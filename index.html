@@ -1270,6 +1270,53 @@
   .prompt .meaning { display: inline-block; }
   .subject-toggle { margin-bottom: 26px; max-width: 780px; }
 
+  /* Ripasso del giorno: today's spaced-repetition review, across all sections */
+  .ripasso {
+    max-width: 780px;
+    margin: -4px auto 18px;
+    padding: 12px 16px;
+    background: var(--cream);
+    border: 1px solid rgba(176, 133, 64, 0.35);
+    border-left: 3px solid var(--gold);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 18px;
+    flex-wrap: wrap;
+  }
+  .ripasso:empty { display: none; }
+  .ripasso-main { display: flex; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; }
+  .ripasso-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 22px; color: var(--ink); }
+  .ripasso-text { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-soft); letter-spacing: 0.03em; }
+  .ripasso-text strong { color: var(--ink); font-size: 13px; }
+  .ripasso-parts { color: var(--ink-faded); margin-left: 6px; }
+  .ripasso-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .ripasso-dirs { display: inline-flex; border: 1px solid rgba(28, 22, 17, 0.18); border-radius: 3px; overflow: hidden; }
+  .ripasso-dirs button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    padding: 6px 9px;
+    background: transparent;
+    border: none;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .ripasso-dirs button + button { border-left: 1px solid rgba(28, 22, 17, 0.18); }
+  .ripasso-dirs button.active { background: var(--ink); color: var(--cream); }
+  button.submit.ripasso-start { padding: 10px 16px; font-size: 11px; }
+  .card-section {
+    top: auto;
+    bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+  }
+  .card-section:empty { display: none; }
+
   /* Phrases: longer chips and prompts */
   .container[data-kind="phrase"] .verb-chip-italian { font-size: 19px; line-height: 1.15; }
   .container[data-kind="phrase"] .prompt { font-size: 50px; line-height: 1.1; }
@@ -3176,6 +3223,9 @@
   // right" override takes a card back out. Drives "Practise the ones I missed".
   let roundMissed = new Map();
   let sessionIsReview = false;  // true while replaying a round's missed cards
+  // Ripasso del giorno: a mixed review of everything due today, across sections
+  let reviewMode = false;
+  let reviewReturn = null;      // the section to go back to afterwards
   // How the setup subset is chosen: 'random' or 'frequent' (the N most common).
   // capMode is the setup choice (kept while the page is open); sessionPickMode
   // records what this session actually used, so Deck size grows the same way.
@@ -3239,7 +3289,107 @@
     catch (e) { /* quota full or disabled — silently ignore */ }
   }
 
+  // ===== Spaced repetition: when each item is next due, per section and direction =====
+  // One record per item: { b: box 1–7, d: the day it's next due, l: the day it last
+  // changed }. Days are whole local days. A correct answer moves an item up a box
+  // (at most once a day, so six right conjugations of one verb count once) and sends
+  // it out 1, 2, 4, 8, 16, 32 or 64 days; a wrong answer drops it to box 1, due tomorrow.
+  const SRS_INTERVALS = [0, 1, 2, 4, 8, 16, 32, 64];
+  const SRS_MAX_BOX = 7;
+  function today() {
+    const now = Date.now();
+    return Math.floor((now - new Date(now).getTimezoneOffset() * 60000) / 86400000);
+  }
+  function srsKey(subj, dir) { return `${SUBJECTS[subj].statsKeys[dir]}:srs`; }
+  function loadSrs(subj, dir) {
+    try { const o = JSON.parse(localStorage.getItem(srsKey(subj, dir)) || '{}'); return o && typeof o === 'object' ? o : {}; }
+    catch (e) { return {}; }
+  }
+  function saveSrs(subj, dir, srs) {
+    try { localStorage.setItem(srsKey(subj, dir), JSON.stringify(srs)); } catch (e) { /* storage full */ }
+  }
+  // Any section's progress, in the common { seen, wrong } shape
+  function readStats(subj, dir) {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(SUBJECTS[subj].statsKeys[dir]) || '{}') || {};
+      if (SUBJECTS[subj].statsFormat !== 'verb') return parsed;
+      const out = {};
+      for (const [k, s] of Object.entries(parsed)) out[k] = { seen: s.attempts || 0, wrong: s.wrongs || 0 };
+      return out;
+    } catch (e) { return {}; }
+  }
+  // History from before the schedule existed: weak items come due now, solid ones are
+  // spread over the coming days (spread by name, so it's the same on every load)
+  function spreadDays(key, span) {
+    let h = 0;
+    for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return span > 0 ? h % (span + 1) : 0;
+  }
+  function seedRecord(key, s, t) {
+    const rate = s.wrong / s.seen;
+    if (s.wrong > 0 && rate >= 0.25) return { b: 1, d: t, l: null };
+    if (s.wrong > 0) return { b: 2, d: t + spreadDays(key, 2), l: null };
+    const b = s.seen >= 3 ? 4 : 3;
+    return { b, d: t + 1 + spreadDays(key, SRS_INTERVALS[b] - 1), l: null };
+  }
+  function seedSrs(subj, dir) {
+    const srs = loadSrs(subj, dir), t = today();
+    let added = false;
+    for (const [k, s] of Object.entries(readStats(subj, dir))) {
+      if (!srs[k] && s.seen > 0) { srs[k] = seedRecord(k, s, t); added = true; }
+    }
+    if (added) saveSrs(subj, dir, srs);
+    return srs;
+  }
+  let lastSrsChange = null;   // so "I was right" can undo a demotion
+  function srsAnswer(subj, dir, key, correct) {
+    const srs = loadSrs(subj, dir), t = today();
+    if (!srs[key]) {   // first time on the schedule: start from any earlier history
+      const s = readStats(subj, dir)[key];
+      if (s && s.seen > 0) srs[key] = seedRecord(key, s, t);
+    }
+    const prev = srs[key] ? { ...srs[key] } : null;
+    const r = srs[key] ? { ...srs[key] } : { b: 0, d: t, l: null };
+    if (correct) {
+      if (r.l !== t) { r.b = Math.min(r.b + 1, SRS_MAX_BOX); r.d = t + SRS_INTERVALS[r.b]; }
+    } else {
+      r.b = 1;
+      r.d = t + 1;
+    }
+    r.l = t;
+    srs[key] = r;
+    saveSrs(subj, dir, srs);
+    lastSrsChange = { subj, dir, key, prev };
+  }
+  function srsUndoLast(subj, dir, key) {
+    if (!lastSrsChange || lastSrsChange.subj !== subj || lastSrsChange.dir !== dir || lastSrsChange.key !== key) return false;
+    const srs = loadSrs(subj, dir);
+    if (lastSrsChange.prev) srs[key] = lastSrsChange.prev; else delete srs[key];
+    saveSrs(subj, dir, srs);
+    lastSrsChange = null;
+    return true;
+  }
+  // Everything due today (or overdue) in one direction, across all sections,
+  // most overdue first, then the shakiest
+  function dueList(dir) {
+    const t = today(), out = [];
+    for (const subj of Object.keys(SUBJECTS)) {
+      const srs = seedSrs(subj, dir);
+      for (const n of SUBJECTS[subj].items) {
+        const r = srs[n.noun];
+        if (r && r.d <= t) out.push({ subj, n, r });
+      }
+    }
+    return out.sort((a, b) => (a.r.d - b.r.d) || (a.r.b - b.r.b) || a.n.noun.localeCompare(b.n.noun));
+  }
+  function dueOnDay(dir, day) {
+    let n = 0;
+    for (const subj of Object.keys(SUBJECTS)) for (const r of Object.values(seedSrs(subj, dir))) if (r.d === day) n++;
+    return n;
+  }
+
   function recordAnswer(nounKey, isCorrect) {
+    srsAnswer(subject, direction, nounKey, isCorrect);
     const s = stats[nounKey] || { seen: 0, wrong: 0 };
     s.seen += 1;
     if (!isCorrect) s.wrong += 1;
@@ -5361,6 +5511,99 @@
     try { localStorage.setItem(SUBJECT_KEY, s); } catch (e) { /* storage unavailable */ }
   }
 
+  // ===== Ripasso del giorno =====
+  const RIPASSO_DIR_KEY = 'mazzo-ripasso-dir';
+  const REVIEW_START = 30;   // cards in play at the start; Deck size reaches the rest
+  const REVIEW_LABEL = { nouns: 'noun', verbs: 'regular verb', irregular: 'irregular verb', adjectives: 'adjective', phrases: 'phrase' };
+  let ripassoDir = 'en-it';
+  try { const d = localStorage.getItem(RIPASSO_DIR_KEY); if (DIR_LABELS[d]) ripassoDir = d; } catch (e) { /* default */ }
+
+  // Point the game at one section's items, progress and associations without
+  // touching the setup screen — used card by card in the mixed review
+  function setCardContext(subj) {
+    if (subject === subj) return;
+    subject = subj;
+    const cfg = SUBJECTS[subj];
+    nounData = cfg.items;
+    THEMES = cfg.themes;
+    FREQUENCY_ORDER = cfg.frequency;
+    frequencyRank = Object.fromEntries(FREQUENCY_ORDER.map((n, i) => [n, i + 1]));
+    stats = loadStats();
+    associations = loadAssociations();
+    container.dataset.kind = cfg.kind;
+  }
+
+  function startRipasso() {
+    const list = dueList(ripassoDir);
+    if (!list.length) return;
+    // Remember the section we came from, with its setup, to return to afterwards
+    Object.assign(subjectState[subject], { selected: selectedNouns, capValue, capMode, direction });
+    reviewReturn = subject;
+    reviewMode = true;
+    direction = ripassoDir;
+    // One card per due item: a noun, a phrase, an adjective's dictionary form, or one
+    // conjugation of a verb (a different person each time)
+    const keepVerbMode = verbMode, keepAdjMode = adjMode;
+    verbMode = 'conjugations';
+    adjMode = 'dictionary';
+    const cards = list.map(({ subj, n }) => {
+      setCardContext(subj);
+      const options = cardsForItem(n);
+      const c = options[Math.floor(Math.random() * options.length)];
+      return { ...c, key: `${subj}:${c.key}`, subject: subj };
+    });
+    verbMode = keepVerbMode;
+    adjMode = keepAdjMode;
+    sessionPool = cards;                              // everything due
+    sessionMaxDeck = cards.slice(0, REVIEW_START);    // most overdue first
+    sessionPickMode = 'random';
+    sessionFocused = false;
+    sessionIsReview = false;
+    deck = sessionMaxDeck.slice();
+    document.getElementById('app-title').textContent = 'Ripasso del giorno';
+    document.getElementById('app-subtitle').textContent = 'Il Mazzo · Ripasso Quotidiano';
+    document.title = 'Il Mazzo · Ripasso del giorno';
+    startGame();   // the session is set, so this shuffles these cards and starts
+  }
+
+  function renderRipasso() {
+    const el = document.getElementById('ripasso');
+    if (!el) return;
+    const list = dueList(ripassoDir);
+    const counts = {};
+    for (const { subj } of list) counts[subj] = (counts[subj] || 0) + 1;
+    const parts = Object.keys(SUBJECTS).filter(s => counts[s]).map(s => `${counts[s]} ${REVIEW_LABEL[s]}${counts[s] === 1 ? '' : 's'}`);
+    const anyHistory = Object.keys(SUBJECTS).some(s => Object.keys(loadSrs(s, ripassoDir)).length);
+    let text;
+    if (list.length) {
+      text = `<strong>${list.length}</strong> due today <span class="ripasso-parts">${parts.join(' · ')}</span>`;
+    } else if (anyHistory) {
+      const tomorrow = dueOnDay(ripassoDir, today() + 1);
+      text = `All done for today ✓${tomorrow ? ` <span class="ripasso-parts">${tomorrow} due tomorrow</span>` : ''}`;
+    } else {
+      text = `<span class="ripasso-parts">Practise some cards and they'll come back here just before you'd forget them.</span>`;
+    }
+    el.innerHTML = `
+      <div class="ripasso-main">
+        <span class="ripasso-title">Ripasso del giorno</span>
+        <span class="ripasso-text">${text}</span>
+      </div>
+      <div class="ripasso-actions">
+        <span class="ripasso-dirs" role="group" aria-label="Review direction">
+          ${Object.entries(DIR_LABELS).map(([d, l]) => `<button type="button" data-ripasso-dir="${d}" class="${d === ripassoDir ? 'active' : ''}" aria-pressed="${d === ripassoDir}">${d === 'listen' ? '🔊' : l.short}</button>`).join('')}
+        </span>
+        ${list.length ? `<button type="button" class="submit ripasso-start" id="ripasso-start">▶ Start${list.length > REVIEW_START ? ` · ${REVIEW_START} of ${list.length}` : ''}</button>` : ''}
+      </div>
+    `;
+    el.querySelectorAll('[data-ripasso-dir]').forEach(b => b.addEventListener('click', () => {
+      ripassoDir = b.dataset.ripassoDir;
+      try { localStorage.setItem(RIPASSO_DIR_KEY, ripassoDir); } catch (e) { /* ignore */ }
+      renderRipasso();
+    }));
+    const start = document.getElementById('ripasso-start');
+    if (start) start.addEventListener('click', startRipasso);
+  }
+
   // Returns 'full' | 'partial' | 'empty' for a given theme based on current selection
   function themeState(theme) {
     let selected = 0;
@@ -5437,6 +5680,12 @@
 
   // ===== Setup view =====
   function showSetup() {
+    if (reviewMode) {
+      reviewMode = false;
+      const back = reviewReturn;
+      subject = null;   // don't save review state into a section
+      applySubject(back);
+    }
     container.dataset.view = 'setup';
     sessionPool = null;    // returning to setup resets the session layers
     sessionMaxDeck = null;
@@ -5447,6 +5696,7 @@
       : isAdjSubject() ? [['dictionary', 'Dictionary form'], ['forms', 'All forms']] : null;
     const currentMode = isVerbs ? verbMode : adjMode;
     gameArea.innerHTML = `
+      <div class="ripasso" id="ripasso"></div>
       <div class="mode-toggle subject-toggle" id="subject-toggle" role="group" aria-label="What to practise">
         ${Object.entries(SUBJECTS).map(([key, s]) => `
           <button type="button" class="mode-option${key === subject ? ' active' : ''}" data-subject="${key}" aria-pressed="${key === subject}">${s.switchLabel}</button>
@@ -6015,6 +6265,7 @@
     const el = document.getElementById('setup-meta');
     if (!el) return;
     renderWeakPanel();
+    renderRipasso();
     renderAudioRow();
     const entries = Object.values(stats);
     const practised = entries.filter(s => s.seen > 0).length;
@@ -6043,6 +6294,7 @@
       if (confirm(`Reset all ${which} ${SUBJECTS[subject].itemWord} practice history? This cannot be undone.`)) {
         stats = {};
         saveStats();
+        try { localStorage.removeItem(srsKey(subject, direction)); } catch (e) { /* ignore */ }
         renderSetupMeta();
       }
     });
@@ -6203,9 +6455,9 @@
   const BACKUP_APP = 'il-mazzo';
 
   function storageKeys() {
-    const keys = new Set([SUBJECT_KEY, AUDIO_KEY]);
+    const keys = new Set([SUBJECT_KEY, AUDIO_KEY, RIPASSO_DIR_KEY]);
     for (const s of Object.values(SUBJECTS)) {
-      Object.values(s.statsKeys).forEach(k => keys.add(k));
+      Object.values(s.statsKeys).forEach(k => { keys.add(k); keys.add(`${k}:srs`); });
       keys.add(s.assocKey);
     }
     return [...keys];
@@ -6260,6 +6512,7 @@
     const valid = (k, v) => {
       if (!known.has(k) || typeof v !== 'string') return false;
       if (k === SUBJECT_KEY) return !!SUBJECTS[v];
+      if (k === RIPASSO_DIR_KEY) return !!DIR_LABELS[v];
       try { const o = JSON.parse(v); return !!o && typeof o === 'object'; } catch (e) { return false; }
     };
     const entries = Object.entries(payload.data).filter(([k, v]) => valid(k, v));
@@ -6288,6 +6541,7 @@
     <div class="card">
       <div class="card-corner streak-flag" id="streak-display"></div>
       <div class="card-corner right">№ <span id="cardnum">001</span></div>
+      <div class="card-corner card-section" id="card-section"></div>
       <div class="verb-meta" id="verb-meta" style="display: none"></div>
       <div class="prompt" id="prompt"></div>
       <div class="pronoun-hint" id="pronoun-hint">+ articolo</div>
@@ -6304,13 +6558,13 @@
     controlsEl.innerHTML = `
       <div class="controls-left">
         <button type="button" class="ghost" id="reshuffle-btn">↻ Reshuffle</button>
-        <button type="button" class="ghost" id="change-btn">← Change ${SUBJECTS[subject].itemWords}</button>
+        <button type="button" class="ghost" id="change-btn">${reviewMode ? '← Back to setup' : `← Change ${SUBJECTS[subject].itemWords}`}</button>
         <label class="game-trim">
           <span>Deck size</span>
           <select id="game-trim-input"></select>
         </label>
-        <button type="button" class="ghost" id="game-focus-btn">→ Focus…</button>
-        <span class="direction-toggle" role="group" aria-label="Translation direction">
+        ${reviewMode ? '' : '<button type="button" class="ghost" id="game-focus-btn">→ Focus…</button>'}
+        <span class="direction-toggle" role="group" aria-label="Translation direction"${reviewMode ? ' hidden' : ''}>
           <button type="button" data-dir="en-it" class="${direction === 'en-it' ? 'active' : ''}" aria-pressed="${direction === 'en-it'}">EN → IT</button>
           <button type="button" data-dir="it-en" class="${direction === 'it-en' ? 'active' : ''}" aria-pressed="${direction === 'it-en'}">IT → EN</button>
           <button type="button" data-dir="listen" class="${direction === 'listen' ? 'active' : ''}" aria-pressed="${direction === 'listen'}" title="Hear the Italian and type it">🔊 Listen</button>
@@ -6321,7 +6575,8 @@
     document.getElementById('reshuffle-btn').addEventListener('click', () => startGame());
     document.getElementById('change-btn').addEventListener('click', showSetup);
     document.getElementById('game-trim-input').addEventListener('change', handleGameResize);
-    document.getElementById('game-focus-btn').addEventListener('click', () => openFocusModal('game'));
+    const focusBtn = document.getElementById('game-focus-btn');
+    if (focusBtn) focusBtn.addEventListener('click', () => openFocusModal('game'));
     controlsEl.querySelectorAll('.direction-toggle button').forEach(btn => {
       btn.addEventListener('click', () => setDirection(btn.dataset.dir));
     });
@@ -6432,8 +6687,11 @@
       return;
     }
     const card = deck[index];
+    if (card.subject) setCardContext(card.subject);   // mixed review: this card's section
     const itToEn = direction === 'it-en';
     const promptEl = document.getElementById('prompt');
+    const sectionEl = document.getElementById('card-section');
+    if (sectionEl) sectionEl.textContent = card.subject ? SUBJECTS[card.subject].title : '';
     const hintEl = document.getElementById('pronoun-hint');
     const metaEl = document.getElementById('verb-meta');
     const ans = document.getElementById('answer');
@@ -6659,6 +6917,7 @@
   // streak and score as if the answer had been accepted
   function acceptOverride(card, prevStreak) {
     roundMissed.delete(card.key);
+    if (srsUndoLast(subject, direction, card.noun)) srsAnswer(subject, direction, card.noun, true);
     const s = stats[card.noun];
     if (s && s.wrong > 0) { s.wrong -= 1; saveStats(); }
     score++;
@@ -6744,7 +7003,11 @@
     // The cards missed this round, in the order they came up
     const missed = deck.filter(c => roundMissed.has(c.key));
     if (sessionIsReview && missed.length === 0) msg = 'Tutto giusto! Every card you missed is now right.';
-    const missedLabel = c => (isVerbSubject() && c.person) ? `${c.pronounLabel.split(' / ')[0]} ${c.italian}` : c.italian;
+    if (reviewMode && !sessionIsReview) {
+      msg = missed.length === 0 ? 'Fatto! Every card in today\'s review was right — they\'ll be back in a few days.'
+        : 'Fatto! The ones you missed will be back tomorrow; the rest are scheduled further out.';
+    }
+    const missedLabel = c => c.person ? `${c.pronounLabel.split(' / ')[0]} ${c.italian}` : c.italian;
     const MAX_SHOWN = 12;
     const missedHTML = missed.length ? `
         <div class="missed">
@@ -6756,7 +7019,7 @@
     container.dataset.view = 'complete';
     gameArea.innerHTML = `
       <div class="card complete">
-        <div class="badge">${sessionIsReview ? 'FINE DEL RIPASSO' : 'FINE DELLA SESSIONE'}</div>
+        <div class="badge">${sessionIsReview || reviewMode ? 'FINE DEL RIPASSO' : 'FINE DELLA SESSIONE'}</div>
         <h2>${score}<span style="color: var(--ink-faded); font-weight: 400;">/${deck.length}</span></h2>
         <div class="pct">${pct}% &nbsp;·&nbsp; best streak ${bestStreak}</div>
         <p class="msg">${msg}</p>
@@ -6764,7 +7027,7 @@
         <div class="complete-actions">
           ${missed.length ? `<button type="button" class="submit" id="practise-missed">↻ Practise ${practiseLabel}</button>` : ''}
           <button type="button" class="${missed.length ? 'ghost' : 'submit'}" id="play-again">↻ Play ${missed.length ? `all ${deck.length} ` : ''}again</button>
-          <button type="button" class="ghost" id="back-to-setup">← Change ${SUBJECTS[subject].itemWords}</button>
+          <button type="button" class="ghost" id="back-to-setup">${reviewMode ? '← Back to setup' : `← Change ${SUBJECTS[subject].itemWords}`}</button>
         </div>
       </div>
     `;

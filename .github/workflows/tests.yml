@@ -1,8 +1,19 @@
+# Tests every push. Work from Claude Code on the web arrives on claude/... branches:
+# once its tests pass it's merged into main automatically, and main is published to
+# GitHub Pages. A push to main (from Claude Code on a laptop) is tested and published.
+# Nothing that fails a test reaches main or the live site.
 name: tests
 
 on:
   push:
-  pull_request:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: write   # promote: push the merge to main
+  actions: write    # promote: start the main run that publishes
+  pages: write      # deploy
+  id-token: write   # deploy
 
 jobs:
   test:
@@ -15,3 +26,49 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+
+  promote:
+    needs: test
+    if: startsWith(github.ref_name, 'claude/')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: promote-to-main
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Merge the tested branch into main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B main origin/main
+          git merge --no-edit -m "Merge ${GITHUB_REF_NAME} (tests passed)" "${GITHUB_SHA}"
+          git push origin main
+      # A push made by this workflow doesn't start a new run on its own, so start
+      # one on main explicitly: it re-tests the merged result, then publishes it
+      - name: Test and publish main
+        run: gh workflow run tests.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  deploy:
+    needs: test
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare the site
+        run: mkdir _site && cp index.html _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

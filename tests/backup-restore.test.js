@@ -11,7 +11,7 @@ ok(A.d.title === 'Il Mazzo · Verbi Regolari' && A.d.getElementById('app-subtitl
 const meta = A.d.getElementById('setup-meta').textContent.replace(/\s+/g, ' ').trim();
 ok(/back up · restore ·\s?reset progress/.test(meta), `strip shows back up · restore · reset ("${meta}")`);
 const backup = A.ev('buildBackup()');
-ok(backup.app === 'il-mazzo' && Object.keys(backup.data).length === 5 && backup.data['verbi-regolari-assoc-v1'].includes('grasp'), `backup holds all 5 saved keys (${Object.keys(backup.data).join(', ')})`);
+ok(backup.app === 'il-mazzo' && ['flipcards-subject', 'sostantivi-stats-v1', 'sostantivi-assoc-v1', 'verbi-regolari-stats', 'verbi-regolari-assoc-v1', 'sostantivi-stats-v1:srs', 'verbi-regolari-stats:srs'].every(k => k in backup.data) && Object.keys(backup.data).length === 7 && backup.data['verbi-regolari-assoc-v1'].includes('grasp'), `backup holds the 5 saved keys plus the review schedules seeded from them (${Object.keys(backup.data).join(', ')})`);
 // The download itself (jsdom has no object URLs, so stub them and catch the click)
 let downloaded = null;
 A.w.URL.createObjectURL = () => 'blob:test'; A.w.URL.revokeObjectURL = () => {};
