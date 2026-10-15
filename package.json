@@ -1,0 +1,15 @@
+{
+  "name": "il-mazzo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Il Mazzo — Italian flashcards (nouns, verbs, adjectives, everyday phrases) in a single HTML file",
+  "scripts": {
+    "test": "node tests/run-all.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "jsdom": "24.1.3"
+  }
+}
