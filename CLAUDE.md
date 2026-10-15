@@ -16,7 +16,7 @@ If a suite fails, fix the cause; never weaken a test to make it pass unless the 
 
 ## Rules that protect the user's data
 
-- **Never rename saved-data keys.** Progress lives in each browser's localStorage under keys such as `sostantivi-stats-v1`, `verbi-regolari-stats` (old `{attempts, wrongs}` format — keep it), `aggettivi-stats-v1`, `frasi-stats-v1`, their `-iten` / `-listen` variants, the `:srs` review schedules, the `*-assoc-v1` association keys, `flipcards-subject`, `mazzo-audio-v1` and `mazzo-ripasso-dir`. Renaming any of them silently wipes the user's history.
+- **Never rename saved-data keys.** Progress lives in each browser's localStorage under keys such as `sostantivi-stats-v1`, `verbi-regolari-stats` (old `{attempts, wrongs}` format — keep it), `aggettivi-stats-v1`, `frasi-stats-v1`, their `-iten` / `-listen` variants, the `:srs` review schedules, the `*-assoc-v1` association keys, the story's `racconto-stats-*` keys and reading progress `mazzo-story-v1`, `flipcards-subject`, `mazzo-audio-v1` and `mazzo-ripasso-dir`. Renaming any of them silently wipes the user's history.
 - New saved data goes in new keys, and must be added to `storageKeys()` so backups include it.
 - `tests/fixtures/original-*.html` are the user's original standalone games, used to prove the ports haven't drifted. Never edit them.
 
@@ -30,6 +30,14 @@ If a suite fails, fix the cause; never weaken a test to make it pass unless the 
 - Frequency rankings blend written (wordfreq) and spoken (OpenSubtitles) counts, weighted by part-of-speech share in the Italian UD treebanks; method notes sit beside each data block.
 - Layout must work from desktop down to 320px phones with no sideways scroll.
 
+## Story chapters (*La casa di pietra*)
+
+- Present tense only, until the user says they're ready for other tenses. First person: the narrator is the reader. Invented characters only.
+- Build each chapter mostly from deck words (check how many resolve to deck cards before adding it); teach the rest through `STORY_WORDS`, each with a meaning, accepted alternatives where useful, and a history note in the usual style.
+- Natural, correct Italian matters more than squeezing in vocabulary. Every sentence needs an accurate English translation.
+- Every word must resolve: use `senses` for plurals and two-way words (a verb form that is also a noun), `context` when a card's meaning is wider than this use (*paese*: country, here a village). Read through every word's resolution before committing — a tap that teaches the wrong meaning is worse than none.
+- Each chapter gets three multiple-choice questions and one *Trova la parola*, a drawing in `STORY_ART` (SVG drawn in code, in the app's palette, gentle animation that `prefers-reduced-motion` turns off) and a pin in `STORY_PINS`.
+
 ## Code landmarks (search for these in `index.html`)
 
 - `SUBJECTS` — the five sections (items, themes, frequency order, stats/association keys, panel).
@@ -37,5 +45,6 @@ If a suite fails, fix the cause; never weaken a test to make it pass unless the 
 - `startGame`, `sessionPool` / `sessionMaxDeck` — sessions; Deck size, Focus and "practise the ones I missed" filter the session pool.
 - `srsAnswer`, `dueList`, `startRipasso`, `setCardContext` — spaced repetition and the mixed Ripasso del giorno review.
 - `speak`, `chosenVoice`, `renderAudioRow` — Italian text-to-speech and Listening mode.
+- `STORY_CHAPTERS`, `STORY_WORDS`, `storySegments` / `storyResolveWord` — the story and how each word finds its card; `renderStoryHome`, `renderStoryReader`, `storyShowWord` — the map, the reader and word cards; `STORY_ART`, `storyMapSVG` — the drawings; `startMixedSession` — the mixed round behind both Ripasso and chapter practice.
 - `buildBackup`, `restoreFromText`, `storageKeys` — backup and restore.
 - `validateSubjects` (runs at start-up) warns in the console about data problems; the tests fail on any such warning.

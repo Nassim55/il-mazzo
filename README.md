@@ -1,6 +1,6 @@
 # Il Mazzo
 
-Italian flashcards in a single HTML file: nouns, regular and irregular verbs, adjectives and everyday phrases, with progress tracking, history notes and spoken Italian. No server, no accounts, no build step — open `index.html` and play.
+Italian flashcards in a single HTML file: nouns, regular and irregular verbs, adjectives and everyday phrases, with progress tracking, history notes and spoken Italian — and an illustrated story to read, built from the words you're learning. No server, no accounts, no build step — open `index.html` and play.
 
 ## Sections
 
@@ -11,12 +11,13 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 | Verbi irregolari | 50 verbs | the most common verbs that are irregular in the present |
 | Aggettivi | 100 adjectives | the dictionary form, or every gender and number |
 | Frasi | 50 phrases | everyday expressions, with *tu* and *Lei* forms kept distinct |
+| Racconto | 3 chapters | *La casa di pietra*, an illustrated story to read, plus the 30 words it teaches |
 
-Every section works in three directions — English → Italian, Italian → English, and Listening (hear the Italian, type it) — and each direction keeps its own progress.
+Every card section works in three directions — English → Italian, Italian → English, and Listening (hear the Italian, type it) — and each direction keeps its own progress.
 
 ## Features
 
-- **Ripasso del giorno** — spaced repetition across all five sections: every item you practise is scheduled, and the daily review brings back exactly what's due (see below)
+- **Ripasso del giorno** — spaced repetition across every section: every item you practise is scheduled, and the daily review brings back exactly what's due (see below)
 - Themes, quick picks (Random, Weakest), hand-picking, and "the most common" by frequency
 - Deck size and Focus, to grow or narrow a round while playing
 - A history note on every item, plus your own word associations
@@ -24,12 +25,41 @@ Every section works in three directions — English → Italian, Italian → Eng
 - Practise the cards you missed, as a filter on the round you just played
 - Spoken Italian using the device's own voices, and stress-marked pronunciation for verbs
 - Back up and restore all progress to a file
+- **Racconto** — a story to read, in which every word links to its card (see below)
 
 ## Ripasso del giorno
 
 Every item you answer gets a review date, separately for each direction. A correct answer moves it up a box and pushes it further out — 1, 2, 4, 8, 16, 32, then 64 days — while a wrong answer brings it back tomorrow. Only the first correct answer of the day moves an item up, so six right conjugations of one verb count once. Progress from before the schedule existed seeds it: weak items come due straight away and solid ones are spread over the following days.
 
 The strip at the top of the setup screen shows what's due today in the chosen direction, by section. **Start** mixes it all into one round (up to 30 cards to begin with; Deck size reaches the rest), each card labelled with its section and checked by that section's rules. Schedules are part of backups, and resetting a section's progress clears its schedule.
+
+## Racconto: *La casa di pietra*
+
+A diary in Italian, in the present tense, set in Boarezzo in the Valganna. The narrator is you: you arrive with the key to an old stone house, and a letter from 1923 turns up behind a loose stone. About 70% of the words come from the deck; the rest are taught as you read.
+
+- **The map** charts the journey from Malpensa up the valley, with a pin for each chapter. Finishing a chapter's questions stamps it *Letto*.
+- **Every word can be tapped.** A word from the deck shows its card's meaning, its dictionary form (and person, for a verb), its history note and whether you know it yet; the story's own words have notes too; small words like *di* or *alla* just show a meaning. **+ Ripasso** puts the word on today's review.
+- **Underlines show where you stand:** none for words you know (box 2 or above in either direction), dotted for words you're learning, dashed for deck words you haven't practised, wavy for words the story teaches.
+- **The readiness meter** on each chapter is the share of its words you already know.
+- **Listening and translation:** ▶ reads a sentence aloud, *Ascolta il capitolo* reads the whole chapter with each sentence highlighted, and EN reveals a sentence's English.
+- **After each chapter:** three questions, and *Trova la parola* — find the word that means "key" by tapping it in the text. *Esercitati* then practises every word in the chapter as one mixed round.
+- The story's own words are a section of their own (drilled like phrases), so they come back in Ripasso del giorno with everything else.
+
+### Writing a chapter
+
+Chapters live in `STORY_CHAPTERS` in `index.html`; words the deck doesn't have live in `STORY_WORDS`, each with a meaning and a history note. A chapter is:
+
+```js
+{ id: 'c4', title: 'Domenica', place: 'Boarezzo', art: 'c4',
+  paragraphs: [[['Italian sentence.', 'Its English.'], …], …],
+  senses: { case: 'nouns:casa' },          // plurals, and words that could be read two ways
+  glossary: { camino: 'camino' },          // words (or phrases) taught from STORY_WORDS
+  context: { paese: 'the village — …' },   // optional: what a word means here
+  questions: [{ q: '…?', options: ['right', 'wrong', 'wrong'], answer: 0 }, …,
+              { find: 'nouns:chiave', q: 'Trova la parola che vuol dire «key».' }] }
+```
+
+It also needs a picture (a drawing function in `STORY_ART`) and a pin position in `STORY_PINS`. Each word in the text is matched in this order: the chapter's `senses`, its `glossary`, names, then the deck — after an article or preposition a noun is preferred, so *la porta* is the door rather than *porta*, "carries". The start-up check warns about any word left unexplained, a sense or glossary entry pointing nowhere, or a *Trova la parola* word missing from the text, and the tests fail on any warning.
 
 ## Your progress
 
@@ -66,6 +96,7 @@ Node 20 or later is required.
 
 - **Against the originals:** `regular-verbs-vs-original` and `adjectives-vs-original` load the original standalone games from `tests/fixtures/` side by side with Il Mazzo and compare every card, answer verdict, ranking and saved-progress format — over 23,000 comparisons — so the ports can't quietly drift.
 - **Each section:** `nouns-core`, `nouns-features`, `regular-verbs`, `regular-verbs-additions`, `irregular-verbs`, `adjectives`, `phrases`.
+- **The story:** `story` — every word explained and read the right way (*porta* the door, *legge* "reads"), the reader, word cards, + Ripasso, reading aloud, the questions and stamp, chapter practice, and backups.
 - **Shared features:** `ripasso` (the schedule, seeding, the mixed review — with the clock under test control), `audio`, `practise-missed`, `weakest-panel`, `backup-restore`, `grid-order`, `verb-notes`, `start-begin-labels`.
 
 ## Project layout
@@ -83,4 +114,4 @@ tests/
 
 ## Data
 
-Frequency rankings combine written Italian (wordfreq), spoken Italian (OpenSubtitles 2018 word counts) and the Italian Universal Dependencies treebanks, which are used to count only true noun, verb or adjective uses of each form. The phrases were chosen by cross-checking native teachers' and language publishers' lists of everyday Italian with research on spoken Italian. Notes on method sit beside each data block in `index.html`.
+Frequency rankings combine written Italian (wordfreq), spoken Italian (OpenSubtitles 2018 word counts) and the Italian Universal Dependencies treebanks, which are used to count only true noun, verb or adjective uses of each form. The phrases were chosen by cross-checking native teachers' and language publishers' lists of everyday Italian with research on spoken Italian. Notes on method sit beside each data block in `index.html`. The story and its illustrations are original to Il Mazzo.
