@@ -44,6 +44,8 @@ If a suite fails, fix the cause; never weaken a test to make it pass unless the 
 - The app does all merging (`syncMergeAll` and the per-kind rules); the Worker in `worker/` only stores copies and enforces the version check. Keep it that way — the merge rules are tested in jsdom with the rest of the app.
 - The Worker's API and `worker/migrations/` change together with `tests/sync-worker.test.js`. Never edit an applied migration; add a new numbered one.
 - Deployment is the `deploy-sync` job; it needs the Cloudflare secrets and the `D1_DATABASE_ID` variable and skips quietly without them. The live API is `SYNC_URL` (https://il-mazzo-sync.il-mazzo.workers.dev); its allowed browser origins are in `worker/src/index.js`.
+- Every device uses the built-in `SYNC_SHARED_KEY` (a personal site, by the user's choice — there is no opt-in or linking). A device's first sync merges its existing progress in; a device that used an old per-device key moves over and that key's server copy is deleted.
+- Syncing is invisible by the user's choice: no status line, panel, settings or wording about it in the UI. Keep it that way (the `sync-client` tests check).
 - Any new code that saves progress must call `syncTouched()` after writing. Syncing never runs while `container.dataset.view === 'game'`; keep it that way.
 - `tests/d1-fixture.js` is the shared D1 stand-in (Node's built-in SQLite with the real migrations).
 
