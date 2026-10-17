@@ -111,6 +111,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
+          wranglerVersion: '4.151.1'
           command: d1 migrations apply il-mazzo --remote
       - name: Deploy the sync API
         if: steps.cf.outputs.ready == 'true'
@@ -119,4 +120,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
+          wranglerVersion: '4.151.1'
           command: deploy

@@ -61,15 +61,15 @@ Chapters live in `STORY_CHAPTERS` in `index.html`; words the deck doesn't have l
 
 It also needs a picture (a drawing function in `STORY_ART`) and a pin position in `STORY_PINS`. Each word in the text is matched in this order: the chapter's `senses`, its `glossary`, names, then the deck — after an article or preposition a noun is preferred, so *la porta* is the door rather than *porta*, "carries". The start-up check warns about any word left unexplained, a sense or glossary entry pointing nowhere, or a *Trova la parola* word missing from the text, and the tests fail on any warning.
 
-## Syncing across devices (in progress)
+## Syncing across devices
 
-Progress is being made to sync between devices through a small API of Il Mazzo's own — a Cloudflare Worker with a D1 (SQLite) database, both on Cloudflare's free plan. The browser stays the working copy, so the app stays instant and works offline; the server holds the latest agreed copy.
+Progress syncs between devices through a small API of Il Mazzo's own — a Cloudflare Worker with a D1 (SQLite) database, both on Cloudflare's free plan. The browser stays the working copy, so the app stays instant and works offline; the server holds the latest agreed copy.
 
 **How copies merge.** Merging is three-way: each device remembers the copy it last agreed with the server, so changes on each side since then can be told apart and both kept. Answer counts add up (*casa* seen 3 times, then twice more on one laptop and once on the other, is 6); review schedules keep the most recently answered record; associations keep whichever side changed; a chapter read on either device counts. On a device's first sync, when there's no shared copy yet, the larger count is kept instead, so the same backup restored on two devices isn't counted twice. A reset or a restore raises that store's *epoch* and wins outright. Voice, speed, last section and review direction stay per device.
 
 **The server** (`worker/`) stores each progress store's JSON and a version number. A save names the version it was based on and is refused if another device saved in between — that device fetches, merges again and retries — so two devices saving at once can't overwrite each other. Devices share a long random sync key; only its SHA-256 hash is stored.
 
-**Done so far:** the merging (in `index.html`) and the API, both tested. **Still to come:** the Sync panel in the app (turn on, link a device, status).
+**Using it.** The status line under the section switcher opens the Sync panel. On your first device choose **Turn on sync**: it makes a private key and uploads that device's progress. On each other device choose **Link this device** and paste the key (*Show* / *Copy* in the panel on a synced device); anything practised there is merged in. The app then syncs when it opens, when the setup screen comes back after practice, and when the tab is hidden — never in the middle of a round — and the status line shows when it last synced, or that it's offline and will catch up. **Turn off on this device** keeps the progress there; **Delete synced data** removes it from the server. Sync works on the published site (the API only accepts requests from it, or from `localhost`).
 
 **To deploy the API**, add to the repository's Settings → Secrets and variables → Actions: the secrets `CLOUDFLARE_API_TOKEN` (the *Edit Cloudflare Workers* template plus *Account · D1 · Edit*) and `CLOUDFLARE_ACCOUNT_ID`, and the variable `D1_DATABASE_ID` (the ID of a D1 database named `il-mazzo`). The workflow then applies the database migrations and deploys the Worker after every successful test run on `main`.
 
@@ -109,7 +109,7 @@ Node 20 or later is required.
 - **Against the originals:** `regular-verbs-vs-original` and `adjectives-vs-original` load the original standalone games from `tests/fixtures/` side by side with Il Mazzo and compare every card, answer verdict, ranking and saved-progress format — over 23,000 comparisons — so the ports can't quietly drift.
 - **Each section:** `nouns-core`, `nouns-features`, `regular-verbs`, `regular-verbs-additions`, `irregular-verbs`, `adjectives`, `phrases`.
 - **The story:** `story` — every word explained and read the right way (*porta* the door, *legge* "reads"), the reader, word cards, + Ripasso, reading aloud, the questions and stamp, chapter practice, and backups.
-- **Sync:** `sync-merge` (what syncs, the merge rules, epochs, and two devices syncing through a stand-in server) and `sync-worker` (the API against real SQLite — browser access, key hashing, the version check including two simultaneous saves, validation, and two app instances syncing through it).
+- **Sync:** `sync-merge` (what syncs, the merge rules, epochs, and two devices syncing through a stand-in server), `sync-client` (the Sync panel and sync step against the real Worker: turning on, linking, two devices syncing at the same instant, an answer saved mid-sync, offline, deleting) and `sync-worker` (the API against real SQLite — browser access, key hashing, the version check including two simultaneous saves, validation, and two app instances syncing through it).
 - **Shared features:** `ripasso` (the schedule, seeding, the mixed review — with the clock under test control), `audio`, `practise-missed`, `weakest-panel`, `backup-restore`, `grid-order`, `verb-notes`, `start-begin-labels`.
 
 ## Project layout

@@ -1857,6 +1857,40 @@
     .story-map-svg { min-width: 660px; }
   }
 
+  /* ===== Sync ===== */
+  .sync-line { display: flex; justify-content: flex-end; margin-top: -6px; }
+  .sync-pill { display: inline-flex; align-items: center; gap: 7px; background: none; border: none; padding: 3px 2px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: var(--ink-faded); }
+  .sync-pill:hover { color: var(--ink); }
+  .sync-pill-action { color: var(--terracotta); text-decoration: underline; text-underline-offset: 3px; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #b9ad99; flex-shrink: 0; }
+  .is-ok .sync-dot { background: var(--olive); }
+  .is-busy .sync-dot { background: var(--gold); animation: sync-pulse 1s ease-in-out infinite; }
+  .is-warn .sync-dot { background: var(--terracotta); }
+  @keyframes sync-pulse { 50% { opacity: 0.3; } }
+  @media (prefers-reduced-motion: reduce) { .is-busy .sync-dot { animation: none; } }
+  .sync-panel { max-width: 480px; }
+  .sync-body { padding: 18px 24px 22px; overflow-y: auto; font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+  .sync-intro { margin: 0 0 16px; }
+  .sync-block { margin-bottom: 18px; }
+  .sync-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faded); margin-bottom: 7px; }
+  .sync-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .sync-input { flex: 1; min-width: 180px; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 9px 10px; border: 1px solid rgba(28, 22, 17, 0.25); border-radius: 3px; background: var(--paper); color: var(--ink); }
+  .sync-primary { background: var(--ink); color: var(--paper); border: none; border-radius: 3px; padding: 10px 18px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
+  .sync-primary:hover:not(:disabled) { background: var(--terracotta); }
+  .sync-primary:disabled { opacity: 0.5; cursor: default; }
+  .sync-secondary { background: none; border: 1px solid var(--ink); border-radius: 3px; padding: 8px 12px; font-family: 'DM Sans', sans-serif; font-size: 11.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; color: var(--ink); }
+  .sync-secondary:hover { border-color: var(--terracotta); color: var(--terracotta); }
+  .sync-hint { font-size: 12.5px; color: var(--ink-faded); margin: 7px 0 0; }
+  .sync-key { flex: 1; min-width: 180px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; padding: 8px 10px; background: var(--cream); border-radius: 3px; word-break: break-all; color: var(--ink); }
+  .sync-status { display: flex; align-items: center; gap: 9px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; color: var(--ink); margin-bottom: 14px; }
+  .sync-status .sync-dot { width: 9px; height: 9px; }
+  .sync-danger-row { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid rgba(28, 22, 17, 0.08); padding-top: 14px; margin-bottom: 4px; }
+  .sync-link-btn { background: none; border: none; padding: 0; font-size: 12.5px; color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .sync-link-btn.is-danger { color: var(--terracotta); }
+  .sync-msg { margin: 6px 0 0; font-size: 13px; min-height: 1em; }
+  .sync-msg.is-ok { color: var(--olive); }
+  .sync-msg.is-warn { color: var(--terracotta); }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
@@ -3527,6 +3561,7 @@
         for (const [k, s] of Object.entries(stats)) data[k] = { attempts: s.seen, wrongs: s.wrong };
       }
       localStorage.setItem(statsKey(), JSON.stringify(data));
+      syncTouched();
     }
     catch (e) { /* quota full or disabled — silently ignore */ }
   }
@@ -3548,7 +3583,7 @@
     catch (e) { return {}; }
   }
   function saveSrs(subj, dir, srs) {
-    try { localStorage.setItem(srsKey(subj, dir), JSON.stringify(srs)); } catch (e) { /* storage full */ }
+    try { localStorage.setItem(srsKey(subj, dir), JSON.stringify(srs)); syncTouched(); } catch (e) { /* storage full */ }
   }
   // Any section's progress, in the common { seen, wrong } shape
   function readStats(subj, dir) {
@@ -3656,7 +3691,7 @@
   }
 
   function saveAssociations() {
-    try { localStorage.setItem(SUBJECTS[subject].assocKey, JSON.stringify(associations)); }
+    try { localStorage.setItem(SUBJECTS[subject].assocKey, JSON.stringify(associations)); syncTouched(); }
     catch (e) { /* quota full or disabled — silently ignore */ }
   }
 
@@ -6077,7 +6112,7 @@
     } catch (e) { return { read: {}, quiz: {} }; }
   }
   function saveStoryProgress(p) {
-    try { localStorage.setItem(STORY_PROGRESS_KEY, JSON.stringify(p)); } catch (e) { /* storage full */ }
+    try { localStorage.setItem(STORY_PROGRESS_KEY, JSON.stringify(p)); syncTouched(); } catch (e) { /* storage full */ }
   }
 
   // ----- Words: which card (or meaning) each word of the text belongs to -----
@@ -7080,8 +7115,10 @@
             <button type="button" class="mode-option${key === subject ? ' active' : ''}" data-subject="${key}" aria-pressed="${key === subject}">${s.switchLabel}</button>
           `).join('')}
         </div>
+        <div class="sync-line" id="sync-line"></div>
       </div>
     `;
+    syncOnSetup();
     if (cfg.story) {
       wireSubjectToggle();
       renderRipasso();
@@ -8021,6 +8058,278 @@
     const meta = syncMeta();
     for (const k of keys) if (syncedKeys().has(k)) meta.epochs[k] = (+meta.epochs[k] || 0) + 1;
     syncSaveMeta(meta);
+    syncTouched();
+  }
+
+  // ===== Sync, part 2: talking to the server, and the Sync panel =====
+  // Syncs when the app opens, when the setup screen comes back after practice, and
+  // when the tab is hidden — never in the middle of a round. Each sync fetches the
+  // server's copy, merges (part 1), sends only what changed, and retries if another
+  // device saved in between. Progress changed here while a sync was in flight is
+  // layered on top of the merged copy, so no answer is lost or counted twice.
+  const SYNC_URL = 'https://il-mazzo-sync.il-mazzo.workers.dev';
+  const SYNC_KEY_RE = /^[A-Za-z0-9_-]{24,128}$/;
+  const syncState = { status: 'idle', detail: '', busy: false, pending: false, timer: null };
+  let syncDirty = false;
+
+  function syncKey() { return syncMeta().key || null; }
+  function syncNewKey() {
+    const bytes = new Uint8Array(24);
+    crypto.getRandomValues(bytes);
+    let s = '';
+    for (const b of bytes) s += String.fromCharCode(b);
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  async function syncRequest(method, path, key, body) {
+    const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(() => ctrl.abort(), 12000) : null;
+    try {
+      const res = await fetch(SYNC_URL + path, {
+        method,
+        headers: { Authorization: `Bearer ${key}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+        body: body ? JSON.stringify(body) : undefined,
+        cache: 'no-store',
+        signal: ctrl ? ctrl.signal : undefined
+      });
+      let data = null;
+      try { data = await res.json(); } catch (e) { /* no body */ }
+      return { status: res.status, data };
+    } finally { if (timer) clearTimeout(timer); }
+  }
+  // Called whenever progress is saved here
+  function syncTouched() {
+    syncDirty = true;
+    if (syncKey() && container.dataset.view !== 'game') syncSoon(3000);
+  }
+  function syncSoon(delay = 800) {
+    if (!syncKey()) return;
+    clearTimeout(syncState.timer);
+    syncState.timer = setTimeout(() => { syncNow(); }, delay);
+  }
+  async function syncNow() {
+    const key = syncKey();
+    if (!key) return 'off';
+    if (container.dataset.view === 'game') { syncState.pending = true; return 'later'; }
+    if (syncState.busy) { syncState.pending = true; return 'busy'; }
+    syncState.busy = true;
+    clearTimeout(syncState.timer);
+    syncSetStatus('syncing');
+    try {
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const local = syncLocalSnapshot(), stamp = syncStable(local);
+        const got = await syncRequest('GET', '/v1/progress', key);
+        if (got.status === 404) { syncSetStatus('missing'); return 'missing'; }
+        if (got.status !== 200 || !got.data) throw new Error(`fetch ${got.status}`);
+        const remote = got.data.items || {};
+        const merged = syncMergeAll(syncReadJSON(SYNC_BASE_KEY, {}), local, remote);
+        const changes = syncChanges(merged, remote);
+        let version = got.data.version;
+        if (Object.keys(changes).length) {
+          const put = await syncRequest('PUT', '/v1/progress', key, { baseVersion: version, items: changes });
+          if (put.status === 409) continue;   // another device saved first: merge again
+          if (put.status !== 200 || !put.data) throw new Error(`save ${put.status}`);
+          version = put.data.version;
+        }
+        // The server now holds `merged`; anything saved here meanwhile goes on top of it
+        const now = syncLocalSnapshot();
+        const late = syncStable(now) !== stamp;
+        const final = late ? syncMergeAll(local, now, merged) : merged;
+        try { localStorage.setItem(SYNC_BASE_KEY, JSON.stringify(merged)); } catch (e) { /* storage full */ }
+        if (!syncSame(final, now)) syncApply(final);
+        const meta = syncMeta();
+        meta.version = version;
+        meta.lastSync = Date.now();
+        syncSaveMeta(meta);
+        syncDirty = late;
+        syncSetStatus('ok');
+        return 'ok';
+      }
+      syncSetStatus('error', 'Another device kept saving at the same moment. It will try again shortly.');
+      syncState.pending = true;
+      return 'conflict';
+    } catch (e) {
+      syncSetStatus('offline');
+      return 'offline';
+    } finally {
+      syncState.busy = false;
+      if (syncState.pending && container.dataset.view !== 'game') { syncState.pending = false; syncSoon(1500); }
+    }
+  }
+  // Sync when the setup screen comes back with something new, or now and then
+  function syncOnSetup() {
+    renderSyncLine();
+    if (!syncKey() || syncState.busy) return;
+    const last = syncMeta().lastSync || 0;
+    if (syncDirty || syncState.pending || Date.now() - last > 60000) { syncState.pending = false; syncSoon(600); }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && syncDirty && syncKey() && container.dataset.view !== 'game') syncNow();
+  });
+  window.addEventListener('online', () => { if (syncKey() && (syncDirty || syncState.status === 'offline')) syncSoon(500); });
+
+  // ----- Status line and panel -----
+  function syncAgo(ms) {
+    const s = Math.max(0, Math.round((Date.now() - ms) / 1000));
+    if (s < 45) return 'just now';
+    if (s < 3600) return `${Math.round(s / 60)} min ago`;
+    if (s < 86400) return `${Math.round(s / 3600)} h ago`;
+    return new Date(ms).toLocaleDateString();
+  }
+  function syncStatusText() {
+    if (!syncKey()) return { cls: 'off', text: 'Sync is off', action: 'Set up' };
+    const st = syncState.status, last = syncMeta().lastSync;
+    if (st === 'syncing') return { cls: 'busy', text: 'Syncing…', action: '' };
+    if (st === 'offline') return { cls: 'warn', text: "Offline — will sync when you're back", action: 'Details' };
+    if (st === 'missing') return { cls: 'warn', text: 'Synced progress not found', action: 'Fix' };
+    if (st === 'error') return { cls: 'warn', text: 'Sync problem', action: 'Details' };
+    return { cls: 'ok', text: last ? `Synced ${syncAgo(last)}` : 'Sync is on', action: 'Sync' };
+  }
+  function syncSetStatus(status, detail = '') {
+    syncState.status = status;
+    syncState.detail = detail;
+    renderSyncLine();
+    if (document.getElementById('sync-modal') && !document.getElementById('sync-modal').hidden) renderSyncPanel();
+  }
+  function renderSyncLine() {
+    const el = document.getElementById('sync-line');
+    if (!el) return;
+    const s = syncStatusText();
+    el.innerHTML = `<button type="button" class="sync-pill is-${s.cls}" id="sync-open" aria-label="Sync across devices: ${storyEsc(s.text)}">
+      <span class="sync-dot" aria-hidden="true"></span><span>${storyEsc(s.text)}</span>${s.action ? `<span class="sync-pill-action">${storyEsc(s.action)}</span>` : ''}</button>`;
+    document.getElementById('sync-open').addEventListener('click', openSyncPanel);
+  }
+  function openSyncPanel() {
+    let modal = document.getElementById('sync-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.className = 'focus-modal sync-modal';
+      modal.id = 'sync-modal';
+      modal.hidden = true;
+      modal.addEventListener('click', e => { if (e.target === modal) closeSyncPanel(); });
+      document.body.appendChild(modal);
+    }
+    modal.hidden = false;
+    renderSyncPanel();
+  }
+  function closeSyncPanel() {
+    const modal = document.getElementById('sync-modal');
+    if (modal) modal.hidden = true;
+  }
+  document.addEventListener('keydown', e => {
+    const modal = document.getElementById('sync-modal');
+    if (e.key === 'Escape' && modal && !modal.hidden) closeSyncPanel();
+  });
+  function syncMessage(text, kind = '') {
+    const el = document.getElementById('sync-msg');
+    if (el) { el.textContent = text; el.className = `sync-msg${kind ? ` is-${kind}` : ''}`; }
+  }
+  function renderSyncPanel() {
+    const modal = document.getElementById('sync-modal');
+    if (!modal) return;
+    const key = syncKey(), s = syncStatusText();
+    const body = !key ? `
+        <p class="sync-intro">Keep your progress the same on every device. Each device keeps its own copy too, so Il Mazzo still works offline.</p>
+        <div class="sync-block">
+          <button type="button" class="sync-primary" id="sync-turn-on">Turn on sync</button>
+          <p class="sync-hint">On your first device. It makes a private key and uploads the progress on this device.</p>
+        </div>
+        <div class="sync-block">
+          <label class="sync-label" for="sync-key-input">Already syncing on another device? Paste its key</label>
+          <div class="sync-row"><input type="text" id="sync-key-input" class="sync-input" autocomplete="off" spellcheck="false" placeholder="Sync key">
+          <button type="button" class="sync-secondary" id="sync-link">Link this device</button></div>
+          <p class="sync-hint">Anything practised on this device is merged in, not lost.</p>
+        </div>` : `
+        <div class="sync-status is-${s.cls}"><span class="sync-dot" aria-hidden="true"></span>${storyEsc(s.text)}</div>
+        ${syncState.status === 'missing' ? '<p class="sync-hint">This device\'s key no longer has any progress on the server — it may have been deleted from another device. Turn sync off here, then turn it on or link again.</p>' : ''}
+        ${syncState.detail ? `<p class="sync-hint">${storyEsc(syncState.detail)}</p>` : ''}
+        <div class="sync-block"><button type="button" class="sync-primary" id="sync-now"${syncState.busy ? ' disabled' : ''}>Sync now</button></div>
+        <div class="sync-block">
+          <div class="sync-label">Your sync key</div>
+          <div class="sync-row"><code class="sync-key" id="sync-key-text">${'•'.repeat(16)}</code>
+          <button type="button" class="sync-secondary" id="sync-show-key">Show</button>
+          <button type="button" class="sync-secondary" id="sync-copy-key">Copy</button></div>
+          <p class="sync-hint">To add another device, open Il Mazzo there, choose Sync → Link this device, and paste this key. Keep it private: anyone with it can see and change your progress.</p>
+        </div>
+        <div class="sync-block sync-danger-row">
+          <button type="button" class="sync-link-btn" id="sync-off">Turn off on this device</button>
+          <button type="button" class="sync-link-btn is-danger" id="sync-delete">Delete synced data</button>
+        </div>`;
+    modal.innerHTML = `
+      <div class="focus-panel sync-panel" role="dialog" aria-modal="true" aria-labelledby="sync-title">
+        <div class="focus-header"><h3 id="sync-title">Sync across devices</h3><button type="button" class="focus-close" id="sync-close" aria-label="Close">✕</button></div>
+        <div class="sync-body">${body}<p class="sync-msg" id="sync-msg" aria-live="polite"></p></div>
+      </div>`;
+    const on = (id, f) => { const b = document.getElementById(id); if (b) b.addEventListener('click', f); };
+    on('sync-close', closeSyncPanel);
+    on('sync-turn-on', () => syncTurnOn());
+    on('sync-link', () => syncLink(document.getElementById('sync-key-input').value));
+    on('sync-now', () => syncNow());
+    on('sync-show-key', () => {
+      const code = document.getElementById('sync-key-text');
+      const shown = code.dataset.shown === '1';
+      code.textContent = shown ? '•'.repeat(16) : syncKey();
+      code.dataset.shown = shown ? '' : '1';
+      document.getElementById('sync-show-key').textContent = shown ? 'Show' : 'Hide';
+    });
+    on('sync-copy-key', async () => {
+      try { await navigator.clipboard.writeText(syncKey()); syncMessage('Key copied.', 'ok'); }
+      catch (e) { syncMessage('Copying was blocked — use Show and copy it by hand.', 'warn'); }
+    });
+    on('sync-off', () => { syncTurnOff(); renderSyncPanel(); syncMessage('Sync is off on this device. Your progress here is kept.', 'ok'); });
+    on('sync-delete', () => syncDeleteData());
+  }
+  async function syncTurnOn() {
+    const key = syncNewKey();
+    let r = null;
+    try { r = await syncRequest('POST', '/v1/space', key); } catch (e) { /* offline */ }
+    if (!r || r.status !== 201) { syncMessage(r ? 'The sync server had a problem — please try again.' : "Couldn't reach the sync server — check your connection.", 'warn'); return false; }
+    const meta = syncMeta();
+    syncSaveMeta({ ...meta, key, version: 0, lastSync: null, epochs: {} });
+    try { localStorage.removeItem(SYNC_BASE_KEY); } catch (e) { /* ignore */ }
+    syncDirty = true;
+    renderSyncPanel();
+    await syncNow();
+    renderSyncPanel();
+    syncMessage("Sync is on. Show your key to link your other devices.", 'ok');
+    return true;
+  }
+  async function syncLink(raw) {
+    const key = String(raw || '').trim();
+    if (!SYNC_KEY_RE.test(key)) { syncMessage("That doesn't look like a sync key — copy it from Sync on your other device.", 'warn'); return false; }
+    let r = null;
+    try { r = await syncRequest('GET', '/v1/progress', key); } catch (e) { /* offline */ }
+    if (!r) { syncMessage("Couldn't reach the sync server — check your connection.", 'warn'); return false; }
+    if (r.status === 404) { syncMessage('No synced progress found for that key. Check you copied all of it.', 'warn'); return false; }
+    if (r.status !== 200) { syncMessage('The sync server had a problem — please try again.', 'warn'); return false; }
+    // A first link: no shared copy yet, and resets made here before linking don't count
+    syncSaveMeta({ ...syncMeta(), key, version: null, lastSync: null, epochs: {} });
+    try { localStorage.removeItem(SYNC_BASE_KEY); } catch (e) { /* ignore */ }
+    syncDirty = true;
+    renderSyncPanel();
+    await syncNow();
+    renderSyncPanel();
+    syncMessage('This device is linked, and its progress has been merged in.', 'ok');
+    return true;
+  }
+  function syncTurnOff() {
+    const meta = syncMeta();
+    delete meta.key; delete meta.version; delete meta.lastSync;
+    syncSaveMeta({ ...meta, epochs: {} });
+    try { localStorage.removeItem(SYNC_BASE_KEY); } catch (e) { /* ignore */ }
+    clearTimeout(syncState.timer);
+    syncState.status = 'idle'; syncState.detail = ''; syncState.pending = false;
+    syncDirty = false;
+    renderSyncLine();
+  }
+  async function syncDeleteData() {
+    if (!confirm('Delete all your synced progress from the server? Progress on this device stays; other devices will stop syncing.')) return false;
+    let r = null;
+    try { r = await syncRequest('DELETE', '/v1/space', syncKey()); } catch (e) { /* offline */ }
+    if (!r || (r.status !== 200 && r.status !== 404)) { syncMessage("Couldn't reach the sync server — nothing was deleted.", 'warn'); return false; }
+    syncTurnOff();
+    renderSyncPanel();
+    syncMessage('Synced data deleted. Progress on this device is kept.', 'ok');
+    return true;
   }
 
   // Validates the file, asks before overwriting, then reloads everything
@@ -8824,6 +9133,7 @@
   } catch (e) { /* storage unavailable */ }
   applySubject(initialSubject);
   showSetup();
+  if (syncKey()) syncNow();
 </script>
 </body>
 </html>
