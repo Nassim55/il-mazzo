@@ -1857,6 +1857,29 @@
     .story-map-svg { min-width: 660px; }
   }
 
+  /* ===== Sign-in (once per device) ===== */
+  .signin-gate { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(243, 234, 216, 0.97); }
+  .signin-card { width: 100%; max-width: 420px; background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.14); border-top: 3px solid var(--terracotta); border-radius: 6px; box-shadow: 0 20px 60px rgba(28, 22, 17, 0.18); padding: 34px 32px 26px; text-align: center; }
+  .signin-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
+  .signin-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 46px; line-height: 1.05; margin: 8px 0 12px; color: var(--ink); }
+  .signin-text { font-size: 15px; line-height: 1.55; color: var(--ink-soft); margin: 0 0 22px; }
+  .signin-button { display: flex; justify-content: center; min-height: 44px; }
+  .signin-msg { min-height: 1.2em; margin: 14px 0 0; font-size: 13.5px; color: var(--terracotta); }
+
+  /* ===== Verbs: which persons to practise ===== */
+  .person-picker { margin: 0 auto 4px; max-width: 360px; }
+  .person-picker[hidden] { display: none; }
+  .person-label { display: flex; justify-content: center; align-items: baseline; gap: 12px; }
+  .person-quick { font-size: 11px; letter-spacing: 0.04em; text-transform: none; }
+  .person-quick .ghost { font-size: 11px; }
+  .person-quick .ghost.active { color: var(--ink); text-decoration-color: var(--terracotta); }
+  /* Singular on the top row, plural below — the shape of a conjugation table */
+  .person-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 4px; }
+  .person-chip { background: var(--paper); border: 1px dashed rgba(28, 22, 17, 0.3); border-radius: 3px; padding: 8px 4px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; color: var(--ink-faded); cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+  .person-chip:hover { border-color: var(--terracotta); color: var(--ink); }
+  .person-chip.active { background: var(--ink); border-style: solid; border-color: var(--ink); color: var(--paper); }
+  .person-hint { min-height: 1em; margin: 2px 0 10px; font-size: 12.5px; color: var(--terracotta); text-align: center; }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
@@ -3430,7 +3453,7 @@
       return [{ key: `${v.it}|inf`, noun: v.it, english: v.en, italian: v.it, person: null,
                 pronounLabel: '', verbMeaning: v.en, pron, note: n.note || null }];
     }
-    return personOrder.map(p => ({
+    return activePersons().map(p => ({
       key: `${v.it}|${p}`, noun: v.it, english: v.prompts[p], italian: v.conj[p], person: p,
       pronounLabel: personLabel[p], verbMeaning: v.en,
       pron: (v.pronMap && v.pronMap[p]) || pronounceForm(v.conj[p], p),
@@ -3440,7 +3463,7 @@
 
   // How many cards each selected item contributes
   function cardsPerItem() {
-    return isVerbSubject() && verbMode === 'conjugations' ? personOrder.length : 1;
+    return isVerbSubject() && verbMode === 'conjugations' ? activePersons().length : 1;
   }
 
   // ===== State =====
@@ -4494,6 +4517,26 @@
 
   const personOrder = ["io", "tu", "lui", "noi", "voi", "loro"];
   const personLabel = { io: "io", tu: "tu", lui: "lui / lei", noi: "noi", voi: "voi", loro: "loro" };
+  // ===== Which persons to practise, per verb section =====
+  // Saved per section and synced with progress, so every device drills the same ones.
+  // Conjugation cards — in a round, in Ripasso del giorno, in chapter practice — come
+  // only from these persons; at least one always stays selected.
+  const VERB_PERSONS_KEY = 'mazzo-verb-persons-v1';
+  const PERSON_SETS = { all: personOrder, sing: ['io', 'tu', 'lui'], plur: ['noi', 'voi', 'loro'] };
+  function verbPersonsSaved() {
+    try { const o = JSON.parse(localStorage.getItem(VERB_PERSONS_KEY) || '{}'); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
+    catch (e) { return {}; }
+  }
+  function activePersons(subj = subject) {
+    const saved = verbPersonsSaved()[subj];
+    const list = Array.isArray(saved) ? personOrder.filter(p => saved.includes(p)) : personOrder;
+    return list.length ? list : personOrder;
+  }
+  function saveVerbPersons(subj, list) {
+    const all = verbPersonsSaved();
+    all[subj] = personOrder.filter(p => list.includes(p));
+    try { localStorage.setItem(VERB_PERSONS_KEY, JSON.stringify(all)); syncTouched(); } catch (e) { /* storage full */ }
+  }
 
   // History & etymology notes for every verb, shown after every answer (like the nouns')
   const VERB_NOTES = {
@@ -7045,6 +7088,40 @@
   const progressEl = document.getElementById('progress');
 
   // ===== Setup view =====
+  // ===== Verbs: which persons to practise =====
+  function renderPersonPicker() {
+    const on = activePersons();
+    document.querySelectorAll('#person-picker .person-chip').forEach(b => {
+      const active = on.includes(b.dataset.person);
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-pressed', String(active));
+    });
+    document.querySelectorAll('#person-picker [data-set]').forEach(b => {
+      const set = PERSON_SETS[b.dataset.set];
+      b.classList.toggle('active', set.length === on.length && set.every(p => on.includes(p)));
+    });
+  }
+  function wirePersonPicker() {
+    const picker = document.getElementById('person-picker');
+    if (!picker) return;
+    renderPersonPicker();
+    picker.addEventListener('click', e => {
+      const chip = e.target.closest('.person-chip'), set = e.target.closest('[data-set]');
+      const hint = document.getElementById('person-hint');
+      let next;
+      if (chip) {
+        const cur = activePersons(), p = chip.dataset.person;
+        next = cur.includes(p) ? cur.filter(x => x !== p) : [...cur, p];
+        if (!next.length) { hint.textContent = 'Keep at least one person.'; return; }
+      } else if (set) next = PERSON_SETS[set.dataset.set];
+      else return;
+      hint.textContent = '';
+      saveVerbPersons(subject, next);
+      renderPersonPicker();
+      updateReadout();
+    });
+  }
+
   // ===== Section switch =====
   function wireSubjectToggle() {
     document.querySelectorAll('#subject-toggle .mode-option').forEach(btn => {
@@ -7101,6 +7178,16 @@
       <div class="mode-toggle" id="mode-toggle">
         ${modeOptions.map(([key, label]) => `<button type="button" class="mode-option${currentMode === key ? ' active' : ''}" data-mode="${key}">${label}</button>`).join('')}
       </div>
+      ${isVerbs ? `
+      <div class="person-picker" id="person-picker"${verbMode === 'conjugations' ? '' : ' hidden'}>
+        <div class="mode-label person-label">Persons
+          <span class="person-quick">${Object.entries({ all: 'all', sing: 'singular', plur: 'plural' }).map(([k, l]) => `<button type="button" class="ghost" data-set="${k}">${l}</button>`).join('<span class="meta-sep">·</span>')}</span>
+        </div>
+        <div class="person-chips" role="group" aria-label="Which persons to practise">
+          ${personOrder.map(p => `<button type="button" class="person-chip" data-person="${p}">${personLabel[p]}</button>`).join('')}
+        </div>
+        <p class="person-hint" id="person-hint" aria-live="polite"></p>
+      </div>` : ''}
 
       <div class="mode-label">Direction</div>
       <div class="mode-toggle" id="direction-toggle">
@@ -7427,6 +7514,8 @@
 
     wireSubjectToggle();
 
+    if (isVerbs) wirePersonPicker();
+
     // ===== Verbs: practice mode and direction (as in the verb game's setup) =====
     if (modeOptions) {
       gameArea.querySelectorAll('#mode-toggle .mode-option').forEach(btn => {
@@ -7435,6 +7524,8 @@
           gameArea.querySelectorAll('#mode-toggle .mode-option').forEach(b => {
             b.classList.toggle('active', b.dataset.mode === btn.dataset.mode);
           });
+          const picker = document.getElementById('person-picker');
+          if (picker) picker.hidden = verbMode !== 'conjugations';
           updateReadout();
         });
       });
@@ -7837,7 +7928,7 @@
   const BACKUP_APP = 'il-mazzo';
 
   function storageKeys() {
-    const keys = new Set([SUBJECT_KEY, AUDIO_KEY, RIPASSO_DIR_KEY, STORY_PROGRESS_KEY]);
+    const keys = new Set([SUBJECT_KEY, AUDIO_KEY, RIPASSO_DIR_KEY, STORY_PROGRESS_KEY, VERB_PERSONS_KEY]);
     for (const s of Object.values(SUBJECTS)) {
       Object.values(s.statsKeys).forEach(k => { keys.add(k); keys.add(`${k}:srs`); });
       keys.add(s.assocKey);
@@ -7896,6 +7987,7 @@
   //  - The story: a chapter read on either device counts; the best quiz score is kept.
   // A reset (or restoring a backup) can't be merged — it looks like data vanishing — so
   // it raises that key's epoch, and the copy with the higher epoch wins outright.
+  //  - Which persons each verb section drills: per section, like associations.
   // Device settings (voice, speed, last section, review direction) don't sync.
   const SYNC_META_KEY = 'mazzo-sync-meta-v1';   // { epochs: { storage key: n } }
   const SYNC_BASE_KEY = 'mazzo-sync-base-v1';   // { storage key: { v, e } } as last agreed
@@ -7906,6 +7998,7 @@
       keys.set(cfg.assocKey, 'assoc');
     }
     keys.set(STORY_PROGRESS_KEY, 'story');
+    keys.set(VERB_PERSONS_KEY, 'assoc');   // which persons each verb section drills
     return keys;
   }
   const syncIsObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -8026,31 +8119,34 @@
     syncTouched();
   }
 
-  // ===== Sync, part 2: recording to the server, automatically =====
-  // Il Mazzo is a personal site, so every device uses one built-in sync key: whatever
-  // device opens the site records to the same place, with nothing to set up. (The key
-  // is public with the code, so anyone with the site's address could read or change
-  // the progress — accepted for a personal site.) The server copy is the master; each
-  // device keeps a working copy so cards stay instant and a round works offline.
-  // It's invisible to the player — no status, no settings. It syncs when the app
-  // opens, when the setup screen comes back after practice, and when the tab is
-  // hidden — never in the middle of a round. Each sync fetches the server's
-  // copy, merges (part 1), sends only what changed, and retries if another device saved
-  // in between. Progress saved here while a sync was in flight is layered on top of the
-  // merged copy, so no answer is lost or counted twice.
+  // ===== Sync, part 2: recording to the server, signed in with Google =====
+  // Invisible to the player once signed in — no status, no settings. Each device signs
+  // in with Google once (the server checks the Google token and keeps a year-long
+  // session); after that it syncs when the app opens, when the setup screen comes back
+  // after practice, and when the tab is hidden — never in the middle of a round. Each
+  // sync fetches the server's copy, merges (part 1), sends only what changed, and
+  // retries if another device saved in between. Progress saved here while a sync was
+  // in flight is layered on top of the merged copy, so no answer is lost or counted twice.
   const SYNC_URL = 'https://il-mazzo-sync.il-mazzo.workers.dev';
-  const SYNC_SHARED_KEY = 'lRdadfl9fkeJDf3Jz5LUlmAhwmSFphz6';
-  const syncState = { status: 'idle', detail: '', busy: false, pending: false, timer: null };
+  // The built-in key used before sign-in existed: sent once at sign-in so the server
+  // can move its progress to your account, after which it opens nothing
+  const SYNC_LEGACY_KEY = 'lRdadfl9fkeJDf3Jz5LUlmAhwmSFphz6';
+  const GIS_SRC = 'https://accounts.google.com/gsi/client';
+  const syncState = { status: 'idle', detail: '', busy: false, pending: false, timer: null, legacy: false };
   let syncDirty = false;
 
-  function syncKey() { return SYNC_SHARED_KEY; }
+  // A session — or, while the live server is still the one from before sign-in
+  // existed, the old built-in key, so nothing stops syncing during the changeover
+  function syncKey() { return syncMeta().session || (syncState.legacy ? SYNC_LEGACY_KEY : null); }
   async function syncRequest(method, path, key, body) {
     const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
     const timer = ctrl ? setTimeout(() => ctrl.abort(), 12000) : null;
     try {
+      const headers = {};
+      if (key) headers.Authorization = `Bearer ${key}`;
+      if (body) headers['Content-Type'] = 'application/json';
       const res = await fetch(SYNC_URL + path, {
-        method,
-        headers: { Authorization: `Bearer ${key}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+        method, headers,
         body: body ? JSON.stringify(body) : undefined,
         cache: 'no-store',
         signal: ctrl ? ctrl.signal : undefined
@@ -8069,36 +8165,24 @@
     clearTimeout(syncState.timer);
     syncState.timer = setTimeout(() => { syncNow(); }, delay);
   }
-  // Before a device's first sync, resets made on it earlier don't count — its progress
-  // is merged in (keeping the larger counts, so a shared backup isn't counted twice).
-  // A device that used the old per-device key moves to the built-in one, and that
-  // key's server copy is deleted once this device's progress is safely merged.
-  function syncPrepare() {
-    const meta = syncMeta();
-    if (meta.joined && !(meta.key && meta.key !== SYNC_SHARED_KEY)) return null;
-    const oldKey = meta.key && meta.key !== SYNC_SHARED_KEY ? meta.key : null;
-    delete meta.key;
-    syncSaveMeta({ ...meta, epochs: {}, joined: false });
-    try { localStorage.removeItem(SYNC_BASE_KEY); } catch (e) { /* ignore */ }
-    return oldKey;
-  }
   async function syncNow() {
-    const key = SYNC_SHARED_KEY;
+    const key = syncKey();
+    if (!key) return 'signed-out';
     if (container.dataset.view === 'game') { syncState.pending = true; return 'later'; }
     if (syncState.busy) { syncState.pending = true; return 'busy'; }
     syncState.busy = true;
     clearTimeout(syncState.timer);
     syncSetStatus('syncing');
-    const oldKey = syncPrepare();
     try {
       for (let attempt = 0; attempt < 5; attempt++) {
         const local = syncLocalSnapshot(), stamp = syncStable(local);
         const got = await syncRequest('GET', '/v1/progress', key);
-        if (got.status === 404) {   // nothing on the server yet: create the space, then sync
+        if (got.status === 404 && syncState.legacy && !syncMeta().session) {   // old server, nothing there yet
           const made = await syncRequest('POST', '/v1/space', key);
           if (made.status !== 201 && made.status !== 409) throw new Error(`create ${made.status}`);
           continue;
         }
+        if (got.status === 401 || got.status === 404) { syncSignedOut(); return 'signed-out'; }
         if (got.status !== 200 || !got.data) throw new Error(`fetch ${got.status}`);
         const remote = got.data.items || {};
         const merged = syncMergeAll(syncReadJSON(SYNC_BASE_KEY, {}), local, remote);
@@ -8107,6 +8191,7 @@
         if (Object.keys(changes).length) {
           const put = await syncRequest('PUT', '/v1/progress', key, { baseVersion: version, items: changes });
           if (put.status === 409) continue;   // another device saved first: merge again
+          if (put.status === 401 || put.status === 404) { syncSignedOut(); return 'signed-out'; }
           if (put.status !== 200 || !put.data) throw new Error(`save ${put.status}`);
           version = put.data.version;
         }
@@ -8116,40 +8201,133 @@
         const final = late ? syncMergeAll(local, now, merged) : merged;
         try { localStorage.setItem(SYNC_BASE_KEY, JSON.stringify(merged)); } catch (e) { /* storage full */ }
         if (!syncSame(final, now)) syncApply(final);
-        syncSaveMeta({ ...syncMeta(), version, lastSync: Date.now(), joined: true });
+        syncSaveMeta({ ...syncMeta(), version, lastSync: Date.now(), ...(syncState.legacy ? { joined: true } : {}) });
         syncDirty = late;
         syncSetStatus('ok');
-        if (oldKey) syncRequest('DELETE', '/v1/space', oldKey).catch(() => {});
         return 'ok';
       }
-      syncSetStatus('error', 'Another device kept saving at the same moment. It will try again shortly.');
+      syncSetStatus('error', 'Another device kept saving at the same moment.');
       syncState.pending = true;
       return 'conflict';
     } catch (e) {
-      if (oldKey) syncSaveMeta({ ...syncMeta(), key: oldKey });   // try the move again next time
       syncSetStatus('offline');
       return 'offline';
     } finally {
       syncState.busy = false;
-      if (syncState.pending && container.dataset.view !== 'game') { syncState.pending = false; syncSoon(1500); }
+      if (syncState.pending && syncKey() && container.dataset.view !== 'game') { syncState.pending = false; syncSoon(1500); }
     }
   }
   // Sync when the setup screen comes back with something new, or now and then
   function syncOnSetup() {
-    if (syncState.busy) return;
+    if (syncState.busy || !syncKey()) return;
     const last = syncMeta().lastSync || 0;
     if (syncDirty || syncState.pending || Date.now() - last > 60000) { syncState.pending = false; syncSoon(600); }
   }
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden' && syncDirty && container.dataset.view !== 'game') syncNow();
+    if (document.visibilityState === 'hidden' && syncDirty && syncKey() && container.dataset.view !== 'game') syncNow();
   });
-  window.addEventListener('online', () => { if (syncDirty || syncState.status === 'offline') syncSoon(500); });
-
+  window.addEventListener('online', () => {
+    if (!syncKey()) signinOffer();
+    else if (syncDirty || syncState.status === 'offline') syncSoon(500);
+  });
   // Nothing about syncing is ever shown: it just happens. The state is kept for the
   // tests, and for a look in the browser's console (`syncState`).
   function syncSetStatus(status, detail = '') {
     syncState.status = status;
     syncState.detail = detail;
+  }
+  function syncStart() {
+    if (syncKey()) syncNow(); else signinOffer();
+  }
+
+  // ----- Signing in with Google: once per device -----
+  // Shown only when the server can be reached and says which Google client to use;
+  // offline, the app just works from this device's copy and offers sign-in later.
+  async function signinOffer(message = '') {
+    if (syncKey()) return;
+    let r = null;
+    try { r = await syncRequest('GET', '/v1/config'); } catch (e) { /* offline */ }
+    if (r && r.status === 404 && !syncKey()) { syncLegacyStart(); return; }
+    if (!r || r.status !== 200 || !r.data || !r.data.googleClientId || syncKey()) return;
+    renderSigninGate(r.data.googleClientId, message);
+  }
+  // The live server predates sign-in: sync with the old built-in key, as before. A
+  // device's first sync merges its progress in, ignoring resets made before joining.
+  function syncLegacyStart() {
+    syncState.legacy = true;
+    const meta = syncMeta();
+    if (!meta.joined) {
+      syncSaveMeta({ ...meta, epochs: {} });
+      try { localStorage.removeItem(SYNC_BASE_KEY); } catch (e) { /* ignore */ }
+    }
+    syncNow();
+  }
+  function syncSignedOut() {
+    syncState.legacy = false;   // the server now expects a sign-in
+    const meta = syncMeta();
+    delete meta.session; delete meta.email;
+    syncSaveMeta(meta);
+    syncSetStatus('signed-out');
+    signinOffer('Please sign in again.');
+  }
+  function loadGoogleSignIn() {
+    if (window.google && google.accounts && google.accounts.id) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = GIS_SRC;
+      s.async = true;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('google sign-in'));
+      document.head.appendChild(s);
+    });
+  }
+  function signinMessage(text) {
+    const el = document.getElementById('signin-msg');
+    if (el) el.textContent = text;
+  }
+  function renderSigninGate(clientId, message = '') {
+    let gate = document.getElementById('signin-gate');
+    if (!gate) {
+      gate = document.createElement('div');
+      gate.id = 'signin-gate';
+      gate.className = 'signin-gate';
+      document.body.appendChild(gate);
+    }
+    gate.innerHTML = `
+      <div class="signin-card" role="dialog" aria-modal="true" aria-labelledby="signin-title">
+        <div class="signin-eyebrow">Il Mazzo</div>
+        <h2 class="signin-title" id="signin-title">Bentornato</h2>
+        <p class="signin-text">Sign in with Google to keep your progress on every device.</p>
+        <div class="signin-button" id="signin-button"></div>
+        <p class="signin-msg" id="signin-msg" aria-live="polite">${storyEsc(message)}</p>
+      </div>`;
+    loadGoogleSignIn().then(() => {
+      google.accounts.id.initialize({ client_id: clientId, callback: signinWithGoogle, auto_select: true, cancel_on_tap_outside: false });
+      google.accounts.id.renderButton(document.getElementById('signin-button'), { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', width: 260 });
+      google.accounts.id.prompt();
+    }).catch(() => signinMessage("Couldn't load Google sign-in — check your connection and reload."));
+  }
+  function closeSigninGate() {
+    const gate = document.getElementById('signin-gate');
+    if (gate) gate.remove();
+  }
+  async function signinWithGoogle(response) {
+    signinMessage('Signing in…');
+    let r = null;
+    try { r = await syncRequest('POST', '/v1/session', null, { credential: response && response.credential, legacyKey: SYNC_LEGACY_KEY }); } catch (e) { /* offline */ }
+    if (!r) { signinMessage("Couldn't reach the server — check your connection and try again."); return false; }
+    if (r.status === 403) { signinMessage('This Il Mazzo is private.'); return false; }
+    if (r.status !== 200 || !r.data || !r.data.token) { signinMessage("Sign-in didn't work — please try again."); return false; }
+    // A first sign-in on this device: its progress is merged in (keeping the larger
+    // counts, so a shared backup isn't counted twice), and earlier resets don't count
+    const meta = syncMeta();
+    delete meta.key; delete meta.joined;
+    syncSaveMeta({ ...meta, session: r.data.token, email: r.data.email, epochs: {} });
+    try { localStorage.removeItem(SYNC_BASE_KEY); } catch (e) { /* ignore */ }
+    syncDirty = true;
+    closeSigninGate();
+    await syncNow();
+    return true;
   }
 
   // Validates the file, asks before overwriting, then reloads everything
@@ -8953,7 +9131,7 @@
   } catch (e) { /* storage unavailable */ }
   applySubject(initialSubject);
   showSetup();
-  syncNow();
+  syncStart();
 </script>
 </body>
 </html>

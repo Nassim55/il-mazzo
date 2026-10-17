@@ -1,109 +1,102 @@
 // Sync, part 2: the Worker (worker/src/index.js) against real SQLite — D1 is SQLite —
-// through a small adapter with D1's interface. Covers browser access, keys and hashing,
+// with a stand-in Google. Covers sign-in (and every way a token can be wrong), sessions,
 // the version check (including two saves at the same instant), validation, deleting,
-// and two app instances syncing through it end to end.
-const { boot, ok, done } = require('./harness');
+// and the one-time move from the old built-in key.
+const { ok, done } = require('./harness');
 const path = require('path');
 const { makeD1 } = require('./d1-fixture');
+const { makeGoogle, CLIENT_ID, ME } = require('./google-fixture');
 
 (async () => {
+  const google = await makeGoogle();
+  google.install();
   const worker = (await import(path.join(__dirname, '..', 'worker', 'src', 'index.js'))).default;
-  const env = { DB: makeD1() };
-  const KEY = 'k3y-For-Testing_0123456789abcdefXYZ', OTHER = 'another-Key_9876543210fedcbaQWERTY';
+  const env = { DB: makeD1(), GOOGLE_CLIENT_ID: CLIENT_ID, ALLOWED_EMAILS: ` ${ME.toUpperCase()} ` };
   const ORIGIN = 'https://nassim55.github.io';
-  const call = async (method, p, { key = KEY, body, origin = ORIGIN, headers = {} } = {}) => {
-    const h = { Origin: origin, ...headers };
-    if (key) h.Authorization = `Bearer ${key}`;
+  const call = async (method, p, { auth, body, origin = ORIGIN, e = env } = {}) => {
+    const h = { Origin: origin };
+    if (auth) h.Authorization = `Bearer ${auth}`;
     if (body !== undefined) h['Content-Type'] = 'application/json';
-    const res = await worker.fetch(new Request(`https://il-mazzo-sync.example.workers.dev${p}`, { method, headers: h, body: body === undefined ? undefined : (typeof body === 'string' ? body : JSON.stringify(body)) }), env);
+    const res = await worker.fetch(new Request(`https://il-mazzo-sync.il-mazzo.workers.dev${p}`, { method, headers: h, body: body === undefined ? undefined : (typeof body === 'string' ? body : JSON.stringify(body)) }), e);
     let data = null;
-    try { data = await res.json(); } catch (e) { /* empty */ }
+    try { data = await res.json(); } catch (err) { /* empty */ }
     return { status: res.status, data, headers: res.headers };
   };
+  const signIn = async (claims, opts, extra = {}) => call('POST', '/v1/session', { body: { credential: await google.token(claims, opts), ...extra } });
+  const raw = env.DB.raw;
 
-  // ---- Browser access ----
-  let r = await call('OPTIONS', '/v1/progress', { key: null });
-  ok(r.status === 204 && r.headers.get('Access-Control-Allow-Origin') === ORIGIN && /Authorization/.test(r.headers.get('Access-Control-Allow-Headers')) && /PUT/.test(r.headers.get('Access-Control-Allow-Methods')),
-     'the GitHub Pages site may call the API (preflight answered)');
-  r = await call('OPTIONS', '/v1/progress', { key: null, origin: 'http://localhost:8080' });
-  ok(r.headers.get('Access-Control-Allow-Origin') === 'http://localhost:8080', 'so may a local copy, for development');
-  r = await call('OPTIONS', '/v1/progress', { key: null, origin: 'https://evil.example' });
+  // ---- Browser access and config ----
+  let r = await call('OPTIONS', '/v1/progress');
+  ok(r.status === 204 && r.headers.get('Access-Control-Allow-Origin') === ORIGIN && /Authorization/.test(r.headers.get('Access-Control-Allow-Headers')), 'the GitHub Pages site may call the API');
+  r = await call('OPTIONS', '/v1/progress', { origin: 'https://evil.example' });
   ok(!r.headers.get('Access-Control-Allow-Origin'), 'other websites may not');
+  r = await call('GET', '/v1/config');
+  ok(r.status === 200 && r.data.googleClientId === CLIENT_ID, "the app can ask which Google client to sign in with");
 
-  // ---- Keys ----
-  ok((await call('GET', '/v1/progress', { key: null })).status === 401 && (await call('GET', '/v1/progress', { key: 'short' })).status === 401, 'no key, or a too-short one: refused');
-  ok((await call('GET', '/v1/nothing')).status === 404, 'unknown paths: not found');
-  r = await call('GET', '/v1/progress');
-  ok(r.status === 404 && r.data.error === 'no-space', 'a key with nothing saved yet: "no-space", so linking a device with a mistyped key can be caught');
-  r = await call('POST', '/v1/space');
-  ok(r.status === 201 && r.data.version === 0, 'turning sync on creates the space');
-  ok((await call('POST', '/v1/space')).status === 409, 'creating it twice is refused');
-  const ids = env.DB.raw.prepare('SELECT id FROM spaces').all().map(x => x.id);
-  ok(ids.length === 1 && /^[0-9a-f]{64}$/.test(ids[0]) && !JSON.stringify(env.DB.raw.prepare('SELECT * FROM spaces').all()).includes(KEY), 'only the key\'s SHA-256 hash is stored, never the key');
+  // ---- Every way a sign-in can be wrong ----
+  const LEGACY = 'lRdadfl9fkeJDf3Jz5LUlmAhwmSFphz6';
+  const bad = {
+    'signed by an impostor': [{}, { impostor: true }], 'unsigned (alg none)': [{}, { unsigned: true, alg: 'none' }],
+    'an unknown signing key': [{}, { kid: 'kid-404' }], 'issued for another app': [{ aud: 'someone-else.apps.googleusercontent.com' }],
+    'not from Google': [{ iss: 'https://evil.example' }], 'expired': [{ exp: Math.floor(Date.now() / 1000) - 600 }],
+    'an unverified email': [{ email_verified: false }]
+  };
+  const refused = [];
+  for (const [label, [claims, opts]] of Object.entries(bad)) { const x = await signIn(claims, opts); if (x.status !== 401) refused.push(`${label}: ${x.status}`); }
+  ok(refused.length === 0, `tokens that are forged, unsigned, from an unknown key, for another app, not from Google, expired or unverified are all refused${refused.length ? ' — ' + refused.join('; ') : ''}`);
+  ok((await call('POST', '/v1/session', { body: { credential: 'not.a.token' } })).status === 401 && (await call('POST', '/v1/session', { body: '{}' })).status === 401, 'malformed or missing tokens are refused');
+  r = await signIn({ email: 'someone.else@example.com', sub: '200000000000000000002' });
+  ok(r.status === 403 && r.data.error === 'not-allowed', "a genuine Google account that isn't on the allow-list is refused");
+  ok((await signIn({}, {}, {})).status === 200 && (await call('POST', '/v1/session', { body: { credential: await google.token() }, e: { ...env, ALLOWED_EMAILS: '' } })).status === 403,
+     'with no allow-list set, nobody can sign in');
+  ok(raw.prepare('SELECT COUNT(*) AS n FROM sessions').get().n === 1, '(only the allowed sign-in made a session)');
+  ok((await call('GET', '/v1/progress', { auth: LEGACY })).status === 401, 'the old built-in key no longer opens anything');
+
+  // ---- Signing in ----
+  r = await signIn();
+  const T1 = r.data && r.data.token;
+  ok(r.status === 200 && /^[A-Za-z0-9_-]{43}$/.test(T1) && r.data.email === ME && Math.round((r.data.expiresAt - Date.now()) / 86400000) === 365, 'your Google account gets a session, good for a year');
+  ok(!JSON.stringify(raw.prepare('SELECT * FROM sessions').all()).includes(T1), 'only the session\'s hash is stored, never the token');
+  r = await call('GET', '/v1/progress', { auth: T1 });
+  ok(r.status === 200 && r.data.version === 0 && JSON.stringify(r.data.items) === '{}', 'a first sign-in opens an empty space for the account');
+  ok((await call('GET', '/v1/progress')).status === 401 && (await call('GET', '/v1/progress', { auth: 'x'.repeat(43) })).status === 401, 'no session, or a made-up one: refused');
 
   // ---- Saving and fetching ----
-  const items = { 'sostantivi-stats-v1': { v: { casa: { seen: 4, wrong: 1 } }, e: 0 }, 'frasi-stats-v1': { v: null, e: 1 } };
-  r = await call('PUT', '/v1/progress', { body: { baseVersion: 0, items } });
-  ok(r.status === 200 && r.data.version === 1, 'a save based on the current version is accepted, and the version goes up');
-  r = await call('GET', '/v1/progress');
-  ok(r.status === 200 && r.data.version === 1 && r.data.items['sostantivi-stats-v1'].v.casa.seen === 4 && r.data.items['frasi-stats-v1'].v === null && r.data.items['frasi-stats-v1'].e === 1,
-     'fetching returns every store as saved: values, an emptied (reset) store, epochs');
-  r = await call('PUT', '/v1/progress', { body: { baseVersion: 0, items: { 'sostantivi-stats-v1': { v: { casa: { seen: 99, wrong: 0 } }, e: 0 } } } });
-  ok(r.status === 409 && r.data.version === 1 && (await call('GET', '/v1/progress')).data.items['sostantivi-stats-v1'].v.casa.seen === 4,
-     'a save based on an out-of-date version is refused (409, with the current version) and changes nothing');
-  env.DB.hooks.beforeBatch = db => db.prepare('UPDATE spaces SET version = version + 1').run();   // another device saves in between
-  r = await call('PUT', '/v1/progress', { body: { baseVersion: 1, items: { 'sostantivi-stats-v1': { v: { casa: { seen: 77, wrong: 0 } }, e: 0 } } } });
-  ok(r.status === 409 && r.data.version === 2 && (await call('GET', '/v1/progress')).data.items['sostantivi-stats-v1'].v.casa.seen === 4,
-     'two saves at the same instant: the second one writes nothing and is told to merge again');
-  r = await call('PUT', '/v1/progress', { body: { baseVersion: 2, items: { 'sostantivi-stats-v1': { v: { casa: { seen: 6, wrong: 1 } }, e: 0 } } } });
-  ok(r.status === 200 && (await call('GET', '/v1/progress')).data.items['sostantivi-stats-v1'].v.casa.seen === 6 && (await call('GET', '/v1/progress')).data.items['frasi-stats-v1'].e === 1,
-     'a save replaces only the stores it sends');
-
-  // ---- Validation ----
-  const bad = [{ baseVersion: 3, items: { 'Bad Key!': { v: {}, e: 0 } } }, { baseVersion: 3, items: { 'sostantivi-stats-v1': { v: [1, 2], e: 0 } } },
-               { baseVersion: 3, items: { 'sostantivi-stats-v1': { v: {}, e: -1 } } }, { items: {} }, 'not json'];
+  r = await call('PUT', '/v1/progress', { auth: T1, body: { baseVersion: 0, items: { 'sostantivi-stats-v1': { v: { casa: { seen: 4, wrong: 1 } }, e: 0 }, 'frasi-stats-v1': { v: null, e: 1 } } } });
+  ok(r.status === 200 && r.data.version === 1, 'a save based on the current version is accepted');
+  const T2 = (await signIn()).data.token;
+  r = await call('GET', '/v1/progress', { auth: T2 });
+  ok(r.data.items['sostantivi-stats-v1'].v.casa.seen === 4 && r.data.items['frasi-stats-v1'].v === null && r.data.items['frasi-stats-v1'].e === 1, 'signing in on another device opens the same progress');
+  r = await call('PUT', '/v1/progress', { auth: T2, body: { baseVersion: 0, items: { 'sostantivi-stats-v1': { v: { casa: { seen: 99, wrong: 0 } }, e: 0 } } } });
+  ok(r.status === 409 && r.data.version === 1, 'a save based on an out-of-date version is refused, and changes nothing');
+  env.DB.hooks.beforeBatch = db => db.prepare('UPDATE spaces SET version = version + 1').run();
+  r = await call('PUT', '/v1/progress', { auth: T2, body: { baseVersion: 1, items: { 'sostantivi-stats-v1': { v: { casa: { seen: 77, wrong: 0 } }, e: 0 } } } });
+  ok(r.status === 409 && (await call('GET', '/v1/progress', { auth: T1 })).data.items['sostantivi-stats-v1'].v.casa.seen === 4, 'two saves at the same instant: the second writes nothing and is told to merge again');
   const statuses = [];
-  for (const b of bad) statuses.push((await call('PUT', '/v1/progress', { body: b })).status);
-  ok(statuses.every(s => s === 400), `malformed saves are refused (${statuses.join(', ')})`);
-  ok((await call('PUT', '/v1/progress', { body: { baseVersion: 3, items: { x: { v: { s: 'a'.repeat(1_600_000) }, e: 0 } } } })).status === 413, 'oversized saves are refused');
+  for (const b of [{ baseVersion: 2, items: { 'Bad Key!': { v: {}, e: 0 } } }, { baseVersion: 2, items: { 'sostantivi-stats-v1': { v: [1], e: 0 } } }, { items: {} }, 'not json']) statuses.push((await call('PUT', '/v1/progress', { auth: T1, body: b })).status);
+  ok(statuses.every(s => s === 400) && (await call('PUT', '/v1/progress', { auth: T1, body: { baseVersion: 2, items: { x: { v: { s: 'a'.repeat(1_600_000) }, e: 0 } } } })).status === 413, 'malformed and oversized saves are refused');
 
-  // ---- Separate keys, and deleting ----
-  ok((await call('GET', '/v1/progress', { key: OTHER })).status === 404, "another key can't see this key's progress");
-  r = await call('DELETE', '/v1/space');
-  ok(r.status === 200 && (await call('GET', '/v1/progress')).status === 404 && env.DB.raw.prepare('SELECT COUNT(*) AS n FROM items').get().n === 0, 'deleting removes everything stored for the key');
+  // ---- Sessions end ----
+  ok((await call('DELETE', '/v1/session', { auth: T2 })).status === 200 && (await call('GET', '/v1/progress', { auth: T2 })).status === 401 && (await call('GET', '/v1/progress', { auth: T1 })).status === 200,
+     'signing a device out ends only that device\'s session');
+  raw.prepare('UPDATE sessions SET expires_at = ?').run(Date.now() - 1000);
+  ok((await call('GET', '/v1/progress', { auth: T1 })).status === 401, 'an expired session is refused');
 
-  // ---- End to end: two app instances syncing through the Worker ----
-  const quiet = w => { w.confirm = () => true; };
-  const start = { 'sostantivi-stats-v1': JSON.stringify({ casa: { seen: 4, wrong: 1 } }), 'flipcards-subject': 'nouns' };
-  const A = boot(start, quiet), B = boot(start, quiet);
-  ok((await call('POST', '/v1/space')).status === 201, 'end to end: a fresh space');
-  // What the app's sync step will do: fetch, merge, save based on the fetched version, retry on 409
-  async function sync(dev) {
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const got = await call('GET', '/v1/progress');
-      const merged = dev.ev(`syncMergeAll(syncReadJSON(SYNC_BASE_KEY, {}), syncLocalSnapshot(), ${JSON.stringify(got.data.items)})`);
-      const changed = dev.ev(`syncChanges(${JSON.stringify(merged)}, ${JSON.stringify(got.data.items)})`);
-      if (process.env.SYNC_DEBUG && Object.keys(changed).length) console.log('   sends:', Object.keys(changed).join(', '));
-      const put = Object.keys(changed).length ? await call('PUT', '/v1/progress', { body: { baseVersion: got.data.version, items: changed } }) : { status: 200 };
-      if (put.status === 409) continue;
-      dev.ev(`syncApply(${JSON.stringify(merged)}); localStorage.setItem(SYNC_BASE_KEY, ${JSON.stringify(JSON.stringify(merged))})`);
-      return put.status;
-    }
-    return 409;
-  }
-  const practise = (dev, word, n) => dev.ev(`(() => { const o = readStats('nouns', 'en-it'); const s = o[${JSON.stringify(word)}] || { seen: 0, wrong: 0 };
-    localStorage.setItem('sostantivi-stats-v1', JSON.stringify({ ...o, [${JSON.stringify(word)}]: { seen: s.seen + ${n}, wrong: s.wrong } })); })()`);
-  await sync(A); await sync(B);
-  practise(A, 'casa', 3); practise(B, 'casa', 2); practise(B, 'gatto', 1);
-  await sync(A); await sync(B); await sync(A);
-  const sa = A.ev("readStats('nouns', 'en-it')"), sb = B.ev("readStats('nouns', 'en-it')");
-  ok(sa.casa.seen === 9 && sb.casa.seen === 9 && sa.gatto.seen === 1 && sb.gatto.seen === 1, 'both devices end with every answer from both (casa 4 + 3 + 2 = 9)');
-  // The redrawn setup screen gives newly arrived words their first review dates — real
-  // new data, saved once; after that, syncing with nothing new must save nothing
-  await sync(A); await sync(B);
-  const v = (await call('GET', '/v1/progress')).data.version;
-  await sync(A); await sync(B); await sync(A);
-  ok((await call('GET', '/v1/progress')).data.version === v, 'once settled, syncing with nothing new saves nothing (no wasted writes)');
-  ok(JSON.stringify(A.ev("loadSrs('nouns', 'en-it')")) !== '{}' && A.ev(`syncSame(loadSrs('nouns', 'en-it'), ${JSON.stringify(B.ev("loadSrs('nouns', 'en-it')"))})`), 'and both devices hold the same review schedule');
+  // ---- A second account, and deleting ----
+  const env2 = { ...env, ALLOWED_EMAILS: `${ME},other@example.com` };
+  const T3 = (await call('POST', '/v1/session', { body: { credential: await google.token({ email: 'other@example.com', sub: '300000000000000000003' }) }, e: env2 })).data.token;
+  ok(JSON.stringify((await call('GET', '/v1/progress', { auth: T3, e: env2 })).data.items) === '{}', "another allowed account has its own space, and can't see yours");
+  const T4 = (await signIn()).data.token;
+  ok((await call('DELETE', '/v1/space', { auth: T4 })).status === 200 && (await call('GET', '/v1/progress', { auth: T4 })).status === 401
+     && raw.prepare("SELECT COUNT(*) AS n FROM items WHERE value LIKE '%casa%'").get().n === 0, 'deleting an account\'s space removes its progress and signs it out everywhere');
+
+  // ---- The one-time move from the old built-in key ----
+  const legacyId = require('crypto').createHash('sha256').update(LEGACY).digest('hex');
+  raw.prepare('INSERT INTO spaces (id, version, created_at, updated_at) VALUES (?, 5, 1, 1)').run(legacyId);
+  raw.prepare('INSERT INTO items (space_id, key, value, epoch, updated_at) VALUES (?, ?, ?, 0, 1)').run(legacyId, 'sostantivi-stats-v1', JSON.stringify({ sole: { seen: 5, wrong: 0 } }));
+  const T5 = (await signIn({}, {}, { legacyKey: LEGACY })).data.token;
+  r = await call('GET', '/v1/progress', { auth: T5 });
+  ok(r.data.items['sostantivi-stats-v1'].v.sole.seen === 5 && !raw.prepare('SELECT 1 FROM spaces WHERE id = ?').get(legacyId), "the first sign-in brings the old built-in key's progress across, then deletes that copy");
+  ok((await signIn({}, {}, { legacyKey: LEGACY })).status === 200, 'later sign-ins with the old key are harmless');
   done();
 })().catch(e => { console.error(e); process.exit(1); });

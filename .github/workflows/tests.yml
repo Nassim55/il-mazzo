@@ -3,8 +3,9 @@
 # GitHub Pages. A push to main (from Claude Code on a laptop) is tested and published.
 # Nothing that fails a test reaches main or the live site.
 # The sync API (worker/) deploys to Cloudflare from main too, once the repository has
-# the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets and the D1_DATABASE_ID
-# variable; until then that job just notes what's missing.
+# the CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and ALLOWED_EMAILS secrets and the
+# D1_DATABASE_ID and GOOGLE_CLIENT_ID variables; until then that job notes what's missing.
+# (ALLOWED_EMAILS is a secret so the email never appears in this public repo's logs.)
 name: tests
 
 on:
@@ -91,18 +92,23 @@ jobs:
           TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           DB_ID: ${{ vars.D1_DATABASE_ID }}
+          CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          EMAILS: ${{ secrets.ALLOWED_EMAILS }}
         run: |
-          if [ -n "$TOKEN" ] && [ -n "$ACCOUNT" ] && [ -n "$DB_ID" ]; then
+          if [ -n "$TOKEN" ] && [ -n "$ACCOUNT" ] && [ -n "$DB_ID" ] && [ -n "$CLIENT_ID" ] && [ -n "$EMAILS" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Sync API not deployed yet: add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets and the D1_DATABASE_ID variable in Settings → Secrets and variables → Actions."
+            echo "::notice::Sync API not deployed: it needs the CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and ALLOWED_EMAILS secrets and the D1_DATABASE_ID and GOOGLE_CLIENT_ID variables (Settings → Secrets and variables → Actions)."
           fi
-      - name: Point the Worker at the database
+      - name: Point the Worker at the database and the Google client
         if: steps.cf.outputs.ready == 'true'
         env:
           DB_ID: ${{ vars.D1_DATABASE_ID }}
-        run: sed -i "s/D1_DATABASE_ID_PLACEHOLDER/${DB_ID}/" worker/wrangler.toml
+          CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+        run: |
+          sed -i "s/D1_DATABASE_ID_PLACEHOLDER/${DB_ID}/" worker/wrangler.toml
+          sed -i "s/GOOGLE_CLIENT_ID_PLACEHOLDER/${CLIENT_ID}/" worker/wrangler.toml
       # Database changes first, so the new code never runs against an old schema
       - name: Apply database migrations
         if: steps.cf.outputs.ready == 'true'
@@ -122,3 +128,7 @@ jobs:
           workingDirectory: worker
           wranglerVersion: '4.151.1'
           command: deploy
+          secrets: |
+            ALLOWED_EMAILS
+        env:
+          ALLOWED_EMAILS: ${{ secrets.ALLOWED_EMAILS }}

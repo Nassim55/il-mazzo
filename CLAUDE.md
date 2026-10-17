@@ -44,7 +44,8 @@ If a suite fails, fix the cause; never weaken a test to make it pass unless the 
 - The app does all merging (`syncMergeAll` and the per-kind rules); the Worker in `worker/` only stores copies and enforces the version check. Keep it that way — the merge rules are tested in jsdom with the rest of the app.
 - The Worker's API and `worker/migrations/` change together with `tests/sync-worker.test.js`. Never edit an applied migration; add a new numbered one.
 - Deployment is the `deploy-sync` job; it needs the Cloudflare secrets and the `D1_DATABASE_ID` variable and skips quietly without them. The live API is `SYNC_URL` (https://il-mazzo-sync.il-mazzo.workers.dev); its allowed browser origins are in `worker/src/index.js`.
-- Every device uses the built-in `SYNC_SHARED_KEY` (a personal site, by the user's choice — there is no opt-in or linking). A device's first sync merges its existing progress in; a device that used an old per-device key moves over and that key's server copy is deleted.
+- While the live server predates sign-in (its `/v1/config` is a 404), the app keeps syncing with `SYNC_LEGACY_KEY` (`syncState.legacy`); the new server's 401 for that key ends this and shows the sign-in screen. `tests/fixtures/worker-v1.mjs` is that old server, kept for this test.
+- Sign-in is Google only: the app gets an ID token from Google Identity Services and swaps it at `POST /v1/session` for a year-long session; the Worker verifies the RS256 signature against Google's keys, `aud` = `GOOGLE_CLIENT_ID`, issuer, expiry, `email_verified`, and the `ALLOWED_EMAILS` secret (empty = nobody). Never weaken these checks; `sync-worker` tries each way a token can be wrong. `SYNC_LEGACY_KEY` exists only so a first sign-in can move the old built-in key's server copy across (then it's deleted).
 - Syncing is invisible by the user's choice: no status line, panel, settings or wording about it in the UI. Keep it that way (the `sync-client` tests check).
 - Any new code that saves progress must call `syncTouched()` after writing. Syncing never runs while `container.dataset.view === 'game'`; keep it that way.
 - `tests/d1-fixture.js` is the shared D1 stand-in (Node's built-in SQLite with the real migrations).
@@ -53,6 +54,7 @@ If a suite fails, fix the cause; never weaken a test to make it pass unless the 
 
 - `SUBJECTS` — the five sections (items, themes, frequency order, stats/association keys, panel).
 - `cardsForItem`, `render`, `handleSubmit` — card building, display and checking; checkers are `checkAnswer` (nouns), `checkVerbAnswer`, `checkAdjAnswer`, `checkPhraseAnswer`.
+- `activePersons(subj)`, `saveVerbPersons` — which persons each verb section drills (`mazzo-verb-persons-v1`, synced); `cardsForItem` builds conjugation cards only for them.
 - `startGame`, `sessionPool` / `sessionMaxDeck` — sessions; Deck size, Focus and "practise the ones I missed" filter the session pool.
 - `srsAnswer`, `dueList`, `startRipasso`, `setCardContext` — spaced repetition and the mixed Ripasso del giorno review.
 - `speak`, `chosenVoice`, `renderAudioRow` — Italian text-to-speech and Listening mode.

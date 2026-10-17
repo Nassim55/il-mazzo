@@ -9,9 +9,9 @@ ok(errors.length === 0 && warns.length === 0, 'loads cleanly');
 
 // ---- What syncs ----
 const keys = ev('[...syncedKeys().keys()]');
-ok(keys.length === 43, `43 progress stores sync (${keys.length})`);
-ok(['sostantivi-stats-v1', 'verbi-regolari-stats:srs', 'frasi-stats-listen-v1', 'aggettivi-assoc-v1', 'mazzo-story-v1'].every(k => keys.includes(k)),
-   'stats, review schedules, associations and story progress for every section and direction');
+ok(keys.length === 44, `44 stores sync (${keys.length})`);
+ok(['sostantivi-stats-v1', 'verbi-regolari-stats:srs', 'frasi-stats-listen-v1', 'aggettivi-assoc-v1', 'mazzo-story-v1', 'mazzo-verb-persons-v1'].every(k => keys.includes(k)),
+   'stats, review schedules, associations, story progress and the verb persons chosen, for every section and direction');
 ok(!['mazzo-audio-v1', 'mazzo-ripasso-dir', 'flipcards-subject', 'mazzo-sync-meta-v1', 'mazzo-sync-base-v1'].some(k => keys.includes(k)),
    'device settings (voice, review direction, last section) and sync bookkeeping stay on the device');
 
@@ -64,7 +64,7 @@ const backup = JSON.stringify(ev('buildBackup()'));
 ok(!/mazzo-sync-/.test(backup), 'backups leave the sync bookkeeping out');
 ev(`restoreFromText(${JSON.stringify(backup)})`);
 const ep2 = ev('syncMeta().epochs');
-ok(Object.keys(ep2).length === 43 && ep2['sostantivi-stats-v1'] === 2 && ep2['frasi-stats-v1'] === 1, 'restoring a backup raises every store\'s epoch, so the restored copy wins');
+ok(Object.keys(ep2).length === 44 && ep2['sostantivi-stats-v1'] === 2 && ep2['frasi-stats-v1'] === 1, 'restoring a backup raises every store\'s epoch, so the restored copy wins');
 
 // ---- Two devices, one stand-in server ----
 const server = { items: {} };
