@@ -57,7 +57,7 @@ d.getElementById('game-focus-btn').click();
 ok(d.getElementById('focus-total').textContent === '5', 'Focus lists the 5 adjectives');
 d.getElementById('focus-top-input').value = '2'; key(d.getElementById('focus-top-input'), 'Enter'); d.getElementById('focus-apply').click();
 ok(new Set(ev('deck.map(c => c.noun)')).size === 2, 'Focus top 2 → the cards of 2 adjectives');
-setVal('game-trim-input', '15', 'change');
+setVal('game-trim-rest', String(15 - ev('sessionMaxDeck.length')), 'change');   // the Focus cards + the rest = 15
 ok(ev('deck.length') === 15 && new Set(ev('deck.map(c => c.key)')).size === 15, 'Deck size grows back to 15 distinct cards');
 d.querySelector('.direction-toggle [data-dir="it-en"]').click();
 ev("index = deck.findIndex(c => c.key === 'alto|fsg'); render();");

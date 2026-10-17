@@ -25,6 +25,7 @@ Every card section works in three directions — English → Italian, Italian �
 - Practise the cards you missed, as a filter on the round you just played
 - Spoken Italian using the device's own voices, and stress-marked pronunciation for verbs
 - **Choose the persons** for the verb sections: under *Practice mode*, pick any of io, tu, lui / lei, noi, voi, loro (or *all*, *singular*, *plural*). Rounds, Ripasso del giorno and chapter practice then ask only those; each verb section keeps its own choice, and it syncs with your progress.
+- **Deck size slider** during a round, from 1 card to the whole selection. After *Practise the ones I missed* (or a mid-game Focus) it becomes two sliders — how many of the missed cards, and how many of the rest to mix back in. Growing adds unplayed cards (the rest in the round's order: random, or the next most common); shrinking trims unplayed cards from the end, so cards already played stay counted.
 - Back up and restore all progress to a file
 - **Racconto** — a story to read, in which every word links to its card (see below)
 
@@ -111,6 +112,7 @@ Node 20 or later is required.
 
 - **Against the originals:** `regular-verbs-vs-original` and `adjectives-vs-original` load the original standalone games from `tests/fixtures/` side by side with Il Mazzo and compare every card, answer verdict, ranking and saved-progress format — over 23,000 comparisons — so the ports can't quietly drift.
 - **Each section:** `nouns-core`, `nouns-features`, `regular-verbs`, `regular-verbs-additions`, `irregular-verbs`, `adjectives`, `phrases`.
+- **Deck size:** `deck-sliders` — one slider, then two after missing some: live numbers, growing and shrinking each group, played cards kept, never an empty deck, game keys left alone.
 - **Verb persons:** `verb-persons` — choosing persons, card counts, rounds and Ripasso asking only those, never none, per-section choices, saving, backups and sync.
 - **The story:** `story` — every word explained and read the right way (*porta* the door, *legge* "reads"), the reader, word cards, + Ripasso, reading aloud, the questions and stamp, chapter practice, and backups.
 - **Sync and sign-in:** `sync-merge` (what syncs, the merge rules, epochs, and two devices syncing through a stand-in server), `sync-client` (signing in with Google, then recording automatically against the real Worker: who gets in, the move from the old built-in key, two devices syncing at the same instant, an answer saved mid-sync, offline, sessions ending) and `sync-worker` (sign-in and every way a token can be wrong — forged, unsigned, unknown key, wrong app, wrong issuer, expired, unverified, not on the allow-list — plus sessions, the version check including two simultaneous saves, validation, and deleting). `tests/google-fixture.js` plays Google with a real RSA key pair; `tests/d1-fixture.js` is D1 on Node's built-in SQLite.

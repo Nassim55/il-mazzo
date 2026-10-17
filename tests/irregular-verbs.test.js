@@ -49,7 +49,7 @@ d.getElementById('game-focus-btn').click();
 ok(d.getElementById('focus-total').textContent === '3', 'Focus lists the 3 verbs');
 d.getElementById('focus-top-input').value = '1'; key(d.getElementById('focus-top-input'), 'Enter'); d.getElementById('focus-apply').click();
 ok(ev('deck.length') === 6 && ev('deck.every(c => c.noun === "essere")'), 'Focus top 1 → the 6 essere cards');
-setVal('game-trim-input', '18', 'change');
+setVal('game-trim-rest', String(18 - ev('sessionMaxDeck.length')), 'change');   // the Focus cards + the rest = 18
 ok(ev('deck.length') === 18 && new Set(ev('deck.map(c => c.key)')).size === 18, 'Deck size grows back to 18 distinct cards');
 d.querySelector('.direction-toggle [data-dir="it-en"]').click();
 ev("index = deck.findIndex(c => c.noun === 'essere' && c.person === 'lui'); render();");

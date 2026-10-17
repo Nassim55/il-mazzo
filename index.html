@@ -1059,39 +1059,28 @@
 
   .game-trim {
     display: inline-flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 5px;
+    gap: 6px 16px;
+    max-width: 100%;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     color: var(--ink-soft);
     letter-spacing: 0.04em;
   }
 
-  .game-trim select {
-    padding: 3px 22px 3px 8px;
-    border: 1px solid rgba(28, 22, 17, 0.18);
-    border-radius: 3px;
-    font-family: inherit;
-    font-size: 11px;
-    color: var(--ink);
-    background-color: var(--paper);
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M0 0l5 6 5-6z' fill='%235a4d3f'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 7px center;
-  }
-
-  .game-trim select:focus {
-    outline: none;
-    border-color: var(--ink);
-    box-shadow: 0 0 0 2px rgba(28, 22, 17, 0.06);
-  }
-
-  .game-trim select:hover {
-    border-color: rgba(28, 22, 17, 0.35);
-  }
+  .trim-slider { display: inline-flex; align-items: center; gap: 8px; }
+  .trim-name { white-space: nowrap; }
+  .trim-value { min-width: 6ch; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .trim-slider input[type="range"] { --fill: 50%; --fill-color: var(--ink); -webkit-appearance: none; appearance: none; width: 120px; height: 20px; margin: 0; background: transparent; cursor: pointer; }
+  .trim-slider.is-focus input[type="range"] { --fill-color: var(--terracotta); }
+  .trim-slider input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--fill-color) var(--fill), rgba(28, 22, 17, 0.15) var(--fill)); }
+  .trim-slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; margin-top: -5.5px; border-radius: 50%; background: var(--paper); border: 2px solid var(--fill-color); box-shadow: 0 1px 3px rgba(28, 22, 17, 0.25); }
+  .trim-slider input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: rgba(28, 22, 17, 0.15); }
+  .trim-slider input[type="range"]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--fill-color); }
+  .trim-slider input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--paper); border: 2px solid var(--fill-color); }
+  .trim-slider input[type="range"]:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 3px; }
+  @media (max-width: 520px) { .trim-slider input[type="range"] { width: 96px; } .trim-name { min-width: 9ch; } }
 
   kbd {
     font-family: 'JetBrains Mono', monospace;
@@ -8391,10 +8380,7 @@
       <div class="controls-left">
         <button type="button" class="ghost" id="reshuffle-btn">↻ Reshuffle</button>
         <button type="button" class="ghost" id="change-btn">${reviewMode ? '← Back to setup' : `← Change ${SUBJECTS[subject].itemWords}`}</button>
-        <label class="game-trim">
-          <span>Deck size</span>
-          <select id="game-trim-input"></select>
-        </label>
+        <div class="game-trim" id="game-trim"></div>
         ${reviewMode ? '' : '<button type="button" class="ghost" id="game-focus-btn">→ Focus…</button>'}
         <span class="direction-toggle" role="group" aria-label="Translation direction"${reviewMode ? ' hidden' : ''}>
           <button type="button" data-dir="en-it" class="${direction === 'en-it' ? 'active' : ''}" aria-pressed="${direction === 'en-it'}">EN → IT</button>
@@ -8406,25 +8392,75 @@
     `;
     document.getElementById('reshuffle-btn').addEventListener('click', () => startGame());
     document.getElementById('change-btn').addEventListener('click', showSetup);
-    document.getElementById('game-trim-input').addEventListener('change', handleGameResize);
     const focusBtn = document.getElementById('game-focus-btn');
     if (focusBtn) focusBtn.addEventListener('click', () => openFocusModal('game'));
     controlsEl.querySelectorAll('.direction-toggle button').forEach(btn => {
       btn.addEventListener('click', () => setDirection(btn.dataset.dir));
     });
-    refreshTrimDropdown();
+    refreshDeckSliders();
   }
 
   // Mid-game deck resize — reads the dropdown value. Can shrink (slice) or
   // grow up to the whole session pool. Growing pulls unused cards from the
   // focus set first, then from the rest of the setup selection. Preserves index
   // so the current card stays put. If we're already past the new end, wraps up.
-  function handleGameResize() {
-    const select = document.getElementById('game-trim-input');
-    if (!select || !sessionPool) return;
-    const newSize = parseInt(select.value, 10);
-    if (!Number.isFinite(newSize) || newSize <= 0 || newSize === deck.length) return;
+  // ===== Deck size: sliders =====
+  // One slider for the deck size, from 1 to the whole session pool. After "Practise
+  // the ones I missed" (or a mid-game Focus) the deck has two groups — those cards and
+  // the rest of the pool — so there are two sliders, one per group. Growing adds the
+  // group's unplayed cards (the rest in the session's pick order: random, or the most
+  // common next); shrinking trims from the end of the play order. With two sliders a
+  // group can't drop below the cards already played from it, and the deck never empties.
+  function trimFill(input) {
+    const min = +input.min, max = +input.max, v = +input.value;
+    input.style.setProperty('--fill', `${max > min ? ((v - min) / (max - min)) * 100 : 100}%`);
+  }
+  function trimSliderHTML(id, name, value, min, max, cls = '') {
+    return `<label class="trim-slider${cls}">
+      <span class="trim-name">${name}</span>
+      <input type="range" id="${id}" min="${min}" max="${max}" step="1" value="${value}" aria-valuetext="${value} of ${max}">
+      <output class="trim-value" id="${id}-value" for="${id}">${value} / ${max}</output>
+    </label>`;
+  }
+  function refreshDeckSliders() {
+    const box = document.getElementById('game-trim');
+    if (!box || !sessionPool) return;
+    const P = sessionPool.length;
+    if (!sessionFocused) {
+      box.innerHTML = trimSliderHTML('game-trim-input', 'Deck size', deck.length, 1, P);
+    } else {
+      const focusKeys = new Set(sessionMaxDeck.map(c => c.key));
+      const F = sessionMaxDeck.length, R = P - F;
+      const inFocus = deck.filter(c => focusKeys.has(c.key)).length;
+      const playedFocus = deck.slice(0, index).filter(c => focusKeys.has(c.key)).length;
+      const playedRest = Math.min(index, deck.length) - playedFocus;
+      box.innerHTML = trimSliderHTML('game-trim-focus', sessionIsReview ? 'Missed' : 'Focus', inFocus, playedFocus, F, ' is-focus')
+        + (R > 0 ? trimSliderHTML('game-trim-rest', 'The rest', deck.length - inFocus, playedRest, R) : '');
+    }
+    box.querySelectorAll('input[type="range"]').forEach(input => {
+      trimFill(input);
+      input.addEventListener('input', () => {
+        trimFill(input);
+        document.getElementById(`${input.id}-value`).textContent = `${input.value} / ${input.max}`;
+        input.setAttribute('aria-valuetext', `${input.value} of ${input.max}`);
+      });
+      input.addEventListener('change', () => (input.id === 'game-trim-input' ? handleGameResize() : handleGameResizeParts(input)));
+    });
+  }
+  function afterResize(currentKey) {
+    totalEl.textContent = deck.length;
+    progressEl.style.width = `${Math.min(index / deck.length, 1) * 100}%`;
+    refreshDeckSliders();
+    if (index >= deck.length) showComplete();
+    else if (deck[index].key !== currentKey) render();   // the card on screen left the deck
+  }
 
+  function handleGameResize() {
+    const input = document.getElementById('game-trim-input');
+    if (!input || !sessionPool) return;
+    const newSize = parseInt(input.value, 10);
+    if (!Number.isFinite(newSize) || newSize <= 0 || newSize === deck.length) return;
+    const currentKey = deck[index] && deck[index].key;
     if (newSize < deck.length) {
       deck = deck.slice(0, newSize);
     } else if (newSize <= sessionPool.length) {
@@ -8439,38 +8475,41 @@
       const toAdd = focusLeftovers.concat(restOfPool).slice(0, newSize - deck.length);
       deck = deck.concat(shuffle(toAdd)); // new cards arrive in random play order
     } else {
-      return; // beyond the pool; dropdown doesn't offer this
+      return; // beyond the pool
     }
-
-    totalEl.textContent = deck.length;
-    progressEl.style.width = `${Math.min(index / deck.length, 1) * 100}%`;
-    refreshTrimDropdown();
-    if (index >= deck.length) showComplete();
+    afterResize(currentKey);
   }
 
-  // Populate the deck-size dropdown. The ceiling is the whole session pool
-  // (labelled "all (N)"). Offers multiples of 5, the current deck size, and —
-  // after a mid-game Focus — the focus set's size labelled "N · focus".
-  function refreshTrimDropdown() {
-    const select = document.getElementById('game-trim-input');
-    if (!select || !sessionPool) return;
-    const maxLen = sessionPool.length;
-    const current = deck.length;
-    const focusLen = sessionFocused ? sessionMaxDeck.length : null;
-
-    const raw = [];
-    for (let n = 5; n < maxLen; n += 5) raw.push(n);
-    raw.push(maxLen);
-    raw.push(current);
-    if (focusLen) raw.push(focusLen);
-    const sizes = [...new Set(raw)].filter(n => n >= 1 && n <= maxLen).sort((a, b) => a - b);
-
-    select.innerHTML = sizes.map(n => {
-      let label = `${n}`;
-      if (n === maxLen) label = `all (${n})`;
-      else if (n === focusLen) label = `${n} · ${sessionIsReview ? 'missed' : 'focus'}`;
-      return `<option value="${n}"${n === current ? ' selected' : ''}>${label}</option>`;
-    }).join('');
+  // Two groups: the missed (or Focus) cards, and the rest of the pool
+  function handleGameResizeParts(changed) {
+    const focusEl = document.getElementById('game-trim-focus'), restEl = document.getElementById('game-trim-rest');
+    if (!focusEl || !sessionPool) return;
+    let fWant = +focusEl.value, rWant = restEl ? +restEl.value : 0;
+    if (fWant + rWant === 0) {   // never an empty deck: put back one card in the group just moved
+      if (changed === restEl) rWant = 1; else fWant = 1;
+    }
+    resizeDeckParts(fWant, rWant);
+  }
+  function resizeDeckParts(fWant, rWant) {
+    const focusKeys = new Set(sessionMaxDeck.map(c => c.key));
+    const isFocus = c => focusKeys.has(c.key);
+    const currentKey = deck[index] && deck[index].key;
+    // Shrink each group from the end of the play order, never touching played cards
+    const drop = new Set();
+    for (const [want, inGroup] of [[fWant, isFocus], [rWant, c => !isFocus(c)]]) {
+      const positions = deck.map((c, i) => i).filter(i => inGroup(deck[i]));
+      for (let k = positions.length - 1; k >= Math.max(want, 0) && positions[k] >= index; k--) drop.add(positions[k]);
+    }
+    const kept = deck.filter((c, i) => !drop.has(i));
+    // Grow each group from its unplayed cards
+    const inDeck = new Set(kept.map(c => c.key));
+    const haveF = kept.filter(isFocus).length, haveR = kept.length - haveF;
+    const addF = shuffle(sessionMaxDeck.filter(c => !inDeck.has(c.key))).slice(0, Math.max(0, fWant - haveF));
+    const others = sessionPool.filter(c => !inDeck.has(c.key) && !isFocus(c));
+    const ordered = sessionPickMode === 'frequent' ? others.sort((a, b) => compareFrequency(a.noun, b.noun)) : shuffle(others);
+    const addR = ordered.slice(0, Math.max(0, rWant - haveR));
+    deck = kept.concat(shuffle(addF.concat(addR)));
+    afterResize(currentKey);
   }
 
   function startGame() {
@@ -8892,7 +8931,7 @@
     if (e.key !== 'Enter') return;
     if (container.dataset.view !== 'game') return;
     // If focus is on the deck-size select, let the browser handle it normally
-    if (e.target && e.target.id === 'game-trim-input') return;
+    if (e.target && e.target.closest && e.target.closest('.game-trim')) return;
     e.preventDefault();
     handleSubmit();
   });

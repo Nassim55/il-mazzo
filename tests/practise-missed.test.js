@@ -4,6 +4,8 @@ const answer = (sel, raw) => { ev(`index = deck.findIndex(${sel}); render();`); 
 const finish = () => ev('index = deck.length; render();');
 const missedShown = () => [...d.querySelectorAll('.missed-item')].map(e => e.textContent);
 const btn = () => d.getElementById('practise-missed');
+const slider = id => { const el = d.getElementById(id); return el && { value: +el.value, min: +el.min, max: +el.max, name: el.closest('.trim-slider').querySelector('.trim-name').textContent }; };
+const setSlider = (id, v) => { const el = d.getElementById(id); el.value = String(v); el.dispatchEvent(new w.Event('change')); };
 ok(warns.length === 0 && errors.length === 0, 'loads cleanly');
 // ---- Nouns: 2 wrong (one typed, one skipped), 2 right ----
 ev("selectedNouns = new Set(['pane', 'casa', 'libro', 'acqua']); updateReadout();");
@@ -19,7 +21,8 @@ ok(d.getElementById('play-again').textContent === '↻ Play all 4 again' && d.ge
 btn().click();
 ok(ev('container.dataset.view') === 'game' && JSON.stringify(ev('deck.map(c => c.noun).sort()')) === JSON.stringify(['casa', 'pane']) && d.getElementById('total').textContent === '2', 'review round: the 2 missed cards in play');
 ok(ev('sessionPool.length') === 4, 'the pool is still the full original set of 4 (a filter, not a new deck)');
-ok(ev(`document.getElementById('game-trim-input').selectedOptions[0].textContent`) === '2 · missed' && ev(`[...document.getElementById('game-trim-input').options].map(o => o.textContent)`).includes('all (4)'), `Deck size: "2 · missed", up to "all (4)" — ${ev(`[...document.getElementById('game-trim-input').options].map(o => o.textContent)`).join(' | ')}`);
+ok(!d.getElementById('game-trim-input') && slider('game-trim-focus').name === 'Missed' && slider('game-trim-focus').value === 2 && slider('game-trim-focus').max === 2
+   && slider('game-trim-rest').name === 'The rest' && slider('game-trim-rest').value === 0 && slider('game-trim-rest').max === 2, 'Deck size becomes two sliders: Missed 2 of 2, and The rest 0 of 2');
 d.getElementById('game-focus-btn').click();
 ok(d.getElementById('focus-total').textContent === '4' && JSON.stringify(ev('[...focusChecked].sort()')) === JSON.stringify(['casa', 'pane']), 'Focus lists all 4, with only the missed 2 ticked');
 d.getElementById('focus-cancel') ? d.getElementById('focus-cancel').click() : ev('closeFocusModal()');
@@ -58,12 +61,12 @@ finish();
 ok(JSON.stringify(missedShown().sort()) === JSON.stringify(['io capisco', 'noi capiamo']), `verbs: just the missed forms, with their pronoun (${missedShown().join(', ')})`);
 btn().click();
 ok(JSON.stringify(ev('deck.map(c => c.key).sort()')) === JSON.stringify(['capire|io', 'capire|noi']), 'verb review round: capire|io and capire|noi only');
-ok(ev(`document.getElementById('game-trim-input').selectedOptions[0].textContent`) === '2 · missed' && ev(`[...document.getElementById('game-trim-input').options].map(o => o.textContent)`).includes('all (6)'), `verbs: Deck size "2 · missed", up to all 6 forms of capire — ${ev(`[...document.getElementById('game-trim-input').options].map(o => o.textContent)`).join(' | ')}`);
-ev("document.getElementById('game-trim-input').value = '6'; handleGameResize();");
+ok(slider('game-trim-focus').value === 2 && slider('game-trim-focus').max === 2 && slider('game-trim-rest').max === 4, 'verbs: Missed 2 of 2, with the other 4 forms of capire as The rest');
+setSlider('game-trim-rest', 4);
 ok(ev('deck.length') === 6 && new Set(ev('deck.map(c => c.key)')).size === 6 && ev("deck.slice(0, 2).every(c => ['capire|io', 'capire|noi'].includes(c.key))"), 'growing to all brings back the other 4 forms (after the missed 2)');
 d.getElementById('game-focus-btn').click();
 ev("focusChecked = new Set(['capire']); applyFocus();");
-ok(!ev('sessionIsReview') && /· focus|all \(6\)/.test(ev(`document.getElementById('game-trim-input').selectedOptions[0].textContent`)), 'applying your own Focus pick ends the review');
+ok(!ev('sessionIsReview') && slider('game-trim-focus').name === 'Focus' && !d.getElementById('game-trim-rest'), 'applying your own Focus pick ends the review (the slider says Focus; nothing is left over)');
 d.getElementById('change-btn').click();
 // ---- Adjectives (All forms) and phrases ----
 d.querySelector('#subject-toggle [data-subject="adjectives"]').click();

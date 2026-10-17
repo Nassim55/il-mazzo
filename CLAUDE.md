@@ -55,6 +55,7 @@ If a suite fails, fix the cause; never weaken a test to make it pass unless the 
 - `SUBJECTS` — the five sections (items, themes, frequency order, stats/association keys, panel).
 - `cardsForItem`, `render`, `handleSubmit` — card building, display and checking; checkers are `checkAnswer` (nouns), `checkVerbAnswer`, `checkAdjAnswer`, `checkPhraseAnswer`.
 - `activePersons(subj)`, `saveVerbPersons` — which persons each verb section drills (`mazzo-verb-persons-v1`, synced); `cardsForItem` builds conjugation cards only for them.
+- `refreshDeckSliders`, `handleGameResize` (one slider, id `game-trim-input`), `resizeDeckParts` (two: `game-trim-focus` for the missed/Focus cards, `game-trim-rest`) — the in-round deck size.
 - `startGame`, `sessionPool` / `sessionMaxDeck` — sessions; Deck size, Focus and "practise the ones I missed" filter the session pool.
 - `srsAnswer`, `dueList`, `startRipasso`, `setCardContext` — spaced repetition and the mixed Ripasso del giorno review.
 - `speak`, `chosenVoice`, `renderAudioRow` — Italian text-to-speech and Listening mode.

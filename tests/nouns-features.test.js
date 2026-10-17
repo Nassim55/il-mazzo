@@ -36,7 +36,7 @@ ok(ev('deck.length') === 5 && ev('index') === 0, 'Apply restarts on those 5');
 d.getElementById('game-focus-btn').click();
 ok(d.getElementById('focus-total').textContent === String(natura.length) && d.querySelectorAll('#focus-list input:checked').length === 5, 'reopened Focus lists the whole selection, 5 checked');
 d.getElementById('focus-cancel').click();
-setVal('game-trim-input', String(natura.length), 'change');
+setVal('game-trim-rest', String(natura.length - ev('sessionMaxDeck.length')), 'change');   // after a Focus pick: the Focus cards + the rest
 ok(ev('deck.length') === natura.length, 'Deck size can grow back to the whole selection');
 // --- weakest-first ordering ---
 ev("stats = { tramonto: {seen: 13, wrong: 10}, pianeta: {seen: 34, wrong: 15}, grotta: {seen: 3, wrong: 3}, sole: {seen: 12, wrong: 0} }");

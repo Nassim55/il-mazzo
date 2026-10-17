@@ -46,7 +46,7 @@ d.getElementById('game-focus-btn').click();
 ok(d.getElementById('focus-total').textContent === '8', 'Focus lists the 8 verbs');
 d.getElementById('focus-top-input').value = '3'; key(d.getElementById('focus-top-input'), 'Enter'); d.getElementById('focus-apply').click();
 ok(ev('deck.length') === 18 && new Set(ev('deck.map(c => c.noun)')).size === 3, 'Focus top 3 → 18 cards from 3 verbs');
-setVal('game-trim-input', '48', 'change');
+setVal('game-trim-rest', String(48 - ev('sessionMaxDeck.length')), 'change');   // the Focus cards + the rest = 48
 ok(ev('deck.length') === 48 && new Set(ev('deck.map(c => c.key)')).size === 48, 'Deck size grows back to 48 with no duplicate cards');
 // IT → EN in game
 d.querySelector('.direction-toggle [data-dir="it-en"]').click();
