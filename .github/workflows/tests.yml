@@ -2,6 +2,9 @@
 # once its tests pass it's merged into main automatically, and main is published to
 # GitHub Pages. A push to main (from Claude Code on a laptop) is tested and published.
 # Nothing that fails a test reaches main or the live site.
+# The sync API (worker/) deploys to Cloudflare from main too, once the repository has
+# the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets and the D1_DATABASE_ID
+# variable; until then that job just notes what's missing.
 name: tests
 
 on:
@@ -72,3 +75,48 @@ jobs:
           path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  deploy-sync:
+    needs: test
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: sync-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the Cloudflare settings
+        id: cf
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DB_ID: ${{ vars.D1_DATABASE_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$ACCOUNT" ] && [ -n "$DB_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Sync API not deployed yet: add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets and the D1_DATABASE_ID variable in Settings → Secrets and variables → Actions."
+          fi
+      - name: Point the Worker at the database
+        if: steps.cf.outputs.ready == 'true'
+        env:
+          DB_ID: ${{ vars.D1_DATABASE_ID }}
+        run: sed -i "s/D1_DATABASE_ID_PLACEHOLDER/${DB_ID}/" worker/wrangler.toml
+      # Database changes first, so the new code never runs against an old schema
+      - name: Apply database migrations
+        if: steps.cf.outputs.ready == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          command: d1 migrations apply il-mazzo --remote
+      - name: Deploy the sync API
+        if: steps.cf.outputs.ready == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          command: deploy

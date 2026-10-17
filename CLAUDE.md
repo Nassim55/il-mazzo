@@ -17,7 +17,8 @@ If a suite fails, fix the cause; never weaken a test to make it pass unless the 
 ## Rules that protect the user's data
 
 - **Never rename saved-data keys.** Progress lives in each browser's localStorage under keys such as `sostantivi-stats-v1`, `verbi-regolari-stats` (old `{attempts, wrongs}` format — keep it), `aggettivi-stats-v1`, `frasi-stats-v1`, their `-iten` / `-listen` variants, the `:srs` review schedules, the `*-assoc-v1` association keys, the story's `racconto-stats-*` keys and reading progress `mazzo-story-v1`, `flipcards-subject`, `mazzo-audio-v1` and `mazzo-ripasso-dir`. Renaming any of them silently wipes the user's history.
-- New saved data goes in new keys, and must be added to `storageKeys()` so backups include it.
+- New saved data goes in new keys, and must be added to `storageKeys()` so backups include it. New *progress* data must also be added to `syncedKeys()` with a merge rule (and a test in `sync-merge`).
+- `mazzo-sync-meta-v1` and `mazzo-sync-base-v1` are per-device sync bookkeeping: never in backups, never synced.
 - `tests/fixtures/original-*.html` are the user's original standalone games, used to prove the ports haven't drifted. Never edit them.
 
 ## Behaviour conventions
@@ -37,6 +38,12 @@ If a suite fails, fix the cause; never weaken a test to make it pass unless the 
 - Natural, correct Italian matters more than squeezing in vocabulary. Every sentence needs an accurate English translation.
 - Every word must resolve: use `senses` for plurals and two-way words (a verb form that is also a noun), `context` when a card's meaning is wider than this use (*paese*: country, here a village). Read through every word's resolution before committing — a tap that teaches the wrong meaning is worse than none.
 - Each chapter gets three multiple-choice questions and one *Trova la parola*, a drawing in `STORY_ART` (SVG drawn in code, in the app's palette, gentle animation that `prefers-reduced-motion` turns off) and a pin in `STORY_PINS`.
+
+## Sync
+
+- The app does all merging (`syncMergeAll` and the per-kind rules); the Worker in `worker/` only stores copies and enforces the version check. Keep it that way — the merge rules are tested in jsdom with the rest of the app.
+- The Worker's API and `worker/migrations/` change together with `tests/sync-worker.test.js`. Never edit an applied migration; add a new numbered one.
+- Deployment is the `deploy-sync` job; it needs the Cloudflare secrets and the `D1_DATABASE_ID` variable and skips quietly without them.
 
 ## Code landmarks (search for these in `index.html`)
 

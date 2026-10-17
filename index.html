@@ -7674,6 +7674,7 @@
         stats = {};
         saveStats();
         try { localStorage.removeItem(srsKey(subject, direction)); } catch (e) { /* ignore */ }
+        syncMarkReset([statsKey(), srsKey(subject, direction)]);
         renderSetupMeta();
       }
     });
@@ -7879,6 +7880,149 @@
     input.click();
   }
 
+  // ===== Sync, part 1: what counts as progress, and how two copies of it merge =====
+  // Each device keeps working from its own storage; syncing exchanges copies with a
+  // small server. Merging is three-way: `base` is the copy both sides last agreed on,
+  // so each side's changes since then can be told apart, and both kept:
+  //  - Counters (seen/wrong, or the regular verbs' attempts/wrongs): new answers on
+  //    both devices add up — casa seen 3 times, then twice more here and once there, is 6.
+  //    With no shared starting point yet (a device's first sync) the larger count is
+  //    kept instead: the same backup restored on two devices mustn't count twice.
+  //  - Review schedules: per item, a change on one side wins; if both changed, the
+  //    most recently answered wins (then the higher box).
+  //  - Associations: per item, a change on one side wins; if both, this device's.
+  //  - The story: a chapter read on either device counts; the best quiz score is kept.
+  // A reset (or restoring a backup) can't be merged — it looks like data vanishing — so
+  // it raises that key's epoch, and the copy with the higher epoch wins outright.
+  // Device settings (voice, speed, last section, review direction) don't sync.
+  const SYNC_META_KEY = 'mazzo-sync-meta-v1';   // { epochs: { storage key: n } }
+  const SYNC_BASE_KEY = 'mazzo-sync-base-v1';   // { storage key: { v, e } } as last agreed
+  function syncedKeys() {
+    const keys = new Map();
+    for (const cfg of Object.values(SUBJECTS)) {
+      for (const k of Object.values(cfg.statsKeys)) { keys.set(k, 'counters'); keys.set(`${k}:srs`, 'schedule'); }
+      keys.set(cfg.assocKey, 'assoc');
+    }
+    keys.set(STORY_PROGRESS_KEY, 'story');
+    return keys;
+  }
+  const syncIsObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
+  const syncObj = v => (syncIsObj(v) ? v : {});
+  // JSON with keys sorted: equal copies compare equal whatever order words were added in
+  function syncStable(v) {
+    if (Array.isArray(v)) return `[${v.map(syncStable).join(',')}]`;
+    if (syncIsObj(v)) return `{${Object.keys(v).sort().map(k => `${JSON.stringify(k)}:${syncStable(v[k])}`).join(',')}}`;
+    return JSON.stringify(v === undefined ? null : v);
+  }
+  const syncSame = (a, b) => syncStable(a) === syncStable(b);
+  function syncMergeCounters(base, local, remote) {
+    const shared = syncIsObj(base);
+    base = syncObj(base); local = syncObj(local); remote = syncObj(remote);
+    const out = {};
+    for (const item of new Set([...Object.keys(local), ...Object.keys(remote)])) {
+      const l = local[item], r = remote[item];
+      if (!syncIsObj(l)) { if (syncIsObj(r)) out[item] = { ...r }; continue; }
+      if (!syncIsObj(r)) { out[item] = { ...l }; continue; }
+      const b = syncObj(base[item]), rec = {};
+      for (const f of new Set([...Object.keys(l), ...Object.keys(r)])) {
+        const lv = +l[f] || 0, rv = +r[f] || 0;
+        rec[f] = shared ? rv + Math.max(0, lv - (+b[f] || 0)) : Math.max(lv, rv);
+      }
+      out[item] = rec;
+    }
+    return out;
+  }
+  // Per item: keep whichever side changed; when both did, `pick` decides
+  function syncMergeItems(base, local, remote, pick) {
+    base = syncObj(base); local = syncObj(local); remote = syncObj(remote);
+    const out = {};
+    for (const item of new Set([...Object.keys(base), ...Object.keys(local), ...Object.keys(remote)])) {
+      const b = base[item], l = local[item], r = remote[item];
+      const lChanged = !syncSame(l, b), rChanged = !syncSame(r, b);
+      const v = !lChanged ? r : !rChanged ? l : pick(l, r);
+      if (v !== undefined && v !== null) out[item] = v;
+    }
+    return out;
+  }
+  const syncNewerRecord = (l, r) => {
+    if (!syncIsObj(l)) return r;
+    if (!syncIsObj(r)) return l;
+    const key = x => [x.l === null || x.l === undefined ? -1 : x.l, x.b || 0, x.d || 0];
+    const [kl, kr] = [key(l), key(r)];
+    for (let i = 0; i < 3; i++) if (kl[i] !== kr[i]) return kl[i] > kr[i] ? l : r;
+    return l;
+  };
+  function syncMergeSchedule(base, local, remote) { return syncMergeItems(base, local, remote, syncNewerRecord); }
+  function syncMergeAssoc(base, local, remote) { return syncMergeItems(base, local, remote, l => l); }
+  function syncMergeStory(base, local, remote) {
+    local = syncObj(local); remote = syncObj(remote);
+    const read = { ...syncObj(remote.read) };
+    for (const [ch, date] of Object.entries(syncObj(local.read))) if (!read[ch] || String(date) < String(read[ch])) read[ch] = date;
+    const quiz = { ...syncObj(remote.quiz) };
+    for (const [ch, q] of Object.entries(syncObj(local.quiz))) if (syncIsObj(q) && (!syncIsObj(quiz[ch]) || (+q.score || 0) > (+quiz[ch].score || 0))) quiz[ch] = q;
+    return { read, quiz };
+  }
+  const SYNC_MERGERS = { counters: syncMergeCounters, schedule: syncMergeSchedule, assoc: syncMergeAssoc, story: syncMergeStory };
+  // Each side is { storage key: { v: value, e: epoch } }; returns the merged copy
+  function syncMergeAll(base, local, remote) {
+    base = syncObj(base); local = syncObj(local); remote = syncObj(remote);
+    const out = {};
+    for (const [key, kind] of syncedKeys()) {
+      const L = local[key], R = remote[key], B = base[key];
+      if (!L && !R) continue;
+      const le = L ? +L.e || 0 : -1, re = R ? +R.e || 0 : -1;
+      if (!L || !R || le !== re) { out[key] = le >= re ? L : R; continue; }
+      const bv = B && (+B.e || 0) === le ? B.v : undefined;
+      out[key] = { v: SYNC_MERGERS[kind](bv, L.v, R.v), e: le };
+    }
+    return out;
+  }
+
+  // The stores in a merged copy that differ from the server's — all a save needs to send
+  function syncChanges(merged, remote) {
+    const out = {};
+    for (const [k, x] of Object.entries(syncObj(merged))) if (!syncIsObj(remote) || !remote[k] || !syncSame(x, remote[k])) out[k] = x;
+    return out;
+  }
+
+  function syncReadJSON(k, fallback) {
+    try { const o = JSON.parse(localStorage.getItem(k) || 'null'); return o === null ? fallback : o; } catch (e) { return fallback; }
+  }
+  function syncMeta() {
+    const m = syncReadJSON(SYNC_META_KEY, {});
+    return { ...syncObj(m), epochs: syncObj(syncObj(m).epochs) };
+  }
+  function syncSaveMeta(m) { try { localStorage.setItem(SYNC_META_KEY, JSON.stringify(m)); } catch (e) { /* storage full */ } }
+  // This device's progress, ready to merge: every store with data, or with a raised epoch
+  function syncLocalSnapshot() {
+    const epochs = syncMeta().epochs, out = {};
+    for (const key of syncedKeys().keys()) {
+      const v = syncReadJSON(key, null), e = +epochs[key] || 0;
+      if (v !== null || e > 0) out[key] = { v: v === null ? null : v, e };
+    }
+    return out;
+  }
+  // Write a merged copy back, then reload what the app holds in memory
+  function syncApply(merged) {
+    const meta = syncMeta();
+    for (const [key, { v, e }] of Object.entries(syncObj(merged))) {
+      if (!syncedKeys().has(key)) continue;
+      try {
+        if (v === null || v === undefined) localStorage.removeItem(key);
+        else localStorage.setItem(key, JSON.stringify(v));
+      } catch (err) { /* storage full */ }
+      meta.epochs[key] = +e || 0;
+    }
+    syncSaveMeta(meta);
+    if (container.dataset.view === 'setup') { applySubject(subject); showSetup(); }
+  }
+  // A reset or restore here should win over other devices' copies at the next sync
+  function syncMarkReset(keys) {
+    const meta = syncMeta();
+    for (const k of keys) if (syncedKeys().has(k)) meta.epochs[k] = (+meta.epochs[k] || 0) + 1;
+    syncSaveMeta(meta);
+  }
+
   // Validates the file, asks before overwriting, then reloads everything
   function restoreFromText(text) {
     let payload = null;
@@ -7908,6 +8052,8 @@
       alert('Your browser blocked saving the restored data.');
       return false;
     }
+    // A restore replaces everything, so it wins over other devices at the next sync
+    syncMarkReset([...syncedKeys().keys()]);
     let saved = null;
     try { saved = localStorage.getItem(SUBJECT_KEY); } catch (e) { /* ignore */ }
     applySubject(SUBJECTS[saved] ? saved : subject);

@@ -1,0 +1,6 @@
+{
+  "name": "il-mazzo-sync",
+  "private": true,
+  "type": "module",
+  "description": "Il Mazzo's sync API: a Cloudflare Worker storing each device group's progress in D1"
+}

@@ -1,0 +1,12 @@
+# Il Mazzo sync API. Deployed by GitHub Actions (.github/workflows/tests.yml) once the
+# repository has the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets and the
+# D1_DATABASE_ID variable; the deploy step writes that ID in place of the placeholder.
+name = "il-mazzo-sync"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "il-mazzo"
+database_id = "D1_DATABASE_ID_PLACEHOLDER"
+migrations_dir = "migrations"

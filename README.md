@@ -61,6 +61,18 @@ Chapters live in `STORY_CHAPTERS` in `index.html`; words the deck doesn't have l
 
 It also needs a picture (a drawing function in `STORY_ART`) and a pin position in `STORY_PINS`. Each word in the text is matched in this order: the chapter's `senses`, its `glossary`, names, then the deck — after an article or preposition a noun is preferred, so *la porta* is the door rather than *porta*, "carries". The start-up check warns about any word left unexplained, a sense or glossary entry pointing nowhere, or a *Trova la parola* word missing from the text, and the tests fail on any warning.
 
+## Syncing across devices (in progress)
+
+Progress is being made to sync between devices through a small API of Il Mazzo's own — a Cloudflare Worker with a D1 (SQLite) database, both on Cloudflare's free plan. The browser stays the working copy, so the app stays instant and works offline; the server holds the latest agreed copy.
+
+**How copies merge.** Merging is three-way: each device remembers the copy it last agreed with the server, so changes on each side since then can be told apart and both kept. Answer counts add up (*casa* seen 3 times, then twice more on one laptop and once on the other, is 6); review schedules keep the most recently answered record; associations keep whichever side changed; a chapter read on either device counts. On a device's first sync, when there's no shared copy yet, the larger count is kept instead, so the same backup restored on two devices isn't counted twice. A reset or a restore raises that store's *epoch* and wins outright. Voice, speed, last section and review direction stay per device.
+
+**The server** (`worker/`) stores each progress store's JSON and a version number. A save names the version it was based on and is refused if another device saved in between — that device fetches, merges again and retries — so two devices saving at once can't overwrite each other. Devices share a long random sync key; only its SHA-256 hash is stored.
+
+**Done so far:** the merging (in `index.html`) and the API, both tested. **Still to come:** the Sync panel in the app (turn on, link a device, status).
+
+**To deploy the API**, add to the repository's Settings → Secrets and variables → Actions: the secrets `CLOUDFLARE_API_TOKEN` (the *Edit Cloudflare Workers* template plus *Account · D1 · Edit*) and `CLOUDFLARE_ACCOUNT_ID`, and the variable `D1_DATABASE_ID` (the ID of a D1 database named `il-mazzo`). The workflow then applies the database migrations and deploys the Worker after every successful test run on `main`.
+
 ## Your progress
 
 Progress, associations and voice settings are saved in the browser's local storage — never in this repository. Each browser keeps its own copy, and so does each address the page is opened from, so use **back up** and **restore** on the setup screen to move progress between them (for example, from a local copy to GitHub Pages).
@@ -97,12 +109,14 @@ Node 20 or later is required.
 - **Against the originals:** `regular-verbs-vs-original` and `adjectives-vs-original` load the original standalone games from `tests/fixtures/` side by side with Il Mazzo and compare every card, answer verdict, ranking and saved-progress format — over 23,000 comparisons — so the ports can't quietly drift.
 - **Each section:** `nouns-core`, `nouns-features`, `regular-verbs`, `regular-verbs-additions`, `irregular-verbs`, `adjectives`, `phrases`.
 - **The story:** `story` — every word explained and read the right way (*porta* the door, *legge* "reads"), the reader, word cards, + Ripasso, reading aloud, the questions and stamp, chapter practice, and backups.
+- **Sync:** `sync-merge` (what syncs, the merge rules, epochs, and two devices syncing through a stand-in server) and `sync-worker` (the API against real SQLite — browser access, key hashing, the version check including two simultaneous saves, validation, and two app instances syncing through it).
 - **Shared features:** `ripasso` (the schedule, seeding, the mixed review — with the clock under test control), `audio`, `practise-missed`, `weakest-panel`, `backup-restore`, `grid-order`, `verb-notes`, `start-begin-labels`.
 
 ## Project layout
 
 ```
 index.html                   the whole app
+worker/                      the sync API (Cloudflare Worker + D1 migrations)
 CLAUDE.md                    project rules and landmarks for Claude Code
 tests/
   run-all.js                 runs every suite; exits non-zero if any fails
