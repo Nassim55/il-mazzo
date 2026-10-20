@@ -34,7 +34,7 @@ ok(camino.itAlts.includes('camino') && camino.enAlts.includes('fireplace'), 'sto
 
 // ---- The map ----
 const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(tabs.length === 6 && tabs[5] === 'Racconto' && d.querySelector('#subject-toggle [data-subject="story"]').classList.contains('active'), 'Racconto is the sixth section, and reopens where you left off');
+ok(tabs.length === 7 && tabs[6] === 'Racconto' && d.querySelector('#subject-toggle [data-subject="story"]').classList.contains('active'), 'Racconto is the last section, and reopens where you left off');
 ok(d.querySelectorAll('.map-pin').length === 3 && d.querySelectorAll('.story-card').length === 3 && d.querySelectorAll('.story-card svg').length === 3, 'a map pin, a card and a picture for each chapter');
 ok(d.querySelector('.map-pin[data-ch="c1"]').getAttribute('class').includes('is-next'), 'the first chapter is marked as next');
 const rd = ev('storyReadiness(STORY_CHAPTERS[0], storyStatusReader())');

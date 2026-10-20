@@ -11,6 +11,7 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 | Verbi irregolari | 50 verbs | the most common verbs that are irregular in the present |
 | Aggettivi | 100 adjectives | the dictionary form, or every gender and number |
 | Frasi | 50 phrases | everyday expressions, with *tu* and *Lei* forms kept distinct |
+| Scrittura | 100 sentences | present-tense sentences built from the deck's own words, written in full |
 | Racconto | 3 chapters | *La casa di pietra*, an illustrated story to read, plus the 30 words it teaches |
 
 Every card section works in three directions — English → Italian, Italian → English, and Listening (hear the Italian, type it) — and each direction keeps its own progress.
@@ -34,6 +35,15 @@ Every card section works in three directions — English → Italian, Italian �
 Every item you answer gets a review date, separately for each direction. A correct answer moves it up a box and pushes it further out — 1, 2, 4, 8, 16, 32, then 64 days — while a wrong answer brings it back tomorrow. Only the first correct answer of the day moves an item up, so six right conjugations of one verb count once. Progress from before the schedule existed seeds it: weak items come due straight away and solid ones are spread over the following days.
 
 The strip at the top of the setup screen shows what's due today in the chosen direction, by section. **Start** mixes it all into one round (up to 30 cards to begin with; Deck size reaches the rest), each card labelled with its section and checked by that section's rules. Schedules are part of backups, and resetting a section's progress clears its schedule.
+
+## Scrittura: writing whole sentences
+
+A hundred present-tense sentences, built only from the deck's own nouns, verbs, adjectives and phrases (plus small words: articles, prepositions, pronouns, numbers). You see the English and write the whole Italian sentence — every article, every preposition; nothing is filled in for you.
+
+- **Six levels:** *Io e tu*, *Lui e lei*, *Noi, voi, loro*, *Com'è?* (describing things), *Dove e quando*, *No e domande*.
+- **What counts:** the subject pronoun is optional, as in Italian (*Bevo un caffè* or *Io bevo un caffè*); punctuation, accents and capitals don't matter; natural variants are listed (*nel giardino* / *in giardino*, *Stasera mangiamo la pizza*). English "you" always says whether it means *tu* or *voi*.
+- **Word-by-word feedback:** a wrong answer is lined up with the closest correct version — the wrong or extra words struck through in yours, the missing ones highlighted in the correct one (a missing *l'* shows as a missing *l'*).
+- Sentences come back in Ripasso del giorno and sync like everything else.
 
 ## Racconto: *La casa di pietra*
 
@@ -112,6 +122,7 @@ Node 20 or later is required.
 
 - **Against the originals:** `regular-verbs-vs-original` and `adjectives-vs-original` load the original standalone games from `tests/fixtures/` side by side with Il Mazzo and compare every card, answer verdict, ranking and saved-progress format — over 23,000 comparisons — so the ports can't quietly drift.
 - **Each section:** `nouns-core`, `nouns-features`, `regular-verbs`, `regular-verbs-additions`, `irregular-verbs`, `adjectives`, `phrases`.
+- **Sentences:** `sentences` — every word in the deck, every verb a present-tense form, writing in full (pronoun optional, articles required), the word-by-word feedback, Italian → English, Ripasso and sync.
 - **Deck size:** `deck-sliders` — one slider, then two after missing some: live numbers, growing and shrinking each group, played cards kept, never an empty deck, game keys left alone.
 - **Verb persons:** `verb-persons` — choosing persons, card counts, rounds and Ripasso asking only those, never none, per-section choices, saving, backups and sync.
 - **The story:** `story` — every word explained and read the right way (*porta* the door, *legge* "reads"), the reader, word cards, + Ripasso, reading aloud, the questions and stamp, chapter practice, and backups.

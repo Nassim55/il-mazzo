@@ -1,0 +1,51 @@
+// Scrittura: 100 present-tense sentences from the deck's own words, written in full —
+// optional subject pronouns, nothing else given, word-by-word feedback, in Ripasso.
+const { boot, ok, done } = require('./harness');
+const { w, d, ev, errors, warns } = boot({ 'flipcards-subject': 'sentences' });
+ok(errors.length === 0 && warns.length === 0, 'loads cleanly: every word of every sentence is in the deck');
+ok(ev('SENTENCE_ITEMS.length') === 100 && ev('SENTENCE_THEMES.length') === 6, '100 sentences, in six levels');
+const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
+ok(tabs.join('|') === 'Sostantivi|Verbi regolari|Verbi irregolari|Aggettivi|Frasi|Scrittura|Racconto' && d.querySelector('#subject-toggle [data-subject="sentences"]').classList.contains('active'), 'Scrittura is a section of its own, after Frasi');
+
+// ---- Built from the deck, in the present tense ----
+const words = ev(`SENTENCE_ITEMS.flatMap(n => sentenceSegments(n.it).filter(s => s.ref).map(s => s.ref))`);
+const kinds = new Set(words.map(r => r.split(':')[0]));
+ok([...kinds].every(k => ['nouns', 'verbs', 'irregular', 'adjectives', 'phrases', 'fn'].includes(k)), `every word is a deck noun, verb, adjective or phrase, or a small word (${[...kinds].join(', ')})`);
+const verbForms = ev(`SENTENCE_ITEMS.flatMap(n => sentenceSegments(n.it).filter(s => s.ref && /^(verbs|irregular):/.test(s.ref)).map(s => [s.text.toLowerCase(), s.ref]))`);
+const present = ev(`(() => { const ok = new Set(); for (const v of [...verbData, ...irregularVerbData]) for (const f of Object.values(v.conj)) ok.add(f); return [...ok]; })()`);
+ok(verbForms.length >= 95 && verbForms.every(([f]) => present.includes(f)), `every verb (${verbForms.length} of them; non capisco is a phrase card) is a present-tense form from the deck`);
+ok(ev(`sentenceSegments('I bambini giocano in giardino.').find(s => s.text === 'bambini').ref`) === 'nouns:bambino' && ev(`sentenceSegments('Abito vicino al lago.').find(s => s.text === 'vicino').ref`) === 'fn:vicino',
+   'plurals find their singular card; vicino a means near');
+
+// ---- Writing them ----
+const play = (key, raw) => {
+  ev(`selectedNouns = new Set([${JSON.stringify(key)}]); updateReadout();`);
+  d.getElementById('start-btn').click();
+  d.getElementById('answer').value = raw;
+  d.getElementById('submit').click();
+  const r = { right: d.getElementById('feedback').classList.contains('correct'), html: d.getElementById('feedback').innerHTML, text: d.getElementById('feedback').textContent };
+  d.getElementById('change-btn').click();
+  return r;
+};
+ok(d.getElementById('answer') === null && play('il-cane-beve-l-acqua', "Il cane beve l'acqua.").right, 'the full sentence is right');
+ok(play('il-cane-beve-l-acqua', 'il cane beve lacqua').right && play('il-cane-beve-l-acqua', 'IL CANE BEVE L’ACQUA').right, 'capitals, punctuation and apostrophes don\'t matter');
+ok(play('bevo-un-caffe', 'bevo un caffe').right && play('bevo-un-caffe', 'Io bevo un caffè').right && play('bevo-un-caffe', 'Prendo un caffè').right, 'the subject pronoun is optional, and other correct Italian counts');
+ok(play('lui-parla-con-un-amico', 'Parla con un amico').right && play('dove-abiti', 'Dove abiti tu?').right, '…either way round (Lui parla / Parla; Dove abiti tu?)');
+let r = play('il-cane-beve-l-acqua', 'il cane beve acqua');
+ok(!r.right && /<mark class="sent-missing">l'<\/mark>acqua/.test(r.html.replace(/&#39;/g, "'")), 'leaving out the article is wrong, and the missing l\' is shown, joined to its noun');
+r = play('il-cane-beve-l-acqua', 'il cane bevi acqua');
+ok(/<s class="sent-wrong">bevi<\/s>/.test(r.html) && /<mark class="sent-missing">beve<\/mark>/.test(r.html), 'a wrong verb form is struck through in yours and marked in the correct one');
+r = play('il-cane-beve-l-acqua', '');
+ok(!r.right && /Skipped — the sentence is/.test(r.text) && !/sent-diff/.test(r.html), 'a skip just shows the sentence');
+ok(play('i-bambini-giocano-in-giardino', 'I bambini giocano nel giardino.').right, 'natural variants are accepted (nel giardino / in giardino)');
+
+// ---- The other direction, the prompts, and Ripasso ----
+const itEn = raw => { ev("direction = 'it-en'"); return play('bevo-un-caffe', raw).right; };
+ok(itEn("I'm having a coffee") && itEn('I am drinking a coffee') && itEn('i drink a coffee'), 'Italian → English: the English and its listed variants count');
+ev("direction = 'en-it'");
+ok(ev("SENTENCE_ITEMS.filter(n => /\\byou\\b/i.test(n.en)).every(n => /\\((tu|voi)\\)/.test(n.en))"), 'every English "you" says whether it means tu or voi');
+const t0 = ev('today()');
+const R = boot({ 'flipcards-subject': 'nouns', 'scrittura-stats-v1:srs': JSON.stringify({ 'il-cane-beve-l-acqua': { b: 1, d: t0, l: null } }) });
+ok(/1 sentence/.test(R.d.getElementById('ripasso').textContent), 'sentences come back in Ripasso del giorno');
+ok(ev("syncedKeys().has('scrittura-stats-v1') && syncedKeys().has('scrittura-stats-v1:srs')"), 'and their progress syncs like everything else');
+done();

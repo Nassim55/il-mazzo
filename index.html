@@ -1333,7 +1333,7 @@
   .eg-rows2 { grid-row: span 2; }
   .eg-rows4 { grid-row: span 4; line-height: 1.25; }
   .eg-rows2, .eg-rows4 { display: flex; align-items: center; justify-content: center; }
-  .subject-toggle .mode-option { padding-left: 18px; padding-right: 18px; white-space: nowrap; line-height: 1.3; }
+  .subject-toggle .mode-option { padding-left: 8px; padding-right: 8px; letter-spacing: 0.1em; white-space: nowrap; line-height: 1.3; }
 
   /* Irregular panel: a table of whole words, so a slightly smaller face */
   .eg-words { grid-template-columns: 44px repeat(4, minmax(0, 1fr)); }
@@ -1869,12 +1869,20 @@
   .person-chip.active { background: var(--ink); border-style: solid; border-color: var(--ink); color: var(--paper); }
   .person-hint { min-height: 1em; margin: 2px 0 10px; font-size: 12.5px; color: var(--terracotta); text-align: center; }
 
+  /* ===== Scrittura: what was missing or wrong ===== */
+  .sent-diff { margin-top: 10px; display: grid; gap: 5px; font-size: 15px; }
+  .sent-row { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+  .sent-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faded); }
+  .sent-words { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--ink); line-height: 1.4; }
+  .sent-wrong { color: var(--terracotta); text-decoration-thickness: 1.5px; }
+  .sent-missing { background: rgba(90, 107, 58, 0.18); color: var(--olive); font-weight: 600; padding: 0 3px; border-radius: 2px; }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
   @media (max-width: 1100px) {
     .container[data-view="setup"] { max-width: 660px; }
-    .mode-toggle.subject-toggle { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .mode-toggle.subject-toggle { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .subject-toggle .mode-option { white-space: normal; }
   }
 </style>
@@ -5808,7 +5816,10 @@
     io: 'I', lei: 'she, her / it — Lei: you (formal)', mia: 'my', tua: 'your', questa: 'this', questo: 'this', tutto: 'all, the whole',
     molto: 'very, a lot', quanto: 'how much', ancora: 'still, yet; again', solo: 'only', poi: 'then, afterwards', adesso: 'now',
     qui: 'here', fuori: 'outside', dentro: 'inside', dietro: 'behind', vicino: 'near (vicino a)', bene: 'well, properly', male: 'badly',
-    quando: 'when', 'sì': 'yes', qualcuno: 'someone', altro: 'other (altre: the others)', otto: 'eight', due: 'two', domani: 'tomorrow'
+    quando: 'when', 'sì': 'yes', qualcuno: 'someone', altro: 'other (altre: the others)', otto: 'eight', due: 'two', domani: 'tomorrow',
+    tu: 'you', lui: 'he, him', noi: 'we, us', voi: 'you (plural)', loro: 'they, them', mio: 'my', miei: 'my (plural)', mie: 'my (plural)',
+    ogni: 'every, each', sotto: 'under', dove: 'where', "dov'": 'where', 'perché': 'why, because', stasera: 'this evening, tonight',
+    molti: 'many, a lot of', molte: 'many, a lot of', "d'": 'of, in (before a vowel)', sette: 'seven', dieci: 'ten'
   };
   const STORY_NAMES = {
     malpensa: 'Malpensa — Milan’s main airport', varese: 'Varese — the city at the foot of the valley',
@@ -6727,6 +6738,206 @@
     startMixedSession(list, { title: ch.title, subtitle: 'Il Mazzo · Parole del Racconto', doc: `Il Mazzo · ${ch.title}` });
   }
 
+  // ===== Scrittura: sentences to write in full =====
+  // Present-tense sentences built only from the deck's nouns, verbs, adjectives and
+  // phrases (plus small words: articles, prepositions, pronouns, numbers). You type
+  // the whole sentence — every article and preposition. Italian usually drops the
+  // subject pronoun, so it's optional (Bevo un caffè / Io bevo un caffè); English
+  // "you" says which one is meant, (tu) or (voi). The start-up check warns about
+  // any word that isn't in the deck, and the tests fail on it.
+  // Each entry: [level, person, Italian, English, other correct Italian, other correct English]
+  const SENTENCE_DATA = [
+    ['io-tu', 'io', 'Bevo un caffè.', "I'm having a coffee.", ['Prendo un caffè.'], ['I drink a coffee.', 'I am drinking a coffee.']],
+    ['io-tu', 'io', 'Mangio una mela.', "I'm eating an apple.", [], ['I eat an apple.']],
+    ['io-tu', 'io', 'Leggo un libro.', "I'm reading a book.", [], ['I read a book.']],
+    ['io-tu', 'io', 'Scrivo una lettera.', "I'm writing a letter.", [], ['I write a letter.']],
+    ['io-tu', 'io', 'Apro la finestra.', 'I open the window.', [], ["I'm opening the window."]],
+    ['io-tu', 'io', 'Chiudo la porta.', 'I close the door.', [], ["I'm closing the door.", 'I shut the door.']],
+    ['io-tu', 'io', 'Prendo il treno.', 'I take the train.', [], ["I'm taking the train.", 'I catch the train.']],
+    ['io-tu', 'io', "Aspetto l'autobus.", "I'm waiting for the bus.", [], ['I wait for the bus.']],
+    ['io-tu', 'io', 'Cerco le chiavi.', "I'm looking for the keys.", [], ['I look for the keys.']],
+    ['io-tu', 'io', 'Lavoro in ufficio.', 'I work in the office.', ["Lavoro nell'ufficio."], ['I work at the office.', 'I work in an office.']],
+    ['io-tu', 'io', 'Abito in una casa grande.', 'I live in a big house.', ['Abito in una grande casa.'], ['I live in a large house.']],
+    ['io-tu', 'io', 'Compro il pane.', "I'm buying bread.", ['Compro del pane.'], ['I buy bread.', 'I buy the bread.', "I'm buying the bread."]],
+    ['io-tu', 'tu', 'Parli italiano?', 'Do you speak Italian? (tu)', [], []],
+    ['io-tu', 'tu', 'Mangi la carne?', 'Do you eat meat? (tu)', [], []],
+    ['io-tu', 'tu', 'Bevi il vino?', 'Do you drink wine? (tu)', [], []],
+    ['io-tu', 'tu', 'Leggi il giornale?', 'Are you reading the newspaper? (tu)', [], ['Do you read the newspaper?']],
+    ['io-tu', 'tu', 'Dormi molto.', 'You sleep a lot. (tu)', [], []],
+    ['io-tu', 'tu', 'Cucini bene.', 'You cook well. (tu)', [], []],
+    ['io-tu', 'tu', 'Prendi un gelato?', 'Are you having an ice cream? (tu)', [], ['Will you have an ice cream?']],
+    ['io-tu', 'tu', 'Ascolti la musica.', "You're listening to music. (tu)", ['Ascolti musica.'], ['You listen to music.']],
+
+    ['lui-lei', 'lui', 'Il gatto dorme sul letto.', 'The cat is sleeping on the bed.', [], ['The cat sleeps on the bed.']],
+    ['lui-lei', 'lui', "Il cane beve l'acqua.", 'The dog is drinking the water.', [], ['The dog drinks the water.', 'The dog drinks water.', 'The dog is drinking water.']],
+    ['lui-lei', 'lui', 'Il bambino mangia il pane.', 'The child is eating the bread.', [], ['The child eats the bread.', 'The child eats bread.', 'The boy is eating the bread.']],
+    ['lui-lei', 'lui', 'Mia madre cucina la cena.', 'My mother is cooking dinner.', [], ['My mother cooks dinner.', 'My mother cooks the dinner.']],
+    ['lui-lei', 'lui', 'Mio padre legge il giornale.', 'My father is reading the newspaper.', [], ['My father reads the newspaper.']],
+    ['lui-lei', 'lui', 'Il treno parte alle otto.', 'The train leaves at eight.', [], ['The train departs at eight.', 'The train leaves at 8.']],
+    ['lui-lei', 'lui', 'La signora compra il pane.', 'The lady is buying bread.', [], ['The lady buys bread.', 'The lady buys the bread.']],
+    ['lui-lei', 'lui', 'Il ragazzo gioca a calcio.', 'The boy plays football.', [], ['The boy is playing football.', 'The boy plays soccer.']],
+    ['lui-lei', 'lui', 'La ragazza scrive un messaggio.', 'The girl is writing a message.', [], ['The girl writes a message.']],
+    ['lui-lei', 'lui', 'Lui parla con un amico.', "He's talking to a friend.", [], ['He is talking with a friend.', 'He talks to a friend.', 'He talks with a friend.']],
+    ['lui-lei', 'lei', 'Lei lavora in banca.', 'She works in a bank.', ['Lei lavora in una banca.'], ['She works at a bank.', 'She works at the bank.']],
+    ['lui-lei', 'lui', 'Il bambino ha un gatto.', 'The child has a cat.', [], ['The boy has a cat.']],
+    ['lui-lei', 'lui', 'La casa ha un giardino.', 'The house has a garden.', [], []],
+    ['lui-lei', 'lui', "L'aereo arriva domani.", 'The plane arrives tomorrow.', [], ['The plane is arriving tomorrow.']],
+    ['lui-lei', 'lui', 'Il cameriere porta il caffè.', 'The waiter brings the coffee.', [], ['The waiter is bringing the coffee.']],
+    ['lui-lei', 'lui', 'La nonna prepara una torta.', 'Grandma is making a cake.', [], ['Grandma makes a cake.', 'The grandmother is making a cake.', 'Grandma is preparing a cake.']],
+    ['lui-lei', 'lui', 'Mio fratello studia la storia.', 'My brother studies history.', [], ['My brother is studying history.']],
+    ['lui-lei', 'lui', 'Il negozio chiude alle sette.', 'The shop closes at seven.', [], ['The store closes at seven.', 'The shop closes at 7.']],
+    ['lui-lei', 'lui', 'Lui beve un bicchiere di latte.', 'He drinks a glass of milk.', [], ["He's drinking a glass of milk."]],
+    ['lui-lei', 'lui', 'Mia sorella guarda la televisione.', 'My sister is watching television.', [], ['My sister watches television.', 'My sister is watching TV.', 'My sister watches TV.']],
+
+    ['noi-voi-loro', 'noi', 'Mangiamo la pizza stasera.', "We're having pizza tonight.", ['Stasera mangiamo la pizza.'], ['We are eating pizza tonight.', "We're eating pizza tonight."]],
+    ['noi-voi-loro', 'noi', 'Andiamo al mare.', "We're going to the seaside.", [], ['We are going to the sea.', 'We go to the seaside.', "We're going to the beach."]],
+    ['noi-voi-loro', 'noi', "Prendiamo l'autobus.", 'We take the bus.', [], ["We're taking the bus.", 'We catch the bus.']],
+    ['noi-voi-loro', 'noi', 'Parliamo italiano.', 'We speak Italian.', [], ['We are speaking Italian.']],
+    ['noi-voi-loro', 'noi', 'Guardiamo un film.', "We're watching a film.", [], ['We are watching a movie.', 'We watch a film.']],
+    ['noi-voi-loro', 'noi', 'Facciamo colazione alle sette.', 'We have breakfast at seven.', [], ['We eat breakfast at seven.']],
+    ['noi-voi-loro', 'noi', 'Cerchiamo un ristorante.', "We're looking for a restaurant.", [], ['We look for a restaurant.']],
+    ['noi-voi-loro', 'voi', 'Bevete il vino?', 'Do you drink wine? (voi)', [], []],
+    ['noi-voi-loro', 'voi', 'Aprite la finestra.', "You're opening the window. (voi)", [], ['You open the window.']],
+    ['noi-voi-loro', 'voi', 'Lavorate molto.', 'You work a lot. (voi)', [], []],
+    ['noi-voi-loro', 'voi', 'Venite domani?', 'Are you coming tomorrow? (voi)', [], ['Will you come tomorrow?']],
+    ['noi-voi-loro', 'voi', 'Avete un cane?', 'Do you have a dog? (voi)', [], ['Have you got a dog?']],
+    ['noi-voi-loro', 'voi', 'Abitate in città?', 'Do you live in the city? (voi)', [], ['Do you live in town?']],
+    ['noi-voi-loro', 'loro', 'Loro abitano in una casa vecchia.', 'They live in an old house.', ['Loro abitano in una vecchia casa.'], []],
+    ['noi-voi-loro', 'loro', 'I bambini giocano in giardino.', 'The children are playing in the garden.', ['I bambini giocano nel giardino.'], ['The children play in the garden.', 'The kids are playing in the garden.']],
+    ['noi-voi-loro', 'loro', 'I miei amici arrivano stasera.', 'My friends are arriving tonight.', ['Stasera arrivano i miei amici.'], ['My friends arrive tonight.', 'My friends are arriving this evening.']],
+    ['noi-voi-loro', 'loro', 'I gatti dormono tutto il giorno.', 'The cats sleep all day.', [], ['Cats sleep all day.', 'The cats sleep the whole day.']],
+    ['noi-voi-loro', 'loro', 'Le mie sorelle vivono in città.', 'My sisters live in the city.', [], ['My sisters live in town.']],
+    ['noi-voi-loro', 'loro', 'I ragazzi parlano con la signora.', 'The boys are talking to the lady.', [], ['The boys talk to the lady.', 'The boys are talking with the lady.']],
+    ['noi-voi-loro', 'loro', 'Gli studenti leggono molti libri.', 'The students read a lot of books.', [], ['The students read many books.', 'Students read a lot of books.']],
+
+    ['com-e', 'lui', 'La casa è grande.', 'The house is big.', [], ['The house is large.']],
+    ['com-e', 'lui', 'Il caffè è caldo.', 'The coffee is hot.', [], []],
+    ['com-e', 'lui', "L'acqua è fredda.", 'The water is cold.', [], []],
+    ['com-e', 'lui', 'Il libro è nuovo.', 'The book is new.', [], []],
+    ['com-e', 'lui', 'La strada è lunga.', 'The road is long.', [], ['The street is long.']],
+    ['com-e', 'lui', 'La finestra è aperta.', 'The window is open.', [], []],
+    ['com-e', 'loro', 'I bambini sono stanchi.', 'The children are tired.', [], ['The kids are tired.']],
+    ['com-e', 'lui', 'Mia sorella è alta.', 'My sister is tall.', [], []],
+    ['com-e', 'lui', 'Il treno è pieno.', 'The train is full.', [], []],
+    ['com-e', 'lui', 'La città è bella.', 'The city is beautiful.', [], ['The city is lovely.']],
+    ['com-e', 'lui', 'Il giardino è piccolo ma bello.', 'The garden is small but beautiful.', [], ['The garden is small but lovely.', 'The garden is small but pretty.']],
+    ['com-e', 'io', 'Sono felice.', "I'm happy.", [], []],
+    ['com-e', 'noi', 'Siamo contenti.', "We're pleased.", ['Siamo contente.'], ["We're glad.", "We're happy."]],
+    ['com-e', 'tu', 'Sei stanco?', 'Are you tired? (tu)', ['Sei stanca?'], []],
+    ['com-e', 'loro', 'Le montagne sono alte.', 'The mountains are high.', [], ['The mountains are tall.']],
+
+    ['dove-quando', 'lui', 'Il gatto è sotto il tavolo.', 'The cat is under the table.', [], []],
+    ['dove-quando', 'loro', 'Le chiavi sono sul tavolo.', 'The keys are on the table.', [], []],
+    ['dove-quando', 'io', 'Vado a scuola ogni mattina.', 'I go to school every morning.', ['Ogni mattina vado a scuola.'], []],
+    ['dove-quando', 'noi', 'Torniamo a casa stasera.', "We're going back home tonight.", ['Stasera torniamo a casa.'], ["We're going home tonight.", 'We go back home tonight.']],
+    ['dove-quando', 'lui', 'Il cane dorme in cucina.', 'The dog sleeps in the kitchen.', ['Il cane dorme nella cucina.'], ['The dog is sleeping in the kitchen.']],
+    ['dove-quando', 'lui', 'Il negozio è vicino alla stazione.', 'The shop is near the station.', [], ['The store is near the station.', 'The shop is close to the station.']],
+    ['dove-quando', 'lui', 'Mia madre è in giardino.', 'My mother is in the garden.', ['Mia madre è nel giardino.'], []],
+    ['dove-quando', 'noi', "D'estate andiamo in montagna.", 'In summer we go to the mountains.', ['In estate andiamo in montagna.', "Andiamo in montagna d'estate."], ['In the summer we go to the mountains.', 'We go to the mountains in summer.']],
+    ['dove-quando', 'io', 'La sera leggo un libro.', 'In the evening I read a book.', ['Di sera leggo un libro.'], ['I read a book in the evening.']],
+    ['dove-quando', 'lui', 'Il treno arriva alle dieci.', 'The train arrives at ten.', [], ['The train arrives at 10.']],
+    ['dove-quando', 'io', 'La mattina bevo un caffè.', 'In the morning I drink a coffee.', ['Di mattina bevo un caffè.', 'La mattina prendo un caffè.'], ['I drink a coffee in the morning.', 'In the morning I have a coffee.']],
+    ['dove-quando', 'lui', 'Il bar è in piazza.', 'The café is in the square.', ['Il bar è nella piazza.'], ['The bar is in the square.']],
+    ['dove-quando', 'io', 'Abito vicino al lago.', 'I live near the lake.', [], ['I live close to the lake.']],
+    ['dove-quando', 'noi', 'Mangiamo in cucina.', 'We eat in the kitchen.', ['Mangiamo nella cucina.'], ["We're eating in the kitchen."]],
+    ['dove-quando', 'lui', 'Il medico arriva domani.', 'The doctor is coming tomorrow.', [], ['The doctor arrives tomorrow.', 'The doctor comes tomorrow.']],
+
+    ['no-domande', 'io', 'Non mangio la carne.', "I don't eat meat.", ['Non mangio carne.'], []],
+    ['no-domande', 'io', 'Non capisco la domanda.', "I don't understand the question.", [], []],
+    ['no-domande', 'lui', 'Lui non beve il caffè.', "He doesn't drink coffee.", [], []],
+    ['no-domande', 'tu', 'Dove abiti?', 'Where do you live? (tu)', ['Tu dove abiti?', 'Dove abiti tu?'], []],
+    ['no-domande', 'lui', 'Quando parte il treno?', 'When does the train leave?', [], []],
+    ['no-domande', 'tu', 'Che cosa mangi?', 'What are you eating? (tu)', ['Cosa mangi?', 'Che mangi?'], ['What do you eat?']],
+    ['no-domande', 'tu', 'Perché non vieni?', "Why aren't you coming? (tu)", [], ["Why don't you come?"]],
+    ['no-domande', 'lui', 'Il negozio non apre la domenica.', "The shop doesn't open on Sundays.", [], ["The store doesn't open on Sundays.", "The shop doesn't open on Sunday."]],
+    ['no-domande', 'tu', 'Hai un fratello?', 'Do you have a brother? (tu)', [], ['Have you got a brother?']],
+    ['no-domande', 'lui', "Dov'è la stazione?", 'Where is the station?', ['Dove è la stazione?'], []]
+  ];
+  const SENTENCE_LEVELS = [
+    ['io-tu', 'Io e tu', 'I and you'], ['lui-lei', 'Lui e lei', 'He and she'], ['noi-voi-loro', 'Noi, voi, loro', 'We, you, they'],
+    ['com-e', "Com'è?", 'Describing things'], ['dove-quando', 'Dove e quando', 'Where and when'], ['no-domande', 'No e domande', 'Negatives and questions']
+  ];
+  const SUBJECT_PRONOUN = { io: 'Io', tu: 'Tu', noi: 'Noi', voi: 'Voi', lui: 'Lui', lei: 'Lei', loro: 'Loro' };
+  const sentenceKey = it => it.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  // Italian usually drops the subject pronoun: accept the sentence with or without it
+  function sentenceAccepted(person, it, alts) {
+    const all = [it, ...alts];
+    const out = new Set(all);
+    const pro = SUBJECT_PRONOUN[person];
+    for (const s of all) {
+      const m = /^(Io|Tu|Lui|Lei|Noi|Voi|Loro) (.*)$/.exec(s);
+      if (m) out.add(m[2].charAt(0).toUpperCase() + m[2].slice(1));
+      else if (pro && /^(Non )?[a-zàèéìòù]/i.test(s) && !/^(Il|Lo|La|L'|I|Gli|Le|Un|Una|Uno|Mio|Mia|Miei|Mie|Dove|Dov'|Quando|Che|Cosa|Perché|D'|In|Di|Ogni|Stasera) /i.test(s + ' ')) {
+        out.add(`${pro} ${s.charAt(0).toLowerCase()}${s.slice(1)}`);
+      }
+    }
+    return [...out];
+  }
+  const SENTENCE_ITEMS = SENTENCE_DATA.map(([level, person, it, en, alts, enAlts]) => {
+    const key = sentenceKey(it);
+    const itAll = sentenceAccepted(person, it, alts).filter(s => s !== it);
+    return { noun: key, display: it, it, en, level, note: null,
+             phrase: { key, it, en, itAlts: itAll, enAlts: enAlts.filter(x => x !== en), reg: 'neutral' } };
+  });
+  const SENTENCE_THEMES = SENTENCE_LEVELS.map(([key, label, en]) => ({ key, label, en, nouns: SENTENCE_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
+  const SENTENCE_ORDER = SENTENCE_ITEMS.map(n => n.noun);
+  // Words of a sentence and the deck cards they belong to (as in the story), with
+  // plurals found from their singular: i bambini → il bambino
+  const SENTENCE_CH = { senses: { vicino: 'fn:vicino' }, glossary: {} };   // vicino a: near, not the neighbour
+  function sentencePluralNoun(n, idx) {
+    const c = [];
+    if (/chi$/.test(n)) c.push(n.slice(0, -3) + 'co');
+    if (/ghi$/.test(n)) c.push(n.slice(0, -3) + 'go');
+    if (/che$/.test(n)) c.push(n.slice(0, -3) + 'ca');
+    if (/ghe$/.test(n)) c.push(n.slice(0, -3) + 'ga');
+    if (/ci$/.test(n)) c.push(n.slice(0, -2) + 'co', n.slice(0, -2) + 'cio');
+    if (/i$/.test(n)) c.push(n.slice(0, -1) + 'o', n.slice(0, -1) + 'e', n.slice(0, -1) + 'io', n.slice(0, -1) + 'a');
+    if (/e$/.test(n)) c.push(n.slice(0, -1) + 'a');
+    const hit = c.find(x => idx.noun.has(x));
+    return hit ? idx.noun.get(hit) : null;
+  }
+  // A wrong sentence, word by word: lined up with the closest correct version (a
+  // longest common subsequence), the missing words marked in the correct one and the
+  // wrong or extra ones struck through in yours. An elided article (l', un') is a word.
+  function sentenceWords(s) {
+    return String(s).replace(/[’‘]/g, "'").split(/\s+/).flatMap(w => w.replace(/'/g, "' ").split(' ')).filter(w => /[A-Za-zÀ-ÿ0-9]/.test(w));
+  }
+  const sentenceNorm = w => w.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9']/g, '');
+  function sentenceLCS(a, b) {
+    const m = a.length, n = b.length, L = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+    for (let i = m - 1; i >= 0; i--) for (let j = n - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    const inA = new Set(), inB = new Set();
+    for (let i = 0, j = 0; i < m && j < n;) {
+      if (a[i] === b[j]) { inA.add(i); inB.add(j); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++;
+    }
+    return { len: L[0][0], inA, inB };
+  }
+  function sentenceDiffHTML(raw, card) {
+    const g = sentenceWords(raw), gn = g.map(sentenceNorm);
+    let best = null;
+    for (const a of card.accepted) {
+      const w = sentenceWords(a), r = sentenceLCS(gn, w.map(sentenceNorm));
+      const score = r.len * 2 - Math.abs(w.length - g.length);
+      if (!best || score > best.score) best = { w, r, score };
+    }
+    // An elided word (l', un', d') joins the next one with no space
+    const join = (words, kept, cls, tag) => words.map((w, i) => {
+      const html = kept.has(i) ? escapeHTML(w) : `<${tag} class="${cls}">${escapeHTML(w)}</${tag}>`;
+      return i < words.length - 1 && !/'$/.test(w) ? `${html} ` : html;
+    }).join('');
+    const yours = join(g, best.r.inA, 'sent-wrong', 's'), right = join(best.w, best.r.inB, 'sent-missing', 'mark');
+    return `<div class="sent-diff"><div class="sent-row"><span class="sent-label">You wrote</span><span class="sent-words">${yours}</span></div>
+      <div class="sent-row"><span class="sent-label">Correct</span><span class="sent-words">${right}</span></div></div>`;
+  }
+  function sentenceSegments(text) {
+    const idx = storyIndex();
+    return storySegments(SENTENCE_CH, text).map(sg => {
+      if (!sg.unknown) return sg;
+      const ref = sentencePluralNoun(sg.text.toLowerCase(), idx);
+      return ref ? { text: sg.text, ref } : sg;
+    });
+  }
+
   (function validateSubjects() {
     function check(name, items, themes, order) {
       const keys = new Set(items.map(n => n.noun));
@@ -6757,6 +6968,13 @@
     check('adjectives', ADJ_ITEMS, ADJ_THEMES, ADJ_FREQUENCY_ORDER);
     check('phrases', PHRASE_ITEMS, PHRASE_THEMES, PHRASE_ORDER);
     check('story', STORY_ITEMS, STORY_THEMES, STORY_ORDER);
+    check('sentences', SENTENCE_ITEMS, SENTENCE_THEMES, SENTENCE_ORDER);
+    // Every word of every sentence is in the deck (or a small word), and the keys are unique
+    for (const n of SENTENCE_ITEMS) {
+      const unknown = sentenceSegments(n.it).filter(sg => sg.unknown).map(sg => sg.text);
+      if (unknown.length) console.warn(`[sentences] "${n.it}": words not in the deck:`, unknown);
+    }
+    if (new Set(SENTENCE_ITEMS.map(n => n.noun)).size !== SENTENCE_ITEMS.length) console.warn('[sentences] two sentences share a key');
     for (const ch of STORY_CHAPTERS) {
       const unknown = [];
       for (const para of ch.paragraphs) for (const [it] of para) for (const sg of storySegments(ch, it)) if (sg.unknown) unknown.push(sg.text);
@@ -6847,6 +7065,17 @@
       statsKeys: { 'en-it': 'frasi-stats-v1', 'it-en': 'frasi-stats-iten-v1', listen: 'frasi-stats-listen-v1' }, statsFormat: 'noun',
       assocKey: 'frasi-assoc-v1'
     },
+    // Sentences to write in full, from the deck's own words
+    sentences: {
+      kind: 'phrase', sentences: true, panel: null, doneWord: 'sentences', chipOrder: 'level',   // the grid keeps the levels' order
+      switchLabel: 'Scrittura', title: 'Scrittura', subtitle: 'Il Mazzo · Frasi da Comporre',
+      setupTitle: 'Choose your sentences',
+      setupSub: 'Present-tense sentences built from the nouns, verbs and adjectives in your deck. Write each one in full — every article, every preposition. The subject pronoun is optional, as in Italian; punctuation and accents don\'t matter.',
+      itemWord: 'sentence', itemWords: 'sentences',
+      items: SENTENCE_ITEMS, themes: SENTENCE_THEMES, frequency: SENTENCE_ORDER,
+      statsKeys: { 'en-it': 'scrittura-stats-v1', 'it-en': 'scrittura-stats-iten-v1', listen: 'scrittura-stats-listen-v1' }, statsFormat: 'noun',
+      assocKey: 'scrittura-assoc-v1'
+    },
     // The story: its setup screen is the map and the chapters; its items are the words
     // the story teaches, drilled like phrases in Ripasso and chapter practice
     story: {
@@ -6873,6 +7102,7 @@
     // As in the original game, every adjective starts selected
     adjectives: { selected: new Set(ADJ_ITEMS.map(n => n.noun)), capValue: '', capMode: 'random', direction: 'en-it' },
     phrases: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
+    sentences: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     story: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' }
   };
   let subject = null;
@@ -6910,7 +7140,7 @@
   // ===== Ripasso del giorno =====
   const RIPASSO_DIR_KEY = 'mazzo-ripasso-dir';
   const REVIEW_START = 30;   // cards in play at the start; Deck size reaches the rest
-  const REVIEW_LABEL = { nouns: 'noun', verbs: 'regular verb', irregular: 'irregular verb', adjectives: 'adjective', phrases: 'phrase', story: 'story word' };
+  const REVIEW_LABEL = { nouns: 'noun', verbs: 'regular verb', irregular: 'irregular verb', adjectives: 'adjective', phrases: 'phrase', sentences: 'sentence', story: 'story word' };
   let ripassoDir = 'en-it';
   try { const d = localStorage.getItem(RIPASSO_DIR_KEY); if (DIR_LABELS[d]) ripassoDir = d; } catch (e) { /* default */ }
 
@@ -8693,6 +8923,10 @@
         if (raw.trim() === '') main = `Skipped — the answer is <strong>${answer}</strong>${pron}`;
         else if (result.reason === 'wrong-pronoun') main = `✗ Wrong pronoun — should be <strong>${card.pronounLabel} ${answer}</strong>${pron}`;
         else main = `✗ Not quite — the answer is <strong>${answer}</strong>${pron}`;
+      } else if (SUBJECTS[subject].sentences && !itToEn && raw.trim() !== '') {
+        main = `✗ Not quite — the sentence is <strong>${card.italian}</strong>${sentenceDiffHTML(raw, card)}`;
+      } else if (SUBJECTS[subject].sentences && !itToEn) {
+        main = `Skipped — the sentence is <strong>${card.italian}</strong>`;
       } else if (isPhraseSubject() && !itToEn) {
         main = raw.trim() === ''
           ? `Skipped — the phrase is <strong>${card.italian}</strong>`

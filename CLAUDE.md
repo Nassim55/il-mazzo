@@ -31,6 +31,12 @@ If a suite fails, fix the cause; never weaken a test to make it pass unless the 
 - Frequency rankings blend written (wordfreq) and spoken (OpenSubtitles) counts, weighted by part-of-speech share in the Italian UD treebanks; method notes sit beside each data block.
 - Layout must work from desktop down to 320px phones with no sideways scroll.
 
+## Sentences (*Scrittura*)
+
+- `SENTENCE_DATA`: `[level, person, Italian, English, other correct Italian, other correct English]`. Present tense only (until the user says otherwise); every word must be in the deck or a small word in `STORY_FN` — the start-up check warns otherwise, and the tests fail. Plurals resolve to their singular card (`sentencePluralNoun`); give a word a sense in `SENTENCE_CH.senses` when it could be read two ways.
+- The subject pronoun is accepted with or without automatically (`sentenceAccepted`); list other genuinely correct Italian as alternatives. Write English that allows only one Italian answer, and mark every "you" as (tu) or (voi).
+- Keys are slugs of the Italian (`sentenceKey`), so editing a sentence's Italian starts its history afresh.
+
 ## Story chapters (*La casa di pietra*)
 
 - Present tense only, until the user says they're ready for other tenses. First person: the narrator is the reader. Invented characters only.
