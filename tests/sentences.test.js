@@ -57,6 +57,30 @@ ev("direction = 'it-en'");
 ok(play('mangi-la-carne', 'You eat the meat?').right && play('mangi-la-carne', 'Do you eat meat?').right && play('lavoro-in-ufficio', 'I work in the office').right
    && play('quando-parte-il-treno', 'When does the train leave?').right, 'Italian → English, both the word-for-word and the natural English count');
 ev("direction = 'en-it'");
+// ---- The natural English, for the ones that don't translate well literally ----
+ok(ev('Object.keys(SENTENCE_NATURAL).every(it => SENTENCE_ITEMS.some(n => n.it === it))') && ev('SENTENCE_ITEMS.filter(n => n.natural).length') === ev('Object.keys(SENTENCE_NATURAL).length'),
+   `every natural translation belongs to a real sentence (${ev('Object.keys(SENTENCE_NATURAL).length')} of them)`);
+const card = (key, dir = 'en-it') => {
+  ev(`direction = ${JSON.stringify(dir)}; selectedNouns = new Set([${JSON.stringify(key)}]); updateReadout();`);
+  d.getElementById('start-btn').click();
+  const el = d.getElementById('natural-en');
+  const r = { shown: !el.hidden, text: el.textContent, prompt: d.getElementById('prompt').textContent };
+  d.getElementById('change-btn').click();
+  ev("direction = 'en-it'");
+  return r;
+};
+let c = card('mangi-la-carne');
+ok(c.shown && c.prompt === 'You eat the meat? (tu)' && /in natural English/i.test(c.text) && /Do you eat meat\?/.test(c.text), 'under "You eat the meat? (tu)": in natural English, "Do you eat meat?"');
+c = card('quando-parte-il-treno');
+ok(c.shown && /When does the train leave\?/.test(c.text), 'under "When leaves the train?": "When does the train leave?"');
+ok(!card('apro-la-finestra').shown, 'a prompt that is already good English ("I open the window.") gets no second line');
+ok(!card('mangi-la-carne', 'it-en').shown && !card('mangi-la-carne', 'listen').shown, 'Italian → English and listening hide it — it would give the answer away');
+const N = boot({ 'flipcards-subject': 'nouns' });
+N.ev("selectedNouns = new Set(['casa']); updateReadout();"); N.d.getElementById('start-btn').click();
+ok(N.d.getElementById('natural-en').hidden, 'other sections\' cards never show it');
+ev("direction = 'it-en'");
+ok(play('i-gatti-dormono-tutto-il-giorno', 'The cats sleep all day').right, 'the natural English counts as an answer, Italian → English');
+ev("direction = 'en-it'");
 const t0 = ev('today()');
 const R = boot({ 'flipcards-subject': 'nouns', 'scrittura-stats-v1:srs': JSON.stringify({ 'il-cane-beve-l-acqua': { b: 1, d: t0, l: null } }) });
 ok(/1 sentence/.test(R.d.getElementById('ripasso').textContent), 'sentences come back in Ripasso del giorno');

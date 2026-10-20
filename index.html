@@ -1877,6 +1877,11 @@
   .sent-wrong { color: var(--terracotta); text-decoration-thickness: 1.5px; }
   .sent-missing { background: rgba(90, 107, 58, 0.18); color: var(--olive); font-weight: 600; padding: 0 3px; border-radius: 2px; }
 
+  /* Scrittura: the natural English, under a word-for-word prompt */
+  .natural-en { margin: 6px auto 2px; max-width: 90%; text-align: center; font-family: 'DM Sans', sans-serif; font-size: 14.5px; line-height: 1.4; color: var(--ink-faded); }
+  .natural-en[hidden] { display: none; }
+  .natural-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
@@ -3426,7 +3431,7 @@
     if (isPhraseSubject()) {
       const p = n.phrase;
       return [{ key: p.key, noun: p.key, english: p.en, italian: p.it, accepted: [p.it, ...p.itAlts],
-                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null }];
+                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, natural: n.natural || null }];
     }
     if (isAdjSubject()) {
       const a = n.adj;
@@ -6860,6 +6865,65 @@
     ["no-domande", "tu", "Hai un fratello?", "You have a brother? (tu)", [], ["Do you have a brother? (tu)", "Have you got a brother?"]],
     ["no-domande", "lui", "Dov'è la stazione?", "Where is the station?", ["Dove è la stazione?"], []]
   ];
+  // Natural English, shown under the word-for-word prompt for the sentences that don't
+  // translate well literally (and accepted, Italian → English)
+  const SENTENCE_NATURAL = {
+    "Aspetto l'autobus.": "I'm waiting for the bus.",
+    "Cerco le chiavi.": "I'm looking for the keys.",
+    "Lavoro in ufficio.": "I work in an office.",
+    "Abito in una casa grande.": "I live in a big house.",
+    "Compro il pane.": "I'm buying bread.",
+    "Parli italiano?": "Do you speak Italian?",
+    "Mangi la carne?": "Do you eat meat?",
+    "Bevi il vino?": "Do you drink wine?",
+    "Leggi il giornale?": "Do you read the newspaper?",
+    "Dormi molto.": "You sleep a lot.",
+    "Prendi un gelato?": "Are you having an ice cream?",
+    "Ascolti la musica.": "You're listening to music.",
+    "Mia madre cucina la cena.": "My mother is cooking dinner.",
+    "Il treno parte alle otto.": "The train leaves at eight.",
+    "La signora compra il pane.": "The lady is buying bread.",
+    "Il ragazzo gioca a calcio.": "The boy plays football.",
+    "Lei lavora in banca.": "She works in a bank.",
+    "Mio fratello studia la storia.": "My brother studies history.",
+    "Il negozio chiude alle sette.": "The shop closes at seven.",
+    "Mia sorella guarda la televisione.": "My sister is watching TV.",
+    "Mangiamo la pizza stasera.": "We're having pizza tonight.",
+    "Andiamo al mare.": "We're going to the seaside.",
+    "Facciamo colazione alle sette.": "We have breakfast at seven.",
+    "Cerchiamo un ristorante.": "We're looking for a restaurant.",
+    "Bevete il vino?": "Do you drink wine?",
+    "Lavorate molto.": "You work a lot.",
+    "Venite domani?": "Are you coming tomorrow?",
+    "Avete un cane?": "Do you have a dog?",
+    "Abitate in città?": "Do you live in the city?",
+    "Loro abitano in una casa vecchia.": "They live in an old house.",
+    "I bambini giocano in giardino.": "The children are playing in the garden.",
+    "I miei amici arrivano stasera.": "My friends are arriving tonight.",
+    "I gatti dormono tutto il giorno.": "The cats sleep all day.",
+    "Le mie sorelle vivono in città.": "My sisters live in the city.",
+    "Sei stanco?": "Are you tired?",
+    "Torniamo a casa stasera.": "We're going home tonight.",
+    "Il cane dorme in cucina.": "The dog sleeps in the kitchen.",
+    "Il negozio è vicino alla stazione.": "The shop is near the station.",
+    "Mia madre è in giardino.": "My mother is in the garden.",
+    "D'estate andiamo in montagna.": "In summer we go to the mountains.",
+    "La sera leggo un libro.": "In the evening I read a book.",
+    "Il treno arriva alle dieci.": "The train arrives at ten.",
+    "La mattina bevo un caffè.": "In the morning I have a coffee.",
+    "Il bar è in piazza.": "The café is in the square.",
+    "Abito vicino al lago.": "I live near the lake.",
+    "Mangiamo in cucina.": "We eat in the kitchen.",
+    "Non mangio la carne.": "I don't eat meat.",
+    "Non capisco la domanda.": "I don't understand the question.",
+    "Lui non beve il caffè.": "He doesn't drink coffee.",
+    "Dove abiti?": "Where do you live?",
+    "Quando parte il treno?": "When does the train leave?",
+    "Che cosa mangi?": "What are you eating?",
+    "Perché non vieni?": "Why aren't you coming?",
+    "Il negozio non apre la domenica.": "The shop doesn't open on Sundays.",
+    "Hai un fratello?": "Do you have a brother?"
+  };
   const SENTENCE_LEVELS = [
     ['io-tu', 'Io e tu', 'I and you'], ['lui-lei', 'Lui e lei', 'He and she'], ['noi-voi-loro', 'Noi, voi, loro', 'We, you, they'],
     ['com-e', "Com'è?", 'Describing things'], ['dove-quando', 'Dove e quando', 'Where and when'], ['no-domande', 'No e domande', 'Negatives and questions']
@@ -6883,8 +6947,10 @@
   const SENTENCE_ITEMS = SENTENCE_DATA.map(([level, person, it, en, alts, enAlts]) => {
     const key = sentenceKey(it);
     const itAll = sentenceAccepted(person, it, alts).filter(s => s !== it);
-    return { noun: key, display: it, it, en, level, note: null,
-             phrase: { key, it, en, itAlts: itAll, enAlts: enAlts.filter(x => x !== en), reg: 'neutral' } };
+    const natural = SENTENCE_NATURAL[it] || null;
+    const enAll = [...new Set([...enAlts, ...(natural ? [natural] : [])])].filter(x => x !== en);
+    return { noun: key, display: it, it, en, level, note: null, natural,
+             phrase: { key, it, en, itAlts: itAll, enAlts: enAll, reg: 'neutral' } };
   });
   const SENTENCE_THEMES = SENTENCE_LEVELS.map(([key, label, en]) => ({ key, label, en, nouns: SENTENCE_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
   const SENTENCE_ORDER = SENTENCE_ITEMS.map(n => n.noun);
@@ -8602,6 +8668,7 @@
       <div class="card-corner card-section" id="card-section"></div>
       <div class="verb-meta" id="verb-meta" style="display: none"></div>
       <div class="prompt" id="prompt"></div>
+      <div class="natural-en" id="natural-en" hidden></div>
       <div class="pronoun-hint" id="pronoun-hint">+ articolo</div>
       <button type="button" class="card-speak" id="card-speak" aria-label="Hear the Italian" title="Hear the Italian" hidden>🔊</button>
     </div>
@@ -8794,6 +8861,8 @@
       showComplete();
       return;
     }
+    const natLine = document.getElementById('natural-en');
+    if (natLine) { natLine.hidden = true; natLine.innerHTML = ''; }
     const card = deck[index];
     if (card.subject) setCardContext(card.subject);   // mixed review: this card's section
     const itToEn = direction === 'it-en';
@@ -8820,6 +8889,12 @@
       const shown = itToEn ? card.italian : card.english;
       promptEl.textContent = shown;
       promptEl.classList.toggle('long', shown.length > 18);
+      // A word-for-word sentence that reads oddly: its natural English underneath
+      // (English → Italian only — the other ways round it would give the answer away)
+      const natEl = document.getElementById('natural-en');
+      const showNatural = !!card.natural && direction === 'en-it';
+      natEl.hidden = !showNatural;
+      natEl.innerHTML = showNatural ? `<span class="natural-label">in natural English</span> ${escapeHTML(card.natural)}` : '';
       metaEl.style.display = 'none';
       hintEl.style.display = '';
       hintEl.textContent = itToEn ? '→ in inglese' : '+ frase';
