@@ -44,14 +44,18 @@ const itEn = raw => { ev("direction = 'it-en'"); return play('bevo-un-caffe', ra
 ok(itEn("I'm having a coffee") && itEn('I am drinking a coffee') && itEn('i drink a coffee'), 'Italian → English: the English and its listed variants count');
 ev("direction = 'en-it'");
 ok(ev("SENTENCE_ITEMS.filter(n => /\\byou\\b/i.test(n.en)).every(n => /\\((tu|voi)\\)/.test(n.en))"), 'every English "you" says whether it means tu or voi');
-// ---- Literal English ----
+// ---- Word-for-word English ----
 const prompts = ev('SENTENCE_ITEMS.map(n => n.en)');
 ok(!prompts.some(e => /\b(am|is|are|'m|'re|'s)\s+\w+ing\b/i.test(e)), 'the English is always the simple present (Italian has one present tense): "I drink", never "I\'m drinking"');
-ok(prompts.every(e => (e.match(/\(([^)]*)\)/g) || []).every(b => ['(tu)', '(voi)', '(the)', '(a)'].includes(b))), 'brackets only ever mark (tu), (voi), or a word English needs that the Italian doesn\'t have');
-ok(ev("SENTENCE_ITEMS.find(n => n.noun === 'bevo-un-caffe').en") === 'I drink a coffee.' && ev("SENTENCE_ITEMS.find(n => n.noun === 'mangi-la-carne').en") === 'Do you eat the meat? (tu)'
-   && ev("SENTENCE_ITEMS.find(n => n.noun === 'lavoro-in-ufficio').en") === 'I work in (the) office.', 'literal prompts: I drink a coffee · Do you eat the meat? · I work in (the) office');
+ok(!prompts.some(e => /^(do|does)\b/i.test(e) || /\b(don't|doesn't|do not|does not)\b/i.test(e)), 'no do / does / don\'t, which Italian doesn\'t have: "You eat the meat?", "I not eat the meat"');
+ok(prompts.every(e => (e.match(/\(([^)]*)\)/g) || []).every(b => ['(tu)', '(voi)'].includes(b))), 'the only brackets left say (tu) or (voi)');
+const en = key => ev(`SENTENCE_ITEMS.find(n => n.noun === ${JSON.stringify(key)}).en`);
+ok(en('mangi-la-carne') === 'You eat the meat? (tu)' && en('non-mangio-la-carne') === 'I not eat the meat.' && en('quando-parte-il-treno') === 'When leaves the train?'
+   && en('lavoro-in-ufficio') === 'I work in office.' && en('le-mie-sorelle-vivono-in-citta') === 'The my sisters live in city.' && en('ascolti-la-musica') === 'You listen the music. (tu)',
+   'word for word, in the Italian\'s order: You eat the meat? · I not eat the meat · When leaves the train? · I work in office · The my sisters · You listen the music');
 ev("direction = 'it-en'");
-ok(play('lavoro-in-ufficio', 'I work in the office').right && play('lavoro-in-ufficio', 'I work in office').right && play('mangi-la-carne', 'Do you eat meat?').right, 'Italian → English, both the literal and the natural English count');
+ok(play('mangi-la-carne', 'You eat the meat?').right && play('mangi-la-carne', 'Do you eat meat?').right && play('lavoro-in-ufficio', 'I work in the office').right
+   && play('quando-parte-il-treno', 'When does the train leave?').right, 'Italian → English, both the word-for-word and the natural English count');
 ev("direction = 'en-it'");
 const t0 = ev('today()');
 const R = boot({ 'flipcards-subject': 'nouns', 'scrittura-stats-v1:srs': JSON.stringify({ 'il-cane-beve-l-acqua': { b: 1, d: t0, l: null } }) });
