@@ -38,7 +38,7 @@ The strip at the top of the setup screen shows what's due today in the chosen di
 
 ## Scrittura: writing whole sentences
 
-A hundred present-tense sentences, built only from the deck's own nouns, verbs, adjectives and phrases (plus small words: articles, prepositions, pronouns, numbers). You see the English and write the whole Italian sentence — every article, every preposition; nothing is filled in for you.
+A hundred present-tense sentences, built only from the deck's own nouns, verbs, adjectives and phrases (plus small words: articles, prepositions, pronouns, numbers). You see the English and write the whole Italian sentence — every article, every preposition; nothing is filled in for you. The English is as literal as English allows — the simple present, the Italian's own articles (*Do you eat the meat?*), idioms word for word (*plays at football*) — with (brackets) round words English needs that the Italian doesn't have (*I work in (the) office*: no article to write). The natural English still counts when translating into English.
 
 - **Six levels:** *Io e tu*, *Lui e lei*, *Noi, voi, loro*, *Com'è?* (describing things), *Dove e quando*, *No e domande*.
 - **What counts:** the subject pronoun is optional, as in Italian (*Bevo un caffè* or *Io bevo un caffè*); punctuation, accents and capitals don't matter; natural variants are listed (*nel giardino* / *in giardino*, *Stasera mangiamo la pizza*). English "you" always says whether it means *tu* or *voi*.
