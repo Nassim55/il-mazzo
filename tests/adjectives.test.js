@@ -6,15 +6,15 @@ const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => 
 ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Verbi regolari', 'Verbi irregolari', 'Aggettivi', 'Frasi', 'Scrittura', 'Racconto']), `section switch: ${labels.join(' | ')}`);
 d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 ok(ev('subject') === 'adjectives' && d.getElementById('app-title').textContent === 'Aggettivi' && d.title === 'Il Mazzo · Aggettivi', 'title and tab');
-ok(ev('selectedNouns.size') === 100 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('100 adjectives · 100 cards'), 'every adjective starts selected, as in the original (100 · 100 cards)');
+ok(ev('selectedNouns.size') === 150 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('150 adjectives · 150 cards'), 'every adjective starts selected, as in the original (now 150 · 150 cards)');
 ok(d.querySelector('.agreement-panel .endings-title')?.textContent === 'Le concordanze' && d.querySelector('.setup-side').children[1].id === 'weak-panel', 'Le concordanze panel with Da ripassare under it');
-ok(/1\/100 practised|3\/100 practised/.test(d.getElementById('setup-meta').textContent), 'original history shows in the stats strip');
+ok(/1\/150 practised|3\/150 practised/.test(d.getElementById('setup-meta').textContent), 'original history shows in the stats strip');
 const weakRows = [...d.querySelectorAll('#weak-panel .weak-it')].map(e => e.textContent);
 ok(JSON.stringify(weakRows) === JSON.stringify(['simpatico', 'grigio']), `Da ripassare ranks by error rate like the original Weakest (${weakRows.join(', ')})`);
 const chips = [...d.querySelectorAll('.theme-chip')].map(c => c.textContent.replace(/\s+/g, ' ').trim());
-ok(chips.length === 15 && chips.some(c => /^-chi · -ghi ?9$/.test(c)), `15 theme chips (11 original + 4 patterns): …${chips.slice(11).join(' | ')}`);
+ok(chips.length === 18 && chips.some(c => /^-chi · -ghi ?9$/.test(c)), `18 theme chips (11 original + 3 new + 4 patterns): …${chips.slice(11).join(' | ')}`);
 d.querySelector('#mode-toggle [data-mode="forms"]').click();
-ok(d.getElementById('card-count').textContent === '349', 'All forms: 349 cards for all 100');
+ok(d.getElementById('card-count').textContent === '511', 'All forms: 511 cards for all 150');
 // Dictionary mode game
 d.querySelector('#mode-toggle [data-mode="dictionary"]').click();
 d.getElementById('clear-all').click();
@@ -80,7 +80,7 @@ ok(JSON.stringify(ev('deck.map(c => c.noun).sort()')) === JSON.stringify(['grand
 // All 100 notes render
 ev("adjMode = 'dictionary'; selectedNouns = new Set(adjData.map(a => a.it)); sessionMaxDeck = null; sessionPool = null; startGame();");
 let notes = 0; for (let i = 0; i < ev('deck.length'); i++) { ev(`index = ${i}; render();`); d.getElementById('answer').value = 'x'; d.getElementById('submit').click(); const expected = ev(`ADJ_ITEMS.find(x => x.noun === deck[${i}].noun).note`).replace(/<[^>]+>/g, ''); if (d.querySelector('.feedback-note')?.textContent === expected) notes++; }
-ok(notes === 100, `all 100 adjective notes render (${notes})`);
+ok(notes === 150, `all 150 adjective notes render (${notes})`);
 // Other sections untouched; backups; reload
 d.getElementById('change-btn').click();
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();

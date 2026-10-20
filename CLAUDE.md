@@ -28,7 +28,7 @@ If a suite fails, fix the cause; never weaken a test to make it pass unless the 
 - Answers stay lenient where it doesn't matter (accents, punctuation, capitals) and strict where it does (articles for nouns, *tu*/*Lei* in phrases, pronouns for verbs).
 - History notes: accurate etymology, English cognates, links to other words in the deck, false friends flagged; say "uncertain"/"perhaps" when the origin is disputed.
 - Verb pronunciations: the syllabifier marks stress by rule; verbs with early or unusual stress need a `pronMap` entry (see `abitare`, `significare`, `creare`).
-- Frequency rankings blend written (wordfreq) and spoken (OpenSubtitles) counts, weighted by part-of-speech share in the Italian UD treebanks; method notes sit beside each data block.
+- Frequency rankings blend written (wordfreq) and spoken (OpenSubtitles) counts, weighted by part-of-speech share in the Italian UD treebanks; method notes sit beside each data block. The adjectives' first 100 are the user's original game (keep them first and unchanged — `adjectives-vs-original` checks); newer ones follow in `adjData` and in the themes, with history notes in `ADJ_NEW_NOTES`. Adding adjectives can change how story and sentence words resolve: compare every resolution before and after, and pin senses where needed (chapter 1's *solo* = only).
 - Layout must work from desktop down to 320px phones with no sideways scroll.
 
 ## Sentences (*Scrittura*)

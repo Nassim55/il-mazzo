@@ -9,7 +9,7 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 | Sostantivi | 831 nouns | the noun with its definite article (*il pane, lo zaino, l'acqua*) |
 | Verbi regolari | 150 verbs | present-tense conjugations, or just the infinitive |
 | Verbi irregolari | 50 verbs | the most common verbs that are irregular in the present |
-| Aggettivi | 100 adjectives | the dictionary form, or every gender and number |
+| Aggettivi | 150 adjectives | the dictionary form, or every gender and number |
 | Frasi | 50 phrases | everyday expressions, with *tu* and *Lei* forms kept distinct |
 | Scrittura | 100 sentences | present-tense sentences built from the deck's own words, written in full |
 | Racconto | 3 chapters | *La casa di pietra*, an illustrated story to read, plus the 30 words it teaches |
@@ -145,4 +145,4 @@ tests/
 
 ## Data
 
-Frequency rankings combine written Italian (wordfreq), spoken Italian (OpenSubtitles 2018 word counts) and the Italian Universal Dependencies treebanks, which are used to count only true noun, verb or adjective uses of each form. The phrases were chosen by cross-checking native teachers' and language publishers' lists of everyday Italian with research on spoken Italian. Notes on method sit beside each data block in `index.html`. The story and its illustrations are original to Il Mazzo.
+Frequency rankings combine written Italian (wordfreq), spoken Italian (OpenSubtitles 2018 word counts) and the Italian Universal Dependencies treebanks, which are used to count only true noun, verb or adjective uses of each form. The phrases were chosen by cross-checking native teachers' and language publishers' lists of everyday Italian with research on spoken Italian. Notes on method sit beside each data block in `index.html`. The adjectives' 101–150 are the 50 most common adjectives not in the original game, ranked like the verbs: a geometric-mean blend of written (wordfreq) and spoken (OpenSubtitles) frequency, weighted by adjective use in the UD treebanks. The story and its illustrations are original to Il Mazzo.

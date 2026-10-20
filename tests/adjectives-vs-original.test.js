@@ -8,7 +8,7 @@ n("applySubject('adjectives'); adjMode = 'dictionary'");
 let checks = 0; const diffs = [];
 const same = (a, b, what) => { checks++; if (JSON.stringify(a) !== JSON.stringify(b)) diffs.push(`${what}\n    old: ${JSON.stringify(a)}\n    new: ${JSON.stringify(b)}`); };
 const adjs = o('adjData.map(a => a.it)');
-same(adjs, n('adjData.map(a => a.it)'), 'adjective list');
+same(adjs, n('adjData.slice(0, 100).map(a => a.it)'), 'adjective list (the original 100 come first, unchanged)');   // 50 more follow, added Oct 2026
 o('selectedAdjs = new Set(adjData.map(a => a.it))');
 const oldDeck = o('buildDeck()');
 oldDeck.forEach((c, i) => {
@@ -27,7 +27,7 @@ oldDeck.forEach((c, i) => {
 });
 // Themes: the original 11 keep exactly their members
 const oldThemes = o('THEMES.map(t => [t.key, t.label, t.adjs])');
-for (const [k, label, members] of oldThemes) same([label, members], n(`(t => [t.label, t.nouns])(ADJ_THEMES.find(t => t.key === '${k}'))`), `theme ${k}`);
+for (const [k, label, members] of oldThemes) same([label, members], n(`(t => [t.label, t.nouns.slice(0, ${members.length})])(ADJ_THEMES.find(t => t.key === '${k}'))`), `theme ${k}`);   // its original members first; newer adjectives may follow
 // Weakest picks from identical history (distinct rates → deterministic)
 const hist = {}; adjs.slice(0, 15).forEach((a, i) => { hist[a] = { seen: 10 + i, wrong: (i * 7) % 9 + 1 }; });
 OLD.localStorage.setItem('aggettivi-stats-v1', JSON.stringify(hist)); NEW.localStorage.setItem('aggettivi-stats-v1', JSON.stringify(hist));
