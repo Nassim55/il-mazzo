@@ -1882,6 +1882,13 @@
   .natural-en[hidden] { display: none; }
   .natural-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
 
+  .sent-why { margin-top: 4px; }
+  .sent-why-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-family: 'DM Sans', sans-serif; font-size: 14.5px; line-height: 1.5; color: var(--ink-soft); }
+  .sent-why-list li { padding-left: 22px; position: relative; }
+  .sent-why-list li::before { content: '→'; position: absolute; left: 0; color: var(--gold); }
+  .sent-why-list em { font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--ink); }
+  .sent-why-list em.why-hit { font-weight: 600; color: var(--olive); background: rgba(107, 124, 63, 0.14); padding: 0 3px; border-radius: 2px; }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
@@ -3431,7 +3438,7 @@
     if (isPhraseSubject()) {
       const p = n.phrase;
       return [{ key: p.key, noun: p.key, english: p.en, italian: p.it, accepted: [p.it, ...p.itAlts],
-                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, natural: n.natural || null }];
+                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, natural: n.natural || null, person: n.person || null }];
     }
     if (isAdjSubject()) {
       const a = n.adj;
@@ -7118,7 +7125,7 @@
     const itAll = sentenceAccepted(person, it, alts).filter(s => s !== it);
     const natural = SENTENCE_NATURAL[it] || null;
     const enAll = [...new Set([...enAlts, ...(natural ? [natural] : [])])].filter(x => x !== en);
-    return { noun: key, display: it, it, en, level, note: null, natural,
+    return { noun: key, display: it, it, en, level, person, note: null, natural,
              phrase: { key, it, en, itAlts: itAll, enAlts: enAll, reg: 'neutral' } };
   });
   const SENTENCE_THEMES = SENTENCE_LEVELS.map(([key, label, en]) => ({ key, label, en, nouns: SENTENCE_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
@@ -7154,14 +7161,24 @@
     }
     return { len: L[0][0], inA, inB };
   }
-  function sentenceDiffHTML(raw, card) {
+  // The correct versions closest to the answer (most words in common), spelt-most-alike first
+  function sentenceCandidates(raw, card) {
     const g = sentenceWords(raw), gn = g.map(sentenceNorm);
-    let best = null;
-    for (const a of card.accepted) {
+    const all = card.accepted.map(a => {
       const w = sentenceWords(a), r = sentenceLCS(gn, w.map(sentenceNorm));
-      const score = r.len * 2 - Math.abs(w.length - g.length);
-      if (!best || score > best.score) best = { w, r, score };
-    }
+      return { w, r, g, primary: r.len * 2 - Math.abs(w.length - g.length), dist: sentEdit(gn.join(' '), w.map(sentenceNorm).join(' ')) };
+    });
+    const top = Math.max(...all.map(c => c.primary));
+    return all.filter(c => c.primary === top).sort((a, b) => a.dist - b.dist);
+  }
+  const sentenceBest = (raw, card) => sentenceCandidates(raw, card)[0];
+  function sentenceDiffHTML(raw, card) {
+    // Of the equally close versions, the first whose difference a rule explains — the
+    // comparison and the explanation always use the same one
+    const cands = sentenceCandidates(raw, card);
+    let best = cands[0], why = sentenceWhy(raw, card, best);
+    for (const c of cands.slice(1)) { if (why.length) break; const w2 = sentenceWhy(raw, card, c); if (w2.length) { best = c; why = w2; } }
+    const g = best.g;
     // An elided word (l', un', d') joins the next one with no space
     const join = (words, kept, cls, tag) => words.map((w, i) => {
       const html = kept.has(i) ? escapeHTML(w) : `<${tag} class="${cls}">${escapeHTML(w)}</${tag}>`;
@@ -7169,7 +7186,156 @@
     }).join('');
     const yours = join(g, best.r.inA, 'sent-wrong', 's'), right = join(best.w, best.r.inB, 'sent-missing', 'mark');
     return `<div class="sent-diff"><div class="sent-row"><span class="sent-label">You wrote</span><span class="sent-words">${yours}</span></div>
-      <div class="sent-row"><span class="sent-label">Correct</span><span class="sent-words">${right}</span></div></div>`;
+      <div class="sent-row"><span class="sent-label">Correct</span><span class="sent-words">${right}</span></div>
+      ${why.length ? `<div class="sent-row sent-why"><span class="sent-label">Why</span><ul class="sent-why-list">${why.map(x => `<li>${x}</li>`).join('')}</ul></div>` : ''}</div>`;
+  }
+  // ----- Why a sentence is wrong: the rule behind each mistake -----
+  // The answer is lined up with the closest correct version, word by word; each
+  // mismatch is looked up (every word links to its deck card) and, where a rule
+  // explains it, the rule is given: an adjective's ending agreeing with its noun, a
+  // verb's ending with its subject, the article for the noun, a preposition joining
+  // its article (su + il = sul), a noun's number, non before the verb, word order,
+  // spelling. At most three, so the feedback stays short.
+  const SENT_ART = { il: ['m', 's'], lo: ['m', 's'], "l'": [null, 's'], la: ['f', 's'], i: ['m', 'p'], gli: ['m', 'p'], le: ['f', 'p'], un: ['m', 's'], uno: ['m', 's'], una: ['f', 's'], "un'": ['f', 's'] };
+  const SENT_JOIN = {};
+  for (const [prep, short] of [['a', 'a'], ['di', 'de'], ['da', 'da'], ['in', 'ne'], ['su', 'su']]) {
+    for (const [art, end] of [['il', 'l'], ['lo', 'llo'], ["l'", "ll'"], ['la', 'lla'], ['i', 'i'], ['gli', 'gli'], ['le', 'lle']]) SENT_JOIN[short + end] = [prep, art];
+  }
+  const SENT_PERSON = { io: 'io', tu: 'tu', lui: 'lui / lei', lei: 'lui / lei', noi: 'noi', voi: 'voi', loro: 'loro' };
+  const SENT_PRONOUN = new Set(['io', 'tu', 'lui', 'lei', 'noi', 'voi', 'loro']);
+  const ADJ_SLOT_NAMES = { '4': ['msg', 'fsg', 'mpl', 'fpl'], '2': ['sg', 'pl'], inv: ['all'] };
+  const SLOT_SAYS = { msg: 'masculine singular', fsg: 'feminine singular', mpl: 'masculine plural', fpl: 'feminine plural', sg: 'singular', pl: 'plural' };
+  const em = s => `<em>${escapeHTML(s)}</em>`;
+  // A word's forms, the right one marked: bello · <bella> · belli · belle
+  const emForms = (forms, right) => forms.map(f => (sentenceNorm(f) === right ? `<em class="why-hit">${escapeHTML(f)}</em>` : em(f))).join(' · ');
+  function sentWordInfo(word, prev) {
+    const n = sentenceNorm(word), idx = storyIndex();
+    if (own(SENT_ART, n)) return { kind: 'art', n };
+    if (own(SENT_JOIN, n)) return { kind: 'join', n };
+    let r = storyResolveWord(SENTENCE_CH, word.replace(/[^A-Za-zÀ-ÿ']/g, ''), prev, idx);
+    if (!r.ref) { const p = sentencePluralNoun(n, idx); if (p) r = { ref: p }; }
+    if (!r.ref) return { kind: 'unknown', n };
+    const [k, key] = splitRef(r.ref);
+    if (k === 'adjectives') {
+      const a = adjData.find(x => x.it === key), forms = ADJ_FORMS[key] || [];
+      const i = forms.findIndex(f => sentenceNorm(f) === n);
+      return { kind: 'adj', n, key, adj: a, forms, slot: i >= 0 ? ADJ_SLOT_NAMES[a.type][i] : null };
+    }
+    if (k === 'verbs' || k === 'irregular') {
+      const v = [...verbData, ...irregularVerbData].find(x => x.it === key);
+      return { kind: 'verb', n, key, verb: v, persons: personOrder.filter(p => sentenceNorm(v.conj[p]) === n) };
+    }
+    if (k === 'nouns') {
+      const item = storyItem('nouns', key);
+      const same = /[àèéìòù]$|[^aeiouàèéìòù]$/.test(key);   // città, caffè, bar: the plural is the same word
+      return { kind: 'noun', n, key, g: item && item.g, plural: sentenceNorm(key) !== n || (same && /^(i|gli|le)$/.test(prev || '')), item };
+    }
+    return { kind: k, n, key };
+  }
+  // The noun an adjective agrees with, or a verb's subject: the nearest noun before, then after
+  function sentNearestNoun(infos, j) {
+    for (let k = j - 1; k >= 0; k--) if (infos[k].kind === 'noun') return k;
+    for (let k = j + 1; k < infos.length; k++) if (infos[k].kind === 'noun') return k;
+    return -1;
+  }
+  const SENT_POSSESSIVE = new Set(['mio', 'mia', 'miei', 'mie', 'tuo', 'tua', 'suo', 'sua']);
+  function sentNounPhrase(words, infos, k) {
+    let s = k;
+    while (s > 0 && k - s < 2 && (['art', 'join'].includes(infos[s - 1].kind) || SENT_POSSESSIVE.has(sentenceNorm(words[s - 1])))) s--;
+    return words.slice(s, k + 1).map((x, i, a) => (i < a.length - 1 && !/'$/.test(x) ? `${x} ` : x)).join('').replace(/[.?!,]$/, '').toLowerCase();
+  }
+  function sentenceWhy(raw, card, best = sentenceBest(raw, card)) {
+    const g = best.g, w = best.w, tn = w.map(sentenceNorm), gn = g.map(sentenceNorm);
+    const tInfo = w.map((x, j) => sentWordInfo(x, j > 0 ? tn[j - 1] : null));
+    const gInfo = g.map((x, i) => sentWordInfo(x, i > 0 ? gn[i - 1] : null));
+    const person = card.person || null;
+    const why = [];
+    const add = s => { if (why.length < 3 && !why.includes(s)) why.push(s); };
+    // Runs of unmatched words between matched ones: substitutions, missing, extra
+    const runs = [];
+    let run = { ins: [], del: [] };
+    for (let i = 0, j = 0; i < g.length || j < w.length;) {
+      if (i < g.length && j < w.length && best.r.inA.has(i) && best.r.inB.has(j)) { runs.push(run); run = { ins: [], del: [] }; i++; j++; }
+      else if (i < g.length && !best.r.inA.has(i)) { run.ins.push(i); i++; }
+      else if (j < w.length && !best.r.inB.has(j)) { run.del.push(j); j++; }
+      else { i += i < g.length ? 1 : 0; j += j < w.length ? 1 : 0; }
+    }
+    runs.push(run);
+    // Same words, another order
+    const sorted = a => [...a].sort().join(' ');
+    if (sorted(gn) === sorted(tn) && gn.join(' ') !== tn.join(' ')) {
+      const ni = gn.indexOf('non'), nt = tn.indexOf('non');
+      if (nt >= 0 && ni >= 0 && gn[ni + 1] !== tn[nt + 1]) add(`${em('non')} goes straight before the verb: ${em(w.slice(nt, nt + 2).join(' '))}.`);
+      else add(`The words are right — the order isn't. Italian says ${em(w.join(' ').replace(/' /g, "'"))}`);
+    }
+    for (const { ins, del } of runs) {
+      // A preposition and article written apart that join into one word (su il → sul)
+      for (const j of [...del]) {
+        if (tInfo[j].kind !== 'join') continue;
+        const [prep, art] = SENT_JOIN[tn[j]];
+        const at = ins.findIndex((i, k) => gn[i] === prep && ins[k + 1] === i + 1 && gn[i + 1] === art);
+        if (at >= 0) {
+          add(`${em(w[j])} = ${em(prep)} + ${em(art)}: these prepositions join the article into one word.`);
+          ins.splice(at, 2); del.splice(del.indexOf(j), 1);
+        }
+      }
+      const pairs = Math.min(ins.length, del.length);
+      for (let k = 0; k < pairs; k++) {
+        const i = ins[k], j = del[k], a = gInfo[i], b = tInfo[j], right = em(w[j].replace(/[.?!,]$/, '').toLowerCase()), wrong = em(g[i].toLowerCase());
+        if (b.kind === 'adj' && a.kind === 'adj' && a.key === b.key && b.slot) {
+          const nk = sentNearestNoun(tInfo, j);
+          const list = emForms(b.forms, tn[j]);
+          if (nk >= 0) {
+            const nounSays = b.adj.type === '2' ? (tInfo[nk].plural ? 'plural' : 'singular') : `${tInfo[nk].g === 'f' ? 'feminine' : 'masculine'} ${tInfo[nk].plural ? 'plural' : 'singular'}`;
+            add(`${right}, not ${wrong}: it agrees with ${em(sentNounPhrase(w, tInfo, nk))}, which is ${nounSays} — ${list}.`);
+          } else if (person) {
+            add(`${right}, not ${wrong}: the subject is ${em(person)}, so ${SLOT_SAYS[b.slot].replace(/^(masculine|feminine) /, '')} — ${list}.`);
+          }
+        } else if (b.kind === 'verb' && a.kind === 'verb' && a.key === b.key) {
+          const p = b.persons.includes(person) ? person : (person === 'lei' && b.persons.includes('lui') ? 'lui' : b.persons[0]);
+          const vk = sentNearestNoun(tInfo, j), pro = j > 0 && SENT_PRONOUN.has(tn[j - 1]) ? w[j - 1] : null;
+          const subject = pro || (['lui', 'lei', 'loro'].includes(person) && vk >= 0 ? sentNounPhrase(w, tInfo, vk) : person);
+          const was = a.persons.length ? ` (${wrong} is the ${a.persons.map(x => SENT_PERSON[x]).join(' / ')} form)` : '';
+          add(`${right}, not ${wrong}: the subject is ${em(subject)}, so the verb takes the ${SENT_PERSON[p]} form${was}. ${em(b.verb.it)}: ${emForms(personOrder.map(x => b.verb.conj[x]), tn[j])}.`);
+        } else if (b.kind === 'art' && a.kind === 'art') {
+          const next = tInfo[j + 1] && tInfo[j + 1].kind === 'noun' ? tInfo[j + 1] : null, noun = next ? em(sentNounPhrase(w, tInfo, j + 1)) : '';
+          const wrongGender = next && next.g && SENT_ART[gn[i]][0] && SENT_ART[gn[i]][0] !== next.g;
+          const rule = { "l'": 'goes before a vowel', lo: 'goes with masculine nouns starting with s + consonant, z, gn or ps', gli: 'goes with masculine plurals starting with a vowel, s + consonant or z',
+                         il: 'goes with masculine nouns starting with a consonant', i: 'goes with masculine plurals starting with a consonant', la: 'goes with feminine nouns', le: 'goes with feminine plurals',
+                         un: 'goes with masculine nouns', uno: 'goes with masculine nouns starting with s + consonant or z', una: 'goes with feminine nouns', "un'": 'goes with feminine nouns starting with a vowel' }[tn[j]];
+          if (wrongGender) add(`${right}, not ${wrong}: ${em(next.key)} is ${next.g === 'f' ? 'feminine' : 'masculine'}${noun ? ` — ${noun}` : ''}.`);
+          else add(`${right}, not ${wrong}: ${em(tn[j])} ${rule}${noun ? ` — ${noun}` : ''}.`);
+        } else if (['a', 'di', 'da', 'in', 'su'].includes(tn[j]) && own(SENT_JOIN, gn[i]) && SENT_JOIN[gn[i]][0] === tn[j]) {
+          const next = tInfo[j + 1] && tInfo[j + 1].kind === 'noun' ? em(sentNounPhrase(w, tInfo, j + 1)) : '';
+          add(`${right}, not ${wrong}: no article here — just ${em(tn[j])}${next ? `: ${em(tn[j])} ${next}` : ''}.`);
+        } else if (b.kind === 'join' && (a.kind === 'join' || own(SENT_JOIN, gn[i]) || ['a', 'di', 'da', 'in', 'su'].includes(gn[i]))) {
+          const [prep, art] = SENT_JOIN[tn[j]], next = tInfo[j + 1] && tInfo[j + 1].kind === 'noun' ? tInfo[j + 1] : null;
+          // The article's own reason: a vowel for l', s + consonant or z for lo / gli, else gender and number
+          const reason = !next ? '' : art === "l'" ? ` — ${em(next.key)} starts with a vowel`
+            : ['lo', 'gli'].includes(art) ? ` — ${em(next.n)} starts with s + consonant or z`
+            : next.g ? ` — ${em(next.key)} is ${next.g === 'f' ? 'feminine' : 'masculine'}${next.plural ? ' plural' : ''}` : '';
+          add(`${right}, not ${wrong}: ${em(tn[j])} = ${em(prep)} + ${em(art)}${reason}.`);
+        } else if (b.kind === 'noun' && a.kind === 'noun' && a.key === b.key && a.plural !== b.plural) {
+          add(`${right}, not ${wrong}: ${b.plural ? 'plural' : 'singular'} here — ${em(b.item ? b.item.it : b.key)}${b.plural ? `, plural ${right}` : ''}.`);
+        } else if (gn[i].length > 2 && sentEdit(gn[i], tn[j]) <= (tn[j].length > 5 ? 2 : 1)) {
+          add(`Spelling: ${right}.`);
+        }
+      }
+      // A missing article, or a missing non
+      for (const j of del.slice(pairs)) {
+        if (tInfo[j].kind === 'art' && tInfo[j + 1] && tInfo[j + 1].kind === 'noun') add(`Don't drop the article: ${em(sentNounPhrase(w, tInfo, j + 1))}.`);
+        else if (tInfo[j].kind === 'art' && tn[j + 1] && SENT_POSSESSIVE.has(tn[j + 1]) && tInfo[j + 2] && tInfo[j + 2].kind === 'noun')
+          add(`Don't drop the article: ${em(sentNounPhrase(w, tInfo, j + 2))} — possessives take the article in Italian (only a single family member goes without: ${em('mia madre')}).`);
+        else if (tn[j] === 'non') add(`${em('non')}, right before the verb, makes it negative.`);
+      }
+    }
+    return why;
+  }
+  function sentEdit(a, b) {
+    const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array(b.length).fill(0)]);
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    return d[a.length][b.length];
   }
   function sentenceSegments(text) {
     const idx = storyIndex();

@@ -81,6 +81,29 @@ ok(N.d.getElementById('natural-en').hidden, 'other sections\' cards never show i
 ev("direction = 'it-en'");
 ok(play('i-gatti-dormono-tutto-il-giorno', 'The cats sleep all day').right, 'the natural English counts as an answer, Italian → English');
 ev("direction = 'en-it'");
+// ---- Why it's wrong ----
+const why = (key, raw) => ev(`sentenceWhy(${JSON.stringify(raw)}, cardsForItem(SENTENCE_ITEMS.find(n => n.noun === ${JSON.stringify(key)}))[0])`).map(s => s.replace(/<[^>]+>/g, '').replace(/&#39;/g, "'")).join(' | ');
+ok(/bella, not bello: it agrees with la città, which is feminine singular — bello · bella · belli · belle/.test(why('la-citta-e-bella', 'La citta è bello')), 'an adjective\'s ending: it agrees with la città, feminine singular (bello · bella · belli · belle)');
+ok(/stanchi, not stanco: it agrees with i bambini, which is masculine plural/.test(why('i-bambini-sono-stanchi', 'I bambini sono stanco')) && /grande, not grandi: it agrees with la casa, which is singular — grande · grandi/.test(why('la-casa-e-grande', 'la casa e grandi')),
+   '…masculine plural (i bambini), and number only for two-form adjectives');
+ok(/stanco, not stanchi: the subject is tu, so singular/.test(why('sei-stanco', 'sei stanchi')), '…or with the subject, when there\'s no noun (tu: singular)');
+ok(/beve, not bevi: the subject is il cane, so the verb takes the lui \/ lei form \(bevi is the tu form\)\. bere: bevo · bevi · beve · beviamo · bevete · bevono/.test(why('il-cane-beve-l-acqua', 'il cane bevi l acqua')),
+   'a verb\'s ending: the subject (il cane), the form it takes, the form written, and all six');
+ok(/the subject is mia madre/.test(why('mia-madre-cucina-la-cena', 'mia madre cucino la cena')) && /the subject is le mie sorelle, so the verb takes the loro form/.test(why('le-mie-sorelle-vivono-in-citta', 'le mie sorelle vive in città')),
+   '…naming the subject with its possessive (mia madre, le mie sorelle)');
+ok(/l', not la: l' goes before a vowel — l'acqua/.test(why('il-cane-beve-l-acqua', 'il cane beve la acqua')) && /un, not una: messaggio is masculine — un messaggio/.test(why('la-ragazza-scrive-un-messaggio', 'la ragazza scrive una messaggio'))
+   && /gli, not i: gli goes with masculine plurals starting with a vowel, s \+ consonant or z — gli studenti/.test(why('gli-studenti-leggono-molti-libri', 'i studenti leggono molti libri')), 'articles: the vowel rule, gender, and gli');
+ok(/Don't drop the article: l'acqua/.test(why('il-cane-beve-l-acqua', 'il cane beve acqua')), 'a missing article');
+ok(/sul = su \+ il: these prepositions join the article into one word/.test(why('il-gatto-dorme-sul-letto', 'il gatto dorme su il letto')) && /nella, not nel: nella = in \+ la — cucina is feminine/.test(why('il-cane-dorme-in-cucina', 'il cane dorme nel cucina'))
+   && /nell', not nel: nell' = in \+ l' — ufficio starts with a vowel/.test(why('lavoro-in-ufficio', 'lavoro nel ufficio')), 'prepositions joining their article (sul = su + il), with the article\'s own reason');
+ok(/chiavi, not chiave: plural here — la chiave, plural chiavi/.test(why('cerco-le-chiavi', 'cerco le chiave')), 'a noun\'s number');
+ok(/non goes straight before the verb: non mangio/i.test(why('non-mangio-la-carne', 'mangio non la carne')) && /Spelling: libro/.test(why('il-libro-e-nuovo', 'il libbro è nuovo')), 'where non goes, and spelling');
+ok(/Don't drop the article: i miei amici — possessives take the article in Italian \(only a single family member goes without: mia madre\)/.test(why('i-miei-amici-arrivano-stasera', 'miei amici arrivano stasera')),
+   'a possessive takes the article (i miei amici) — only a single family member goes without');
+ok(/la, not i: sera is feminine/.test(ev("(() => { const c = cardsForItem(SENTENCE_ITEMS.find(n => n.noun === 'la-sera-leggo-un-libro'))[0]; return sentenceDiffHTML('i sera leggo un libro', c).replace(/<[^>]+>/g, ''); })()")),
+   'of equally close correct versions (La sera · Di sera), the one whose difference a rule explains');
+const wr = play('la-citta-e-bella', 'La citta è bello');
+ok(/<span class="sent-label">Why<\/span>/.test(wr.html) && /feminine singular/.test(wr.text), 'it shows under "Why" in the feedback');
 const t0 = ev('today()');
 const R = boot({ 'flipcards-subject': 'nouns', 'scrittura-stats-v1:srs': JSON.stringify({ 'il-cane-beve-l-acqua': { b: 1, d: t0, l: null } }) });
 ok(/1 sentence/.test(R.d.getElementById('ripasso').textContent), 'sentences come back in Ripasso del giorno');

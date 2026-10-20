@@ -43,6 +43,7 @@ A hundred present-tense sentences, built only from the deck's own nouns, verbs, 
 - **Six levels:** *Io e tu*, *Lui e lei*, *Noi, voi, loro*, *Com'è?* (describing things), *Dove e quando*, *No e domande*.
 - **What counts:** the subject pronoun is optional, as in Italian (*Bevo un caffè* or *Io bevo un caffè*); punctuation, accents and capitals don't matter; natural variants are listed (*nel giardino* / *in giardino*, *Stasera mangiamo la pizza*). English "you" always says whether it means *tu* or *voi*.
 - **Word-by-word feedback:** a wrong answer is lined up with the closest correct version — the wrong or extra words struck through in yours, the missing ones highlighted in the correct one (a missing *l'* shows as a missing *l'*).
+- **Why it's wrong:** under the comparison, the rule behind each mistake — an adjective agreeing with its noun (*bella*: it agrees with *la città*, feminine singular), a verb with its subject (*beve*: the subject is *il cane*, the lui/lei form, with all six forms), the article for the noun (*l'* before a vowel), a preposition joining its article (*sul* = *su* + *il*), a noun's number, where *non* goes, word order, spelling.
 - Sentences come back in Ripasso del giorno and sync like everything else.
 
 ## Racconto: *La casa di pietra*
