@@ -50,7 +50,13 @@ const play = (key, raw, dir = 'en-it') => {
   return r;
 };
 let r = play('del-libro', 'del libro');
-ok(r.right && r.mech && /^di \+ il libro$/.test(r.shown) && /In English of the book/.test(r.note), 'a fusion drill: di + il libro (the + in gold); del libro; the English after');
+ok(r.right && r.shown === 'of the book' && /In una parola di \+ il libro → del libro/.test(r.note),
+   'a fusion drill, English → Italian like every card: of the book → del libro; the pieces after (di + il libro → del libro)');
+ok(ev("PREP_ITEMS.filter(n => n.mech).every(n => !/\\+/.test(n.en))") && new Set(ev('PREP_ITEMS.map(n => n.en.toLowerCase())')).size === ev('PREP_ITEMS.length'),
+   'every English prompt is English, and no two cards share one — (m.) and (f.) where the English could be either (to the friend\'s)');
+r = play('del-pane', "del'pane");
+ok(!r.right && /del, not del': no apostrophe here — it stands for a dropped vowel, and only before another vowel/.test(r.why) && play('dell-amico', 'dell amico').right,
+   "an apostrophe Italian doesn't have is wrong (del'pane), with the reason; a missing one is forgiven (dell amico)");
 ok(!/\.prompt\.mech\s*\{[^}]*font/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8')), "fusion drills use the cards' usual face, like every other prompt");
 ok(play('dell-amico', 'dell amico').right && play('dell-amico', "dell'amico").right && play('della-citta', 'della citta').right, "apostrophes and accents are forgiven (dell amico, della citta)");
 ok(/del = di \+ il: these prepositions join the article into one word/.test(play('del-libro', 'di il libro').why), 'why: di il libro — they join into one word');

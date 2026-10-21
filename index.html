@@ -1900,7 +1900,7 @@
   .type-key em { font-family: 'Cormorant Garamond', serif; font-size: 16px; color: var(--ink-soft); }
   .literal-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
 
-  /* Preposizioni: fusion drills in the cards' own face, the + in gold; grouped chips; the table */
+  /* Preposizioni: the + in gold (a fusion drill's pieces, after answering); grouped chips; the table */
   .mech-plus { color: var(--gold); margin: 0 0.1em; }
   .theme-chips.grouped { display: grid; gap: 10px; }
   .theme-group { display: grid; grid-template-columns: 128px minmax(0, 1fr); align-items: start; gap: 8px; }
@@ -5854,13 +5854,20 @@
     for (const [re, to] of EN_CONTRACTIONS) t = t.replace(re, to);
     return t.replace(/[^a-z0-9]+/g, '');
   }
+  // An apostrophe stands for a dropped vowel: a missing one is forgiven (dell amico), one
+  // Italian doesn't have is not (del'pane, un'amico)
+  const phraseElided = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’‘`´]/g, "'").match(/[a-z]+'/g) || [];
+  function phraseElisionOk(guess, answer) {
+    const have = phraseElided(answer);
+    return phraseElided(guess).every(e => { const i = have.indexOf(e); if (i < 0) return false; have.splice(i, 1); return true; });
+  }
   function checkPhraseAnswer(rawGuess, card, itToEn) {
     if (itToEn) {
       const g = normPhraseEn(rawGuess);
       return { correct: g !== '' && card.englishAll.some(e => normPhraseEn(e) === g) };
     }
     const g = normPhraseIt(rawGuess);
-    const match = card.accepted.find(a => normPhraseIt(a) === g);
+    const match = card.accepted.find(a => normPhraseIt(a) === g && phraseElisionOk(rawGuess, a));
     return { correct: g !== '' && !!match, match };
   }
 
@@ -7399,7 +7406,7 @@
     ["di-art", null, "del cane", "of the dog", [], [], "di + il cane", null],
     ["di-art", null, "dello zucchero", "of the sugar", [], [], "di + lo zucchero", null],
     ["di-art", null, "dello studente", "of the student", [], [], "di + lo studente", null],
-    ["di-art", null, "dell'amico", "of the friend", [], [], "di + l'amico", null],
+    ["di-art", null, "dell'amico", "of the friend (m.)", [], [], "di + l'amico", null],
     ["di-art", null, "dell'albero", "of the tree", [], [], "di + l'albero", null],
     ["di-art", null, "dell'acqua", "of the water", [], [], "di + l'acqua", null],
     ["di-art", null, "della casa", "of the house", [], [], "di + la casa", null],
@@ -7407,7 +7414,7 @@
     ["di-art", null, "dei ragazzi", "of the boys", [], [], "di + i ragazzi", null],
     ["di-art", null, "dei libri", "of the books", [], [], "di + i libri", null],
     ["di-art", null, "degli studenti", "of the students", [], [], "di + gli studenti", null],
-    ["di-art", null, "degli amici", "of the friends", [], [], "di + gli amici", null],
+    ["di-art", null, "degli amici", "of the friends (m.)", [], [], "di + gli amici", null],
     ["di-art", null, "delle case", "of the houses", [], [], "di + le case", null],
     ["di-art", null, "del pane", "of the bread", [], [], "di + il pane", null],
     ["di-art", null, "del mare", "of the sea", [], [], "di + il mare", null],
@@ -7422,28 +7429,28 @@
     ["a-art", null, "al mare", "to the sea", [], ["at the sea", "to the seaside", "at the seaside"], "a + il mare", null],
     ["a-art", null, "allo stadio", "to the stadium", [], ["at the stadium"], "a + lo stadio", null],
     ["a-art", null, "allo zio", "to the uncle", [], [], "a + lo zio", null],
-    ["a-art", null, "all'amico", "to the friend", [], [], "a + l'amico", null],
+    ["a-art", null, "all'amico", "to the friend (m.)", [], [], "a + l'amico", null],
     ["a-art", null, "all'aeroporto", "to the airport", [], ["at the airport"], "a + l'aeroporto", null],
     ["a-art", null, "alla stazione", "to the station", [], ["at the station"], "a + la stazione", null],
     ["a-art", null, "alla nonna", "to the grandmother", [], ["to grandma"], "a + la nonna", null],
     ["a-art", null, "ai bambini", "to the children", [], [], "a + i bambini", null],
-    ["a-art", null, "agli amici", "to the friends", [], [], "a + gli amici", null],
+    ["a-art", null, "agli amici", "to the friends (m.)", [], [], "a + gli amici", null],
     ["a-art", null, "alle ragazze", "to the girls", [], [], "a + le ragazze", null],
 
     ["da-art", null, "dal medico", "to the doctor's", [], ["at the doctor's", "from the doctor"], "da + il medico", null],
     ["da-art", null, "dal treno", "from the train", [], ["off the train"], "da + il treno", null],
     ["da-art", null, "dallo zio", "to the uncle's", [], ["at the uncle's", "from the uncle"], "da + lo zio", null],
     ["da-art", null, "dallo specchio", "from the mirror", [], [], "da + lo specchio", null],
-    ["da-art", null, "dall'amico", "to the friend's", [], ["at the friend's", "from the friend"], "da + l'amico", null],
+    ["da-art", null, "dall'amico", "to the friend's (m.)", [], ["at the friend's", "from the friend"], "da + l'amico", null],
     ["da-art", null, "dall'aeroporto", "from the airport", [], [], "da + l'aeroporto", null],
-    ["da-art", null, "dall'amica", "to the friend's", [], ["at the friend's", "from the friend"], "da + l'amica", null],
+    ["da-art", null, "dall'amica", "to the friend's (f.)", [], ["at the friend's", "from the friend"], "da + l'amica", null],
     ["da-art", null, "dalla nonna", "to grandma's", [], ["at grandma's", "to the grandmother's", "at the grandmother's", "from the grandmother"], "da + la nonna", null],
     ["da-art", null, "dalla finestra", "from the window", [], ["out of the window"], "da + la finestra", null],
     ["da-art", null, "dai nonni", "to the grandparents'", [], ["at the grandparents'", "from the grandparents"], "da + i nonni", null],
     ["da-art", null, "dai genitori", "to the parents'", [], ["at the parents'", "from the parents"], "da + i genitori", null],
-    ["da-art", null, "dagli amici", "to the friends'", [], ["at the friends'", "from the friends"], "da + gli amici", null],
+    ["da-art", null, "dagli amici", "to the friends' (m.)", [], ["at the friends'", "from the friends"], "da + gli amici", null],
     ["da-art", null, "dalle montagne", "from the mountains", [], [], "da + le montagne", null],
-    ["da-art", null, "dalle amiche", "to the friends'", [], ["at the friends'", "from the friends"], "da + le amiche", null],
+    ["da-art", null, "dalle amiche", "to the friends' (f.)", [], ["at the friends'", "from the friends"], "da + le amiche", null],
     ["da-art", null, "dal bar", "from the bar", [], [], "da + il bar", null],
     ["da-art", null, "dal centro", "from the centre", [], ["from the center"], "da + il centro", null],
     ["da-art", null, "dallo stadio", "from the stadium", [], [], "da + lo stadio", null],
@@ -7510,7 +7517,7 @@
     ["da-persona", "io", "Sono dal medico.", "I'm at the doctor's.", [], [], null, null],
     ["da-persona", "io", "Vado dallo zio.", "I go to my uncle's.", ["Vado da mio zio."], ["I go to the uncle's.", "I'm going to my uncle's."], null, null],
     ["da-persona", "noi", "Mangiamo dalla nonna.", "We eat at grandma's.", [], ["We eat at the grandmother's.", "We eat at our grandmother's.", "We're eating at grandma's."], null, null],
-    ["da-persona", "io", "Dormo da un'amica.", "I sleep at a friend's.", ["Dormo da una amica."], ["I'm sleeping at a friend's."], null, null],
+    ["da-persona", "io", "Dormo da un'amica.", "I sleep at a friend's (f.).", ["Dormo da una amica."], ["I'm sleeping at a friend's."], null, null],
     ["da-persona", "loro", "Vengono da me.", "They come to my place.", [], ["They're coming to my place.", "They come to my house."], null, "with a pronoun, <em>da</em> has nothing to join: <em>da me</em>, <em>da te</em>, <em>da noi</em> — to or at my, your, our place."],
     ["da-persona", "noi", "Siamo dai nonni.", "We are at our grandparents'.", [], ["We are at the grandparents'."], null, null],
     ["da-persona", "io", "Vado dal medico.", "I go to the doctor's.", [], ["I'm going to the doctor's.", "I go to the doctor."], null, null],
@@ -7532,7 +7539,7 @@
 
     ["possesso", null, "il libro di Marco", "Marco's book", [], ["the book of Marco"], "the book of Marco", null],
     ["possesso", null, "la casa di Maria", "Maria's house", [], ["the house of Maria"], "the house of Maria", null],
-    ["possesso", null, "l'amico di mio fratello", "my brother's friend", [], ["the friend of my brother"], "the friend of my brother", null],
+    ["possesso", null, "l'amico di mio fratello", "my brother's friend (m.)", [], ["the friend of my brother"], "the friend of my brother", null],
     ["possesso", null, "la macchina del medico", "the doctor's car", [], ["the car of the doctor"], "the car of-the doctor", null],
     ["possesso", null, "il nome del cane", "the dog's name", [], ["the name of the dog"], "the name of-the dog", null],
     ["possesso", null, "la stanza dei bambini", "the children's room", [], ["the kids' room", "the room of the children"], "the room of-the children", null],
@@ -7651,7 +7658,7 @@
     const [, group, , , rule, mech] = PREP_THEME_OF[level];
     const key = sentenceKey(it);
     const itAll = sentenceAccepted(person, it, alts).filter(s => s !== it);
-    const note = mech ? `<span class="literal-label">In English</span> <em>${en}</em>`
+    const note = mech ? `<span class="literal-label">In una parola</span> <em>${extra.replace(' + ', ' <span class="mech-plus">+</span> ')} → ${it}</em>`
       : extra ? `<span class="literal-label">Word for word</span> <em>${extra}</em>` : null;
     return { noun: key, display: it, it, en, level, group, type: 'prep', person, natural: null, literal: mech ? null : extra,
              mech: !!mech, mechPrompt: mech ? extra : null, rule: why || rule, ownRule: why || null, note,
@@ -7841,6 +7848,10 @@
       const pairs = Math.min(ins.length, del.length);
       for (let k = 0; k < pairs; k++) {
         const i = ins[k], j = del[k], a = gInfo[i], b = tInfo[j], right = em(w[j].replace(/[.?!,]$/, '').toLowerCase()), wrong = em(g[i].replace(/[.?!,]$/, '').toLowerCase());
+        if (/'$/.test(gn[i]) && gn[i].slice(0, -1) === tn[j]) {   // del'pane: an apostrophe Italian doesn't have
+          add(`${right}, not ${wrong}: no apostrophe here — it stands for a dropped vowel, and only before another vowel: ${tn[j] === 'un' ? `${em("un'amica")}, but ${em('un amico')}` : `${em("dell'amico")}, but ${em('del pane')}`}.`);
+          continue;
+        }
         const pa = sentPrepOf(gn[i]), pb = sentPrepOf(tn[j]);
         if (card.rule && pa && pb && pa !== pb) { add(`${right}, not ${wrong}: ${card.rule}`); continue; }   // the wrong preposition
         if (card.ownRule && pa && pa === pb) { add(`${right}, not ${wrong}: ${card.ownRule}`); continue; }   // the right one, wrongly joined: this card's own lesson
@@ -9901,8 +9912,6 @@
     }
     const natLine = document.getElementById('natural-en');
     if (natLine) { natLine.hidden = true; natLine.innerHTML = ''; }
-    const promptReset = document.getElementById('prompt');
-    if (promptReset) promptReset.classList.remove('mech');
     const card = deck[index];
     if (card.subject) setCardContext(card.subject);   // mixed review: this card's section
     const itToEn = direction === 'it-en';
@@ -9926,11 +9935,8 @@
       ans.placeholder = itToEn ? 'type the english meaning…'
         : (card.person ? 'type the italian conjugation…' : 'type the italian infinitive…');
     } else if (isPhraseSubject()) {
-      const mechShown = !!card.mech && direction === 'en-it';   // a fusion drill: di + il libro, the + in gold
-      const shown = itToEn ? card.italian : (mechShown ? card.mechPrompt : card.english);
-      if (mechShown) promptEl.innerHTML = escapeHTML(shown).replace(' + ', ' <span class="mech-plus">+</span> ');
-      else promptEl.textContent = shown;
-      promptEl.classList.toggle('mech', mechShown);
+      const shown = itToEn ? card.italian : card.english;
+      promptEl.textContent = shown;
       promptEl.classList.toggle('long', shown.length > 18);
       // A word-for-word sentence that reads oddly: its natural English underneath
       // (English → Italian only — the other ways round it would give the answer away)
@@ -9940,7 +9946,7 @@
       natEl.innerHTML = showNatural ? `<span class="natural-label">in natural English</span> ${escapeHTML(card.natural)}` : '';
       metaEl.style.display = 'none';
       hintEl.style.display = '';
-      hintEl.textContent = itToEn ? '→ in inglese' : (card.mech && direction === 'en-it' ? 'in una parola' : '+ frase');   // a fusion drill: one word
+      hintEl.textContent = itToEn ? '→ in inglese' : (card.mech ? '+ preposizione articolata' : '+ frase');   // a fusion drill: join them
       ans.placeholder = itToEn ? 'type the english meaning…' : 'type the italian phrase…';
     } else if (isAdjSubject()) {
       // As in the adjectives game: the agreement type sits above the English, and
