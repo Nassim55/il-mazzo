@@ -3449,7 +3449,9 @@
     if (isPhraseSubject()) {
       const p = n.phrase;
       return [{ key: p.key, noun: p.key, english: p.en, italian: p.it, accepted: [p.it, ...p.itAlts],
-                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, natural: n.natural || null, person: n.person || null, type: n.type || null }];
+                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, natural: n.natural || null, sentPerson: n.person || null, type: n.type || null }];
+    // (A sentence's subject is sentPerson, never person: a card with a person is a verb card everywhere else —
+    //  the missed list, the pronoun hint, answer checking)
     }
     if (isAdjSubject()) {
       const a = n.adj;
@@ -7448,7 +7450,7 @@
     // mi, ti, gli, le, ci, vi straight before a verb: the person, not an article
     const markPron = (infos, ns) => infos.forEach((x, k) => { if (SENT_IOBJ.has(ns[k]) && infos[k + 1] && infos[k + 1].kind === 'verb') infos[k] = { kind: 'pron', n: ns[k] }; });
     markPron(tInfo, tn); markPron(gInfo, gn);
-    const person = card.person || null, like = card.type === 'piacere';
+    const person = card.sentPerson || null, like = card.type === 'piacere';
     const why = [];
     const add = s => { if (why.length < 3 && !why.includes(s)) why.push(s); };
     // Runs of unmatched words between matched ones: substitutions, missing, extra
