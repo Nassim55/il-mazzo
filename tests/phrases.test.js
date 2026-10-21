@@ -2,7 +2,7 @@ const { boot, ok, done } = require('./harness');
 let { w, d, ev, key, setVal, errors, warns } = boot();
 ok(warns.length === 0 && errors.length === 0, `loads with no validator warnings or errors ${warns.join(' ')}`);
 const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(labels.length === 7 && labels[4] === 'Frasi' && labels[5] === 'Scrittura' && labels[6] === 'Racconto', `section switch: ${labels.join(' | ')}`);
+ok(labels.length === 8 && labels[5] === 'Frasi' && labels[6] === 'Scrittura' && labels[7] === 'Racconto', `section switch: ${labels.join(' | ')}`);
 d.querySelector('#subject-toggle [data-subject="phrases"]').click();
 ok(d.getElementById('app-title').textContent === 'Frasi' && d.title === 'Il Mazzo · Frasi' && ev('selectedNouns.size') === 0, 'title, tab, empty selection');
 ok(d.querySelector('.phrases-panel .endings-title')?.textContent === 'In pratica' && d.querySelector('.setup-side').children[1].id === 'weak-panel', 'In pratica panel with Da ripassare under it');
