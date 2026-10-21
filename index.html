@@ -1900,8 +1900,7 @@
   .type-key em { font-family: 'Cormorant Garamond', serif; font-size: 16px; color: var(--ink-soft); }
   .literal-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
 
-  /* Preposizioni: fusion drills in the typewriter face; grouped chips; the table */
-  .prompt.mech { font-family: 'JetBrains Mono', monospace; font-style: normal; font-size: clamp(26px, 4.2vw, 40px); letter-spacing: 0.02em; }
+  /* Preposizioni: fusion drills in the cards' own face, the + in gold; grouped chips; the table */
   .mech-plus { color: var(--gold); margin: 0 0.1em; }
   .theme-chips.grouped { display: grid; gap: 10px; }
   .theme-group { display: grid; grid-template-columns: 128px minmax(0, 1fr); align-items: start; gap: 8px; }
@@ -9927,12 +9926,12 @@
       ans.placeholder = itToEn ? 'type the english meaning…'
         : (card.person ? 'type the italian conjugation…' : 'type the italian infinitive…');
     } else if (isPhraseSubject()) {
-      const mechShown = !!card.mech && direction === 'en-it';   // a fusion drill: di + il libro, typewriter face
+      const mechShown = !!card.mech && direction === 'en-it';   // a fusion drill: di + il libro, the + in gold
       const shown = itToEn ? card.italian : (mechShown ? card.mechPrompt : card.english);
       if (mechShown) promptEl.innerHTML = escapeHTML(shown).replace(' + ', ' <span class="mech-plus">+</span> ');
       else promptEl.textContent = shown;
       promptEl.classList.toggle('mech', mechShown);
-      promptEl.classList.toggle('long', !mechShown && shown.length > 18);
+      promptEl.classList.toggle('long', shown.length > 18);
       // A word-for-word sentence that reads oddly: its natural English underneath
       // (English → Italian only — the other ways round it would give the answer away)
       const natEl = document.getElementById('natural-en');

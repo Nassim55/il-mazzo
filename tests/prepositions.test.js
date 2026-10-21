@@ -50,7 +50,8 @@ const play = (key, raw, dir = 'en-it') => {
   return r;
 };
 let r = play('del-libro', 'del libro');
-ok(r.right && r.mech && /^di \+ il libro$/.test(r.shown) && /In English of the book/.test(r.note), 'a fusion drill: di + il libro, in the typewriter face; del libro; the English after');
+ok(r.right && r.mech && /^di \+ il libro$/.test(r.shown) && /In English of the book/.test(r.note), 'a fusion drill: di + il libro (the + in gold); del libro; the English after');
+ok(!/\.prompt\.mech\s*\{[^}]*font/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8')), "fusion drills use the cards' usual face, like every other prompt");
 ok(play('dell-amico', 'dell amico').right && play('dell-amico', "dell'amico").right && play('della-citta', 'della citta').right, "apostrophes and accents are forgiven (dell amico, della citta)");
 ok(/del = di \+ il: these prepositions join the article into one word/.test(play('del-libro', 'di il libro').why), 'why: di il libro — they join into one word');
 ok(/dello, not del: dello = di \+ lo — zucchero starts with s \+ consonant or z/.test(play('dello-zucchero', 'del zucchero').why), 'why: dello, because zucchero starts with z');
@@ -68,7 +69,7 @@ ok(play('abito-negli-stati-uniti', 'abito negli Stati Uniti').right && /a countr
    'negli Stati Uniti, with its own rule');
 ok(/all', not alle: one o'clock is singular/.test(play('all-una', 'alle una').why), "a card's own lesson comes first: all'una, because one o'clock is singular");
 r = play('del-libro', 'of the book', 'it-en');
-ok(r.right && !r.mech && r.shown === 'del libro', 'Italian → English: del libro → of the book (no typewriter face)');
+ok(r.right && !r.mech && r.shown === 'del libro', 'Italian → English: del libro → of the book (a plain Italian prompt)');
 ok(play('vado-da-marco', "I'm going to Marco's", 'it-en').right && play('dal-medico', "at the doctor's", 'it-en').right, "Italian → English: I'm going to Marco's · at the doctor's");
 
 // ---- The setup: grouped themes, the table ----
