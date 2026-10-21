@@ -1892,10 +1892,10 @@
   /* Scrittura: the kinds of sentence */
   .type-toggle .mode-option { display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; padding-left: 22px; padding-right: 22px; }
   .type-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; opacity: 0.7; }
-  .type-toggle { max-width: 100%; box-sizing: border-box; }
+  .type-toggle { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; box-sizing: border-box; }
   .type-toggle .mode-option { flex: 1 1 auto; min-width: 0; }
   @media (max-width: 520px) { .type-toggle .mode-option { padding-left: 10px; padding-right: 10px; letter-spacing: 0.06em; font-size: 12px; } }
-  #type-hint:empty { display: none; }
+  #type-hint:empty, #number-hint:empty { display: none; }
   .type-key { margin: 12px auto 22px; max-width: 600px; text-align: center; font-family: 'DM Sans', sans-serif; font-size: 13.5px; line-height: 1.55; color: var(--ink-faded); }
   .type-key em { font-family: 'Cormorant Garamond', serif; font-size: 16px; color: var(--ink-soft); }
   .literal-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
@@ -3482,7 +3482,13 @@
       const p = n.phrase;
       return [{ key: p.key, noun: p.key, english: p.en, italian: p.it, accepted: [p.it, ...p.itAlts],
                 englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, natural: n.natural || null, sentPerson: n.person || null, type: n.type || null,
-                rule: n.rule || null, ownRule: n.ownRule || null, mech: !!n.mech, mechPrompt: n.mechPrompt || null }];
+                rule: n.rule || null, ownRule: n.ownRule || null, mech: !!n.mech, mechPrompt: n.mechPrompt || null }].flatMap(c => {
+        if (!n.pl) return [c];
+        const pl = { ...c, key: `${c.key}|pl`, english: n.pl.en, italian: n.pl.it, accepted: [n.pl.it], englishAll: [n.pl.en, ...n.pl.enAlts],
+                     note: n.pl.note, mechPrompt: n.pl.mechPrompt, number: 'pl' };
+        const on = activeNumbers();
+        return [...(on.includes('sg') ? [{ ...c, number: 'sg' }] : []), ...(on.includes('pl') ? [pl] : [])];
+      });
     // (A sentence's subject is sentPerson, never person: a card with a person is a verb card everywhere else —
     //  the missed list, the pronoun hint, answer checking)
     }
@@ -4606,6 +4612,19 @@
   function saveSentenceTypes(list) {
     const all = verbPersonsSaved();
     all.sentences = SENTENCE_TYPES.map(x => x.key).filter(k => list.includes(k));
+    try { localStorage.setItem(VERB_PERSONS_KEY, JSON.stringify(all)); syncTouched(); } catch (e) { /* storage full */ }
+  }
+
+  // Preposizioni's fusion drills: singular, plural or both (stored under 'prepositions')
+  const PREP_NUMBERS = [['sg', 'Singolare'], ['pl', 'Plurale']];
+  function activeNumbers() {
+    const keys = PREP_NUMBERS.map(x => x[0]), saved = verbPersonsSaved().prepositions;
+    const list = Array.isArray(saved) ? keys.filter(k => saved.includes(k)) : keys;
+    return list.length ? list : keys;
+  }
+  function saveNumbers(list) {
+    const all = verbPersonsSaved();
+    all.prepositions = PREP_NUMBERS.map(x => x[0]).filter(k => list.includes(k));
     try { localStorage.setItem(VERB_PERSONS_KEY, JSON.stringify(all)); syncTouched(); } catch (e) { /* storage full */ }
   }
 
@@ -7419,88 +7438,6 @@
   //  fusion drill: its prompt), this card's own rule]. Person: who the verb is for (an
   //  optional subject pronoun is accepted); 'cosa' or null — nothing to add
   const PREP_DATA = [
-    ["di-art", null, "del libro", "of the book", [], [], "di + il libro", null],
-    ["di-art", null, "del cane", "of the dog", [], [], "di + il cane", null],
-    ["di-art", null, "dello zucchero", "of the sugar", [], [], "di + lo zucchero", null],
-    ["di-art", null, "dello studente", "of the student", [], [], "di + lo studente", null],
-    ["di-art", null, "dell'amico", "of the friend (m.)", [], [], "di + l'amico", null],
-    ["di-art", null, "dell'albero", "of the tree", [], [], "di + l'albero", null],
-    ["di-art", null, "dell'acqua", "of the water", [], [], "di + l'acqua", null],
-    ["di-art", null, "della casa", "of the house", [], [], "di + la casa", null],
-    ["di-art", null, "della città", "of the city", [], [], "di + la città", null],
-    ["di-art", null, "dei ragazzi", "of the boys", [], [], "di + i ragazzi", null],
-    ["di-art", null, "dei libri", "of the books", [], [], "di + i libri", null],
-    ["di-art", null, "degli studenti", "of the students", [], [], "di + gli studenti", null],
-    ["di-art", null, "degli amici", "of the friends (m.)", [], [], "di + gli amici", null],
-    ["di-art", null, "delle case", "of the houses", [], [], "di + le case", null],
-    ["di-art", null, "del pane", "of the bread", [], [], "di + il pane", null],
-    ["di-art", null, "del mare", "of the sea", [], [], "di + il mare", null],
-    ["di-art", null, "dello zaino", "of the backpack", [], ["of the rucksack"], "di + lo zaino", null],
-    ["di-art", null, "dello zio", "of the uncle", [], [], "di + lo zio", null],
-    ["di-art", null, "dell'aeroporto", "of the airport", [], [], "di + l'aeroporto", null],
-    ["di-art", null, "della nonna", "of the grandmother", [], [], "di + la nonna", null],
-    ["di-art", null, "dei bambini", "of the children", [], [], "di + i bambini", null],
-    ["di-art", null, "delle montagne", "of the mountains", [], [], "di + le montagne", null],
-
-    ["a-art", null, "al bar", "to the bar", [], ["at the bar"], "a + il bar", null],
-    ["a-art", null, "al mare", "to the sea", [], ["at the sea", "to the seaside", "at the seaside"], "a + il mare", null],
-    ["a-art", null, "allo stadio", "to the stadium", [], ["at the stadium"], "a + lo stadio", null],
-    ["a-art", null, "allo zio", "to the uncle", [], [], "a + lo zio", null],
-    ["a-art", null, "all'amico", "to the friend (m.)", [], [], "a + l'amico", null],
-    ["a-art", null, "all'aeroporto", "to the airport", [], ["at the airport"], "a + l'aeroporto", null],
-    ["a-art", null, "alla stazione", "to the station", [], ["at the station"], "a + la stazione", null],
-    ["a-art", null, "alla nonna", "to the grandmother", [], ["to grandma"], "a + la nonna", null],
-    ["a-art", null, "ai bambini", "to the children", [], [], "a + i bambini", null],
-    ["a-art", null, "agli amici", "to the friends (m.)", [], [], "a + gli amici", null],
-    ["a-art", null, "alle ragazze", "to the girls", [], [], "a + le ragazze", null],
-
-    ["da-art", null, "dal medico", "to the doctor's", [], ["at the doctor's", "from the doctor"], "da + il medico", null],
-    ["da-art", null, "dal treno", "from the train", [], ["off the train"], "da + il treno", null],
-    ["da-art", null, "dallo zio", "to the uncle's", [], ["at the uncle's", "from the uncle"], "da + lo zio", null],
-    ["da-art", null, "dallo specchio", "from the mirror", [], [], "da + lo specchio", null],
-    ["da-art", null, "dall'amico", "to the friend's (m.)", [], ["at the friend's", "from the friend"], "da + l'amico", null],
-    ["da-art", null, "dall'aeroporto", "from the airport", [], [], "da + l'aeroporto", null],
-    ["da-art", null, "dall'amica", "to the friend's (f.)", [], ["at the friend's", "from the friend"], "da + l'amica", null],
-    ["da-art", null, "dalla nonna", "to grandma's", [], ["at grandma's", "to the grandmother's", "at the grandmother's", "from the grandmother"], "da + la nonna", null],
-    ["da-art", null, "dalla finestra", "from the window", [], ["out of the window"], "da + la finestra", null],
-    ["da-art", null, "dai nonni", "to the grandparents'", [], ["at the grandparents'", "from the grandparents"], "da + i nonni", null],
-    ["da-art", null, "dai genitori", "to the parents'", [], ["at the parents'", "from the parents"], "da + i genitori", null],
-    ["da-art", null, "dagli amici", "to the friends' (m.)", [], ["at the friends'", "from the friends"], "da + gli amici", null],
-    ["da-art", null, "dalle montagne", "from the mountains", [], [], "da + le montagne", null],
-    ["da-art", null, "dalle amiche", "to the friends' (f.)", [], ["at the friends'", "from the friends"], "da + le amiche", null],
-    ["da-art", null, "dal bar", "from the bar", [], [], "da + il bar", null],
-    ["da-art", null, "dal centro", "from the centre", [], ["from the center"], "da + il centro", null],
-    ["da-art", null, "dallo stadio", "from the stadium", [], [], "da + lo stadio", null],
-    ["da-art", null, "dall'ufficio", "from the office", [], [], "da + l'ufficio", null],
-    ["da-art", null, "dalla stazione", "from the station", [], [], "da + la stazione", null],
-    ["da-art", null, "dalla cucina", "from the kitchen", [], [], "da + la cucina", null],
-    ["da-art", null, "dai bambini", "from the children", [], [], "da + i bambini", null],
-    ["da-art", null, "dagli alberi", "from the trees", [], [], "da + gli alberi", null],
-
-    ["in-art", null, "nel giardino", "in the garden", [], [], "in + il giardino", null],
-    ["in-art", null, "nel bicchiere", "in the glass", [], [], "in + il bicchiere", null],
-    ["in-art", null, "nello zaino", "in the backpack", [], ["in the rucksack"], "in + lo zaino", null],
-    ["in-art", null, "nello specchio", "in the mirror", [], [], "in + lo specchio", null],
-    ["in-art", null, "nell'acqua", "in the water", [], [], "in + l'acqua", null],
-    ["in-art", null, "nell'armadio", "in the wardrobe", [], ["in the cupboard"], "in + l'armadio", null],
-    ["in-art", null, "nella cucina", "in the kitchen", [], [], "in + la cucina", null],
-    ["in-art", null, "nella borsa", "in the bag", [], [], "in + la borsa", null],
-    ["in-art", null, "nei libri", "in the books", [], [], "in + i libri", null],
-    ["in-art", null, "negli occhi", "in the eyes", [], [], "in + gli occhi", null],
-    ["in-art", null, "nelle mani", "in the hands", [], [], "in + le mani", null],
-
-    ["su-art", null, "sul tavolo", "on the table", [], [], "su + il tavolo", null],
-    ["su-art", null, "sul letto", "on the bed", [], [], "su + il letto", null],
-    ["su-art", null, "sullo specchio", "on the mirror", [], [], "su + lo specchio", null],
-    ["su-art", null, "sullo zaino", "on the backpack", [], ["on the rucksack"], "su + lo zaino", null],
-    ["su-art", null, "sull'albero", "on the tree", [], ["in the tree"], "su + l'albero", null],
-    ["su-art", null, "sull'erba", "on the grass", [], [], "su + l'erba", null],
-    ["su-art", null, "sulla sedia", "on the chair", [], [], "su + la sedia", null],
-    ["su-art", null, "sulla strada", "on the road", [], [], "su + la strada", null],
-    ["su-art", null, "sui tetti", "on the roofs", [], [], "su + i tetti", null],
-    ["su-art", null, "sugli alberi", "on the trees", [], ["in the trees"], "su + gli alberi", null],
-    ["su-art", null, "sulle montagne", "on the mountains", [], ["in the mountains"], "su + le montagne", null],
-
     ["citta", "io", "Vado a Roma.", "I go to Rome.", [], ["I'm going to Rome."], null, null],
     ["citta", "io", "Abito a Milano.", "I live in Milan.", ["Vivo a Milano."], [], "I live at Milan.", null],
     ["citta", "noi", "Siamo a Parigi.", "We are in Paris.", [], [], "We are at Paris.", null],
@@ -7670,8 +7607,74 @@
     ["tra", null, "tra noi", "between us", ["fra noi", "tra di noi"], ["among us"], null, null],
     ["tra", "cosa", "La casa è tra il bosco e il lago.", "The house is between the wood and the lake.", ["La casa è fra il bosco e il lago."], ["The house is between the woods and the lake."], null, null]
   ];
+  // Fusion drills come in pairs: the singular, then its plural (del libro, then dei libri),
+  // as two cards of one item — like a verb's persons. [theme, [prompt, form, English],
+  // other English, [plural prompt, form, English], its other English]
+  const PREP_FUSION = [
+    ["di-art", ["di + il libro", "del libro", "of the book"], [], ["di + i libri", "dei libri", "of the books"], []],
+    ["di-art", ["di + il bambino", "del bambino", "of the child"], [], ["di + i bambini", "dei bambini", "of the children"], []],
+    ["di-art", ["di + il cane", "del cane", "of the dog"], [], ["di + i cani", "dei cani", "of the dogs"], []],
+    ["di-art", ["di + lo studente", "dello studente", "of the student"], [], ["di + gli studenti", "degli studenti", "of the students"], []],
+    ["di-art", ["di + lo zio", "dello zio", "of the uncle"], [], ["di + gli zii", "degli zii", "of the uncles"], ["of the aunt and uncle"]],
+    ["di-art", ["di + l'amico", "dell'amico", "of the friend (m.)"], [], ["di + gli amici", "degli amici", "of the friends (m.)"], []],
+    ["di-art", ["di + l'albero", "dell'albero", "of the tree"], [], ["di + gli alberi", "degli alberi", "of the trees"], []],
+    ["di-art", ["di + l'amica", "dell'amica", "of the friend (f.)"], [], ["di + le amiche", "delle amiche", "of the friends (f.)"], []],
+    ["di-art", ["di + la casa", "della casa", "of the house"], [], ["di + le case", "delle case", "of the houses"], []],
+    ["di-art", ["di + la città", "della città", "of the city"], [], ["di + le città", "delle città", "of the cities"], []],
+    ["di-art", ["di + la montagna", "della montagna", "of the mountain"], [], ["di + le montagne", "delle montagne", "of the mountains"], []],
+
+    ["a-art", ["a + il bar", "al bar", "to the bar"], ["at the bar"], ["a + i bar", "ai bar", "to the bars"], ["at the bars"]],
+    ["a-art", ["a + il bambino", "al bambino", "to the child"], [], ["a + i bambini", "ai bambini", "to the children"], []],
+    ["a-art", ["a + lo stadio", "allo stadio", "to the stadium"], ["at the stadium"], ["a + gli stadi", "agli stadi", "to the stadiums"], ["at the stadiums", "to the stadia"]],
+    ["a-art", ["a + lo zio", "allo zio", "to the uncle"], [], ["a + gli zii", "agli zii", "to the uncles"], ["to the aunt and uncle"]],
+    ["a-art", ["a + l'amico", "all'amico", "to the friend (m.)"], [], ["a + gli amici", "agli amici", "to the friends (m.)"], []],
+    ["a-art", ["a + l'amica", "all'amica", "to the friend (f.)"], [], ["a + le amiche", "alle amiche", "to the friends (f.)"], []],
+    ["a-art", ["a + la stazione", "alla stazione", "to the station"], ["at the station"], ["a + le stazioni", "alle stazioni", "to the stations"], ["at the stations"]],
+    ["a-art", ["a + la ragazza", "alla ragazza", "to the girl"], [], ["a + le ragazze", "alle ragazze", "to the girls"], []],
+
+    ["da-art", ["da + il medico", "dal medico", "to the doctor's"], ["at the doctor's", "from the doctor"], ["da + i medici", "dai medici", "to the doctors'"], ["at the doctors'", "from the doctors"]],
+    ["da-art", ["da + il treno", "dal treno", "from the train"], ["off the train"], ["da + i treni", "dai treni", "from the trains"], ["off the trains"]],
+    ["da-art", ["da + il nonno", "dal nonno", "to grandad's"], ["at grandad's", "to the grandfather's", "at the grandfather's", "from the grandfather", "from grandad"], ["da + i nonni", "dai nonni", "to the grandparents'"], ["at the grandparents'", "from the grandparents"]],
+    ["da-art", ["da + lo zio", "dallo zio", "to the uncle's"], ["at the uncle's", "from the uncle"], ["da + gli zii", "dagli zii", "to the uncles'"], ["at the uncles'", "to the aunt and uncle's", "at the aunt and uncle's", "from the uncles"]],
+    ["da-art", ["da + lo specchio", "dallo specchio", "from the mirror"], [], ["da + gli specchi", "dagli specchi", "from the mirrors"], []],
+    ["da-art", ["da + l'amico", "dall'amico", "to the friend's (m.)"], ["at the friend's", "from the friend"], ["da + gli amici", "dagli amici", "to the friends' (m.)"], ["at the friends'", "from the friends"]],
+    ["da-art", ["da + l'aeroporto", "dall'aeroporto", "from the airport"], [], ["da + gli aeroporti", "dagli aeroporti", "from the airports"], []],
+    ["da-art", ["da + l'amica", "dall'amica", "to the friend's (f.)"], ["at the friend's", "from the friend"], ["da + le amiche", "dalle amiche", "to the friends' (f.)"], ["at the friends'", "from the friends"]],
+    ["da-art", ["da + la nonna", "dalla nonna", "to grandma's"], ["at grandma's", "to the grandmother's", "at the grandmother's", "from the grandmother", "from grandma"], ["da + le nonne", "dalle nonne", "to the grandmothers'"], ["at the grandmothers'", "from the grandmothers"]],
+    ["da-art", ["da + la finestra", "dalla finestra", "from the window"], ["out of the window"], ["da + le finestre", "dalle finestre", "from the windows"], ["out of the windows"]],
+    ["da-art", ["da + la montagna", "dalla montagna", "from the mountain"], [], ["da + le montagne", "dalle montagne", "from the mountains"], []],
+
+    ["in-art", ["in + il giardino", "nel giardino", "in the garden"], [], ["in + i giardini", "nei giardini", "in the gardens"], []],
+    ["in-art", ["in + il bicchiere", "nel bicchiere", "in the glass"], [], ["in + i bicchieri", "nei bicchieri", "in the glasses"], []],
+    ["in-art", ["in + lo zaino", "nello zaino", "in the backpack"], ["in the rucksack"], ["in + gli zaini", "negli zaini", "in the backpacks"], ["in the rucksacks"]],
+    ["in-art", ["in + lo specchio", "nello specchio", "in the mirror"], [], ["in + gli specchi", "negli specchi", "in the mirrors"], []],
+    ["in-art", ["in + l'occhio", "nell'occhio", "in the eye"], [], ["in + gli occhi", "negli occhi", "in the eyes"], []],
+    ["in-art", ["in + l'armadio", "nell'armadio", "in the wardrobe"], ["in the cupboard"], ["in + gli armadi", "negli armadi", "in the wardrobes"], ["in the cupboards"]],
+    ["in-art", ["in + l'università", "nell'università", "in the university"], ["at the university"], ["in + le università", "nelle università", "in the universities"], ["at the universities"]],
+    ["in-art", ["in + la borsa", "nella borsa", "in the bag"], [], ["in + le borse", "nelle borse", "in the bags"], []],
+    ["in-art", ["in + la mano", "nella mano", "in the hand"], [], ["in + le mani", "nelle mani", "in the hands"], []],
+
+    ["su-art", ["su + il tavolo", "sul tavolo", "on the table"], [], ["su + i tavoli", "sui tavoli", "on the tables"], []],
+    ["su-art", ["su + il tetto", "sul tetto", "on the roof"], [], ["su + i tetti", "sui tetti", "on the roofs"], []],
+    ["su-art", ["su + lo specchio", "sullo specchio", "on the mirror"], [], ["su + gli specchi", "sugli specchi", "on the mirrors"], []],
+    ["su-art", ["su + lo zaino", "sullo zaino", "on the backpack"], ["on the rucksack"], ["su + gli zaini", "sugli zaini", "on the backpacks"], ["on the rucksacks"]],
+    ["su-art", ["su + l'albero", "sull'albero", "on the tree"], ["in the tree"], ["su + gli alberi", "sugli alberi", "on the trees"], ["in the trees"]],
+    ["su-art", ["su + l'isola", "sull'isola", "on the island"], [], ["su + le isole", "sulle isole", "on the islands"], []],
+    ["su-art", ["su + la sedia", "sulla sedia", "on the chair"], [], ["su + le sedie", "sulle sedie", "on the chairs"], []],
+    ["su-art", ["su + la strada", "sulla strada", "on the road"], [], ["su + le strade", "sulle strade", "on the roads"], []],
+    ["su-art", ["su + la montagna", "sulla montagna", "on the mountain"], [], ["su + le montagne", "sulle montagne", "on the mountains"], ["in the mountains"]]
+  ];
   const PREP_THEME_OF = Object.fromEntries(PREP_THEME_DEFS.map(d => [d[0], d]));
-  const PREP_ITEMS = PREP_DATA.map(([level, person, it, en, alts, enAlts, extra, why]) => {
+  const prepGloss = (prompt, it) => `<span class="literal-label">In una parola</span> <em>${prompt.replace(' + ', ' <span class="mech-plus">+</span> ')} → ${it}</em>`;
+  const PREP_FUSION_ITEMS = PREP_FUSION.map(([level, [prompt, it, en], enAlts, [plPrompt, plIt, plEn], plEnAlts]) => {
+    const [, group, , , rule] = PREP_THEME_OF[level];
+    const key = sentenceKey(it);
+    return { noun: key, display: it, it, en, level, group, type: 'prep', person: null, natural: null, literal: null,
+             mech: true, mechPrompt: prompt, rule, ownRule: null, note: prepGloss(prompt, it),
+             pl: { it: plIt, en: plEn, enAlts: plEnAlts, mechPrompt: plPrompt, note: prepGloss(plPrompt, plIt) },
+             phrase: { key, it, en, itAlts: [], enAlts, reg: 'neutral' } };
+  });
+  const PREP_ITEMS = [...PREP_FUSION_ITEMS, ...PREP_DATA.map(([level, person, it, en, alts, enAlts, extra, why]) => {
     const [, group, , , rule, mech] = PREP_THEME_OF[level];
     const key = sentenceKey(it);
     const itAll = sentenceAccepted(person, it, alts).filter(s => s !== it);
@@ -7680,7 +7683,7 @@
     return { noun: key, display: it, it, en, level, group, type: 'prep', person, natural: null, literal: mech ? null : extra,
              mech: !!mech, mechPrompt: mech ? extra : null, rule: why || rule, ownRule: why || null, note,
              phrase: { key, it, en, itAlts: itAll, enAlts: enAlts.filter(x => x !== en), reg: 'neutral' } };
-  });
+  })];
   const PREP_THEMES = PREP_THEME_DEFS.map(([key, group, label, en]) => ({ key, group, label, en, nouns: PREP_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
   const PREP_ORDER = PREP_ITEMS.map(n => n.noun);
   // The fusion table, for the side panel: rows the article, columns di · a · da · in · su
@@ -8009,7 +8012,7 @@
     check('sentences', SENTENCE_ITEMS, SENTENCE_THEMES, SENTENCE_ORDER);
     check('prepositions', PREP_ITEMS, PREP_THEMES, PREP_ORDER);
     for (const n of PREP_ITEMS) {
-      const unknown = sentenceSegments(n.it).filter(sg => sg.unknown).map(sg => sg.text);
+      const unknown = [n.it, ...(n.pl ? [n.pl.it] : [])].flatMap(x => sentenceSegments(x).filter(sg => sg.unknown).map(sg => sg.text));
       if (unknown.length) console.warn(`[prepositions] "${n.it}": words not in the deck:`, unknown);
     }
     if (new Set(PREP_ITEMS.map(n => n.noun)).size !== PREP_ITEMS.length) console.warn('[prepositions] two cards share a key');
@@ -8100,10 +8103,10 @@
       assocKey: 'aggettivi-assoc-v1'
     },
     prepositions: {
-      kind: 'phrase', sentences: true, panel: 'prepositions', doneWord: 'phrases', chipOrder: 'level', themeGroups: PREP_GROUPS,
+      kind: 'phrase', sentences: true, panel: 'prepositions', doneWord: 'phrases', chipOrder: 'level', themeGroups: PREP_GROUPS, keepPairs: true, numberToggle: true,
       switchLabel: 'Preposizioni', title: 'Preposizioni', subtitle: 'Il Mazzo · Le Preposizioni',
       setupTitle: 'Choose your prepositions',
-      setupSub: 'Italian prepositions rarely map onto one English word — <em>a</em> alone can be to, at or in. Two kinds of card: the fusion drills show <em>di + il libro</em> and ask for the one word (<em>del libro</em>); everywhere else you write the Italian for the English, and after each answer you see it word for word. Every noun is from your deck; where Italian has more than one good way, any of them counts.',
+      setupSub: 'Italian prepositions rarely map onto one English word — <em>a</em> alone can be to, at or in. The fusion drills come in pairs: <em>of the book</em>, the preposition joined to the article (<em>del libro</em>), then straight after, its plural (<em>dei libri</em>). Everywhere else you write the Italian for the English, and after each answer you see it word for word. Every noun is from your deck; where Italian has more than one good way, any of them counts.',
       itemWord: 'phrase', itemWords: 'phrases',
       items: PREP_ITEMS, themes: PREP_THEMES, frequency: PREP_ORDER,
       statsKeys: { 'en-it': 'preposizioni-stats-v1', 'it-en': 'preposizioni-stats-iten-v1', listen: 'preposizioni-stats-listen-v1' }, statsFormat: 'noun',
@@ -8241,11 +8244,11 @@
     const keepVerbMode = verbMode, keepAdjMode = adjMode;
     verbMode = 'conjugations';
     adjMode = 'dictionary';
-    const cards = list.map(({ subj, n }) => {
+    const cards = list.flatMap(({ subj, n }) => {
       setCardContext(subj);
       const options = cardsForItem(n);
-      const c = options[Math.floor(Math.random() * options.length)];
-      return { ...c, key: `${subj}:${c.key}`, subject: subj };
+      const picked = SUBJECTS[subj].keepPairs ? options : [options[Math.floor(Math.random() * options.length)]];
+      return picked.map(c => ({ ...c, key: `${subj}:${c.key}`, subject: subj }));
     });
     verbMode = keepVerbMode;
     adjMode = keepAdjMode;
@@ -8754,6 +8757,34 @@
     else if (submit) submit.focus();
   }
 
+  // ===== Preposizioni: singular, plural or both, for the fusion drills =====
+  function prepNumbersHTML() {
+    const on = activeNumbers();
+    return `
+      <div class="mode-label">Le articolate</div>
+      <div class="mode-toggle type-toggle" id="number-toggle" role="group" aria-label="Singular, plural or both">
+        ${PREP_NUMBERS.map(([k, label]) => `<button type="button" class="mode-option${on.includes(k) ? ' active' : ''}" data-num="${k}" aria-pressed="${on.includes(k)}">${label}</button>`).join('')}
+      </div>
+      <p class="person-hint" id="number-hint" aria-live="polite"></p>
+      <p class="type-key">Each fusion drill is a pair — the singular, then its plural straight after: <em>del libro</em>, then <em>dei libri</em>.</p>`;
+  }
+  function wireNumbers() {
+    const box = document.getElementById('number-toggle');
+    if (!box) return;
+    box.addEventListener('click', e => {
+      const b = e.target.closest('[data-num]');
+      if (!b) return;
+      const cur = activeNumbers(), k = b.dataset.num;
+      const next = cur.includes(k) ? cur.filter(x => x !== k) : [...cur, k];
+      const hint = document.getElementById('number-hint');
+      if (!next.length) { hint.textContent = 'Keep at least one.'; return; }
+      hint.textContent = '';
+      saveNumbers(next);
+      box.querySelectorAll('[data-num]').forEach(x => { const a = next.includes(x.dataset.num); x.classList.toggle('active', a); x.setAttribute('aria-pressed', String(a)); });
+      updateReadout();
+    });
+  }
+
   // ===== Section switch =====
   function wireSubjectToggle() {
     document.querySelectorAll('#subject-toggle .mode-option').forEach(btn => {
@@ -8807,6 +8838,7 @@
         <p class="setup-sub">${cfg.setupSub}</p>
       </div>
       ${cfg.typeFilter ? sentenceTypesHTML() : ''}
+      ${cfg.numberToggle ? prepNumbersHTML() : ''}
       ${modeOptions ? `
       <div class="mode-label">Practice mode</div>
       <div class="mode-toggle" id="mode-toggle">
@@ -8905,6 +8937,7 @@
 
     if (isVerbs) wirePersonPicker();
     wireSentenceTypes();
+    wireNumbers();
 
     // ===== Verbs: practice mode and direction (as in the verb game's setup) =====
     if (modeOptions) {
@@ -9936,10 +9969,26 @@
     afterResize(currentKey);
   }
 
+  // Shuffle a round's cards; in Preposizioni each item's cards stay together, in their
+  // order (del libro, then dei libri), and a deck cut to size never splits a pair
+  function shuffleDeck(cards) {
+    if (!SUBJECTS[subject].keepPairs) return shuffle(cards);
+    const groups = [];
+    for (const c of cards) {
+      const last = groups[groups.length - 1];
+      if (last && last[0].noun === c.noun) last.push(c); else groups.push([c]);
+    }
+    return shuffle(groups).flat();
+  }
+  function takeCards(cards, n) {
+    let k = Math.min(n, cards.length);
+    if (SUBJECTS[subject].keepPairs) while (k > 0 && k < cards.length && cards[k].noun === cards[k - 1].noun) k++;
+    return cards.slice(0, k);
+  }
   function startGame() {
     if (sessionMaxDeck && sessionMaxDeck.length > 0) {
       // Play again / Reshuffle — replay the current active subset in new order
-      deck = shuffle(deck);
+      deck = shuffleDeck(deck);
     } else {
       // Fresh entry from setup — the pool is the selection (or the whole deck
       // when nothing is selected but a number is set); the number only decides
@@ -9950,10 +9999,10 @@
       if (capMode === 'frequent' && cap < sessionPool.length) {
         // The N most common nouns of the selection, played in random order
         const byRank = [...sessionPool].sort((a, b) => compareFrequency(a.noun, b.noun));
-        sessionMaxDeck = shuffle(byRank.slice(0, cap));
+        sessionMaxDeck = shuffleDeck(takeCards(byRank, cap));
         sessionPickMode = 'frequent';
       } else {
-        sessionMaxDeck = shuffle(sessionPool).slice(0, cap);
+        sessionMaxDeck = takeCards(shuffleDeck(sessionPool), cap);
         sessionPickMode = 'random';
       }
       sessionFocused = false;
