@@ -1902,6 +1902,7 @@
 
   /* Preposizioni: the + in gold (a fusion drill's pieces, after answering); grouped chips; the table */
   .mech-plus { color: var(--gold); margin: 0 0.1em; }
+  .literal-gap { margin-top: 8px; }
   .theme-chips.grouped { display: grid; gap: 10px; }
   .theme-group { display: grid; grid-template-columns: 128px minmax(0, 1fr); align-items: start; gap: 8px; }
   .theme-group-chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -3484,8 +3485,8 @@
                 englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, natural: n.natural || null, sentPerson: n.person || null, type: n.type || null,
                 rule: n.rule || null, ownRule: n.ownRule || null, mech: !!n.mech, mechPrompt: n.mechPrompt || null }].flatMap(c => {
         if (!n.pl) return [c];
-        const pl = { ...c, key: `${c.key}|pl`, english: n.pl.en, italian: n.pl.it, accepted: [n.pl.it], englishAll: [n.pl.en, ...n.pl.enAlts],
-                     note: n.pl.note, mechPrompt: n.pl.mechPrompt, number: 'pl' };
+        const pl = { ...c, key: `${c.key}|pl`, english: n.pl.en, italian: n.pl.it, accepted: [n.pl.it, ...n.pl.itAlts], englishAll: [n.pl.en, ...n.pl.enAlts],
+                     note: n.pl.note, mechPrompt: n.pl.mechPrompt, sentPerson: n.pl.person, number: 'pl' };
         const on = activeNumbers();
         return [...(on.includes('sg') ? [{ ...c, number: 'sg' }] : []), ...(on.includes('pl') ? [pl] : [])];
       });
@@ -7406,11 +7407,11 @@
   ];
   // key, group, label, English, rule (Why, when the preposition is wrong), a fusion drill?
   const PREP_THEME_DEFS = [
-    ["di-art", "art", "di + articolo", "del · dello · dell' · della · dei · degli · delle", "<em>di</em> joins the article into one word: <em>del, dello, dell', della, dei, degli, delle</em>.", true],
-    ["a-art", "art", "a + articolo", "al · allo · all' · alla · ai · agli · alle", "<em>a</em> joins the article into one word: <em>al, allo, all', alla, ai, agli, alle</em>.", true],
-    ["da-art", "art", "da + articolo", "dal · dallo · dall' · dalla · dai · dagli · dalle", "<em>da</em> joins the article into one word: <em>dal, dallo, dall', dalla, dai, dagli, dalle</em>.", true],
-    ["in-art", "art", "in + articolo", "nel · nello · nell' · nella · nei · negli · nelle", "<em>in</em> joins the article and becomes <em>ne-</em>: <em>nel, nello, nell', nella, nei, negli, nelle</em>.", true],
-    ["su-art", "art", "su + articolo", "sul · sullo · sull' · sulla · sui · sugli · sulle", "<em>su</em> joins the article into one word: <em>sul, sullo, sull', sulla, sui, sugli, sulle</em>.", true],
+    ["di-art", "art", "di + articolo", "del · dello · dell' · della · dei · degli · delle", "<em>parlare di</em> is to talk about — and <em>di</em> joins the article into one word: <em>del, dello, dell', della, dei, degli, delle</em>.", true],
+    ["a-art", "art", "a + articolo", "al · allo · all' · alla · ai · agli · alle", "<em>andare a</em> is to go to — and <em>a</em> joins the article into one word: <em>al, allo, all', alla, ai, agli, alle</em>.", true],
+    ["da-art", "art", "da + articolo", "dal · dallo · dall' · dalla · dai · dagli · dalle", "<em>venire da</em> is to come from — and <em>da</em> joins the article into one word: <em>dal, dallo, dall', dalla, dai, dagli, dalle</em>.", true],
+    ["in-art", "art", "in + articolo", "nel · nello · nell' · nella · nei · negli · nelle", "<em>in</em> is in, inside — and it joins the article as <em>ne-</em>: <em>nel, nello, nell', nella, nei, negli, nelle</em>.", true],
+    ["su-art", "art", "su + articolo", "sul · sullo · sull' · sulla · sui · sugli · sulle", "<em>su</em> is on — and it joins the article into one word: <em>sul, sullo, sull', sulla, sui, sugli, sulle</em>.", true],
     ["citta", "dove", "a + città", "cities take a", "cities take <em>a</em> — <em>a Roma</em>, <em>a Milano</em> (countries take <em>in</em>: <em>in Italia</em>).", false],
     ["paesi", "dove", "in + paese", "countries and regions take in", "countries and regions take <em>in</em> — <em>in Italia</em>, <em>in Sicilia</em> (cities take <em>a</em>: <em>a Roma</em>).", false],
     ["luoghi", "dove", "a casa · in cucina · al bar", "places with and without the article", "some places take no article — <em>a casa, a scuola, a letto, in cucina, in ufficio, in centro, in banca</em>; others keep it — <em>al bar, al cinema, al ristorante</em>.", false],
@@ -7607,72 +7608,78 @@
     ["tra", null, "tra noi", "between us", ["fra noi", "tra di noi"], ["among us"], null, null],
     ["tra", "cosa", "La casa è tra il bosco e il lago.", "The house is between the wood and the lake.", ["La casa è fra il bosco e il lago."], ["The house is between the woods and the lake."], null, null]
   ];
-  // Fusion drills come in pairs: the singular, then its plural (del libro, then dei libri),
-  // as two cards of one item — like a verb's persons. [theme, [prompt, form, English],
-  // other English, [plural prompt, form, English], its other English]
+  // Fusion drills come in pairs, each with one easy verb that goes with its preposition —
+  // parlo di, vado a, vengo da, è in, è su: the singular, then its plural straight after
+  // (Parlo del libro, then Parlo dei libri), two cards of one item like a verb's persons.
+  // [theme, person, [Italian, English, other English, the pieces, the joined form, word for
+  //  word], the same for the plural]
   const PREP_FUSION = [
-    ["di-art", ["di + il libro", "del libro", "of the book"], [], ["di + i libri", "dei libri", "of the books"], []],
-    ["di-art", ["di + il bambino", "del bambino", "of the child"], [], ["di + i bambini", "dei bambini", "of the children"], []],
-    ["di-art", ["di + il cane", "del cane", "of the dog"], [], ["di + i cani", "dei cani", "of the dogs"], []],
-    ["di-art", ["di + lo studente", "dello studente", "of the student"], [], ["di + gli studenti", "degli studenti", "of the students"], []],
-    ["di-art", ["di + lo zio", "dello zio", "of the uncle"], [], ["di + gli zii", "degli zii", "of the uncles"], ["of the aunt and uncle"]],
-    ["di-art", ["di + l'amico", "dell'amico", "of the friend (m.)"], [], ["di + gli amici", "degli amici", "of the friends (m.)"], []],
-    ["di-art", ["di + l'albero", "dell'albero", "of the tree"], [], ["di + gli alberi", "degli alberi", "of the trees"], []],
-    ["di-art", ["di + l'amica", "dell'amica", "of the friend (f.)"], [], ["di + le amiche", "delle amiche", "of the friends (f.)"], []],
-    ["di-art", ["di + la casa", "della casa", "of the house"], [], ["di + le case", "delle case", "of the houses"], []],
-    ["di-art", ["di + la città", "della città", "of the city"], [], ["di + le città", "delle città", "of the cities"], []],
-    ["di-art", ["di + la montagna", "della montagna", "of the mountain"], [], ["di + le montagne", "delle montagne", "of the mountains"], []],
+    ["di-art", "io", ["Parlo del libro.", "I talk about the book.", ["I speak about the book.", "I speak about the book."], "di + il libro", "del libro", "I speak of-the book."], ["Parlo dei libri.", "I talk about the books.", ["I speak about the books."], "di + i libri", "dei libri", "I speak of-the books."]],
+    ["di-art", "io", ["Parlo del bambino.", "I talk about the child.", ["I speak about the child."], "di + il bambino", "del bambino", "I speak of-the child."], ["Parlo dei bambini.", "I talk about the children.", ["I speak about the children."], "di + i bambini", "dei bambini", "I speak of-the children."]],
+    ["di-art", "io", ["Parlo del cane.", "I talk about the dog.", ["I speak about the dog."], "di + il cane", "del cane", "I speak of-the dog."], ["Parlo dei cani.", "I talk about the dogs.", ["I speak about the dogs."], "di + i cani", "dei cani", "I speak of-the dogs."]],
+    ["di-art", "io", ["Parlo dello studente.", "I talk about the student.", ["I speak about the student."], "di + lo studente", "dello studente", "I speak of-the student."], ["Parlo degli studenti.", "I talk about the students.", ["I speak about the students."], "di + gli studenti", "degli studenti", "I speak of-the students."]],
+    ["di-art", "io", ["Parlo dello zio.", "I talk about the uncle.", ["I speak about the uncle."], "di + lo zio", "dello zio", "I speak of-the uncle."], ["Parlo degli zii.", "I talk about the uncles.", ["I speak about the uncles."], "di + gli zii", "degli zii", "I speak of-the uncles."]],
+    ["di-art", "io", ["Parlo dell'amico.", "I talk about the friend (m.).", ["I speak about the friend (m.)."], "di + l'amico", "dell'amico", "I speak of-the friend."], ["Parlo degli amici.", "I talk about the friends (m.).", ["I speak about the friends (m.)."], "di + gli amici", "degli amici", "I speak of-the friends."]],
+    ["di-art", "io", ["Parlo dell'albero.", "I talk about the tree.", ["I speak about the tree."], "di + l'albero", "dell'albero", "I speak of-the tree."], ["Parlo degli alberi.", "I talk about the trees.", ["I speak about the trees."], "di + gli alberi", "degli alberi", "I speak of-the trees."]],
+    ["di-art", "io", ["Parlo dell'amica.", "I talk about the friend (f.).", ["I speak about the friend (f.)."], "di + l'amica", "dell'amica", "I speak of-the friend."], ["Parlo delle amiche.", "I talk about the friends (f.).", ["I speak about the friends (f.)."], "di + le amiche", "delle amiche", "I speak of-the friends."]],
+    ["di-art", "io", ["Parlo della casa.", "I talk about the house.", ["I speak about the house."], "di + la casa", "della casa", "I speak of-the house."], ["Parlo delle case.", "I talk about the houses.", ["I speak about the houses."], "di + le case", "delle case", "I speak of-the houses."]],
+    ["di-art", "io", ["Parlo della città.", "I talk about the city.", ["I speak about the city."], "di + la città", "della città", "I speak of-the city."], ["Parlo delle città.", "I talk about the cities.", ["I speak about the cities."], "di + le città", "delle città", "I speak of-the cities."]],
+    ["di-art", "io", ["Parlo della montagna.", "I talk about the mountain.", ["I speak about the mountain."], "di + la montagna", "della montagna", "I speak of-the mountain."], ["Parlo delle montagne.", "I talk about the mountains.", ["I speak about the mountains."], "di + le montagne", "delle montagne", "I speak of-the mountains."]],
 
-    ["a-art", ["a + il bar", "al bar", "to the bar"], ["at the bar"], ["a + i bar", "ai bar", "to the bars"], ["at the bars"]],
-    ["a-art", ["a + il bambino", "al bambino", "to the child"], [], ["a + i bambini", "ai bambini", "to the children"], []],
-    ["a-art", ["a + lo stadio", "allo stadio", "to the stadium"], ["at the stadium"], ["a + gli stadi", "agli stadi", "to the stadiums"], ["at the stadiums", "to the stadia"]],
-    ["a-art", ["a + lo zio", "allo zio", "to the uncle"], [], ["a + gli zii", "agli zii", "to the uncles"], ["to the aunt and uncle"]],
-    ["a-art", ["a + l'amico", "all'amico", "to the friend (m.)"], [], ["a + gli amici", "agli amici", "to the friends (m.)"], []],
-    ["a-art", ["a + l'amica", "all'amica", "to the friend (f.)"], [], ["a + le amiche", "alle amiche", "to the friends (f.)"], []],
-    ["a-art", ["a + la stazione", "alla stazione", "to the station"], ["at the station"], ["a + le stazioni", "alle stazioni", "to the stations"], ["at the stations"]],
-    ["a-art", ["a + la ragazza", "alla ragazza", "to the girl"], [], ["a + le ragazze", "alle ragazze", "to the girls"], []],
+    ["a-art", "io", ["Vado al mercato.", "I go to the market.", ["I'm going to the market."], "a + il mercato", "al mercato", "I go to-the market."], ["Vado ai mercati.", "I go to the markets.", ["I'm going to the markets."], "a + i mercati", "ai mercati", "I go to-the markets."]],
+    ["a-art", "io", ["Vado al parco.", "I go to the park.", ["I'm going to the park."], "a + il parco", "al parco", "I go to-the park."], ["Vado ai parchi.", "I go to the parks.", ["I'm going to the parks."], "a + i parchi", "ai parchi", "I go to-the parks."]],
+    ["a-art", "io", ["Vado al museo.", "I go to the museum.", ["I'm going to the museum."], "a + il museo", "al museo", "I go to-the museum."], ["Vado ai musei.", "I go to the museums.", ["I'm going to the museums."], "a + i musei", "ai musei", "I go to-the museums."]],
+    ["a-art", "io", ["Vado allo stadio.", "I go to the stadium.", ["I'm going to the stadium."], "a + lo stadio", "allo stadio", "I go to-the stadium."], ["Vado agli stadi.", "I go to the stadiums.", ["I'm going to the stadiums."], "a + gli stadi", "agli stadi", "I go to-the stadiums."]],
+    ["a-art", "io", ["Vado all'aeroporto.", "I go to the airport.", ["I'm going to the airport."], "a + l'aeroporto", "all'aeroporto", "I go to-the airport."], ["Vado agli aeroporti.", "I go to the airports.", ["I'm going to the airports."], "a + gli aeroporti", "agli aeroporti", "I go to-the airports."]],
+    ["a-art", "io", ["Vado all'ospedale.", "I go to the hospital.", ["I'm going to the hospital."], "a + l'ospedale", "all'ospedale", "I go to-the hospital."], ["Vado agli ospedali.", "I go to the hospitals.", ["I'm going to the hospitals."], "a + gli ospedali", "agli ospedali", "I go to-the hospitals."]],
+    ["a-art", "io", ["Vado all'università.", "I go to the university.", ["I'm going to the university."], "a + l'università", "all'università", "I go to-the university."], ["Vado alle università.", "I go to the universities.", ["I'm going to the universities."], "a + le università", "alle università", "I go to-the universities."]],
+    ["a-art", "io", ["Vado alla stazione.", "I go to the station.", ["I'm going to the station."], "a + la stazione", "alla stazione", "I go to-the station."], ["Vado alle stazioni.", "I go to the stations.", ["I'm going to the stations."], "a + le stazioni", "alle stazioni", "I go to-the stations."]],
+    ["a-art", "io", ["Vado alla partita.", "I go to the match.", ["I'm going to the match.", "I go to the game."], "a + la partita", "alla partita", "I go to-the match."], ["Vado alle partite.", "I go to the matches.", ["I'm going to the matches.", "I go to the games."], "a + le partite", "alle partite", "I go to-the matches."]],
 
-    ["da-art", ["da + il medico", "dal medico", "to the doctor's"], ["at the doctor's", "from the doctor"], ["da + i medici", "dai medici", "to the doctors'"], ["at the doctors'", "from the doctors"]],
-    ["da-art", ["da + il treno", "dal treno", "from the train"], ["off the train"], ["da + i treni", "dai treni", "from the trains"], ["off the trains"]],
-    ["da-art", ["da + il nonno", "dal nonno", "to grandad's"], ["at grandad's", "to the grandfather's", "at the grandfather's", "from the grandfather", "from grandad"], ["da + i nonni", "dai nonni", "to the grandparents'"], ["at the grandparents'", "from the grandparents"]],
-    ["da-art", ["da + lo zio", "dallo zio", "to the uncle's"], ["at the uncle's", "from the uncle"], ["da + gli zii", "dagli zii", "to the uncles'"], ["at the uncles'", "to the aunt and uncle's", "at the aunt and uncle's", "from the uncles"]],
-    ["da-art", ["da + lo specchio", "dallo specchio", "from the mirror"], [], ["da + gli specchi", "dagli specchi", "from the mirrors"], []],
-    ["da-art", ["da + l'amico", "dall'amico", "to the friend's (m.)"], ["at the friend's", "from the friend"], ["da + gli amici", "dagli amici", "to the friends' (m.)"], ["at the friends'", "from the friends"]],
-    ["da-art", ["da + l'aeroporto", "dall'aeroporto", "from the airport"], [], ["da + gli aeroporti", "dagli aeroporti", "from the airports"], []],
-    ["da-art", ["da + l'amica", "dall'amica", "to the friend's (f.)"], ["at the friend's", "from the friend"], ["da + le amiche", "dalle amiche", "to the friends' (f.)"], ["at the friends'", "from the friends"]],
-    ["da-art", ["da + la nonna", "dalla nonna", "to grandma's"], ["at grandma's", "to the grandmother's", "at the grandmother's", "from the grandmother", "from grandma"], ["da + le nonne", "dalle nonne", "to the grandmothers'"], ["at the grandmothers'", "from the grandmothers"]],
-    ["da-art", ["da + la finestra", "dalla finestra", "from the window"], ["out of the window"], ["da + le finestre", "dalle finestre", "from the windows"], ["out of the windows"]],
-    ["da-art", ["da + la montagna", "dalla montagna", "from the mountain"], [], ["da + le montagne", "dalle montagne", "from the mountains"], []],
+    ["da-art", "io", ["Vengo dal medico.", "I come from the doctor's.", ["I'm coming from the doctor's.", "I come from the doctor.", "I'm coming from the doctor's."], "da + il medico", "dal medico", "I come from-the doctor."], ["Vengo dai medici.", "I come from the doctors'.", ["I'm coming from the doctors'."], "da + i medici", "dai medici", "I come from-the doctors."]],
+    ["da-art", "io", ["Vengo dal nonno.", "I come from grandad's.", ["I'm coming from grandad's.", "I come from the grandfather's.", "I come from grandpa's.", "I'm coming from grandad's."], "da + il nonno", "dal nonno", "I come from-the grandfather."], ["Vengo dai nonni.", "I come from the grandparents'.", ["I'm coming from the grandparents'.", "I come from my grandparents'."], "da + i nonni", "dai nonni", "I come from-the grandparents."]],
+    ["da-art", "io", ["Vengo dal mercato.", "I come from the market.", ["I'm coming from the market."], "da + il mercato", "dal mercato", "I come from-the market."], ["Vengo dai mercati.", "I come from the markets.", ["I'm coming from the markets."], "da + i mercati", "dai mercati", "I come from-the markets."]],
+    ["da-art", "io", ["Vengo dallo zio.", "I come from the uncle's.", ["I'm coming from the uncle's.", "I come from my uncle's."], "da + lo zio", "dallo zio", "I come from-the uncle."], ["Vengo dagli zii.", "I come from the uncles'.", ["I'm coming from the uncles'.", "I come from my aunt and uncle's."], "da + gli zii", "dagli zii", "I come from-the uncles."]],
+    ["da-art", "io", ["Vengo dallo stadio.", "I come from the stadium.", ["I'm coming from the stadium."], "da + lo stadio", "dallo stadio", "I come from-the stadium."], ["Vengo dagli stadi.", "I come from the stadiums.", ["I'm coming from the stadiums."], "da + gli stadi", "dagli stadi", "I come from-the stadiums."]],
+    ["da-art", "io", ["Vengo dall'amico.", "I come from the friend's (m.).", ["I'm coming from the friend's (m.)."], "da + l'amico", "dall'amico", "I come from-the friend."], ["Vengo dagli amici.", "I come from the friends' (m.).", ["I'm coming from the friends' (m.)."], "da + gli amici", "dagli amici", "I come from-the friends."]],
+    ["da-art", "io", ["Vengo dall'ufficio.", "I come from the office.", ["I'm coming from the office."], "da + l'ufficio", "dall'ufficio", "I come from-the office."], ["Vengo dagli uffici.", "I come from the offices.", ["I'm coming from the offices."], "da + gli uffici", "dagli uffici", "I come from-the offices."]],
+    ["da-art", "io", ["Vengo dall'amica.", "I come from the friend's (f.).", ["I'm coming from the friend's (f.)."], "da + l'amica", "dall'amica", "I come from-the friend."], ["Vengo dalle amiche.", "I come from the friends' (f.).", ["I'm coming from the friends' (f.)."], "da + le amiche", "dalle amiche", "I come from-the friends."]],
+    ["da-art", "io", ["Vengo dalla nonna.", "I come from grandma's.", ["I'm coming from grandma's.", "I come from the grandmother's.", "I come from grandma's."], "da + la nonna", "dalla nonna", "I come from-the grandmother."], ["Vengo dalle nonne.", "I come from the grandmothers'.", ["I'm coming from the grandmothers'."], "da + le nonne", "dalle nonne", "I come from-the grandmothers."]],
+    ["da-art", "io", ["Vengo dalla montagna.", "I come from the mountain.", ["I'm coming from the mountain."], "da + la montagna", "dalla montagna", "I come from-the mountain."], ["Vengo dalle montagne.", "I come from the mountains.", ["I'm coming from the mountains."], "da + le montagne", "dalle montagne", "I come from-the mountains."]],
+    ["da-art", "io", ["Vengo dalla stazione.", "I come from the station.", ["I'm coming from the station."], "da + la stazione", "dalla stazione", "I come from-the station."], ["Vengo dalle stazioni.", "I come from the stations.", ["I'm coming from the stations."], "da + le stazioni", "dalle stazioni", "I come from-the stations."]],
 
-    ["in-art", ["in + il giardino", "nel giardino", "in the garden"], [], ["in + i giardini", "nei giardini", "in the gardens"], []],
-    ["in-art", ["in + il bicchiere", "nel bicchiere", "in the glass"], [], ["in + i bicchieri", "nei bicchieri", "in the glasses"], []],
-    ["in-art", ["in + lo zaino", "nello zaino", "in the backpack"], ["in the rucksack"], ["in + gli zaini", "negli zaini", "in the backpacks"], ["in the rucksacks"]],
-    ["in-art", ["in + lo specchio", "nello specchio", "in the mirror"], [], ["in + gli specchi", "negli specchi", "in the mirrors"], []],
-    ["in-art", ["in + l'occhio", "nell'occhio", "in the eye"], [], ["in + gli occhi", "negli occhi", "in the eyes"], []],
-    ["in-art", ["in + l'armadio", "nell'armadio", "in the wardrobe"], ["in the cupboard"], ["in + gli armadi", "negli armadi", "in the wardrobes"], ["in the cupboards"]],
-    ["in-art", ["in + l'università", "nell'università", "in the university"], ["at the university"], ["in + le università", "nelle università", "in the universities"], ["at the universities"]],
-    ["in-art", ["in + la borsa", "nella borsa", "in the bag"], [], ["in + le borse", "nelle borse", "in the bags"], []],
-    ["in-art", ["in + la mano", "nella mano", "in the hand"], [], ["in + le mani", "nelle mani", "in the hands"], []],
+    ["in-art", "cosa", ["È nel cassetto.", "It's in the drawer.", [], "in + il cassetto", "nel cassetto", "It is in-the drawer."], ["Sono nei cassetti.", "They're in the drawers.", [], "in + i cassetti", "nei cassetti", "They are in-the drawers."]],
+    ["in-art", "cosa", ["È nel frigorifero.", "It's in the fridge.", ["It's in the refrigerator."], "in + il frigorifero", "nel frigorifero", "It is in-the fridge."], ["Sono nei frigoriferi.", "They're in the fridges.", ["They're in the refrigerators."], "in + i frigoriferi", "nei frigoriferi", "They are in-the fridges."]],
+    ["in-art", "cosa", ["È nel bicchiere.", "It's in the glass.", [], "in + il bicchiere", "nel bicchiere", "It is in-the glass."], ["Sono nei bicchieri.", "They're in the glasses.", [], "in + i bicchieri", "nei bicchieri", "They are in-the glasses."]],
+    ["in-art", "cosa", ["È nello zaino.", "It's in the backpack.", ["It's in the rucksack."], "in + lo zaino", "nello zaino", "It is in-the backpack."], ["Sono negli zaini.", "They're in the backpacks.", ["They're in the rucksacks."], "in + gli zaini", "negli zaini", "They are in-the backpacks."]],
+    ["in-art", "cosa", ["È nell'armadio.", "It's in the wardrobe.", ["It's in the cupboard."], "in + l'armadio", "nell'armadio", "It is in-the wardrobe."], ["Sono negli armadi.", "They're in the wardrobes.", ["They're in the cupboards."], "in + gli armadi", "negli armadi", "They are in-the wardrobes."]],
+    ["in-art", "cosa", ["È nell'università.", "It's in the university.", [], "in + l'università", "nell'università", "It is in-the university."], ["Sono nelle università.", "They're in the universities.", [], "in + le università", "nelle università", "They are in-the universities."]],
+    ["in-art", "cosa", ["È nella borsa.", "It's in the bag.", [], "in + la borsa", "nella borsa", "It is in-the bag."], ["Sono nelle borse.", "They're in the bags.", [], "in + le borse", "nelle borse", "They are in-the bags."]],
+    ["in-art", "cosa", ["È nella tasca.", "It's in the pocket.", [], "in + la tasca", "nella tasca", "It is in-the pocket."], ["Sono nelle tasche.", "They're in the pockets.", [], "in + le tasche", "nelle tasche", "They are in-the pockets."]],
+    ["in-art", "cosa", ["È nella scatola.", "It's in the box.", [], "in + la scatola", "nella scatola", "It is in-the box."], ["Sono nelle scatole.", "They're in the boxes.", [], "in + le scatole", "nelle scatole", "They are in-the boxes."]],
 
-    ["su-art", ["su + il tavolo", "sul tavolo", "on the table"], [], ["su + i tavoli", "sui tavoli", "on the tables"], []],
-    ["su-art", ["su + il tetto", "sul tetto", "on the roof"], [], ["su + i tetti", "sui tetti", "on the roofs"], []],
-    ["su-art", ["su + lo specchio", "sullo specchio", "on the mirror"], [], ["su + gli specchi", "sugli specchi", "on the mirrors"], []],
-    ["su-art", ["su + lo zaino", "sullo zaino", "on the backpack"], ["on the rucksack"], ["su + gli zaini", "sugli zaini", "on the backpacks"], ["on the rucksacks"]],
-    ["su-art", ["su + l'albero", "sull'albero", "on the tree"], ["in the tree"], ["su + gli alberi", "sugli alberi", "on the trees"], ["in the trees"]],
-    ["su-art", ["su + l'isola", "sull'isola", "on the island"], [], ["su + le isole", "sulle isole", "on the islands"], []],
-    ["su-art", ["su + la sedia", "sulla sedia", "on the chair"], [], ["su + le sedie", "sulle sedie", "on the chairs"], []],
-    ["su-art", ["su + la strada", "sulla strada", "on the road"], [], ["su + le strade", "sulle strade", "on the roads"], []],
-    ["su-art", ["su + la montagna", "sulla montagna", "on the mountain"], [], ["su + le montagne", "sulle montagne", "on the mountains"], ["in the mountains"]]
+    ["su-art", "cosa", ["È sul tavolo.", "It's on the table.", [], "su + il tavolo", "sul tavolo", "It is on-the table."], ["Sono sui tavoli.", "They're on the tables.", [], "su + i tavoli", "sui tavoli", "They are on-the tables."]],
+    ["su-art", "cosa", ["È sul letto.", "It's on the bed.", [], "su + il letto", "sul letto", "It is on-the bed."], ["Sono sui letti.", "They're on the beds.", [], "su + i letti", "sui letti", "They are on-the beds."]],
+    ["su-art", "cosa", ["È sul divano.", "It's on the sofa.", ["It's on the couch."], "su + il divano", "sul divano", "It is on-the sofa."], ["Sono sui divani.", "They're on the sofas.", ["They're on the couches."], "su + i divani", "sui divani", "They are on-the sofas."]],
+    ["su-art", "cosa", ["È sullo scaffale.", "It's on the shelf.", [], "su + lo scaffale", "sullo scaffale", "It is on-the shelf."], ["Sono sugli scaffali.", "They're on the shelves.", [], "su + gli scaffali", "sugli scaffali", "They are on-the shelves."]],
+    ["su-art", "cosa", ["È sullo specchio.", "It's on the mirror.", [], "su + lo specchio", "sullo specchio", "It is on-the mirror."], ["Sono sugli specchi.", "They're on the mirrors.", [], "su + gli specchi", "sugli specchi", "They are on-the mirrors."]],
+    ["su-art", "cosa", ["È sull'albero.", "It's on the tree.", [], "su + l'albero", "sull'albero", "It is on-the tree."], ["Sono sugli alberi.", "They're on the trees.", [], "su + gli alberi", "sugli alberi", "They are on-the trees."]],
+    ["su-art", "cosa", ["È sull'isola.", "It's on the island.", [], "su + l'isola", "sull'isola", "It is on-the island."], ["Sono sulle isole.", "They're on the islands.", [], "su + le isole", "sulle isole", "They are on-the islands."]],
+    ["su-art", "cosa", ["È sulla sedia.", "It's on the chair.", [], "su + la sedia", "sulla sedia", "It is on-the chair."], ["Sono sulle sedie.", "They're on the chairs.", [], "su + le sedie", "sulle sedie", "They are on-the chairs."]],
+    ["su-art", "cosa", ["È sulla strada.", "It's on the road.", [], "su + la strada", "sulla strada", "It is on-the road."], ["Sono sulle strade.", "They're on the roads.", [], "su + le strade", "sulle strade", "They are on-the roads."]]
   ];
   const PREP_THEME_OF = Object.fromEntries(PREP_THEME_DEFS.map(d => [d[0], d]));
-  const prepGloss = (prompt, it) => `<span class="literal-label">In una parola</span> <em>${prompt.replace(' + ', ' <span class="mech-plus">+</span> ')} → ${it}</em>`;
-  const PREP_FUSION_ITEMS = PREP_FUSION.map(([level, [prompt, it, en], enAlts, [plPrompt, plIt, plEn], plEnAlts]) => {
+  // After answering: the pieces (di + il libro → del libro), then the sentence word for word
+  const prepGloss = (pieces, fused, literal) => `<span class="literal-label">In una parola</span> <em>${pieces.replace(' + ', ' <span class="mech-plus">+</span> ')} → ${fused}</em>`
+    + `<span class="literal-label literal-gap">Word for word</span> <em>${literal}</em>`;
+  const PREP_FUSION_ITEMS = PREP_FUSION.map(([level, person, [it, en, enAlts, pieces, fused, literal], [plIt, plEn, plEnAlts, plPieces, plFused, plLiteral]]) => {
     const [, group, , , rule] = PREP_THEME_OF[level];
-    const key = sentenceKey(it);
-    return { noun: key, display: it, it, en, level, group, type: 'prep', person: null, natural: null, literal: null,
-             mech: true, mechPrompt: prompt, rule, ownRule: null, note: prepGloss(prompt, it),
-             pl: { it: plIt, en: plEn, enAlts: plEnAlts, mechPrompt: plPrompt, note: prepGloss(plPrompt, plIt) },
-             phrase: { key, it, en, itAlts: [], enAlts, reg: 'neutral' } };
+    const key = sentenceKey(it), plPerson = person === 'cosa' ? 'cose' : person;   // È nel cassetto, Sono nei cassetti
+    return { noun: key, display: it, it, en, level, group, type: 'prep', person, natural: null, literal,
+             mech: true, mechPrompt: pieces, fused, rule, ownRule: null, note: prepGloss(pieces, fused, literal),
+             pl: { it: plIt, en: plEn, enAlts: plEnAlts, itAlts: sentenceAccepted(plPerson, plIt, []).filter(s => s !== plIt), person: plPerson,
+                   mechPrompt: plPieces, fused: plFused, literal: plLiteral, note: prepGloss(plPieces, plFused, plLiteral) },
+             phrase: { key, it, en, itAlts: sentenceAccepted(person, it, []).filter(s => s !== it), enAlts, reg: 'neutral' } };
   });
   const PREP_ITEMS = [...PREP_FUSION_ITEMS, ...PREP_DATA.map(([level, person, it, en, alts, enAlts, extra, why]) => {
     const [, group, , , rule, mech] = PREP_THEME_OF[level];
@@ -8106,7 +8113,7 @@
       kind: 'phrase', sentences: true, panel: 'prepositions', doneWord: 'phrases', chipOrder: 'level', themeGroups: PREP_GROUPS, keepPairs: true, numberToggle: true,
       switchLabel: 'Preposizioni', title: 'Preposizioni', subtitle: 'Il Mazzo · Le Preposizioni',
       setupTitle: 'Choose your prepositions',
-      setupSub: 'Italian prepositions rarely map onto one English word — <em>a</em> alone can be to, at or in. The fusion drills come in pairs: <em>of the book</em>, the preposition joined to the article (<em>del libro</em>), then straight after, its plural (<em>dei libri</em>). Everywhere else you write the Italian for the English, and after each answer you see it word for word. Every noun is from your deck; where Italian has more than one good way, any of them counts.',
+      setupSub: 'Italian prepositions rarely map onto one English word — <em>a</em> alone can be to, at or in. The fusion drills come in pairs, each with one easy verb: <em>I talk about the book</em> — the preposition joined to the article (<em>parlo del libro</em>) — then straight after, its plural (<em>parlo dei libri</em>). Everywhere else you write the Italian for the English, and after each answer you see it word for word. Every noun is from your deck; where Italian has more than one good way, any of them counts.',
       itemWord: 'phrase', itemWords: 'phrases',
       items: PREP_ITEMS, themes: PREP_THEMES, frequency: PREP_ORDER,
       statsKeys: { 'en-it': 'preposizioni-stats-v1', 'it-en': 'preposizioni-stats-iten-v1', listen: 'preposizioni-stats-listen-v1' }, statsFormat: 'noun',
@@ -8770,7 +8777,7 @@
         ${PREP_NUMBERS.map(([k, label]) => `<button type="button" class="mode-option${on.includes(k) ? ' active' : ''}" data-num="${k}" aria-pressed="${on.includes(k)}">${label}</button>`).join('')}
       </div>
       <p class="person-hint" id="number-hint" aria-live="polite"></p>
-      <p class="type-key">Each fusion drill is a pair — the singular, then its plural straight after: <em>del libro</em>, then <em>dei libri</em>.</p>`;
+      <p class="type-key">Each fusion drill is a pair, with one easy verb: the singular, then its plural straight after — <em>parlo del libro</em>, then <em>parlo dei libri</em>.</p>`;
   }
   function wireNumbers() {
     const box = document.getElementById('number-toggle');

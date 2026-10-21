@@ -12,7 +12,7 @@ const startRound = (subj, keys) => {
 const key = (d, k) => d.dispatchEvent(new d.defaultView.KeyboardEvent('keydown', { key: k, bubbles: true }));
 
 // ---- Preposizioni: Le articolate ----
-const P = startRound('prepositions', ['del-libro', 'vado-a-roma']);
+const P = startRound('prepositions', ['parlo-del-libro', 'vado-a-roma']);
 const pd = P.d, btn = pd.getElementById('chart-btn');
 ok(btn && !btn.hidden && btn.textContent.trim() === '▦ Le articolate', 'in a Preposizioni round: ▦ Le articolate, beside the other controls');
 pd.getElementById('answer').value = 'del';
@@ -61,7 +61,7 @@ ok(label('nouns', 'casa') === null && label('sentences', 'bevo-un-caffe') === nu
 // ---- Ripasso: the button follows each card's own section ----
 const R = boot({ 'flipcards-subject': 'nouns' });
 R.ev(`(() => {
-  for (const [subj, k] of [['prepositions', 'del-libro'], ['nouns', 'casa'], ['verbs', 'parlare']]) {
+  for (const [subj, k] of [['prepositions', 'parlo-del-libro'], ['nouns', 'casa'], ['verbs', 'parlare']]) {
     const s = loadSrs(subj, 'en-it'); s[k] = { b: 1, d: today(), l: today() - 1 }; saveSrs(subj, 'en-it', s);
   }
   startRipasso();
