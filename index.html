@@ -1889,6 +1889,17 @@
   .sent-why-list em { font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--ink); }
   .sent-why-list em.why-hit { font-weight: 600; color: var(--olive); background: rgba(107, 124, 63, 0.14); padding: 0 3px; border-radius: 2px; }
 
+  /* Scrittura: the kinds of sentence */
+  .type-toggle .mode-option { display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; padding-left: 22px; padding-right: 22px; }
+  .type-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; opacity: 0.7; }
+  .type-toggle { max-width: 100%; box-sizing: border-box; }
+  .type-toggle .mode-option { flex: 1 1 auto; min-width: 0; }
+  @media (max-width: 520px) { .type-toggle .mode-option { padding-left: 10px; padding-right: 10px; letter-spacing: 0.06em; font-size: 12px; } }
+  #type-hint:empty { display: none; }
+  .type-key { margin: 12px auto 22px; max-width: 600px; text-align: center; font-family: 'DM Sans', sans-serif; font-size: 13.5px; line-height: 1.55; color: var(--ink-faded); }
+  .type-key em { font-family: 'Cormorant Garamond', serif; font-size: 16px; color: var(--ink-soft); }
+  .literal-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
@@ -3438,7 +3449,7 @@
     if (isPhraseSubject()) {
       const p = n.phrase;
       return [{ key: p.key, noun: p.key, english: p.en, italian: p.it, accepted: [p.it, ...p.itAlts],
-                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, natural: n.natural || null, person: n.person || null }];
+                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, natural: n.natural || null, person: n.person || null, type: n.type || null }];
     }
     if (isAdjSubject()) {
       const a = n.adj;
@@ -3646,11 +3657,13 @@
   }
   // Everything due today (or overdue) in one direction, across all sections,
   // most overdue first, then the shakiest
+  const sentenceTypeOff = (subj, key, on) => SUBJECTS[subj].sentences && !on.includes(SENTENCE_TYPE_OF[key]);
   function dueList(dir) {
-    const t = today(), out = [];
+    const t = today(), out = [], on = activeSentenceTypes();
     for (const subj of Object.keys(SUBJECTS)) {
       const srs = seedSrs(subj, dir);
       for (const n of SUBJECTS[subj].items) {
+        if (sentenceTypeOff(subj, n.noun, on)) continue;
         const r = srs[n.noun];
         if (r && r.d <= t) out.push({ subj, n, r });
       }
@@ -3659,7 +3672,8 @@
   }
   function dueOnDay(dir, day) {
     let n = 0;
-    for (const subj of Object.keys(SUBJECTS)) for (const r of Object.values(seedSrs(subj, dir))) if (r.d === day) n++;
+    const on = activeSentenceTypes();
+    for (const subj of Object.keys(SUBJECTS)) for (const [k, r] of Object.entries(seedSrs(subj, dir))) if (r.d === day && !sentenceTypeOff(subj, k, on)) n++;
     return n;
   }
 
@@ -4544,6 +4558,19 @@
   function saveVerbPersons(subj, list) {
     const all = verbPersonsSaved();
     all[subj] = personOrder.filter(p => list.includes(p));
+    try { localStorage.setItem(VERB_PERSONS_KEY, JSON.stringify(all)); syncTouched(); } catch (e) { /* storage full */ }
+  }
+
+  // Scrittura's kinds of sentence, chosen at the top of its setup — kept in the same
+  // store as the verb sections' persons (synced, backed up), under 'sentences'
+  function activeSentenceTypes() {
+    const keys = SENTENCE_TYPES.map(x => x.key), saved = verbPersonsSaved().sentences;
+    const list = Array.isArray(saved) ? keys.filter(k => saved.includes(k)) : keys;
+    return list.length ? list : keys;
+  }
+  function saveSentenceTypes(list) {
+    const all = verbPersonsSaved();
+    all.sentences = SENTENCE_TYPES.map(x => x.key).filter(k => list.includes(k));
     try { localStorage.setItem(VERB_PERSONS_KEY, JSON.stringify(all)); syncTouched(); } catch (e) { /* storage full */ }
   }
 
@@ -5989,11 +6016,13 @@
 
   // Small, frequent words: a meaning on tap, never drilled
   const STORY_FN = {
-    "l'": 'the (before a vowel)', il: 'the', lo: 'the / it, him', la: 'the / it, her', i: 'the (plural)', gli: 'the (plural)', le: 'the (plural) / to her',
+    "l'": 'the (before a vowel)', il: 'the', lo: 'the / it, him', la: 'the / it, her', i: 'the (plural)', gli: 'the (plural) / to him, to them', le: 'the (plural) / to her',
+    ti: 'you, to you', ci: 'us, to us', vi: 'you, to you (plural)', me: 'me (after a preposition: a me)', te: 'you (after a preposition: a te)',
+    anche: 'also, too', no: 'no', poco: 'little, not much', tuo: 'your', tuoi: 'your (plural)', ai: 'to the (plural)', agli: 'to the (plural)',
     un: 'a, an', una: 'a, an', di: 'of, from', a: 'to, at, in', da: 'from, by', in: 'in, into', con: 'with', su: 'on, along', per: 'for, to',
     tra: 'between, among', del: 'of the', della: 'of the', dei: 'of the', al: 'to the, at the', alla: 'to the, at the', alle: 'at (a time)',
     dal: 'from the, out of the', dalla: 'from, through the', dalle: 'from the', nella: 'in the', nelle: 'in the', sul: 'on the',
-    e: 'and', ma: 'but', non: 'not', che: 'that, which', chi: 'who', si: 'itself, oneself (reflexive)', mi: 'me, myself',
+    e: 'and', ma: 'but', non: 'not', che: 'that, which', chi: 'who', si: 'itself, oneself (reflexive)', mi: 'me, to me, myself',
     io: 'I', lei: 'she, her / it — Lei: you (formal)', mia: 'my', tua: 'your', questa: 'this', questo: 'this', tutto: 'all, the whole',
     molto: 'very, a lot', quanto: 'how much', ancora: 'still, yet; again', solo: 'only', poi: 'then, afterwards', adesso: 'now',
     qui: 'here', fuori: 'outside', dentro: 'inside', dietro: 'behind', vicino: 'near (vicino a)', bene: 'well, properly', male: 'badly',
@@ -7039,11 +7068,149 @@
     ["no-domande", "tu", "Perché non vieni?", "Why you not come? (tu)", [], ["Why don't you come? (tu)", "Why aren't you coming? (tu)", "Why don't you come?"]],
     ["no-domande", "lui", "Il negozio non apre la domenica.", "The shop not opens the Sunday.", [], ["The shop doesn't open on Sundays.", "The store doesn't open on Sundays.", "The shop doesn't open on Sunday."]],
     ["no-domande", "tu", "Hai un fratello?", "You have a brother? (tu)", [], ["Do you have a brother? (tu)", "Have you got a brother?"]],
-    ["no-domande", "lui", "Dov'è la stazione?", "Where is the station?", ["Dove è la stazione?"], []]
+    ["no-domande", "lui", "Dov'è la stazione?", "Where is the station?", ["Dove è la stazione?"], []],
+
+    // ---- Mi piace (Oct 2026): verbs like piacere, where the thing liked is the subject and
+    // the person is in the pronoun. Persons: 'cosa' / 'cose' = a thing / things is the subject
+    // (no subject pronoun to add); io, tu, voi, loro = a person is (Mi manchi: tu)
+    ["mi-piace", "cosa", "Mi piace il caffè.", "To me pleases the coffee.", ["A me piace il caffè.", "Il caffè mi piace."], []],
+    ["mi-piace", "cose", "Mi piacciono i libri.", "To me please the books.", ["A me piacciono i libri.", "I libri mi piacciono."], []],
+    ["mi-piace", "cosa", "Mi piace la pizza.", "To me pleases the pizza.", ["A me piace la pizza.", "La pizza mi piace."], []],
+    ["mi-piace", "cose", "Mi piacciono i gatti.", "To me please the cats.", ["A me piacciono i gatti.", "I gatti mi piacciono."], []],
+    ["mi-piace", "cosa", "Mi piace la musica.", "To me pleases the music.", ["A me piace la musica.", "La musica mi piace."], []],
+    ["mi-piace", "cose", "Mi piacciono i film italiani.", "To me please the films Italian.", ["A me piacciono i film italiani.", "I film italiani mi piacciono."], []],
+    ["mi-piace", "cosa", "Mi piace leggere.", "To me pleases to read.", ["A me piace leggere."], []],
+    ["mi-piace", "cosa", "Mi piace cucinare.", "To me pleases to cook.", ["A me piace cucinare."], []],
+    ["mi-piace", "cosa", "Mi piace il mare.", "To me pleases the sea.", ["A me piace il mare.", "Il mare mi piace."], []],
+    ["mi-piace", "cose", "Mi piacciono le montagne.", "To me please the mountains.", ["A me piacciono le montagne.", "Le montagne mi piacciono."], []],
+    ["mi-piace", "cosa", "Non mi piace il pesce.", "Not to me pleases the fish.", ["A me non piace il pesce.", "Il pesce non mi piace."], []],
+    ["mi-piace", "cose", "Non mi piacciono i cani grandi.", "Not to me please the dogs big.", ["A me non piacciono i cani grandi.", "I cani grandi non mi piacciono."], []],
+    ["mi-piace", "cosa", "Mi piace molto il gelato.", "To me pleases much the ice cream.", ["A me piace molto il gelato.", "Il gelato mi piace molto."], []],
+    ["mi-piace", "cose", "Mi piacciono molto i dolci.", "To me please much the sweets.", ["A me piacciono molto i dolci.", "I dolci mi piacciono molto."], []],
+    ["mi-piace", "cosa", "Mi piace camminare in montagna.", "To me pleases to walk in mountain.", ["A me piace camminare in montagna."], []],
+    ["mi-piace", "cosa", "Mi piace la casa nuova.", "To me pleases the house new.", ["Mi piace la nuova casa.", "A me piace la casa nuova.", "La casa nuova mi piace."], []],
+
+    ["a-chi", "cosa", "Ti piace la pizza?", "To you pleases the pizza? (tu)", ["A te piace la pizza?", "La pizza ti piace?"], []],
+    ["a-chi", "cose", "Ti piacciono i cani?", "To you please the dogs? (tu)", ["A te piacciono i cani?", "I cani ti piacciono?"], []],
+    ["a-chi", "cosa", "Gli piace il calcio.", "To him pleases the football.", ["A lui piace il calcio.", "Il calcio gli piace."], []],
+    ["a-chi", "cose", "Le piacciono i fiori.", "To her please the flowers.", ["A lei piacciono i fiori.", "I fiori le piacciono."], []],
+    ["a-chi", "cosa", "Ci piace la città.", "To us pleases the city.", ["A noi piace la città.", "La città ci piace."], []],
+    ["a-chi", "cosa", "Vi piace il vino?", "To you pleases the wine? (voi)", ["A voi piace il vino?", "Il vino vi piace?"], []],
+    ["a-chi", "cose", "Gli piacciono i treni.", "To them please the trains.", ["A loro piacciono i treni.", "Piacciono loro i treni.", "I treni gli piacciono."], []],
+    ["a-chi", "cosa", "A mio fratello piace il calcio.", "To my brother pleases the football.", ["Il calcio piace a mio fratello."], []],
+    ["a-chi", "cose", "A mia madre piacciono i fiori.", "To my mother please the flowers.", ["I fiori piacciono a mia madre."], []],
+    ["a-chi", "cosa", "Ai bambini piace il gelato.", "To the children pleases the ice cream.", ["Il gelato piace ai bambini."], []],
+    ["a-chi", "cosa", "Alla nonna piace cucinare.", "To the grandmother pleases to cook.", [], []],
+    ["a-chi", "cosa", "A me piace il tè, a lui piace il caffè.", "To me pleases the tea, to him pleases the coffee.", ["A me piace il tè, a lui il caffè."], []],
+    ["a-chi", "cosa", "Mi piace il gelato. Anche a me.", "To me pleases the ice cream. — Also to me.", ["A me piace il gelato. Anche a me."], []],
+    ["a-chi", "cosa", "Non mi piace il pesce. A me sì.", "Not to me pleases the fish. — To me yes.", ["A me non piace il pesce. A me sì."], []],
+    ["a-chi", "cosa", "Ti piace il mare? A me no.", "To you pleases the sea? (tu) — To me no.", ["A te piace il mare? A me no."], []],
+    ["a-chi", "cosa", "Le piace la musica italiana.", "To her pleases the music Italian.", ["A lei piace la musica italiana.", "La musica italiana le piace."], []],
+
+    ["come-piacere", "cosa", "Mi manca la mia famiglia.", "To me lacks the my family.", ["La mia famiglia mi manca.", "A me manca la mia famiglia."], []],
+    ["come-piacere", "cose", "Mi mancano i miei amici.", "To me lack the my friends.", ["I miei amici mi mancano.", "A me mancano i miei amici."], []],
+    ["come-piacere", "cosa", "Mi serve una penna.", "To me serves a pen.", ["A me serve una penna."], []],
+    ["come-piacere", "cose", "Mi servono le chiavi.", "To me serve the keys.", ["A me servono le chiavi.", "Le chiavi mi servono."], []],
+    ["come-piacere", "cosa", "Ti serve aiuto?", "To you serves help? (tu)", ["Ti serve un aiuto?", "A te serve aiuto?"], []],
+    ["come-piacere", "cosa", "Mi interessa la storia.", "To me interests the history.", ["A me interessa la storia.", "La storia mi interessa."], []],
+    ["come-piacere", "cose", "Ci interessano i libri vecchi.", "To us interest the books old.", ["Ci interessano i vecchi libri.", "A noi interessano i libri vecchi.", "I libri vecchi ci interessano."], []],
+    ["come-piacere", "cosa", "Non mi interessa.", "Not to me interests.", ["A me non interessa."], []],
+    ["come-piacere", "cosa", "Mi sembra strano.", "To me seems strange.", ["A me sembra strano."], []],
+    ["come-piacere", "cosa", "Mi sembra una buona idea.", "To me seems a good idea.", ["A me sembra una buona idea."], []],
+    ["come-piacere", "loro", "Mi sembrano stanchi.", "To me they seem tired.", ["A me sembrano stanchi."], []],
+    ["come-piacere", "cosa", "Mi dispiace.", "To me displeases.", ["A me dispiace."], []],
+    ["come-piacere", "cosa", "Ci dispiace molto.", "To us displeases much.", ["A noi dispiace molto."], []],
+    ["come-piacere", "cosa", "Mi fa male la testa.", "To me does bad the head.", ["La testa mi fa male."], []],
+    ["come-piacere", "cose", "Mi fanno male i piedi.", "To me do bad the feet.", ["I piedi mi fanno male."], []],
+    ["come-piacere", "cosa", "Ti va un caffè?", "To you goes a coffee? (tu)", ["A te va un caffè?"], []],
+    ["come-piacere", "cosa", "Mi resta poco tempo.", "To me remains little time.", ["Mi rimane poco tempo.", "A me resta poco tempo."], []],
+    ["come-piacere", "cosa", "Gli manca la casa.", "To him lacks the house.", ["A lui manca la casa.", "La casa gli manca."], []],
+
+    ["mi-piaci", "tu", "Mi piaci.", "To me you please. (tu)", [], []],
+    ["mi-piaci", "io", "Ti piaccio?", "To you I please? (tu)", [], []],
+    ["mi-piaci", "tu", "Mi manchi.", "To me you lack. (tu)", [], []],
+    ["mi-piaci", "io", "Ti manco?", "To you I lack? (tu)", [], []],
+    ["mi-piaci", "tu", "Ci manchi molto.", "To us you lack much. (tu)", [], []],
+    ["mi-piaci", "tu", "Gli piaci.", "To him you please. (tu)", ["Tu gli piaci.", "A lui piaci."], []],
+    ["mi-piaci", "tu", "Le piaci molto.", "To her you please much. (tu)", ["Tu le piaci molto.", "A lei piaci molto."], []],
+    ["mi-piaci", "voi", "Mi mancate.", "To me you lack. (voi)", [], []],
+    ["mi-piaci", "voi", "Ci piacete.", "To us you please. (voi)", [], []],
+    ["mi-piaci", "io", "Non ti piaccio?", "Not to you I please? (tu)", [], []],
+
+    ["al-contrario", "cosa", "Mi piace la cucina italiana.", "I like Italian food.", ["A me piace la cucina italiana.", "La cucina italiana mi piace."], []],
+    ["al-contrario", "cose", "Mi mancano i miei genitori.", "I miss my parents.", ["I miei genitori mi mancano.", "A me mancano i miei genitori."], []],
+    ["al-contrario", "cosa", "Ti piace questo libro?", "Do you like this book? (tu)", ["A te piace questo libro?", "Questo libro ti piace?"], []],
+    ["al-contrario", "cosa", "Ci serve una macchina nuova.", "We need a new car.", ["Ci serve una nuova macchina.", "A noi serve una macchina nuova."], []],
+    ["al-contrario", "cose", "Gli piacciono le macchine veloci.", "He likes fast cars.", ["A lui piacciono le macchine veloci.", "Le macchine veloci gli piacciono."], []],
+    ["al-contrario", "cosa", "Mi fa male il braccio.", "My arm hurts.", ["Il braccio mi fa male."], []],
+    ["al-contrario", "cosa", "Ti manca casa?", "Do you miss home? (tu)", ["Ti manca la casa?", "A te manca casa?"], []],
+    ["al-contrario", "cosa", "A mio padre non piace il rumore.", "My father doesn't like noise.", ["Il rumore non piace a mio padre."], []],
+    ["al-contrario", "cosa", "Non mi sembra giusto.", "It doesn't seem right to me.", ["A me non sembra giusto."], []],
+    ["al-contrario", "cose", "Ti mancano i tuoi amici?", "Do you miss your friends? (tu)", ["I tuoi amici ti mancano?", "A te mancano i tuoi amici?"], []]
   ];
   // Natural English, shown under the word-for-word prompt for the sentences that don't
   // translate well literally (and accepted, Italian → English)
   const SENTENCE_NATURAL = {
+    "Mi piace il caffè.": "I like coffee.",
+    "Mi piacciono i libri.": "I like books.",
+    "Mi piace la pizza.": "I like pizza.",
+    "Mi piacciono i gatti.": "I like cats.",
+    "Mi piace la musica.": "I like music.",
+    "Mi piacciono i film italiani.": "I like Italian films.",
+    "Mi piace leggere.": "I like reading.",
+    "Mi piace cucinare.": "I like cooking.",
+    "Mi piace il mare.": "I like the seaside.",
+    "Mi piacciono le montagne.": "I like the mountains.",
+    "Non mi piace il pesce.": "I don't like fish.",
+    "Non mi piacciono i cani grandi.": "I don't like big dogs.",
+    "Mi piace molto il gelato.": "I really like ice cream.",
+    "Mi piacciono molto i dolci.": "I really like sweets.",
+    "Mi piace camminare in montagna.": "I like walking in the mountains.",
+    "Mi piace la casa nuova.": "I like the new house.",
+    "Ti piace la pizza?": "Do you like pizza?",
+    "Ti piacciono i cani?": "Do you like dogs?",
+    "Gli piace il calcio.": "He likes football.",
+    "Le piacciono i fiori.": "She likes flowers.",
+    "Ci piace la città.": "We like the city.",
+    "Vi piace il vino?": "Do you like wine?",
+    "Gli piacciono i treni.": "They like trains.",
+    "A mio fratello piace il calcio.": "My brother likes football.",
+    "A mia madre piacciono i fiori.": "My mother likes flowers.",
+    "Ai bambini piace il gelato.": "Children like ice cream.",
+    "Alla nonna piace cucinare.": "Grandma likes cooking.",
+    "A me piace il tè, a lui piace il caffè.": "I like tea; he likes coffee.",
+    "Mi piace il gelato. Anche a me.": "I like ice cream. — Me too.",
+    "Non mi piace il pesce. A me sì.": "I don't like fish. — I do.",
+    "Ti piace il mare? A me no.": "Do you like the seaside? — I don't.",
+    "Le piace la musica italiana.": "She likes Italian music.",
+    "Mi manca la mia famiglia.": "I miss my family.",
+    "Mi mancano i miei amici.": "I miss my friends.",
+    "Mi serve una penna.": "I need a pen.",
+    "Mi servono le chiavi.": "I need the keys.",
+    "Ti serve aiuto?": "Do you need help?",
+    "Mi interessa la storia.": "I'm interested in history.",
+    "Ci interessano i libri vecchi.": "We're interested in old books.",
+    "Non mi interessa.": "I'm not interested.",
+    "Mi sembra strano.": "It seems strange to me.",
+    "Mi sembra una buona idea.": "It seems like a good idea to me.",
+    "Mi sembrano stanchi.": "They seem tired to me.",
+    "Mi dispiace.": "I'm sorry.",
+    "Ci dispiace molto.": "We're very sorry.",
+    "Mi fa male la testa.": "My head hurts.",
+    "Mi fanno male i piedi.": "My feet hurt.",
+    "Ti va un caffè?": "Do you fancy a coffee?",
+    "Mi resta poco tempo.": "I have little time left.",
+    "Gli manca la casa.": "He misses the house.",
+    "Mi piaci.": "I like you.",
+    "Ti piaccio?": "Do you like me?",
+    "Mi manchi.": "I miss you.",
+    "Ti manco?": "Do you miss me?",
+    "Ci manchi molto.": "We miss you a lot.",
+    "Gli piaci.": "He likes you.",
+    "Le piaci molto.": "She likes you a lot.",
+    "Mi mancate.": "I miss you all.",
+    "Ci piacete.": "We like you all.",
+    "Non ti piaccio?": "Don't you like me?",
     "Aspetto l'autobus.": "I'm waiting for the bus.",
     "Cerco le chiavi.": "I'm looking for the keys.",
     "Lavoro in ufficio.": "I work in an office.",
@@ -7100,10 +7267,31 @@
     "Il negozio non apre la domenica.": "The shop doesn't open on Sundays.",
     "Hai un fratello?": "Do you have a brother?"
   };
+  // Al contrario: the prompt is the natural English; the word for word comes after answering
+  const SENTENCE_LITERAL = {
+    "Mi piace la cucina italiana.": "To me pleases the kitchen Italian.",
+    "Mi mancano i miei genitori.": "To me lack the my parents.",
+    "Ti piace questo libro?": "To you pleases this book?",
+    "Ci serve una macchina nuova.": "To us serves a car new.",
+    "Gli piacciono le macchine veloci.": "To him please the cars fast.",
+    "Mi fa male il braccio.": "To me does bad the arm.",
+    "Ti manca casa?": "To you lacks home?",
+    "A mio padre non piace il rumore.": "To my father not pleases the noise.",
+    "Non mi sembra giusto.": "Not to me seems right.",
+    "Ti mancano i tuoi amici?": "To you lack the your friends?"
+  };
   const SENTENCE_LEVELS = [
-    ['io-tu', 'Io e tu', 'I and you'], ['lui-lei', 'Lui e lei', 'He and she'], ['noi-voi-loro', 'Noi, voi, loro', 'We, you, they'],
-    ['com-e', "Com'è?", 'Describing things'], ['dove-quando', 'Dove e quando', 'Where and when'], ['no-domande', 'No e domande', 'Negatives and questions']
+    ['io-tu', 'Io e tu', 'I and you', 'presente'], ['lui-lei', 'Lui e lei', 'He and she', 'presente'], ['noi-voi-loro', 'Noi, voi, loro', 'We, you, they', 'presente'],
+    ['com-e', "Com'è?", 'Describing things', 'presente'], ['dove-quando', 'Dove e quando', 'Where and when', 'presente'], ['no-domande', 'No e domande', 'Negatives and questions', 'presente'],
+    ['mi-piace', 'Mi piace', 'Piace or piacciono', 'piacere'], ['a-chi', 'A chi piace?', 'Every person', 'piacere'], ['come-piacere', 'Come piacere', 'Verbs that work the same', 'piacere'],
+    ['mi-piaci', 'Mi piaci', 'People as the subject', 'piacere'], ['al-contrario', 'Al contrario', 'Natural English: do the flip', 'piacere']
   ];
+  // The kinds of sentence, chosen at the top of Scrittura's setup
+  const SENTENCE_TYPES = [
+    { key: 'presente', label: 'Presente semplice', en: 'The present tense' },
+    { key: 'piacere', label: 'Mi piace', en: 'Verbs like piacere' }
+  ];
+  const SENTENCE_LEVEL_TYPE = Object.fromEntries(SENTENCE_LEVELS.map(([key, , , type]) => [key, type]));
   const SUBJECT_PRONOUN = { io: 'Io', tu: 'Tu', noi: 'Noi', voi: 'Voi', lui: 'Lui', lei: 'Lei', loro: 'Loro' };
   const sentenceKey = it => it.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   // Italian usually drops the subject pronoun: accept the sentence with or without it
@@ -7125,14 +7313,17 @@
     const itAll = sentenceAccepted(person, it, alts).filter(s => s !== it);
     const natural = SENTENCE_NATURAL[it] || null;
     const enAll = [...new Set([...enAlts, ...(natural ? [natural] : [])])].filter(x => x !== en);
-    return { noun: key, display: it, it, en, level, person, note: null, natural,
+    const literal = SENTENCE_LITERAL[it] || null;
+    return { noun: key, display: it, it, en, level, type: SENTENCE_LEVEL_TYPE[level], person, natural, literal,
+             note: literal ? `<span class="literal-label">Word for word</span> <em>${literal}</em>` : null,
              phrase: { key, it, en, itAlts: itAll, enAlts: enAll, reg: 'neutral' } };
   });
-  const SENTENCE_THEMES = SENTENCE_LEVELS.map(([key, label, en]) => ({ key, label, en, nouns: SENTENCE_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
+  const SENTENCE_THEMES = SENTENCE_LEVELS.map(([key, label, en, type]) => ({ key, label, en, type, nouns: SENTENCE_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
+  const SENTENCE_TYPE_OF = Object.fromEntries(SENTENCE_ITEMS.map(n => [n.noun, n.type]));
   const SENTENCE_ORDER = SENTENCE_ITEMS.map(n => n.noun);
   // Words of a sentence and the deck cards they belong to (as in the story), with
   // plurals found from their singular: i bambini → il bambino
-  const SENTENCE_CH = { senses: { vicino: 'fn:vicino' }, glossary: {} };   // vicino a: near, not the neighbour
+  const SENTENCE_CH = { senses: { vicino: 'fn:vicino', dolci: 'nouns:dolce' }, glossary: {} };   // i dolci: sweets, not sweet   // vicino a: near, not the neighbour
   function sentencePluralNoun(n, idx) {
     const c = [];
     if (/chi$/.test(n)) c.push(n.slice(0, -3) + 'co');
@@ -7201,7 +7392,13 @@
   for (const [prep, short] of [['a', 'a'], ['di', 'de'], ['da', 'da'], ['in', 'ne'], ['su', 'su']]) {
     for (const [art, end] of [['il', 'l'], ['lo', 'llo'], ["l'", "ll'"], ['la', 'lla'], ['i', 'i'], ['gli', 'gli'], ['le', 'lle']]) SENT_JOIN[short + end] = [prep, art];
   }
-  const SENT_PERSON = { io: 'io', tu: 'tu', lui: 'lui / lei', lei: 'lui / lei', noi: 'noi', voi: 'voi', loro: 'loro' };
+  const SENT_PERSON = { io: 'io', tu: 'tu', lui: 'lui / lei', lei: 'lui / lei', noi: 'noi', voi: 'voi', loro: 'loro', cosa: 'lui / lei', cose: 'loro' };
+  // Verbs like piacere: what the subject is doing, word for word
+  const SENT_LIKE = { piacere: 'pleasing', dispiacere: 'displeasing', mancare: 'lacking (missing)', servire: 'serving (being needed)', interessare: 'interesting',
+                      sembrare: 'seeming', restare: 'remaining', rimanere: 'remaining', andare: 'appealing', fare: 'doing' };
+  const SENT_WHO = { io: 'I am', tu: 'you are', lui: 'he or she is', noi: 'we are', voi: 'you all are', loro: 'they are' };
+  const SENT_IOBJ = new Set(['mi', 'ti', 'gli', 'le', 'ci', 'vi']);
+  const SENT_IOBJ_EN = { mi: 'to me', ti: 'to you', gli: 'to him (or to them)', le: 'to her', ci: 'to us', vi: 'to you all' };
   const SENT_PRONOUN = new Set(['io', 'tu', 'lui', 'lei', 'noi', 'voi', 'loro']);
   const ADJ_SLOT_NAMES = { '4': ['msg', 'fsg', 'mpl', 'fpl'], '2': ['sg', 'pl'], inv: ['all'] };
   const SLOT_SAYS = { msg: 'masculine singular', fsg: 'feminine singular', mpl: 'masculine plural', fpl: 'feminine plural', sg: 'singular', pl: 'plural' };
@@ -7238,7 +7435,7 @@
     for (let k = j + 1; k < infos.length; k++) if (infos[k].kind === 'noun') return k;
     return -1;
   }
-  const SENT_POSSESSIVE = new Set(['mio', 'mia', 'miei', 'mie', 'tuo', 'tua', 'suo', 'sua']);
+  const SENT_POSSESSIVE = new Set(['mio', 'mia', 'miei', 'mie', 'tuo', 'tua', 'tuoi', 'tue', 'suo', 'sua', 'suoi', 'sue', 'nostro', 'nostra', 'nostri', 'nostre', 'vostro', 'vostra', 'vostri', 'vostre']);
   function sentNounPhrase(words, infos, k) {
     let s = k;
     while (s > 0 && k - s < 2 && (['art', 'join'].includes(infos[s - 1].kind) || SENT_POSSESSIVE.has(sentenceNorm(words[s - 1])))) s--;
@@ -7248,7 +7445,10 @@
     const g = best.g, w = best.w, tn = w.map(sentenceNorm), gn = g.map(sentenceNorm);
     const tInfo = w.map((x, j) => sentWordInfo(x, j > 0 ? tn[j - 1] : null));
     const gInfo = g.map((x, i) => sentWordInfo(x, i > 0 ? gn[i - 1] : null));
-    const person = card.person || null;
+    // mi, ti, gli, le, ci, vi straight before a verb: the person, not an article
+    const markPron = (infos, ns) => infos.forEach((x, k) => { if (SENT_IOBJ.has(ns[k]) && infos[k + 1] && infos[k + 1].kind === 'verb') infos[k] = { kind: 'pron', n: ns[k] }; });
+    markPron(tInfo, tn); markPron(gInfo, gn);
+    const person = card.person || null, like = card.type === 'piacere';
     const why = [];
     const add = s => { if (why.length < 3 && !why.includes(s)) why.push(s); };
     // Runs of unmatched words between matched ones: substitutions, missing, extra
@@ -7268,6 +7468,15 @@
       if (nt >= 0 && ni >= 0 && gn[ni + 1] !== tn[nt + 1]) add(`${em('non')} goes straight before the verb: ${em(w.slice(nt, nt + 2).join(' '))}.`);
       else add(`The words are right — the order isn't. Italian says ${em(w.join(' ').replace(/' /g, "'"))}`);
     }
+    let anchio = false;   // anch'io for anche a me: said once, not also as a spelling slip
+    if (like) {
+      const tj = tn.join(' '), gj = gn.join(' ');   // accents are already gone: sì reads si
+      if (/\banche a me\b/.test(tj) && /\banch' ?io\b|\banche io\b/.test(gj)) {
+        anchio = true;
+        add(`${em('anche a me')}, not ${em("anch'io")}: with ${em('piacere')} you aren't the subject — it's <em>to me too</em>.`);
+      }
+      for (const [yn, shown] of [['si', 'sì'], ['no', 'no']]) if (new RegExp(`\\ba me ${yn}\\b`).test(tj) && new RegExp(`\\bio ${yn}\\b`).test(gj)) add(`${em('a me ' + shown)}, not ${em('io ' + shown)}: the person is <em>to me</em>, not the subject.`);
+    }
     for (const { ins, del } of runs) {
       // A preposition and article written apart that join into one word (su il → sul)
       for (const j of [...del]) {
@@ -7281,8 +7490,33 @@
       }
       const pairs = Math.min(ins.length, del.length);
       for (let k = 0; k < pairs; k++) {
-        const i = ins[k], j = del[k], a = gInfo[i], b = tInfo[j], right = em(w[j].replace(/[.?!,]$/, '').toLowerCase()), wrong = em(g[i].toLowerCase());
-        if (b.kind === 'adj' && a.kind === 'adj' && a.key === b.key && b.slot) {
+        const i = ins[k], j = del[k], a = gInfo[i], b = tInfo[j], right = em(w[j].replace(/[.?!,]$/, '').toLowerCase()), wrong = em(g[i].replace(/[.?!,]$/, '').toLowerCase());
+        if (b.kind === 'verb' && a.kind === 'verb' && a.key === b.key && b.verb && b.n === sentenceNorm(b.verb.it)) {
+          // mi piace leggere: the second verb, the activity, keeps its infinitive
+          const before = j > 0 ? tInfo[j - 1] : null, pleases = like && before && before.kind === 'verb' && before.key === 'piacere';
+          const doing = b.verb.en ? String(b.verb.en).replace(/^to /, '').split(/[,·/(]/)[0].trim() : '';
+          add(`${right}, not ${wrong}: the activity stays in the infinitive — ${em(`${j > 0 ? tn[j - 1] : ''} ${tn[j]}`.trim())}${pleases && doing ? ` (<em>pleases to ${escapeHTML(doing)}</em>)` : ''}.`);
+        } else if (like && b.kind === 'verb' && a.kind === 'verb' && a.key === b.key && own(SENT_LIKE, b.key)) {
+          // The thing doing the pleasing is the subject; the verb agrees with it
+          const gloss = b.key === 'fare' ? (tn[j + 1] === 'male' ? 'hurting' : 'doing') : SENT_LIKE[b.key];
+          const asPerson = a.persons.filter(x => ['io', 'tu', 'noi', 'voi'].includes(x));
+          const meant = asPerson.length && (person === 'cosa' || person === 'cose') ? ` (${wrong} would mean ${SENT_WHO[asPerson[0]]} doing the ${gloss}.)` : '';
+          if (person === 'cosa' || person === 'cose') {
+            const after = tInfo.findIndex((x, k) => k > j && x.kind === 'noun');
+            const inf = tInfo.findIndex((x, k) => k > j && x.kind === 'verb' && x.verb && sentenceNorm(x.verb.it) === x.n);
+            const nk = after >= 0 ? after : sentNearestNoun(tInfo, j);
+            if (inf >= 0 && (after < 0 || inf < after)) add(`${right}, not ${wrong}: ${em(tn[inf])} — an activity — is doing the ${gloss}, and an activity counts as singular.${meant}`);
+            else if (nk >= 0) {
+              const pl = tInfo[nk].plural;
+              add(`${right}, not ${wrong}: ${em(sentNounPhrase(w, tInfo, nk))} ${pl ? 'are' : 'is'} doing the ${gloss} — ${pl ? 'they are' : 'it is'} the subject, so the verb is ${pl ? 'plural' : 'singular'}.${meant}`);
+            } else add(`${right}, not ${wrong}: the thing doing the ${gloss} is the subject, so the verb is ${person === 'cose' ? 'plural' : 'singular'}.${meant}`);
+          } else {
+            add(`${right}, not ${wrong}: the subject is ${em(person)} — ${SENT_WHO[person]} doing the ${gloss} — so the verb takes the ${SENT_PERSON[person]} form.`);
+          }
+        } else if (b.kind === 'pron' && (a.kind === 'pron' || SENT_PRONOUN.has(gn[i]))) {
+          if (a.kind === 'pron') add(`${right}, not ${wrong}: ${em(tn[j])} is <em>${SENT_IOBJ_EN[tn[j]]}</em> — the person goes in the pronoun: ${emForms(['mi', 'ti', 'gli', 'le', 'ci', 'vi'], tn[j])}.`);
+          else add(`${right}, not ${wrong}: the person isn't the subject here — it's <em>${SENT_IOBJ_EN[tn[j]]}</em>, ${em(tn[j])}.`);
+        } else if (b.kind === 'adj' && a.kind === 'adj' && a.key === b.key && b.slot) {
           const nk = sentNearestNoun(tInfo, j);
           const list = emForms(b.forms, tn[j]);
           if (nk >= 0) {
@@ -7292,11 +7526,12 @@
             add(`${right}, not ${wrong}: the subject is ${em(person)}, so ${SLOT_SAYS[b.slot].replace(/^(masculine|feminine) /, '')} — ${list}.`);
           }
         } else if (b.kind === 'verb' && a.kind === 'verb' && a.key === b.key) {
-          const p = b.persons.includes(person) ? person : (person === 'lei' && b.persons.includes('lui') ? 'lui' : b.persons[0]);
+          const pp = person === 'cosa' ? 'lui' : person === 'cose' ? 'loro' : person;
+          const p = b.persons.includes(pp) ? pp : (pp === 'lei' && b.persons.includes('lui') ? 'lui' : b.persons[0]);
           const vk = sentNearestNoun(tInfo, j), pro = j > 0 && SENT_PRONOUN.has(tn[j - 1]) ? w[j - 1] : null;
           const subject = pro || (['lui', 'lei', 'loro'].includes(person) && vk >= 0 ? sentNounPhrase(w, tInfo, vk) : person);
           const was = a.persons.length ? ` (${wrong} is the ${a.persons.map(x => SENT_PERSON[x]).join(' / ')} form)` : '';
-          add(`${right}, not ${wrong}: the subject is ${em(subject)}, so the verb takes the ${SENT_PERSON[p]} form${was}. ${em(b.verb.it)}: ${emForms(personOrder.map(x => b.verb.conj[x]), tn[j])}.`);
+          if (p && SENT_PERSON[p]) add(`${right}, not ${wrong}: the subject is ${em(subject)}, so the verb takes the ${SENT_PERSON[p]} form${was}. ${em(b.verb.it)}: ${emForms(personOrder.map(x => b.verb.conj[x]), tn[j])}.`);
         } else if (b.kind === 'art' && a.kind === 'art') {
           const next = tInfo[j + 1] && tInfo[j + 1].kind === 'noun' ? tInfo[j + 1] : null, noun = next ? em(sentNounPhrase(w, tInfo, j + 1)) : '';
           const wrongGender = next && next.g && SENT_ART[gn[i]][0] && SENT_ART[gn[i]][0] !== next.g;
@@ -7317,16 +7552,27 @@
           add(`${right}, not ${wrong}: ${em(tn[j])} = ${em(prep)} + ${em(art)}${reason}.`);
         } else if (b.kind === 'noun' && a.kind === 'noun' && a.key === b.key && a.plural !== b.plural) {
           add(`${right}, not ${wrong}: ${b.plural ? 'plural' : 'singular'} here — ${em(b.item ? b.item.it : b.key)}${b.plural ? `, plural ${right}` : ''}.`);
-        } else if (gn[i].length > 2 && sentEdit(gn[i], tn[j]) <= (tn[j].length > 5 ? 2 : 1)) {
+        } else if (b.kind === 'join' && SENT_JOIN[tn[j]][1] === gn[i]) {
+          // just the article, where Italian joins a preposition to it: ai bambini = a + i
+          const [prep, art] = SENT_JOIN[tn[j]];
+          add(`${right}, not ${wrong}: ${em(tn[j])} = ${em(prep)} + ${em(art)}${like && prep === 'a' ? ' — the person takes <em>a</em> (to)' : ''}.`);
+        } else if (gn[i].length > 2 && !(anchio && /^anch/.test(gn[i])) && sentEdit(gn[i], tn[j]) <= (tn[j].length > 5 ? 2 : 1)) {
           add(`Spelling: ${right}.`);
         }
       }
       // A missing article, or a missing non
       for (const j of del.slice(pairs)) {
         if (tInfo[j].kind === 'art' && tInfo[j + 1] && tInfo[j + 1].kind === 'noun') add(`Don't drop the article: ${em(sentNounPhrase(w, tInfo, j + 1))}.`);
+        else if (tInfo[j].kind === 'art' && tInfo[j + 1] && tInfo[j + 1].kind === 'adj' && tInfo[j + 2] && tInfo[j + 2].kind === 'noun')
+          add(`Don't drop the article: ${em(w.slice(j, j + 3).join(' ').replace(/[.?!,]$/, '').toLowerCase())}.`);
         else if (tInfo[j].kind === 'art' && tn[j + 1] && SENT_POSSESSIVE.has(tn[j + 1]) && tInfo[j + 2] && tInfo[j + 2].kind === 'noun')
           add(`Don't drop the article: ${em(sentNounPhrase(w, tInfo, j + 2))} — possessives take the article in Italian (only a single family member goes without: ${em('mia madre')}).`);
         else if (tn[j] === 'non') add(`${em('non')}, right before the verb, makes it negative.`);
+        else if (like && (tn[j] === 'a' || (own(SENT_JOIN, tn[j]) && SENT_JOIN[tn[j]][0] === 'a'))) {
+          let k = j + 1;
+          while (k < w.length && tInfo[k].kind !== 'noun' && !['me', 'te', 'lui', 'lei', 'noi', 'voi', 'loro'].includes(tn[k]) && k - j < 3) k++;
+          add(`The person takes ${em('a')} (<em>to</em>): ${em(w.slice(j, k + 1).join(' ').replace(/[.?!,]$/, '').toLowerCase())}.`);
+        }
       }
     }
     return why;
@@ -7478,7 +7724,7 @@
       kind: 'phrase', sentences: true, panel: null, doneWord: 'sentences', chipOrder: 'level',   // the grid keeps the levels' order
       switchLabel: 'Scrittura', title: 'Scrittura', subtitle: 'Il Mazzo · Frasi da Comporre',
       setupTitle: 'Choose your sentences',
-      setupSub: 'Present-tense sentences built from the nouns, verbs and adjectives in your deck. Write each one in full — every article, every preposition. The English follows the Italian word for word, in its order — You eat the meat?, I work in office — so it shows how Italians build the sentence. The subject pronoun is optional, as in Italian; punctuation and accents don\'t matter.',
+      setupSub: 'Sentences built from the nouns, verbs and adjectives in your deck — the present tense, and verbs like <em>piacere</em>, where the thing liked is the subject. Write each one in full — every article, every preposition. The English follows the Italian word for word, in its order — You eat the meat?, I work in office — so it shows how Italians build the sentence. The subject pronoun is optional, as in Italian; punctuation and accents don\'t matter.',
       itemWord: 'sentence', itemWords: 'sentences',
       items: SENTENCE_ITEMS, themes: SENTENCE_THEMES, frequency: SENTENCE_ORDER,
       statsKeys: { 'en-it': 'scrittura-stats-v1', 'it-en': 'scrittura-stats-iten-v1', listen: 'scrittura-stats-listen-v1' }, statsFormat: 'noun',
@@ -7521,15 +7767,26 @@
 
   function applySubject(s) {
     if (subject) {
-      Object.assign(subjectState[subject], { selected: selectedNouns, capValue, capMode, direction });
+      const keep = subjectState[subject].hidden || [];   // selected, but of a kind switched off
+      Object.assign(subjectState[subject], { selected: keep.length ? new Set([...selectedNouns, ...keep]) : selectedNouns, capValue, capMode, direction });
     }
     subject = s;
     const cfg = SUBJECTS[s], st = subjectState[s];
     nounData = cfg.items;
     THEMES = cfg.themes;
     FREQUENCY_ORDER = cfg.frequency;
-    frequencyRank = Object.fromEntries(FREQUENCY_ORDER.map((n, i) => [n, i + 1]));
     selectedNouns = st.selected;
+    st.hidden = [];
+    if (cfg.sentences) {   // only the kinds of sentence chosen at the top of the setup
+      const on = activeSentenceTypes();
+      nounData = cfg.items.filter(n => on.includes(n.type));
+      const pool = new Set(nounData.map(n => n.noun));
+      THEMES = cfg.themes.filter(th => on.includes(th.type));
+      FREQUENCY_ORDER = cfg.frequency.filter(k => pool.has(k));
+      st.hidden = [...st.selected].filter(k => !pool.has(k));
+      selectedNouns = new Set([...st.selected].filter(k => pool.has(k)));
+    }
+    frequencyRank = Object.fromEntries(FREQUENCY_ORDER.map((n, i) => [n, i + 1]));
     capValue = st.capValue;
     capMode = st.capMode;
     direction = st.direction;
@@ -7749,6 +8006,32 @@
     });
   }
 
+  // ===== Scrittura: which kinds of sentence =====
+  function sentenceTypesHTML() {
+    const on = activeSentenceTypes();
+    return `
+      <div class="mode-label">Sentence types</div>
+      <div class="mode-toggle type-toggle" id="type-toggle" role="group" aria-label="Which kinds of sentence">
+        ${SENTENCE_TYPES.map(x => `<button type="button" class="mode-option${on.includes(x.key) ? ' active' : ''}" data-stype="${x.key}" aria-pressed="${on.includes(x.key)}">${x.label}<span class="type-count">${SENTENCE_ITEMS.filter(n => n.type === x.key).length}</span></button>`).join('')}
+      </div>
+      <p class="person-hint" id="type-hint" aria-live="polite"></p>
+      ${on.includes('piacere') ? `<p class="type-key"><em>Mi piace il caffè</em> — word for word, <em>to me pleases the coffee</em>: the thing liked is the subject, so the verb agrees with it (<em>mi piacciono i libri</em>), and the person goes in the pronoun — <em>mi · ti · gli · le · ci · vi</em>: to me · to you · to him · to her · to us · to you all.</p>` : ''}`;
+  }
+  function wireSentenceTypes() {
+    const box = document.getElementById('type-toggle');
+    if (!box) return;
+    box.addEventListener('click', e => {
+      const b = e.target.closest('[data-stype]');
+      if (!b) return;
+      const cur = activeSentenceTypes(), k = b.dataset.stype;
+      const next = cur.includes(k) ? cur.filter(x => x !== k) : [...cur, k];
+      if (!next.length) { document.getElementById('type-hint').textContent = 'Keep at least one kind of sentence.'; return; }
+      saveSentenceTypes(next);
+      applySubject(subject);   // reload the section with just these kinds
+      showSetup();
+    });
+  }
+
   // ===== Section switch =====
   function wireSubjectToggle() {
     document.querySelectorAll('#subject-toggle .mode-option').forEach(btn => {
@@ -7800,6 +8083,7 @@
         <h2 class="setup-title">${cfg.setupTitle}</h2>
         <p class="setup-sub">${cfg.setupSub}</p>
       </div>
+      ${cfg.sentences ? sentenceTypesHTML() : ''}
       ${modeOptions ? `
       <div class="mode-label">Practice mode</div>
       <div class="mode-toggle" id="mode-toggle">
@@ -8142,6 +8426,7 @@
     wireSubjectToggle();
 
     if (isVerbs) wirePersonPicker();
+    wireSentenceTypes();
 
     // ===== Verbs: practice mode and direction (as in the verb game's setup) =====
     if (modeOptions) {
