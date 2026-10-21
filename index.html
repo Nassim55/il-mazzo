@@ -1915,6 +1915,23 @@
   .eg-prep .eg-person { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
   @media (max-width: 640px) { .theme-group { grid-template-columns: 1fr; gap: 4px; } .theme-group-btn { padding-bottom: 0; } }
 
+  /* In a round: the section's chart, on demand — a drawer beside the card, a sheet on a phone */
+  .chart-overlay { position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end; background: rgba(28, 22, 17, 0.28); }
+  .chart-overlay[hidden] { display: none; }
+  .chart-sheet { position: relative; width: min(420px, 100%); height: 100%; overflow-y: auto; box-sizing: border-box; padding: 46px 18px 28px;
+                 background: var(--cream); box-shadow: -10px 0 30px rgba(28, 22, 17, 0.18); animation: chart-in 0.18s ease-out; }
+  .chart-close { position: absolute; top: 6px; right: 10px; z-index: 1; background: none; border: none; cursor: pointer; padding: 4px 9px;
+                 font-size: 28px; line-height: 1; color: var(--ink-soft); }
+  .chart-close:hover { color: var(--terracotta); }
+  .chart-body .endings { position: static; margin: 0; }
+  @keyframes chart-in { from { transform: translateX(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes chart-up { from { transform: translateY(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @media (max-width: 640px) {
+    .chart-overlay { align-items: flex-end; justify-content: center; }
+    .chart-sheet { width: 100%; height: auto; max-height: 86vh; border-radius: 12px 12px 0 0; animation-name: chart-up; }
+  }
+  @media (prefers-reduced-motion: reduce) { .chart-sheet { animation: none; } }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
@@ -8206,6 +8223,7 @@
     stats = loadStats();
     associations = loadAssociations();
     container.dataset.kind = cfg.kind;
+    updateChartBtn();   // Ripasso: this card's own chart, if its section has one
   }
 
   function startRipasso() {
@@ -8416,6 +8434,326 @@
     });
   }
 
+  // ===== Each section's chart: on its setup screen, and on demand in a round =====
+  const SECTION_CHARTS = {
+    endings: () => `
+      <aside class="endings" aria-label="Regular verb endings, present tense">
+        <h3 class="endings-title">Le desinenze</h3>
+        <div class="endings-sub">Regular endings · presente</div>
+
+        <div class="eg">
+          <div></div>
+          <div class="eg-class">-are</div>
+          <div class="eg-class">-ere</div>
+          <div class="eg-class eg-s2">-ire</div>
+
+          <div></div>
+          <div class="eg-model">parlare</div>
+          <div class="eg-model">vendere</div>
+          <div class="eg-model">dormire</div>
+          <div class="eg-model">capire</div>
+
+          <div class="eg-person">io</div>
+          <div class="eg-cell eg-s3"><span class="eg-txt"><span class="eg-dash">-</span>o</span></div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span><span class="eg-isc">isc</span>o</span></div>
+
+          <div class="eg-person">tu</div>
+          <div class="eg-cell eg-s3"><span class="eg-txt"><span class="eg-dash">-</span>i</span></div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span><span class="eg-isc">isc</span>i</span></div>
+
+          <div class="eg-person">lui/lei</div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>a</span></div>
+          <div class="eg-cell eg-s2"><span class="eg-txt"><span class="eg-dash">-</span>e</span></div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span><span class="eg-isc">isc</span>e</span></div>
+
+          <div class="eg-person">noi</div>
+          <div class="eg-cell eg-s4"><span class="eg-txt"><span class="eg-dash">-</span>iamo</span></div>
+
+          <div class="eg-person">voi</div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>ate</span></div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>ete</span></div>
+          <div class="eg-cell eg-s2"><span class="eg-txt"><span class="eg-dash">-</span>ite</span></div>
+
+          <div class="eg-person">loro</div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>ano</span></div>
+          <div class="eg-cell eg-s2"><span class="eg-txt"><span class="eg-dash">-</span>ono</span></div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span><span class="eg-isc">isc</span>ono</span></div>
+
+          <!-- Faint dotted guides between the -are | -ere | -ire sections, and a lighter one
+               for the dormire | capire split. They run over the boxes; each ending's
+               text knocks out the dots behind it so no line crosses a letter. -->
+          <div class="eg-rule" style="grid-column: 3; grid-row: 1 / 9" aria-hidden="true"></div>
+          <div class="eg-rule" style="grid-column: 4; grid-row: 1 / 9" aria-hidden="true"></div>
+          <div class="eg-rule eg-rule-sub" style="grid-column: 5; grid-row: 2 / 9" aria-hidden="true"></div>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Stress</div>
+          <p>Falls on the stem for io, tu, lui and loro — the same four forms that take <span class="eg-isc">-isc-</span>. Noi and voi stress the ending.</p>
+          <div class="en-eg">pàr·lo · pàr·la·no · par·lià·mo</div>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">-care · -gare</div>
+          <p>Add an <i>h</i> before <i>i</i> to keep the hard sound.</p>
+          <div class="en-eg">giochi, giochiamo · paghi, paghiamo</div>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">-iare</div>
+          <p>The stem's <i>i</i> merges with the ending's <i>i</i>.</p>
+          <div class="en-eg">mangi, mangiamo · studi, studiamo</div>
+        </div>
+      </aside>
+      `,
+    irregular: () => `
+      <aside class="endings irregular-panel" aria-label="Irregular verbs, present tense: essentials and patterns">
+        <h3 class="endings-title">Gli irregolari</h3>
+        <div class="endings-sub">Four essentials · presente</div>
+
+        <div class="eg eg-words">
+          <div></div>
+          <div class="eg-class">essere</div>
+          <div class="eg-class">avere</div>
+          <div class="eg-class">fare</div>
+          <div class="eg-class">andare</div>
+          <div class="eg-person">io</div>
+          <div class="eg-cell"><span class="eg-txt">sono</span></div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">h</span>o</span></div>
+          <div class="eg-cell"><span class="eg-txt">faccio</span></div>
+          <div class="eg-cell"><span class="eg-txt">vado</span></div>
+          <div class="eg-person">tu</div>
+          <div class="eg-cell"><span class="eg-txt">sei</span></div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">h</span>ai</span></div>
+          <div class="eg-cell"><span class="eg-txt">fai</span></div>
+          <div class="eg-cell"><span class="eg-txt">vai</span></div>
+          <div class="eg-person">lui/lei</div>
+          <div class="eg-cell"><span class="eg-txt">è</span></div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">h</span>a</span></div>
+          <div class="eg-cell"><span class="eg-txt">fa</span></div>
+          <div class="eg-cell"><span class="eg-txt">va</span></div>
+          <div class="eg-person">noi</div>
+          <div class="eg-cell"><span class="eg-txt">siamo</span></div>
+          <div class="eg-cell"><span class="eg-txt">abbiamo</span></div>
+          <div class="eg-cell"><span class="eg-txt">facciamo</span></div>
+          <div class="eg-cell"><span class="eg-txt">andiamo</span></div>
+          <div class="eg-person">voi</div>
+          <div class="eg-cell"><span class="eg-txt">siete</span></div>
+          <div class="eg-cell"><span class="eg-txt">avete</span></div>
+          <div class="eg-cell"><span class="eg-txt">fate</span></div>
+          <div class="eg-cell"><span class="eg-txt">andate</span></div>
+          <div class="eg-person">loro</div>
+          <div class="eg-cell"><span class="eg-txt">sono</span></div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">h</span>anno</span></div>
+          <div class="eg-cell"><span class="eg-txt">fanno</span></div>
+          <div class="eg-cell"><span class="eg-txt">vanno</span></div>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Noi &amp; voi</div>
+          <p>Noi always ends in <em>-iamo</em>, even here: <em>siamo, abbiamo, facciamo</em>. Voi is usually built from the infinitive (<em>avete, potete, venite</em>), except <em>siete, fate, dite</em> and the <em>-rre</em> verbs, which use their Latin stem (<em>ponete, traducete</em>).</p>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">-go</div>
+          <p>Io and loro add a <em>g</em>:</p>
+          <span class="en-eg">vengo · vengono · tengo · rimango · salgo · pongo</span>
+          <p>Verbs in <em>-gliere</em> swap it round: <em>scelgo, tolgo, colgo</em>.</p>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">uo · ie</div>
+          <p>A stressed <em>o</em> or <em>e</em> often splits in two, the change that turned Latin <em>ovum</em> into <em>uovo</em>:</p>
+          <span class="en-eg">può · vuole · muore · vieni · tiene · siede</span>
+          <p>Unstressed, it stays put: <em>potete, volete, morite, venite</em>.</p>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Latin stems</div>
+          <p>Short infinitives hide a longer Latin stem that the present brings back:</p>
+          <span class="en-eg">fare → faccio · dire → dico · bere → bevo · porre → pongo · tradurre → traduco</span>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Silent h &amp; accents</div>
+          <p>The <em>h</em> in <em>ho, hai, ha, hanno</em> is never said: it only tells them from <em>o</em> (or), <em>ai</em> (to the), <em>a</em> (to) and <em>anno</em> (year). <em>Dà</em> and <em>è</em> are accented to tell them from <em>da</em> (from) and <em>e</em> (and); <em>può</em>, like <em>più</em>, always is.</p>
+        </div>
+      </aside>
+      `,
+    agreement: () => `
+      <aside class="endings agreement-panel" aria-label="Adjective agreement">
+        <h3 class="endings-title">Le concordanze</h3>
+        <div class="endings-sub">Gender &amp; number · agreement</div>
+
+        <div class="eg eg-agree">
+          <div></div>
+          <div class="eg-class">4 forme</div>
+          <div class="eg-class">2 forme</div>
+          <div class="eg-class">invariabili</div>
+          <div></div>
+          <div class="eg-model">piccolo</div>
+          <div class="eg-model">grande</div>
+          <div class="eg-model">blu</div>
+          <div class="eg-person">m. sing.</div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>o</span></div>
+          <div class="eg-cell eg-rows2"><span class="eg-txt"><span class="eg-dash">-</span>e</span></div>
+          <div class="eg-cell eg-rows4"><span class="eg-txt">blu<br>rosa<br>viola</span></div>
+          <div class="eg-person">f. sing.</div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>a</span></div>
+          <div class="eg-person">m. plur.</div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>i</span></div>
+          <div class="eg-cell eg-rows2"><span class="eg-txt"><span class="eg-dash">-</span>i</span></div>
+          <div class="eg-person">f. plur.</div>
+          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>e</span></div>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">-co · -go</div>
+          <p>Most keep the hard sound in the plural with an <em>h</em>:</p>
+          <span class="en-eg">bianco → bianchi · lungo → lunghi · tedesco → tedeschi</span>
+          <p>Stressed earlier, <em>-co</em> usually softens: <em>sim·pà·ti·co → simpatici</em>. The feminine always stays hard: <em>simpatiche</em>.</p>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">-io</div>
+          <p>Drop the <em>i</em> in the plural:</p>
+          <span class="en-eg">vecchio → vecchi · serio → seri · grigio → grigi</span>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Nationalities</div>
+          <p>Those in <em>-o</em> have four forms (<em>italiano, italiana…</em>); those in <em>-ese</em> have two (<em>francese, francesi</em>). Both take a small letter.</p>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Before the noun</div>
+          <p><em>Bello</em> and <em>buono</em> change before a noun, much like the articles:</p>
+          <span class="en-eg">bel ragazzo · begli occhi · bell'amico · buon giorno · buon'amica</span>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Invariable</div>
+          <p>Colours named after things never change: <em>blu</em>, <em>rosa</em> (rose), <em>viola</em> (violet). <em>Marrone</em> (chestnut) often behaves the same way.</p>
+        </div>
+      </aside>
+      `,
+    prepositions: () => `
+      <aside class="endings prep-panel" aria-label="Prepositions joined to the article">
+        <h3 class="endings-title">Le articolate</h3>
+        <div class="endings-sub">preposition + the article = one word</div>
+        <div class="eg eg-prep">
+          <div></div>${['di', 'a', 'da', 'in', 'su'].map(x => `<div class="eg-class">${x}</div>`).join('')}
+          ${PREP_TABLE.map(([art, forms]) => `<div class="eg-person">${art}</div>${forms.map(f => `<div class="eg-cell"><span class="eg-txt">${f}</span></div>`).join('')}`).join('')}
+        </div>
+        <div class="endings-note">
+          <div class="en-label">Which article?</div>
+          <p><em>lo</em> before <em>s</em> + consonant, <em>z</em>, <em>gn</em>, <em>ps</em> (<em>lo zaino → nello zaino</em>); <em>l'</em> before a vowel; <em>gli</em> for their plurals; <em>la</em>, <em>le</em> for feminine nouns.</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">To, at, in</div>
+          <p><em>a</em> + a city (<em>a Roma</em>), <em>in</em> + a country (<em>in Italia</em>), <em>da</em> + a person (<em>da Marco</em>). No article: <em>a casa, in cucina, in treno</em>.</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">di · da</div>
+          <p><em>di</em>: of, from (<em>sono di Roma</em>), made of (<em>di pietra</em>), some (<em>del pane</em>). <em>da</em>: from (<em>vengo da</em>), at someone's (<em>dal medico</em>), for + the present (<em>da tre anni</em>), for doing (<em>da bere</em>).</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">Stay apart</div>
+          <p><em>con, per, tra, fra</em> don't join: <em>con il latte, per la nonna, tra i libri</em> (<em>col</em> and <em>coi</em> are old-fashioned).</p>
+        </div>
+      </aside>
+      `,
+    phrases: () => `
+      <aside class="endings phrases-panel" aria-label="Using everyday phrases">
+        <h3 class="endings-title">In pratica</h3>
+        <div class="endings-sub">Tu o Lei · when to say what</div>
+
+        <div class="eg eg-tulei">
+          <div class="eg-class">tu</div>
+          <div class="eg-class">Lei</div>
+          <div class="eg-cell"><span class="eg-txt">come stai?</span></div>
+          <div class="eg-cell"><span class="eg-txt">come sta?</span></div>
+          <div class="eg-cell"><span class="eg-txt">come ti chiami?</span></div>
+          <div class="eg-cell"><span class="eg-txt">come si chiama?</span></div>
+          <div class="eg-cell"><span class="eg-txt">di dove sei?</span></div>
+          <div class="eg-cell"><span class="eg-txt">di dov'è?</span></div>
+          <div class="eg-cell"><span class="eg-txt">scusa</span></div>
+          <div class="eg-cell"><span class="eg-txt">mi scusi</span></div>
+          <div class="eg-cell"><span class="eg-txt">figurati</span></div>
+          <div class="eg-cell"><span class="eg-txt">si figuri</span></div>
+          <div class="eg-cell"><span class="eg-txt">non ti preoccupare</span></div>
+          <div class="eg-cell"><span class="eg-txt">non si preoccupi</span></div>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Tu o Lei</div>
+          <p><em>Tu</em> for friends, family and young people; <em>Lei</em> — which takes the third person — for strangers, shop staff and anyone older. When in doubt, start with <em>Lei</em>: Italians will invite you to switch (<em>dammi del tu!</em>).</p>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Time of day</div>
+          <p><em>Buongiorno</em> until mid-afternoon, then <em>buonasera</em> — the switch varies by region. <em>Buonanotte</em> only at bedtime. <em>Ciao</em> is hello and goodbye among friends; <em>salve</em> sits in between.</p>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Prego</div>
+          <p>Not just 'you're welcome':</p>
+          <span class="en-eg">please, go ahead · come in · here you are · can I help you?</span>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Answering</div>
+          <p>To thanks: <em>prego</em>, <em>di niente</em>, <em>figurati</em>. To an apology: <em>non fa niente</em>, <em>non ti preoccupare</em>. To <em>in bocca al lupo</em>: <em>crepi!</em></p>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Così così?</div>
+          <p>Textbooks teach it for 'so-so', but Italians rarely say it: they prefer <em>non c'è male</em> (not bad) or <em>potrebbe andare meglio</em> (could be better).</p>
+        </div>
+      </aside>
+      `
+  };
+  const CHART_TITLES = { endings: 'Le desinenze', irregular: 'Gli irregolari', agreement: 'Le concordanze', prepositions: 'Le articolate', phrases: 'In pratica' };
+  // The chart for the card on screen (in Ripasso, the card's own section)
+  function chartKey() {
+    const k = SUBJECTS[subject] && SUBJECTS[subject].panel;
+    return k && own(SECTION_CHARTS, k) ? k : null;
+  }
+  function updateChartBtn() {
+    const btn = document.getElementById('chart-btn');
+    if (!btn) return;
+    const k = chartKey();
+    btn.hidden = !k;
+    if (k) btn.textContent = `▦ ${CHART_TITLES[k]}`;
+  }
+  function openChart() {
+    const k = chartKey();
+    if (!k) return;
+    let ov = document.getElementById('chart-overlay');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.className = 'chart-overlay';
+      ov.id = 'chart-overlay';
+      ov.hidden = true;
+      ov.innerHTML = `<div class="chart-sheet" role="dialog" aria-modal="true"><button type="button" class="chart-close" id="chart-close" aria-label="Close the chart">×</button><div class="chart-body" id="chart-body"></div></div>`;
+      document.body.appendChild(ov);
+      ov.addEventListener('click', e => { if (e.target === ov || e.target.closest('#chart-close')) closeChart(); });
+    }
+    document.getElementById('chart-body').innerHTML = SECTION_CHARTS[k]();
+    ov.querySelector('.chart-sheet').setAttribute('aria-label', CHART_TITLES[k]);
+    ov.hidden = false;
+    document.getElementById('chart-close').focus();
+  }
+  // Back to the card, with whatever was typed still there
+  function closeChart() {
+    const ov = document.getElementById('chart-overlay');
+    if (!ov || ov.hidden) return;
+    ov.hidden = true;
+    const input = document.getElementById('answer'), submit = document.getElementById('submit');
+    if (input && !input.disabled) input.focus();
+    else if (submit) submit.focus();
+  }
+
   // ===== Section switch =====
   function wireSubjectToggle() {
     document.querySelectorAll('#subject-toggle .mode-option').forEach(btn => {
@@ -8429,6 +8767,7 @@
   }
 
   function showSetup() {
+    closeChart();
     if (reviewMode) {
       reviewMode = false;
       const back = reviewReturn;
@@ -8553,282 +8892,11 @@
       </div>
       </div>
       ${cfg.panel ? '<div class="setup-side">' : ''}
-      ${cfg.panel === 'endings' ? `
-      <aside class="endings" aria-label="Regular verb endings, present tense">
-        <h3 class="endings-title">Le desinenze</h3>
-        <div class="endings-sub">Regular endings · presente</div>
-
-        <div class="eg">
-          <div></div>
-          <div class="eg-class">-are</div>
-          <div class="eg-class">-ere</div>
-          <div class="eg-class eg-s2">-ire</div>
-
-          <div></div>
-          <div class="eg-model">parlare</div>
-          <div class="eg-model">vendere</div>
-          <div class="eg-model">dormire</div>
-          <div class="eg-model">capire</div>
-
-          <div class="eg-person">io</div>
-          <div class="eg-cell eg-s3"><span class="eg-txt"><span class="eg-dash">-</span>o</span></div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span><span class="eg-isc">isc</span>o</span></div>
-
-          <div class="eg-person">tu</div>
-          <div class="eg-cell eg-s3"><span class="eg-txt"><span class="eg-dash">-</span>i</span></div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span><span class="eg-isc">isc</span>i</span></div>
-
-          <div class="eg-person">lui/lei</div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>a</span></div>
-          <div class="eg-cell eg-s2"><span class="eg-txt"><span class="eg-dash">-</span>e</span></div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span><span class="eg-isc">isc</span>e</span></div>
-
-          <div class="eg-person">noi</div>
-          <div class="eg-cell eg-s4"><span class="eg-txt"><span class="eg-dash">-</span>iamo</span></div>
-
-          <div class="eg-person">voi</div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>ate</span></div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>ete</span></div>
-          <div class="eg-cell eg-s2"><span class="eg-txt"><span class="eg-dash">-</span>ite</span></div>
-
-          <div class="eg-person">loro</div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>ano</span></div>
-          <div class="eg-cell eg-s2"><span class="eg-txt"><span class="eg-dash">-</span>ono</span></div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span><span class="eg-isc">isc</span>ono</span></div>
-
-          <!-- Faint dotted guides between the -are | -ere | -ire sections, and a lighter one
-               for the dormire | capire split. They run over the boxes; each ending's
-               text knocks out the dots behind it so no line crosses a letter. -->
-          <div class="eg-rule" style="grid-column: 3; grid-row: 1 / 9" aria-hidden="true"></div>
-          <div class="eg-rule" style="grid-column: 4; grid-row: 1 / 9" aria-hidden="true"></div>
-          <div class="eg-rule eg-rule-sub" style="grid-column: 5; grid-row: 2 / 9" aria-hidden="true"></div>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Stress</div>
-          <p>Falls on the stem for io, tu, lui and loro — the same four forms that take <span class="eg-isc">-isc-</span>. Noi and voi stress the ending.</p>
-          <div class="en-eg">pàr·lo · pàr·la·no · par·lià·mo</div>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">-care · -gare</div>
-          <p>Add an <i>h</i> before <i>i</i> to keep the hard sound.</p>
-          <div class="en-eg">giochi, giochiamo · paghi, paghiamo</div>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">-iare</div>
-          <p>The stem's <i>i</i> merges with the ending's <i>i</i>.</p>
-          <div class="en-eg">mangi, mangiamo · studi, studiamo</div>
-        </div>
-      </aside>
-      ` : ''}
-      ${cfg.panel === 'irregular' ? `
-      <aside class="endings irregular-panel" aria-label="Irregular verbs, present tense: essentials and patterns">
-        <h3 class="endings-title">Gli irregolari</h3>
-        <div class="endings-sub">Four essentials · presente</div>
-
-        <div class="eg eg-words">
-          <div></div>
-          <div class="eg-class">essere</div>
-          <div class="eg-class">avere</div>
-          <div class="eg-class">fare</div>
-          <div class="eg-class">andare</div>
-          <div class="eg-person">io</div>
-          <div class="eg-cell"><span class="eg-txt">sono</span></div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">h</span>o</span></div>
-          <div class="eg-cell"><span class="eg-txt">faccio</span></div>
-          <div class="eg-cell"><span class="eg-txt">vado</span></div>
-          <div class="eg-person">tu</div>
-          <div class="eg-cell"><span class="eg-txt">sei</span></div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">h</span>ai</span></div>
-          <div class="eg-cell"><span class="eg-txt">fai</span></div>
-          <div class="eg-cell"><span class="eg-txt">vai</span></div>
-          <div class="eg-person">lui/lei</div>
-          <div class="eg-cell"><span class="eg-txt">è</span></div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">h</span>a</span></div>
-          <div class="eg-cell"><span class="eg-txt">fa</span></div>
-          <div class="eg-cell"><span class="eg-txt">va</span></div>
-          <div class="eg-person">noi</div>
-          <div class="eg-cell"><span class="eg-txt">siamo</span></div>
-          <div class="eg-cell"><span class="eg-txt">abbiamo</span></div>
-          <div class="eg-cell"><span class="eg-txt">facciamo</span></div>
-          <div class="eg-cell"><span class="eg-txt">andiamo</span></div>
-          <div class="eg-person">voi</div>
-          <div class="eg-cell"><span class="eg-txt">siete</span></div>
-          <div class="eg-cell"><span class="eg-txt">avete</span></div>
-          <div class="eg-cell"><span class="eg-txt">fate</span></div>
-          <div class="eg-cell"><span class="eg-txt">andate</span></div>
-          <div class="eg-person">loro</div>
-          <div class="eg-cell"><span class="eg-txt">sono</span></div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">h</span>anno</span></div>
-          <div class="eg-cell"><span class="eg-txt">fanno</span></div>
-          <div class="eg-cell"><span class="eg-txt">vanno</span></div>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Noi &amp; voi</div>
-          <p>Noi always ends in <em>-iamo</em>, even here: <em>siamo, abbiamo, facciamo</em>. Voi is usually built from the infinitive (<em>avete, potete, venite</em>), except <em>siete, fate, dite</em> and the <em>-rre</em> verbs, which use their Latin stem (<em>ponete, traducete</em>).</p>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">-go</div>
-          <p>Io and loro add a <em>g</em>:</p>
-          <span class="en-eg">vengo · vengono · tengo · rimango · salgo · pongo</span>
-          <p>Verbs in <em>-gliere</em> swap it round: <em>scelgo, tolgo, colgo</em>.</p>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">uo · ie</div>
-          <p>A stressed <em>o</em> or <em>e</em> often splits in two, the change that turned Latin <em>ovum</em> into <em>uovo</em>:</p>
-          <span class="en-eg">può · vuole · muore · vieni · tiene · siede</span>
-          <p>Unstressed, it stays put: <em>potete, volete, morite, venite</em>.</p>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Latin stems</div>
-          <p>Short infinitives hide a longer Latin stem that the present brings back:</p>
-          <span class="en-eg">fare → faccio · dire → dico · bere → bevo · porre → pongo · tradurre → traduco</span>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Silent h &amp; accents</div>
-          <p>The <em>h</em> in <em>ho, hai, ha, hanno</em> is never said: it only tells them from <em>o</em> (or), <em>ai</em> (to the), <em>a</em> (to) and <em>anno</em> (year). <em>Dà</em> and <em>è</em> are accented to tell them from <em>da</em> (from) and <em>e</em> (and); <em>può</em>, like <em>più</em>, always is.</p>
-        </div>
-      </aside>
-      ` : ''}
-      ${cfg.panel === 'agreement' ? `
-      <aside class="endings agreement-panel" aria-label="Adjective agreement">
-        <h3 class="endings-title">Le concordanze</h3>
-        <div class="endings-sub">Gender &amp; number · agreement</div>
-
-        <div class="eg eg-agree">
-          <div></div>
-          <div class="eg-class">4 forme</div>
-          <div class="eg-class">2 forme</div>
-          <div class="eg-class">invariabili</div>
-          <div></div>
-          <div class="eg-model">piccolo</div>
-          <div class="eg-model">grande</div>
-          <div class="eg-model">blu</div>
-          <div class="eg-person">m. sing.</div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>o</span></div>
-          <div class="eg-cell eg-rows2"><span class="eg-txt"><span class="eg-dash">-</span>e</span></div>
-          <div class="eg-cell eg-rows4"><span class="eg-txt">blu<br>rosa<br>viola</span></div>
-          <div class="eg-person">f. sing.</div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>a</span></div>
-          <div class="eg-person">m. plur.</div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>i</span></div>
-          <div class="eg-cell eg-rows2"><span class="eg-txt"><span class="eg-dash">-</span>i</span></div>
-          <div class="eg-person">f. plur.</div>
-          <div class="eg-cell"><span class="eg-txt"><span class="eg-dash">-</span>e</span></div>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">-co · -go</div>
-          <p>Most keep the hard sound in the plural with an <em>h</em>:</p>
-          <span class="en-eg">bianco → bianchi · lungo → lunghi · tedesco → tedeschi</span>
-          <p>Stressed earlier, <em>-co</em> usually softens: <em>sim·pà·ti·co → simpatici</em>. The feminine always stays hard: <em>simpatiche</em>.</p>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">-io</div>
-          <p>Drop the <em>i</em> in the plural:</p>
-          <span class="en-eg">vecchio → vecchi · serio → seri · grigio → grigi</span>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Nationalities</div>
-          <p>Those in <em>-o</em> have four forms (<em>italiano, italiana…</em>); those in <em>-ese</em> have two (<em>francese, francesi</em>). Both take a small letter.</p>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Before the noun</div>
-          <p><em>Bello</em> and <em>buono</em> change before a noun, much like the articles:</p>
-          <span class="en-eg">bel ragazzo · begli occhi · bell'amico · buon giorno · buon'amica</span>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Invariable</div>
-          <p>Colours named after things never change: <em>blu</em>, <em>rosa</em> (rose), <em>viola</em> (violet). <em>Marrone</em> (chestnut) often behaves the same way.</p>
-        </div>
-      </aside>
-      ` : ''}
-      ${cfg.panel === 'prepositions' ? `
-      <aside class="endings prep-panel" aria-label="Prepositions joined to the article">
-        <h3 class="endings-title">Le articolate</h3>
-        <div class="endings-sub">preposition + the article = one word</div>
-        <div class="eg eg-prep">
-          <div></div>${['di', 'a', 'da', 'in', 'su'].map(x => `<div class="eg-class">${x}</div>`).join('')}
-          ${PREP_TABLE.map(([art, forms]) => `<div class="eg-person">${art}</div>${forms.map(f => `<div class="eg-cell"><span class="eg-txt">${f}</span></div>`).join('')}`).join('')}
-        </div>
-        <div class="endings-note">
-          <div class="en-label">Which article?</div>
-          <p><em>lo</em> before <em>s</em> + consonant, <em>z</em>, <em>gn</em>, <em>ps</em> (<em>lo zaino → nello zaino</em>); <em>l'</em> before a vowel; <em>gli</em> for their plurals; <em>la</em>, <em>le</em> for feminine nouns.</p>
-        </div>
-        <div class="endings-note">
-          <div class="en-label">To, at, in</div>
-          <p><em>a</em> + a city (<em>a Roma</em>), <em>in</em> + a country (<em>in Italia</em>), <em>da</em> + a person (<em>da Marco</em>). No article: <em>a casa, in cucina, in treno</em>.</p>
-        </div>
-        <div class="endings-note">
-          <div class="en-label">di · da</div>
-          <p><em>di</em>: of, from (<em>sono di Roma</em>), made of (<em>di pietra</em>), some (<em>del pane</em>). <em>da</em>: from (<em>vengo da</em>), at someone's (<em>dal medico</em>), for + the present (<em>da tre anni</em>), for doing (<em>da bere</em>).</p>
-        </div>
-        <div class="endings-note">
-          <div class="en-label">Stay apart</div>
-          <p><em>con, per, tra, fra</em> don't join: <em>con il latte, per la nonna, tra i libri</em> (<em>col</em> and <em>coi</em> are old-fashioned).</p>
-        </div>
-      </aside>
-      ` : ''}
-      ${cfg.panel === 'phrases' ? `
-      <aside class="endings phrases-panel" aria-label="Using everyday phrases">
-        <h3 class="endings-title">In pratica</h3>
-        <div class="endings-sub">Tu o Lei · when to say what</div>
-
-        <div class="eg eg-tulei">
-          <div class="eg-class">tu</div>
-          <div class="eg-class">Lei</div>
-          <div class="eg-cell"><span class="eg-txt">come stai?</span></div>
-          <div class="eg-cell"><span class="eg-txt">come sta?</span></div>
-          <div class="eg-cell"><span class="eg-txt">come ti chiami?</span></div>
-          <div class="eg-cell"><span class="eg-txt">come si chiama?</span></div>
-          <div class="eg-cell"><span class="eg-txt">di dove sei?</span></div>
-          <div class="eg-cell"><span class="eg-txt">di dov'è?</span></div>
-          <div class="eg-cell"><span class="eg-txt">scusa</span></div>
-          <div class="eg-cell"><span class="eg-txt">mi scusi</span></div>
-          <div class="eg-cell"><span class="eg-txt">figurati</span></div>
-          <div class="eg-cell"><span class="eg-txt">si figuri</span></div>
-          <div class="eg-cell"><span class="eg-txt">non ti preoccupare</span></div>
-          <div class="eg-cell"><span class="eg-txt">non si preoccupi</span></div>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Tu o Lei</div>
-          <p><em>Tu</em> for friends, family and young people; <em>Lei</em> — which takes the third person — for strangers, shop staff and anyone older. When in doubt, start with <em>Lei</em>: Italians will invite you to switch (<em>dammi del tu!</em>).</p>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Time of day</div>
-          <p><em>Buongiorno</em> until mid-afternoon, then <em>buonasera</em> — the switch varies by region. <em>Buonanotte</em> only at bedtime. <em>Ciao</em> is hello and goodbye among friends; <em>salve</em> sits in between.</p>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Prego</div>
-          <p>Not just 'you're welcome':</p>
-          <span class="en-eg">please, go ahead · come in · here you are · can I help you?</span>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Answering</div>
-          <p>To thanks: <em>prego</em>, <em>di niente</em>, <em>figurati</em>. To an apology: <em>non fa niente</em>, <em>non ti preoccupare</em>. To <em>in bocca al lupo</em>: <em>crepi!</em></p>
-        </div>
-
-        <div class="endings-note">
-          <div class="en-label">Così così?</div>
-          <p>Textbooks teach it for 'so-so', but Italians rarely say it: they prefer <em>non c'è male</em> (not bad) or <em>potrebbe andare meglio</em> (could be better).</p>
-        </div>
-      </aside>
-      ` : ''}
+      ${cfg.panel === 'endings' ? SECTION_CHARTS.endings() : ''}
+      ${cfg.panel === 'irregular' ? SECTION_CHARTS.irregular() : ''}
+      ${cfg.panel === 'agreement' ? SECTION_CHARTS.agreement() : ''}
+      ${cfg.panel === 'prepositions' ? SECTION_CHARTS.prepositions() : ''}
+      ${cfg.panel === 'phrases' ? SECTION_CHARTS.phrases() : ''}
       ${cfg.panel ? `<aside class="endings weak-panel" id="weak-panel" aria-label="Your weakest ${cfg.itemWords}"></aside></div>` : ''}
       </div>
     `;
@@ -9735,6 +9803,7 @@
         <button type="button" class="ghost" id="change-btn">${reviewMode ? '← Back to setup' : `← Change ${SUBJECTS[subject].itemWords}`}</button>
         <div class="game-trim" id="game-trim"></div>
         ${reviewMode ? '' : '<button type="button" class="ghost" id="game-focus-btn">→ Focus…</button>'}
+        <button type="button" class="ghost chart-btn" id="chart-btn" hidden></button>
         <span class="direction-toggle" role="group" aria-label="Translation direction"${reviewMode ? ' hidden' : ''}>
           <button type="button" data-dir="en-it" class="${direction === 'en-it' ? 'active' : ''}" aria-pressed="${direction === 'en-it'}">EN → IT</button>
           <button type="button" data-dir="it-en" class="${direction === 'it-en' ? 'active' : ''}" aria-pressed="${direction === 'it-en'}">IT → EN</button>
@@ -9745,6 +9814,8 @@
     `;
     document.getElementById('reshuffle-btn').addEventListener('click', () => startGame());
     document.getElementById('change-btn').addEventListener('click', showSetup);
+    document.getElementById('chart-btn').addEventListener('click', openChart);
+    updateChartBtn();
     const focusBtn = document.getElementById('game-focus-btn');
     if (focusBtn) focusBtn.addEventListener('click', () => openFocusModal('game'));
     controlsEl.querySelectorAll('.direction-toggle button').forEach(btn => {
@@ -10291,6 +10362,11 @@
         e.preventDefault();
         applyFocusTop();
       }
+      return;
+    }
+    const chart = document.getElementById('chart-overlay');
+    if (chart && !chart.hidden) {
+      if (e.key === 'Escape') { e.preventDefault(); closeChart(); }
       return;
     }
     if (e.key !== 'Enter') return;
