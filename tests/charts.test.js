@@ -20,6 +20,12 @@ btn.click();
 const ov = () => pd.getElementById('chart-overlay');
 ok(ov() && !ov().hidden && pd.querySelectorAll('#chart-body .eg-cell').length === 35 && /Stay apart/.test(pd.getElementById('chart-body').textContent),
    'it opens the chart: the 35 joined forms and the notes');
+const headings = k => [...pd.defaultView.eval(`SECTION_CHARTS.${k}()`).matchAll(/class="en-label">([^<]+)</g)].map(m => m[1].trim());
+ok(JSON.stringify(headings('prepositions')) === JSON.stringify(['Which article?', 'To, at, in', 'The uses of di', 'The uses of da', 'Stay apart']),
+   `Le articolate: English headings, with di and da in notes of their own (${headings('prepositions').join(' · ')})`);
+ok(headings('phrases').includes('Formal or informal you') && headings('phrases').includes('The many uses of prego') && headings('irregular').includes('The noi and voi forms')
+   && !['Tu o Lei', 'Prego', 'Così così?', 'Noi &amp; voi', 'di · da'].some(h => [...headings('phrases'), ...headings('irregular'), ...headings('prepositions')].includes(h)),
+   'and the same in every chart: no heading in Italian alone');
 ok(pd.activeElement && pd.activeElement.id === 'chart-close' && ov().querySelector('[role="dialog"]').getAttribute('aria-label') === 'Le articolate', 'focus moves to its close button; the dialog is named');
 key(pd, 'Enter');
 ok(!ov().hidden && pd.getElementById('feedback').classList.contains('hidden'), 'Enter does not submit the card behind it');
