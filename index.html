@@ -925,6 +925,9 @@
   }
 
   button.submit:hover:not(:disabled) { background: #2a2218; }
+  /* A second choice, as easy to hit but quieter: outlined */
+  button.submit.secondary { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+  button.submit.secondary:hover:not(:disabled) { background: rgba(28, 22, 17, 0.07); }
   button.submit:active:not(:disabled) { transform: translateY(1px); }
 
   .feedback {
@@ -10447,8 +10450,8 @@
         <p class="msg">${msg}</p>
         ${missedHTML}
         <div class="complete-actions">
-          ${missed.length ? `<button type="button" class="submit" id="practise-missed">↻ Practise ${practiseLabel}</button>` : ''}
-          <button type="button" class="${missed.length ? 'ghost' : 'submit'}" id="play-again">↻ Play ${missed.length ? `all ${deck.length} ` : ''}again</button>
+          <button type="button" class="submit" id="play-again">↻ Play ${missed.length ? `all ${deck.length} ` : ''}again</button>
+          ${missed.length ? `<button type="button" class="submit secondary" id="practise-missed">↻ Practise ${practiseLabel}</button>` : ''}
           <button type="button" class="ghost" id="back-to-setup">${reviewMode ? '← Back to setup' : `← Change ${SUBJECTS[subject].itemWords}`}</button>
         </div>
       </div>
@@ -10485,6 +10488,13 @@
       return;
     }
     if (e.key !== 'Enter') return;
+    if (container.dataset.view === 'complete') {   // the summary: Enter plays the round again, like its main button
+      if (e.target && e.target.closest && e.target.closest('button')) return;   // a focused button keeps its Enter
+      e.preventDefault();
+      const again = document.getElementById('play-again');
+      if (again) again.click();
+      return;
+    }
     if (container.dataset.view !== 'game') return;
     // If focus is on the deck-size select, let the browser handle it normally
     if (e.target && e.target.closest && e.target.closest('.game-trim')) return;

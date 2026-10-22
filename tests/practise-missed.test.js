@@ -17,7 +17,9 @@ answer("c => c.noun === 'acqua'", "l'acqua");
 finish();
 ok(btn() && btn().textContent === '↻ Practise the 2 I missed', `button: "${btn() && btn().textContent}"`);
 ok(JSON.stringify(missedShown().sort()) === JSON.stringify(['il pane', 'la casa']), `missed list: ${missedShown().join(', ')} (a skip counts)`);
-ok(d.getElementById('play-again').textContent === '↻ Play all 4 again' && d.getElementById('play-again').className === 'ghost', 'Play again is still there, as the secondary choice');
+const actions = [...d.querySelectorAll('.complete-actions button')].map(b => `${b.id}:${b.className}`);
+ok(d.getElementById('play-again').textContent === '↻ Play all 4 again' && actions[0] === 'play-again:submit' && actions[1] === 'practise-missed:submit secondary',
+   'Play all 4 again is the main button, first; Practise the ones I missed sits beside it, outlined');
 btn().click();
 ok(ev('container.dataset.view') === 'game' && JSON.stringify(ev('deck.map(c => c.noun).sort()')) === JSON.stringify(['casa', 'pane']) && d.getElementById('total').textContent === '2', 'review round: the 2 missed cards in play');
 ok(ev('sessionPool.length') === 4, 'the pool is still the full original set of 4 (a filter, not a new deck)');
@@ -90,4 +92,18 @@ ok(missedShown().join() === 'In bocca al lupo!' && btn().textContent === '↻ Pr
 btn().click(); answer("c => c.noun === 'in-bocca-al-lupo'", 'in bocca al lupo'); finish();
 ok(!btn() && !d.querySelector('.missed'), 'nothing missed → no list and no button');
 ok(errors.length === 0, `no runtime errors ${errors.join('; ')}`);
+// ---- Enter on the summary plays the round again, like its main button ----
+{
+  const E = boot({ 'flipcards-subject': 'phrases' });
+  E.ev("selectedNouns = new Set(PHRASE_ITEMS.slice(0, 2).map(n => n.noun)); updateReadout();");
+  E.d.getElementById('start-btn').click();
+  for (let k = 0, n = E.ev('deck.length'); k < n; k++) {
+    E.d.getElementById('answer').value = k === 0 ? 'sbagliato' : E.ev('deck[index].italian'); E.d.getElementById('submit').click();
+    if (k === 0) E.d.getElementById('answer').value = E.ev('deck[index].italian');
+    E.d.getElementById('submit').click();
+  }
+  const onSummary = !!E.d.querySelector('.complete') && !!E.d.getElementById('practise-missed');
+  E.d.dispatchEvent(new E.d.defaultView.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  ok(onSummary && !E.d.querySelector('.complete') && E.ev('index') === 0 && E.ev('deck.length') === 2, 'Enter on the summary plays all of the round again, like its main button');
+}
 done();
