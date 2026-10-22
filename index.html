@@ -1933,6 +1933,13 @@
   }
   @media (prefers-reduced-motion: reduce) { .chart-sheet { animation: none; } }
 
+  /* After a miss: type the right answer to go on */
+  .answer.retype { border-color: var(--terracotta); }
+  .answer.retype-miss { animation: retype-shake 0.3s ease; }
+  @keyframes retype-shake { 0%, 100% { transform: none; } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+  @media (prefers-reduced-motion: reduce) { .answer.retype-miss { animation: none; } }
+  .retype-hint { margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--terracotta); }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
@@ -10043,6 +10050,12 @@
     }
     const natLine = document.getElementById('natural-en');
     if (natLine) { natLine.hidden = true; natLine.innerHTML = ''; }
+    mustRetype = false;
+    const ansReset = document.getElementById('answer');
+    if (ansReset) {
+      ansReset.classList.remove('retype', 'retype-miss');
+      if (ansReset.dataset.normalPlaceholder) { ansReset.placeholder = ansReset.dataset.normalPlaceholder; delete ansReset.dataset.normalPlaceholder; }
+    }
     const card = deck[index];
     if (card.subject) setCardContext(card.subject);   // mixed review: this card's section
     const itToEn = direction === 'it-en';
@@ -10132,7 +10145,40 @@
     setTimeout(() => ans.focus(), 30);
   }
 
+  // The one checker, for an answer and for its retype (it records nothing)
+  function checkCard(raw, card, itToEn) {
+    return isVerbSubject() ? checkVerbAnswer(raw, card, itToEn)
+      : isAdjSubject() ? checkAdjAnswer(raw, card, itToEn)
+      : isPhraseSubject() ? checkPhraseAnswer(raw, card, itToEn)
+      : (itToEn ? checkEnglish(raw, card) : checkAnswer(raw, card));
+  }
+  // After a miss, the right answer has to be typed before the next card — practice
+  // only: it changes neither the score nor the card's history or review schedule
+  let mustRetype = false;
+  function retypeCheck() {
+    const ans = document.getElementById('answer'), hint = document.getElementById('retype-hint');
+    if (ans.value.trim() && checkCard(ans.value, deck[index], direction === 'it-en').correct) {
+      mustRetype = false;
+      index++;
+      render();
+      return;
+    }
+    ans.classList.remove('retype-miss');
+    void ans.offsetWidth;   // restart the shake
+    ans.classList.add('retype-miss');
+    if (hint) hint.textContent = ans.value.trim() ? 'Not quite — type it as shown, then Enter.' : 'Type the answer to go on.';
+    ans.focus();
+  }
+  function endRetype() {   // the card turned out right (I was right — count it)
+    mustRetype = false;
+    const ans = document.getElementById('answer'), hint = document.getElementById('retype-hint');
+    if (ans) { ans.disabled = true; ans.classList.remove('retype', 'retype-miss'); }
+    if (hint) hint.remove();
+    document.getElementById('submit').textContent = 'Avanti →';
+  }
+
   function handleSubmit() {
+    if (answered && mustRetype) { retypeCheck(); return; }
     if (answered) { index++; render(); return; }
 
     const ans = document.getElementById('answer');
@@ -10141,10 +10187,7 @@
     const card = deck[index];
     const raw = ans.value;
     const itToEn = direction === 'it-en';
-    const result = isVerbSubject() ? checkVerbAnswer(raw, card, itToEn)
-      : isAdjSubject() ? checkAdjAnswer(raw, card, itToEn)
-      : isPhraseSubject() ? checkPhraseAnswer(raw, card, itToEn)
-      : (itToEn ? checkEnglish(raw, card) : checkAnswer(raw, card));
+    const result = checkCard(raw, card, itToEn);
     const prevStreak = streak;
 
     answered = true;
@@ -10226,6 +10269,17 @@
     renderAssociation(card);
     wireSpeakBtn(card);
     if (audioPrefs.auto) speak(sayText(card));
+    if (!result.correct) {   // type it right before the next card
+      mustRetype = true;
+      ans.disabled = false;
+      ans.value = '';
+      ans.dataset.normalPlaceholder = ans.placeholder;
+      ans.placeholder = 'now type the right answer…';
+      ans.classList.add('retype');
+      sub.textContent = 'Riscrivi →';
+      fb.querySelector('.feedback-body').insertAdjacentHTML('afterbegin', `<div class="retype-hint" id="retype-hint">Type it above to go on — it won't change your score.</div>`);
+      setTimeout(() => ans.focus(), 30);
+    }
   }
 
   // ===== Association display & inline editor (inside the feedback box) =====
@@ -10298,6 +10352,7 @@
     fb.innerHTML = `<div class="feedback-body">✓ Counted as correct — <strong>${card.english}</strong>${pronHTML}${speakBtnHTML()}${noteHTML}<div class="assoc" id="assoc"></div></div>`;
     renderAssociation(card);
     wireSpeakBtn(card);
+    endRetype();
     focusSubmit(); // Enter now moves on
   }
 

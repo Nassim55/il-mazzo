@@ -19,6 +19,8 @@ Every card section works in three directions — English → Italian, Italian �
 
 ## Features
 
+**Typing it right after a miss.** After a wrong answer (or a skip) the answer box clears and the button reads *Riscrivi →*: the right answer has to be typed before the next card, as leniently checked as the answer itself (accents, capitals and punctuation forgiven). It's practice only: it changes neither the score nor the card's history or review schedule. In Italian → English, *I was right — count it* lifts it.
+
 - **Ripasso del giorno** — spaced repetition across every section: every item you practise is scheduled, and the daily review brings back exactly what's due (see below)
 - Themes, quick picks (Random, Weakest), hand-picking, and "the most common" by frequency
 - Deck size and Focus, to grow or narrow a round while playing

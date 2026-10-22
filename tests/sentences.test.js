@@ -198,6 +198,7 @@ const playRound = (keys, answers) => {
   for (let k = 0; k < n; k++) {
     d.getElementById('answer').value = answers(k, n) ? ev('deck[index].italian') : 'sbagliato';
     d.getElementById('submit').click();
+    if (!answers(k, n)) d.getElementById('answer').value = ev('deck[index].italian');   // a miss: typed right to go on
     d.getElementById('submit').click();   // Avanti
   }
   return { errs, done: !!d.querySelector('.complete'), missed: [...d.querySelectorAll('.missed-item')].map(e => e.textContent) };
@@ -214,6 +215,7 @@ const nR = ev('deck.length');
 for (let k = 0; k < nR; k++) {
   d.getElementById('answer').value = k === 0 ? 'sbagliato' : ev('deck[index].italian');
   d.getElementById('submit').click();
+  if (k === 0) d.getElementById('answer').value = ev('deck[index].italian');   // typed right to go on
   d.getElementById('submit').click();
 }
 ok(nR >= 2 && !!d.querySelector('.complete') && errsR.length === 0 && d.querySelectorAll('.missed-item').length >= 1, 'and in Ripasso: a missed sentence, then Avanti on the last card — the summary opens');

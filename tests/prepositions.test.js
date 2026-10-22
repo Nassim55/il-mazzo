@@ -159,7 +159,7 @@ const errs = [];
 w.addEventListener('error', e => errs.push(e.message));
 ev("selectedNouns = new Set(['parlo-del-libro', 'vado-a-roma', 'penso-a-te']); updateReadout();");
 d.getElementById('start-btn').click();
-for (let k = 0, n = ev('deck.length'); k < n; k++) { d.getElementById('answer').value = k === 0 ? 'sbagliato' : ev('deck[index].italian'); d.getElementById('submit').click(); d.getElementById('submit').click(); }
+for (let k = 0, n = ev('deck.length'); k < n; k++) { d.getElementById('answer').value = k === 0 ? 'sbagliato' : ev('deck[index].italian'); d.getElementById('submit').click(); if (k === 0) d.getElementById('answer').value = ev('deck[index].italian'); d.getElementById('submit').click(); }
 ok(!!d.querySelector('.complete') && errs.length === 0 && d.querySelectorAll('.missed-item').length === 1, 'a round with a miss ends on its summary');
 
 // ---- Every slip of these kinds explained, none broken ----

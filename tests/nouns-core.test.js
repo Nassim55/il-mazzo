@@ -34,7 +34,9 @@ ok(ev('index') === 1, 'Enter moves to the next card');
 d.getElementById('answer').value = 'qualcosa'; d.getElementById('submit').click();
 fb = d.getElementById('feedback');
 ok(fb.className.includes('incorrect') && !!fb.querySelector('.feedback-note') && !!d.getElementById('assoc'), 'wrong answer: note + association area');
-key(d.body, 'Enter'); d.getElementById('play-again').click();
+ok(!d.getElementById('answer').disabled && d.getElementById('answer').value === '' && d.getElementById('submit').textContent === 'Riscrivi →', 'after a miss the box clears for the right answer');
+d.getElementById('answer').value = ev('deck[index].italian'); key(d.body, 'Enter');   // typed right: on to the end
+d.getElementById('play-again').click();
 ev(`index = deck.findIndex(c => c.noun === 'pane'); render();`);
 ok(!d.querySelector('.card').textContent.includes('companion'), 'association hidden before answering');
 d.getElementById('answer').value = 'il pane'; d.getElementById('submit').click();
