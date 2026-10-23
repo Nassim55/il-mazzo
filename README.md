@@ -6,7 +6,7 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 
 | Section | Items | What you practise |
 |---|---|---|
-| Sostantivi | 831 nouns | the noun with its definite article (*il pane, lo zaino, l'acqua*) |
+| Sostantivi | 883 nouns | the noun with its definite article (*il pane, lo zaino, l'acqua*) |
 | Verbi regolari | 150 verbs | present-tense conjugations, or just the infinitive |
 | Verbi irregolari | 50 verbs | the most common verbs that are irregular in the present |
 | Aggettivi | 150 adjectives | the dictionary form, or every gender and number |

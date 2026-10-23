@@ -2,14 +2,14 @@
 const { boot, ok, done } = require('./harness');
 let { w, d, ev, key, warns, errors } = boot();
 ok(warns.length === 0 && errors.length === 0, 'loads with no validator warnings or errors');
-ok(ev('subject') === 'nouns' && ev('nounData.length') === 831, 'opens on nouns with 831 nouns');
+ok(ev('subject') === 'nouns' && ev('nounData.length') === 883, 'opens on nouns with 883 nouns');
 const keys = ev('nounData.map(n => n.noun)');
-ok(new Set(keys).size === 831 && new Set(ev('nounData.map(n => n.en)')).size === 831 && new Set(ev('nounData.map(n => n.it)')).size === 831, 'no duplicate keys, English prompts or Italian forms');
+ok(new Set(keys).size === 883 && new Set(ev('nounData.map(n => n.en)')).size === 883 && new Set(ev('nounData.map(n => n.it)')).size === 883, 'no duplicate keys, English prompts or Italian forms');
 const themed = new Set(ev('THEMES.flatMap(t => t.nouns)'));
 ok(keys.every(k => themed.has(k)) && [...themed].every(k => keys.includes(k)), 'every noun themed, no unknown theme keys');
-ok(ev('FREQUENCY_ORDER.length') === 831 && keys.every(k => ev(`Number.isFinite(rankOf(${JSON.stringify(k)}))`)), 'every noun ranked');
+ok(ev('FREQUENCY_ORDER.length') === 883 && keys.every(k => ev(`Number.isFinite(rankOf(${JSON.stringify(k)}))`)), 'every noun ranked');
 const fails = ev('nounData.filter(n => !checkEnglish(n.en, { english: n.en }).correct || !checkEnglish(n.en.replace(/\\([^)]*\\)/g, "").replace(/^the /i, "").trim(), { english: n.en }).correct).map(n => n.en)');
-ok(fails.length === 0, `English checker accepts all 831 prompts (${fails.slice(0, 3).join(', ')})`);
+ok(fails.length === 0, `English checker accepts all 883 prompts (${fails.slice(0, 3).join(', ')})`);
 ok(ev("checkAnswer('l amico', { italian: \"l'amico\", noun: 'amico' }).correct") && ev("checkAnswer('la pane', { italian: 'il pane', noun: 'pane' }).reason") === 'wrong-article'
    && ev("checkAnswer('pane', { italian: 'il pane', noun: 'pane' }).reason") === 'missing-article', 'article checking: apostrophes, wrong article, missing article');
 
@@ -55,4 +55,20 @@ const store = { 'sostantivi-assoc-v1': w.localStorage.getItem('sostantivi-assoc-
 ev("selectedNouns = new Set(['pane']); updateReadout();"); d.getElementById('start-btn').click();
 d.getElementById('answer').value = 'il pane'; d.getElementById('submit').click();
 ok(d.querySelector('.assoc-text')?.textContent === 'companion <shared bread>', 'association survives a reload');
+// ---- The shop (Oct 2026): 52 more nouns, and the food already in the deck filed there too ----
+const shop = ev("NOUN_THEMES.find(t => t.key === 'negozio').nouns");
+ok(['manzo', 'agnello', 'maiale', 'fagiolo', 'melone', 'arancia', 'cece'].every(k => shop.includes(k)) && shop.length === 142 && ev("NOUN_ITEMS.find(n => n.noun === 'maiale').en") === 'the pig (pork)',
+   `Negozio has beef, lamb, pork (il maiale), beans, melon, oranges and chickpeas — ${shop.length} nouns in all`);
+const SHOP_NEW = ['manzo', 'agnello', 'vitello', 'salsiccia', 'salame', 'pancetta', 'tacchino', 'tonno', 'salmone', 'gambero', 'cozza', 'merluzzo', 'bistecca', 'fagiolo', 'cece', 'lenticchia',
+  'pisello', 'carota', 'lattuga', 'spinaci', 'peperone', 'zucchina', 'melanzana', 'cetriolo', 'cavolo', 'broccolo', 'sedano', 'mais', 'verdura', 'oliva', 'basilico', 'prezzemolo', 'melone',
+  'fragola', 'pesca', 'pera', 'anguria', 'ananas', 'ciliegia', 'albicocca', 'lampone', 'noce', 'mandorla', 'yogurt', 'panna', 'mozzarella', 'parmigiano', 'farina', 'pepe', 'marmellata', 'maionese', 'senape'];
+const wrongArticle = ev(`${JSON.stringify(SHOP_NEW)}.map(k => NOUN_ITEMS.find(n => n.noun === k)).filter(n => {
+  const [art, word] = n.it.startsWith("l'") ? ["l'", n.it.slice(2)] : n.it.split(' ');
+  const plural = /^(i|gli|le)$/.test(art), vowel = /^[aeiouàèéìòù]/.test(word), special = /^(s[^aeiou]|z|gn|ps|x|y)/.test(word);
+  const want = n.g === 'f' ? (plural ? 'le' : vowel ? "l'" : 'la') : plural ? (vowel || special ? 'gli' : 'i') : (vowel ? "l'" : special ? 'lo' : 'il');
+  return art !== want;
+}).map(n => n.it)`);
+ok(wrongArticle.length === 0 && SHOP_NEW.every(k => ev(`NOUN_FREQUENCY_ORDER.includes(${JSON.stringify(k)})`) && ev(`NOUN_THEMES.find(t => t.key === 'cibo').nouns.includes(${JSON.stringify(k)})`)),
+   `the 52 new shop nouns: each article right for its gender and first letter (lo yogurt, l'ananas, gli spinaci), each ranked, each in Cibo too${wrongArticle.length ? ': ' + wrongArticle.join(', ') : ''}`);
+ok(['spinaci', 'melanzana', 'albicocca'].every(k => ev(`NOUN_THEMES.find(t => t.key === 'arabo').nouns.includes(${JSON.stringify(k)})`)), 'spinaci, melanzana and albicocca join the Arabic-origin words');
 done();
