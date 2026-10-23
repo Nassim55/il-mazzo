@@ -49,6 +49,32 @@ d.getElementById('answer').value = 'sbagliato'; d.getElementById('submit').click
 d.getElementById('answer').value = card0.italian; d.getElementById('submit').click();
 ok(ev('index') === 1 && d.getElementById('answer').placeholder === ph, 'after a nudge and a miss, the next card gets its own placeholder back');
 
+// ---- Salta: a skip counts as wrong, shows the answer, then it's typed out ----
+({ d, ev } = round('nouns', ['casa', 'pane']));
+const skipCard = ev('deck[0]'), skipBtn = () => d.getElementById('skip-btn');
+const skipStats0 = ev(`JSON.parse(JSON.stringify(stats[${JSON.stringify(skipCard.noun)}] || { seen: 0, wrong: 0 }))`);
+ok(skipBtn() && !skipBtn().hidden && skipBtn().textContent === 'Salta' && skipBtn().previousElementSibling.id === 'submit', 'Salta sits after Controlla, on every new card');
+skipBtn().click();
+const skipStats1 = ev(`stats[${JSON.stringify(skipCard.noun)}]`);
+ok(new RegExp('Skipped — the answer is ' + skipCard.italian).test(d.getElementById('feedback').textContent) && d.getElementById('feedback').classList.contains('incorrect')
+   && skipStats1.seen === skipStats0.seen + 1 && skipStats1.wrong === (skipStats0.wrong || 0) + 1 && ev('score') === 0 && ev(`roundMissed.has(${JSON.stringify(skipCard.key)})`),
+   'Salta: "Skipped — the answer is …", and it counts as wrong (history, missed list)');
+ok(d.getElementById('submit').textContent === 'Riscrivi →' && !d.getElementById('answer').disabled && skipBtn().hidden, 'then the answer is to be typed out, as after any miss (Salta out of the way)');
+d.getElementById('answer').value = skipCard.italian; d.getElementById('submit').click();
+ok(ev('index') === 1 && !skipBtn().hidden, 'typed out: on to the next card, which offers Salta again');
+d.getElementById('answer').value = ev('deck[1].italian'); d.getElementById('submit').click();
+ok(d.getElementById('feedback').classList.contains('correct'), 'Controlla is never taken for a skip (it gets a click event, not true)');
+({ d, ev } = round('verbs', ['parlare']));
+const v0 = ev("JSON.stringify(stats.parlare || null)");
+d.getElementById('skip-btn').click();
+ok(ev("JSON.stringify(stats.parlare || null)") !== v0 && /Skipped — the answer is/.test(d.getElementById('feedback').textContent), 'Verbi: a skip counts too now');
+({ d, ev } = round('sentences', ['il-cane-beve-l-acqua']));
+d.getElementById('skip-btn').click();
+ok(/Skipped — the sentence is Il cane beve l'acqua\./.test(d.getElementById('feedback').textContent.replace(/’/g, "'")) && d.getElementById('submit').textContent === 'Riscrivi →', 'Scrittura: Skipped — the sentence is …, then typed out');
+({ d, ev } = round('nouns', ['casa'], 'it-en'));
+d.getElementById('skip-btn').click();
+ok(/Skipped — la casa means/.test(d.getElementById('feedback').textContent) && !d.getElementById('override-btn'), 'Italian → English: Skipped — … means …, with no "I was right" (there was no answer)');
+
 // ---- Italian → English: retype the English; "I was right" lifts it ----
 ({ d, ev } = round('nouns', ['casa'], 'it-en'));
 d.getElementById('answer').value = 'home sweet home';

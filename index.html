@@ -928,6 +928,7 @@
   /* A second choice, as easy to hit but quieter: outlined */
   button.submit.secondary { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
   button.submit.secondary:hover:not(:disabled) { background: rgba(28, 22, 17, 0.07); }
+  button.skip-btn[hidden] { display: none; }
   button.submit:active:not(:disabled) { transform: translateY(1px); }
 
   .feedback {
@@ -9846,6 +9847,7 @@
     <div class="input-row">
       <input type="text" class="answer" id="answer" placeholder="type the italian with article…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <button type="button" class="submit" id="submit">Controlla</button>
+      <button type="button" class="submit secondary skip-btn" id="skip-btn" title="Show the answer — it counts as wrong, then type it out">Salta</button>
     </div>
     <div class="feedback hidden" id="feedback"></div>
   `;
@@ -10042,6 +10044,7 @@
     showGameControls();
 
     document.getElementById('submit').addEventListener('click', handleSubmit);
+    document.getElementById('skip-btn').addEventListener('click', () => handleSubmit(true));
 
     render();
   }
@@ -10054,6 +10057,8 @@
     const natLine = document.getElementById('natural-en');
     if (natLine) { natLine.hidden = true; natLine.innerHTML = ''; }
     mustRetype = false;
+    const skipReset = document.getElementById('skip-btn');
+    if (skipReset) skipReset.hidden = false;
     const ansReset = document.getElementById('answer');
     if (ansReset) {
       ansReset.classList.remove('retype', 'retype-miss');
@@ -10191,25 +10196,40 @@
     ans.focus();
   }
 
-  function handleSubmit() {
+  // What a skip shows, before the answer is typed out
+  function skipMessage(card, itToEn) {
+    if (itToEn) return `Skipped — <strong>${card.italian}</strong> means <strong>${card.english}</strong>`;
+    if (isVerbSubject()) return `Skipped — the answer is <strong>${card.italian}</strong> <span class="pron">${card.pron}</span>`;
+    if (SUBJECTS[subject].sentences) return `Skipped — the ${SUBJECTS[subject].itemWord} is <strong>${card.italian}</strong>`;
+    if (isPhraseSubject()) return `Skipped — the phrase is <strong>${card.italian}</strong>`;
+    if (isAdjSubject()) return `Skipped — the answer is <strong>${card.italian}</strong>${card.cue ? ` (${card.cue})` : ''}`;
+    return `Skipped — the answer is <strong>${card.italian}</strong>`;
+  }
+
+  // skip === true only from Salta (as a click handler this gets the click event)
+  function handleSubmit(skip) {
+    const skipped = skip === true;
+    if (skipped && answered) return;
     if (answered && mustRetype) { retypeCheck(); return; }
     if (answered) { index++; render(); return; }
-    if (!document.getElementById('answer').value.trim()) { askForAnswer(document.getElementById('answer')); return; }
+    if (!skipped && !document.getElementById('answer').value.trim()) { askForAnswer(document.getElementById('answer')); return; }
 
     const ans = document.getElementById('answer');
     const sub = document.getElementById('submit');
     const fb = document.getElementById('feedback');
     const card = deck[index];
-    const raw = ans.value;
+    const raw = skipped ? '' : ans.value;
     const itToEn = direction === 'it-en';
-    const result = checkCard(raw, card, itToEn);
+    const result = skipped ? { correct: false } : checkCard(raw, card, itToEn);
+    const skipBtn = document.getElementById('skip-btn');
+    if (skipBtn) skipBtn.hidden = true;   // until the next card
     const prevStreak = streak;
 
     answered = true;
     ans.disabled = true;
     sub.textContent = 'Avanti →';
 
-    // Only a typed answer gets here (an empty one is asked for again), so every one counts
+    // A typed answer or a skip (Salta) — both count; an empty Enter never gets here
     recordAnswer(card.noun, result.correct);
     if (result.correct) roundMissed.delete(card.key); else roundMissed.set(card.key, card);
 
@@ -10234,7 +10254,9 @@
       streak = 0;
       fb.className = 'feedback incorrect';
       let main;
-      if (isVerbSubject()) {
+      if (skipped) {
+        main = skipMessage(card, itToEn);
+      } else if (isVerbSubject()) {
         const answer = itToEn ? card.english : card.italian;
         const pron = ` <span class="pron">${card.pron}</span>`;
         if (result.reason === 'wrong-pronoun') main = `✗ Wrong pronoun — should be <strong>${card.pronounLabel} ${answer}</strong>${pron}`;
@@ -10258,7 +10280,7 @@
       }
       // English has many near-synonyms (woods/forest), so in IT→EN mode a typed
       // answer can be overruled by the player
-      const showOverride = itToEn;
+      const showOverride = itToEn && !skipped;   // a skip wasn't an answer to overrule
       const overrideHTML = showOverride
         ? `<button type="button" class="ghost override-btn" id="override-btn">✓ I was right — count it</button>`
         : '';
@@ -10652,6 +10674,7 @@
       gameArea.innerHTML = cardHTML;
       showGameControls();
       document.getElementById('submit').addEventListener('click', handleSubmit);
+    document.getElementById('skip-btn').addEventListener('click', () => handleSubmit(true));
       render();
     }
     closeFocusModal();
