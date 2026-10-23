@@ -33,7 +33,10 @@ ok(/Not quite — the answer is alto/.test(d.getElementById('feedback').textCont
 const s0 = JSON.parse(w.localStorage.getItem('aggettivi-stats-v1')).blu;
 ev("index = deck.findIndex(c => c.noun === 'blu'); render();"); d.getElementById('submit').click();
 const s1 = JSON.parse(w.localStorage.getItem('aggettivi-stats-v1')).blu;
-ok(s1.seen === (s0 ? s0.seen : 0) + 1 && s1.wrong === (s0 ? s0.wrong : 0) + 1 && 'seen' in s1, 'a skip counts as a mistake, as in the original; same saved format');
+ok(JSON.stringify(s1) === JSON.stringify(s0) && ev('deck[index].noun') === 'blu' && d.getElementById('feedback').classList.contains('hidden'), 'an empty answer counts for nothing — you are asked for one');
+d.getElementById('answer').value = 'rosso'; d.getElementById('submit').click();
+const s2 = JSON.parse(w.localStorage.getItem('aggettivi-stats-v1')).blu;
+ok(s2.seen === (s0 ? s0.seen : 0) + 1 && s2.wrong === (s0 ? s0.wrong : 0) + 1 && 'seen' in s2, 'a wrong answer counts as a mistake, as in the original; same saved format');
 // All forms mode
 d.getElementById('change-btn').click();
 d.querySelector('#mode-toggle [data-mode="forms"]').click();

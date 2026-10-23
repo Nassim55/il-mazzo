@@ -35,7 +35,7 @@ o('stats = loadStats()'); n('stats = loadStats()');
 const rates = Object.values(hist).map(s => s.wrong / s.seen);
 same(true, new Set(rates).size === rates.length || true, 'history prepared');
 same(o('weakestAdjs(10)'), n('weakestNouns(10)'), 'Weakest 10 from the same saved history');
-// Recording: same key, same format, skips count as mistakes (as in the original)
+// Recording: same key, same format, a wrong answer counts as a mistake (as in the original)
 n("recordAnswer('grande', false)"); o("recordAnswer('grande', false)");
 same(JSON.parse(OLD.localStorage.getItem('aggettivi-stats-v1')).grande, JSON.parse(NEW.localStorage.getItem('aggettivi-stats-v1')).grande, 'saved progress: same key and format');
 console.log(`${checks} comparisons, ${diffs.length} differences`);

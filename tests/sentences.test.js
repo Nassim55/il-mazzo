@@ -39,7 +39,7 @@ ok(!r.right && /<mark class="sent-missing">l'<\/mark>acqua/.test(r.html.replace(
 r = play('il-cane-beve-l-acqua', 'il cane bevi acqua');
 ok(/<s class="sent-wrong">bevi<\/s>/.test(r.html) && /<mark class="sent-missing">beve<\/mark>/.test(r.html), 'a wrong verb form is struck through in yours and marked in the correct one');
 r = play('il-cane-beve-l-acqua', '');
-ok(!r.right && /Skipped — the sentence is/.test(r.text) && !/sent-diff/.test(r.html), 'a skip just shows the sentence');
+ok(!r.right && r.text.trim() === '' && !/sent-diff/.test(r.html), 'an empty answer shows nothing and counts nothing — it is asked for again');
 ok(play('i-bambini-giocano-in-giardino', 'I bambini giocano nel giardino.').right, 'natural variants are accepted (nel giardino / in giardino)');
 
 // ---- The other direction, the prompts, and Ripasso ----

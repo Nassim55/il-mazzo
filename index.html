@@ -10180,9 +10180,21 @@
     document.getElementById('submit').textContent = 'Avanti →';
   }
 
+  // Nothing typed — most often an Enter by accident: the box shakes and asks for an
+  // answer, and nothing is counted (an empty answer is never marked wrong)
+  function askForAnswer(ans) {
+    if (!ans.dataset.normalPlaceholder) ans.dataset.normalPlaceholder = ans.placeholder;
+    ans.placeholder = 'type your answer first…';
+    ans.classList.remove('retype-miss');
+    void ans.offsetWidth;   // restart the shake
+    ans.classList.add('retype-miss');
+    ans.focus();
+  }
+
   function handleSubmit() {
     if (answered && mustRetype) { retypeCheck(); return; }
     if (answered) { index++; render(); return; }
+    if (!document.getElementById('answer').value.trim()) { askForAnswer(document.getElementById('answer')); return; }
 
     const ans = document.getElementById('answer');
     const sub = document.getElementById('submit');
@@ -10197,11 +10209,8 @@
     ans.disabled = true;
     sub.textContent = 'Avanti →';
 
-    // Verbs keep the verb game's rule: a skip is neutral (it could be a slip
-    // rather than not knowing), so only typed answers count
-    if (!(isVerbSubject() && raw.trim() === '')) recordAnswer(card.noun, result.correct);
-    // For "practise the ones I missed", a skip counts as missed in every section:
-    // it's a card you didn't produce, whether or not it counts against your history
+    // Only a typed answer gets here (an empty one is asked for again), so every one counts
+    recordAnswer(card.noun, result.correct);
     if (result.correct) roundMissed.delete(card.key); else roundMissed.set(card.key, card);
 
     // Teaching notes now show on every answer, right or wrong, so the history
@@ -10228,28 +10237,17 @@
       if (isVerbSubject()) {
         const answer = itToEn ? card.english : card.italian;
         const pron = ` <span class="pron">${card.pron}</span>`;
-        if (raw.trim() === '') main = `Skipped — the answer is <strong>${answer}</strong>${pron}`;
-        else if (result.reason === 'wrong-pronoun') main = `✗ Wrong pronoun — should be <strong>${card.pronounLabel} ${answer}</strong>${pron}`;
+        if (result.reason === 'wrong-pronoun') main = `✗ Wrong pronoun — should be <strong>${card.pronounLabel} ${answer}</strong>${pron}`;
         else main = `✗ Not quite — the answer is <strong>${answer}</strong>${pron}`;
-      } else if (SUBJECTS[subject].sentences && !itToEn && raw.trim() !== '') {
-        main = `✗ Not quite — the ${SUBJECTS[subject].itemWord} is <strong>${card.italian}</strong>${sentenceDiffHTML(raw, card)}`;
       } else if (SUBJECTS[subject].sentences && !itToEn) {
-        main = `Skipped — the ${SUBJECTS[subject].itemWord} is <strong>${card.italian}</strong>`;
+        main = `✗ Not quite — the ${SUBJECTS[subject].itemWord} is <strong>${card.italian}</strong>${sentenceDiffHTML(raw, card)}`;
       } else if (isPhraseSubject() && !itToEn) {
-        main = raw.trim() === ''
-          ? `Skipped — the phrase is <strong>${card.italian}</strong>`
-          : `✗ Not quite — the phrase is <strong>${card.italian}</strong>`;
+        main = `✗ Not quite — the phrase is <strong>${card.italian}</strong>`;
       } else if (isAdjSubject() && !itToEn) {
         const cue = card.cue ? ` (${card.cue})` : '';
-        main = raw.trim() === ''
-          ? `Skipped — the answer is <strong>${card.italian}</strong>${cue}`
-          : `✗ Not quite — the answer is <strong>${card.italian}</strong>${cue}`;
+        main = `✗ Not quite — the answer is <strong>${card.italian}</strong>${cue}`;
       } else if (itToEn) {
-        main = raw.trim() === ''
-          ? `Skipped — <strong>${card.italian}</strong> means <strong>${card.english}</strong>`
-          : `✗ Not quite — <strong>${card.italian}</strong> means <strong>${card.english}</strong>`;
-      } else if (raw.trim() === '') {
-        main = `Skipped — the answer is <strong>${card.italian}</strong>`;
+        main = `✗ Not quite — <strong>${card.italian}</strong> means <strong>${card.english}</strong>`;
       } else if (result.reason === 'missing-article') {
         main = `✗ Don't forget the article — <strong>${card.italian}</strong>`;
       } else if (result.reason === 'wrong-article') {
@@ -10260,7 +10258,7 @@
       }
       // English has many near-synonyms (woods/forest), so in IT→EN mode a typed
       // answer can be overruled by the player
-      const showOverride = itToEn && raw.trim() !== '';
+      const showOverride = itToEn;
       const overrideHTML = showOverride
         ? `<button type="button" class="ghost override-btn" id="override-btn">✓ I was right — count it</button>`
         : '';
@@ -10276,7 +10274,7 @@
       mustRetype = true;
       ans.disabled = false;
       ans.value = '';
-      ans.dataset.normalPlaceholder = ans.placeholder;
+      if (!ans.dataset.normalPlaceholder) ans.dataset.normalPlaceholder = ans.placeholder;
       ans.placeholder = 'now type the right answer…';
       ans.classList.add('retype');
       sub.textContent = 'Riscrivi →';

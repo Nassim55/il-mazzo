@@ -26,7 +26,7 @@ ok(ev('deck.length') === 2 && label('game-trim-input') === '2 / 6', 'and down to
 set('game-trim-input', 6);
 
 // ---- Two sliders after missing some ----
-for (const n of ['pane', 'casa', 'libro']) answer(n, '');
+for (const n of ['pane', 'casa', 'libro']) answer(n, 'sbagliato');   // three misses (an empty answer wouldn't count)
 for (const n of ['acqua', 'gatto', 'cane']) answer(n, ev(`deck.find(c => c.noun === ${JSON.stringify(n)}).italian`));
 ev('index = deck.length; render();');
 el('practise-missed').click();

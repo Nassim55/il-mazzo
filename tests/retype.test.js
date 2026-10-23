@@ -37,6 +37,18 @@ ans().value = ev('deck[1].italian');
 sub().click();
 ok(sub().textContent === 'Avanti →' && ans().disabled, 'a right answer needs no retype: Avanti as before');
 
+// ---- Nothing typed: asked for an answer, nothing counted ----
+({ d, ev } = round('nouns', ['casa', 'pane']));
+const card0 = ev('deck[0]'), ph = d.getElementById('answer').placeholder, stats0 = ev(`JSON.stringify(stats[${JSON.stringify(card0.noun)}] || null)`);
+key(d, 'Enter');
+d.getElementById('submit').click();
+ok(ev('index') === 0 && d.getElementById('feedback').classList.contains('hidden') && !ev('answered') && d.getElementById('answer').placeholder === 'type your answer first…'
+   && d.getElementById('answer').classList.contains('retype-miss') && ev('score') === 0 && ev('roundMissed.size') === 0 && ev(`JSON.stringify(stats[${JSON.stringify(card0.noun)}] || null)`) === stats0,
+   'an empty answer (Enter by accident) is never wrong: the box asks for an answer, and nothing is counted');
+d.getElementById('answer').value = 'sbagliato'; d.getElementById('submit').click();
+d.getElementById('answer').value = card0.italian; d.getElementById('submit').click();
+ok(ev('index') === 1 && d.getElementById('answer').placeholder === ph, 'after a nudge and a miss, the next card gets its own placeholder back');
+
 // ---- Italian → English: retype the English; "I was right" lifts it ----
 ({ d, ev } = round('nouns', ['casa'], 'it-en'));
 d.getElementById('answer').value = 'home sweet home';

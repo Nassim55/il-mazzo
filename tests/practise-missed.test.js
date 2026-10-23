@@ -7,16 +7,16 @@ const btn = () => d.getElementById('practise-missed');
 const slider = id => { const el = d.getElementById(id); return el && { value: +el.value, min: +el.min, max: +el.max, name: el.closest('.trim-slider').querySelector('.trim-name').textContent }; };
 const setSlider = (id, v) => { const el = d.getElementById(id); el.value = String(v); el.dispatchEvent(new w.Event('change')); };
 ok(warns.length === 0 && errors.length === 0, 'loads cleanly');
-// ---- Nouns: 2 wrong (one typed, one skipped), 2 right ----
+// ---- Nouns: 2 wrong, 2 right ----
 ev("selectedNouns = new Set(['pane', 'casa', 'libro', 'acqua']); updateReadout();");
 d.getElementById('start-btn').click();
 answer("c => c.noun === 'pane'", 'la pane');
-answer("c => c.noun === 'casa'", '');
+answer("c => c.noun === 'casa'", 'il casa');
 answer("c => c.noun === 'libro'", 'il libro');
 answer("c => c.noun === 'acqua'", "l'acqua");
 finish();
 ok(btn() && btn().textContent === '↻ Practise the 2 I missed', `button: "${btn() && btn().textContent}"`);
-ok(JSON.stringify(missedShown().sort()) === JSON.stringify(['il pane', 'la casa']), `missed list: ${missedShown().join(', ')} (a skip counts)`);
+ok(JSON.stringify(missedShown().sort()) === JSON.stringify(['il pane', 'la casa']), `missed list: ${missedShown().join(', ')}`);
 const actions = [...d.querySelectorAll('.complete-actions button')].map(b => `${b.id}:${b.className}`);
 ok(d.getElementById('play-again').textContent === '↻ Play all 4 again' && actions[0] === 'play-again:submit' && actions[1] === 'practise-missed:submit secondary',
    'Play all 4 again is the main button, first; Practise the ones I missed sits beside it, outlined');
@@ -50,14 +50,14 @@ answer("c => c.noun === 'casa'", 'car');
 finish();
 ok(missedShown().join() === 'la casa', `an "I was right" override is not counted as missed (${missedShown().join(', ')})`);
 d.querySelector('.direction-toggle') ; d.getElementById('back-to-setup').click();
-// ---- Verbs: individual forms; a skip is neutral for history but still missed ----
+// ---- Verbs: just the forms missed ----
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
 ev("selectedNouns = new Set(['capire']); updateReadout(); verbMode = 'conjugations';");
 d.getElementById('start-btn').click();
 if (ev('direction') !== 'en-it') d.querySelector('.direction-toggle [data-dir="en-it"]').click();
 const before = JSON.stringify(JSON.parse(w.localStorage.getItem('verbi-regolari-stats') || '{}').capire || null);
 answer("c => c.person === 'io'", 'io capiscio');
-answer("c => c.person === 'noi'", '');
+answer("c => c.person === 'noi'", 'noi capisciamo');
 for (const p of ['tu', 'lui', 'voi', 'loro']) answer(`c => c.person === '${p}'`, ev(`deck.find(c => c.person === '${p}').italian`));
 finish();
 ok(JSON.stringify(missedShown().sort()) === JSON.stringify(['io capisco', 'noi capiamo']), `verbs: just the missed forms, with their pronoun (${missedShown().join(', ')})`);

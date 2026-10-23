@@ -42,7 +42,7 @@ d.getElementById('answer').value = 'voi veniamo'; d.getElementById('submit').cli
 ok(/Wrong pronoun — should be noi veniamo/.test(d.getElementById('feedback').textContent), 'wrong pronoun detected');
 const before = JSON.parse(w.localStorage.getItem('verbi-irregolari-stats')).venire;
 ev("index = deck.findIndex(c => c.noun === 'venire' && c.person === 'tu'); render();"); d.getElementById('submit').click();
-ok(JSON.stringify(JSON.parse(w.localStorage.getItem('verbi-irregolari-stats')).venire) === JSON.stringify(before), 'a skip leaves progress untouched');
+ok(JSON.stringify(JSON.parse(w.localStorage.getItem('verbi-irregolari-stats')).venire) === JSON.stringify(before), 'an empty answer leaves progress untouched — it is asked for again');
 ok(JSON.parse(w.localStorage.getItem('verbi-irregolari-stats')).essere.attempts === 31 && !w.localStorage.getItem('verbi-regolari-stats'), 'progress saved in its own key, original format; regular progress untouched');
 // Focus, Deck size, direction
 d.getElementById('game-focus-btn').click();

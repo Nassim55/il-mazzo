@@ -40,7 +40,7 @@ ok(/Wrong pronoun — should be io finisco/.test(d.getElementById('feedback').te
 const before = JSON.parse(w.localStorage.getItem('verbi-regolari-stats')).pulire;
 ev("index = deck.findIndex(c => c.noun === 'pulire' && c.person === 'noi'); render();");
 d.getElementById('submit').click();
-ok(JSON.stringify(JSON.parse(w.localStorage.getItem('verbi-regolari-stats')).pulire) === JSON.stringify(before) && /Skipped/.test(d.getElementById('feedback').textContent), 'a skip leaves verb progress untouched');
+ok(JSON.stringify(JSON.parse(w.localStorage.getItem('verbi-regolari-stats')).pulire) === JSON.stringify(before) && d.getElementById('feedback').classList.contains('hidden') && d.getElementById('answer').placeholder === 'type your answer first…', 'an empty answer leaves verb progress untouched — it is asked for again');
 // Focus and Deck size work per verb
 d.getElementById('game-focus-btn').click();
 ok(d.getElementById('focus-total').textContent === '8', 'Focus lists the 8 verbs');
