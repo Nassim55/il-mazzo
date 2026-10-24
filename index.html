@@ -1944,6 +1944,24 @@
   @media (prefers-reduced-motion: reduce) { .answer.retype-miss { animation: none; } }
   .retype-hint { margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--terracotta); }
 
+  /* Parla: say the answer */
+  .answer-wrap { position: relative; flex: 1; display: flex; min-width: 0; }
+  .answer-wrap input.answer { flex: 1; min-width: 0; }
+  .answer-wrap.has-mic input.answer { padding-right: 56px; }
+  button.mic-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; padding: 0; border: none; border-radius: 50%;
+                   background: transparent; color: var(--ink-soft); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; }
+  button.mic-btn:hover { background: rgba(28, 22, 17, 0.07); color: var(--ink); }
+  button.mic-btn[hidden] { display: none; }
+  .mic-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .mic-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  button.mic-btn.listening { color: var(--terracotta); background: rgba(160, 82, 45, 0.1); animation: mic-pulse 1.2s ease-in-out infinite; }
+  @keyframes mic-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(160, 82, 45, 0.35); } 50% { box-shadow: 0 0 0 7px rgba(160, 82, 45, 0); } }
+  @media (prefers-reduced-motion: reduce) { button.mic-btn.listening { animation: none; } }
+  input.answer.interim { color: var(--ink-faded); font-style: italic; }
+  .speak-hint { margin: -4px 0 14px; font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: var(--ink-soft); }
+  .speak-hint:empty { display: none; }
+  .said-aloud { margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--olive); }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
@@ -8828,6 +8846,7 @@
   function openChart() {
     const k = chartKey();
     if (!k) return;
+    stopListening();
     let ov = document.getElementById('chart-overlay');
     if (!ov) {
       ov = document.createElement('div');
@@ -8894,6 +8913,7 @@
   }
 
   function showSetup() {
+    stopListening();
     closeChart();
     if (reviewMode) {
       reviewMode = false;
@@ -9919,10 +9939,14 @@
       <button type="button" class="card-speak" id="card-speak" aria-label="Hear the Italian" title="Hear the Italian" hidden>🔊</button>
     </div>
     <div class="input-row">
-      <input type="text" class="answer" id="answer" placeholder="type the italian with article…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <div class="answer-wrap" id="answer-wrap">
+        <input type="text" class="answer" id="answer" placeholder="type the italian with article…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button type="button" class="mic-btn" id="mic-btn" aria-pressed="false" aria-label="Parla — say the answer in Italian" title="Parla — say it in Italian (⇧ Enter)" hidden><svg class="mic-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span class="mic-label">Parla</span></button>
+      </div>
       <button type="button" class="submit" id="submit">Controlla</button>
       <button type="button" class="submit secondary skip-btn" id="skip-btn" title="Show the answer — it counts as wrong, then type it out">Salta</button>
     </div>
+    <div class="speak-hint" id="speak-hint" aria-live="polite"></div>
     <div class="feedback hidden" id="feedback"></div>
   `;
 
@@ -9940,7 +9964,7 @@
           <button type="button" data-dir="listen" class="${direction === 'listen' ? 'active' : ''}" aria-pressed="${direction === 'listen'}" title="Hear the Italian and type it">🔊 Listen</button>
         </span>
       </div>
-      <span><kbd>Enter</kbd> submits · then again for next</span>
+      <span><kbd>Enter</kbd> submits · then again for next<span id="mic-help" hidden> · <kbd>⇧ Enter</kbd> or the microphone to say it</span></span>
     `;
     document.getElementById('reshuffle-btn').addEventListener('click', () => startGame());
     document.getElementById('change-btn').addEventListener('click', showSetup);
@@ -10119,18 +10143,23 @@
 
     document.getElementById('submit').addEventListener('click', handleSubmit);
     document.getElementById('skip-btn').addEventListener('click', () => handleSubmit(true));
+    document.getElementById('mic-btn').addEventListener('click', startListening);
 
     render();
   }
 
   function render() {
     if (index >= deck.length) {
+      stopListening();
       showComplete();
       return;
     }
+    setTimeout(updateMicBtn, 0);   // once this card is drawn
     const natLine = document.getElementById('natural-en');
     if (natLine) { natLine.hidden = true; natLine.innerHTML = ''; }
     mustRetype = false;
+    stopListening();
+    speakHint('');
     const skipReset = document.getElementById('skip-btn');
     if (skipReset) skipReset.hidden = false;
     const ansReset = document.getElementById('answer');
@@ -10227,6 +10256,110 @@
     setTimeout(() => ans.focus(), 30);
   }
 
+  // ===== Parla: say the answer =====
+  // Wherever the answer is Italian (English → Italian; Listen, where repeating what you
+  // hear is shadowing), and for the retype after a miss. The recogniser returns several
+  // guesses: if any is right, it's a right answer (checked as leniently as typing). If
+  // none is, nothing is marked — what was heard stays in the box, to say again, fix, or
+  // check. Only where the browser can listen (Chrome, Edge, Safari).
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  let rec = null, listening = false, micBlocked = false, saidAloud = false;
+  function micAvailable() {
+    return !!SpeechRec && !micBlocked && direction !== 'it-en' && container.dataset.view === 'game' && !!deck[index] && (!answered || mustRetype);
+  }
+  function updateMicBtn() {
+    const b = document.getElementById('mic-btn');
+    if (!b) return;
+    b.hidden = !micAvailable();
+    b.classList.toggle('listening', listening);
+    b.setAttribute('aria-pressed', String(listening));
+    b.setAttribute('aria-label', listening ? 'Listening — press to stop' : 'Parla — say the answer in Italian');
+    const wrap = document.getElementById('answer-wrap');
+    if (wrap) wrap.classList.toggle('has-mic', !b.hidden);
+    const help = document.getElementById('mic-help');
+    if (help) help.hidden = !SpeechRec || micBlocked || direction === 'it-en';
+  }
+  function speakHint(text) {
+    const h = document.getElementById('speak-hint');
+    if (h) h.textContent = text || '';
+  }
+  function stopListening() {
+    if (listening && /^Listening/.test((document.getElementById('speak-hint') || {}).textContent || '')) speakHint('');
+    if (rec) {
+      rec.onresult = rec.onerror = rec.onend = null;
+      try { rec.abort(); } catch (e) { /* already stopped */ }
+      rec = null;
+    }
+    listening = false;
+    const ans = document.getElementById('answer');
+    if (ans) ans.classList.remove('interim');
+    updateMicBtn();
+  }
+  function startListening() {
+    if (listening) { stopListening(); return; }   // pressed again: stop
+    if (!micAvailable()) return;
+    try { if (window.speechSynthesis && window.speechSynthesis.speaking) window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }   // never hear itself
+    const ans = document.getElementById('answer');
+    const me = rec = new SpeechRec();   // each listening acts only on its own events (a late end can't stop the next)
+    rec.lang = 'it-IT';
+    rec.interimResults = true;
+    rec.maxAlternatives = 5;
+    rec.continuous = false;
+    listening = true;
+    speakHint('Listening — say it in Italian…');
+    updateMicBtn();
+    rec.onresult = e => {
+      if (rec !== me) return;
+      const res = e.results[e.results.length - 1];
+      const alts = Array.from({ length: res.length }, (_, k) => String(res[k].transcript || '').trim()).filter(Boolean);
+      if (!res.isFinal) { if (alts[0]) { ans.value = alts[0]; ans.classList.add('interim'); speakHint(''); } return; }
+      ans.classList.remove('interim');
+      rec = null;          // a final result ends this listening
+      listening = false;
+      updateMicBtn();
+      heard(alts);
+    };
+    rec.onerror = e => {
+      if (rec !== me) return;
+      rec = null;
+      listening = false;
+      ans.classList.remove('interim');
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        micBlocked = true;
+        speakHint('The microphone is blocked — allow it for this site to use Parla.');
+      } else if (e.error === 'no-speech') speakHint("Didn't catch anything — press Parla and try again.");
+      else if (e.error === 'network') speakHint('Listening needs an internet connection.');
+      else if (e.error !== 'aborted') speakHint("Couldn't listen just now — try again.");
+      updateMicBtn();
+    };
+    rec.onend = () => {
+      if (rec !== me) return;
+      rec = null;
+      listening = false;
+      ans.classList.remove('interim');
+      if (/^Listening/.test(document.getElementById('speak-hint').textContent)) speakHint('');
+      updateMicBtn();
+    };
+    try { rec.start(); } catch (e) { listening = false; rec = null; updateMicBtn(); }
+  }
+  function heard(alts) {
+    const ans = document.getElementById('answer'), card = deck[index];
+    if (!card) return;
+    if (!alts.length) { speakHint("Didn't catch anything — press Parla and try again."); return; }
+    const right = alts.find(a => checkCard(a, card, direction === 'it-en').correct);
+    if (right) {
+      ans.value = right;
+      speakHint('');
+      saidAloud = true;
+      handleSubmit();   // a right answer (or, in a retype, on to the next card)
+      saidAloud = false;
+      return;
+    }
+    ans.value = alts[0];
+    speakHint(`Heard “${alts[0]}” — say it again, fix it, or press ${mustRetype ? 'Riscrivi' : 'Controlla'} to check it.`);
+    ans.focus();
+  }
+
   // The one checker, for an answer and for its retype (it records nothing)
   function checkCard(raw, card, itToEn) {
     return isVerbSubject() ? checkVerbAnswer(raw, card, itToEn)
@@ -10257,6 +10390,7 @@
     if (ans) { ans.disabled = true; ans.classList.remove('retype', 'retype-miss'); }
     if (hint) hint.remove();
     document.getElementById('submit').textContent = 'Avanti →';
+    updateMicBtn();
   }
 
   // Nothing typed — most often an Enter by accident: the box shakes and asks for an
@@ -10366,6 +10500,7 @@
     renderAssociation(card);
     wireSpeakBtn(card);
     if (audioPrefs.auto) speak(sayText(card));
+    if (result.correct && saidAloud) fb.querySelector('.feedback-body').insertAdjacentHTML('afterbegin', '<div class="said-aloud">🎙 Said aloud</div>');
     if (!result.correct) {   // type it right before the next card
       mustRetype = true;
       ans.disabled = false;
@@ -10377,6 +10512,8 @@
       fb.querySelector('.feedback-body').insertAdjacentHTML('afterbegin', `<div class="retype-hint" id="retype-hint">Type it above to go on — it won't change your score.</div>`);
       setTimeout(() => ans.focus(), 30);
     }
+    speakHint('');
+    updateMicBtn();
   }
 
   // ===== Association display & inline editor (inside the feedback box) =====
@@ -10581,6 +10718,11 @@
       if (e.key === 'Escape') { e.preventDefault(); closeChart(); }
       return;
     }
+    if (e.key === 'Enter' && e.shiftKey && container.dataset.view === 'game' && (listening || micAvailable())) {   // ⇧ Enter: say it (again to stop)
+      e.preventDefault();
+      startListening();
+      return;
+    }
     if (e.key !== 'Enter') return;
     if (container.dataset.view === 'complete') {   // the summary: Enter plays the round again, like its main button
       if (e.target && e.target.closest && e.target.closest('button')) return;   // a focused button keeps its Enter
@@ -10749,6 +10891,7 @@
       showGameControls();
       document.getElementById('submit').addEventListener('click', handleSubmit);
     document.getElementById('skip-btn').addEventListener('click', () => handleSubmit(true));
+    document.getElementById('mic-btn').addEventListener('click', startListening);
       render();
     }
     closeFocusModal();
