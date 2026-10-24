@@ -3,7 +3,7 @@ const seeded = { simpatico: { seen: 4, wrong: 3 }, grigio: { seen: 10, wrong: 5 
 let { w, d, ev, key, setVal, errors, warns } = boot({ 'aggettivi-stats-v1': JSON.stringify(seeded) });
 ok(warns.length === 0 && errors.length === 0, 'loads with no validator warnings or errors');
 const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Verbi regolari', 'Verbi irregolari', 'Aggettivi', 'Preposizioni', 'Frasi', 'Scrittura', 'Racconto']), `section switch: ${labels.join(' | ')}`);
+ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Verbi regolari', 'Verbi irregolari', 'Aggettivi', 'Preposizioni', 'Frasi', 'Scrittura', 'Dialoghi', 'Racconto']), `section switch: ${labels.join(' | ')}`);
 d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 ok(ev('subject') === 'adjectives' && d.getElementById('app-title').textContent === 'Aggettivi' && d.title === 'Il Mazzo · Aggettivi', 'title and tab');
 ok(ev('selectedNouns.size') === 150 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('150 adjectives · 150 cards'), 'every adjective starts selected, as in the original (now 150 · 150 cards)');

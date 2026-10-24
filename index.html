@@ -1962,12 +1962,78 @@
   .speak-hint:empty { display: none; }
   .said-aloud { margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--olive); }
 
+  /* Dialoghi: the scenes, and a scene's three steps */
+  .container[data-subject="dialoghi"][data-view="setup"] #game-area { max-width: none; }
+  .container[data-view="dialogue"] { max-width: 860px; }
+  .container[data-view="dialogue"] .stats,
+  .container[data-view="dialogue"] .progress-bar,
+  .container[data-view="dialogue"] #controls { display: none; }
+  .dlg-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; margin-top: 28px; }
+  .dlg-card { display: flex; flex-direction: column; gap: 6px; padding: 22px 22px 18px; background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.12); border-radius: 4px;
+              box-shadow: 0 1px 0 rgba(28, 22, 17, 0.04), 0 14px 30px -20px rgba(28, 22, 17, 0.3); }
+  .dlg-card.is-heard { border-color: rgba(90, 107, 58, 0.35); }
+  .dlg-card-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faded); }
+  .dlg-card-title { margin: 2px 0 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 32px; line-height: 1.1; color: var(--ink); }
+  .dlg-card-en { margin: 0; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink-soft); }
+  .dlg-cast { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .dlg-cast.spk-a, .spk-a .dlg-speaker { color: var(--gold); }
+  .dlg-cast.spk-b, .spk-b .dlg-speaker { color: var(--ink-soft); }
+  .dlg-card-steps { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+  .dlg-step { padding: 4px 8px; border: 1px dashed rgba(28, 22, 17, 0.22); border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em; color: var(--ink-faded); }
+  .dlg-step.is-done { border-style: solid; border-color: rgba(90, 107, 58, 0.45); background: rgba(90, 107, 58, 0.08); color: var(--olive); }
+  .dlg-open { align-self: flex-start; margin-top: 8px; }
+  .dlg-back { margin: 0 0 18px; padding: 0 0 1px; background: none; border: none; border-bottom: 1px solid rgba(28, 22, 17, 0.25); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink-soft); cursor: pointer; }
+  .dlg-back:hover { color: var(--ink); border-color: var(--ink); }
+  .dlg-title { margin: 6px 0 4px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 48px; line-height: 1.05; color: var(--ink); }
+  .dlg-sub { margin: 0; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--ink-soft); }
+  .dlg-sec { margin-top: 34px; padding-top: 22px; border-top: 1px solid rgba(28, 22, 17, 0.12); }
+  .dlg-sec-title { display: flex; align-items: center; gap: 12px; margin: 0 0 6px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 30px; color: var(--ink); }
+  .dlg-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid var(--gold); border-radius: 50%;
+             font-family: 'JetBrains Mono', monospace; font-style: normal; font-size: 13px; color: var(--gold); }
+  .dlg-help { margin: 0 0 16px; font-family: 'DM Sans', sans-serif; font-size: 14.5px; line-height: 1.5; color: var(--ink-soft); }
+  .dlg-player { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-bottom: 10px; }
+  .dlg-play { padding: 13px 20px; background: var(--ink); color: var(--cream); border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
+  .dlg-play.active { background: var(--terracotta); }
+  .mode-toggle.dlg-speed { margin: 0; }
+  .dlg-heard { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--olive); }
+  .dlg-heard[hidden] { display: none; }
+  .dlg-toggles { display: flex; flex-wrap: wrap; gap: 16px; margin: 6px 0 14px; }
+  .dlg-lines { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .dlg-line { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 4px 16px; align-items: baseline; padding: 12px 16px; background: var(--paper);
+              border: 1px solid rgba(28, 22, 17, 0.1); border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s, box-shadow 0.15s; }
+  .dlg-line.spk-b { margin-left: 8%; background: var(--cream); }
+  .dlg-line:hover { border-color: rgba(176, 133, 64, 0.5); }
+  .dlg-line:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .dlg-line.is-speaking { border-color: var(--gold); background: rgba(176, 133, 64, 0.12); box-shadow: inset 3px 0 0 var(--gold); }
+  .dlg-speaker { padding-top: 3px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .dlg-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .dlg-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 23px; line-height: 1.3; color: var(--ink); }
+  .dlg-en { font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.4; color: var(--ink-soft); }
+  .dlg-lit { font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.4; color: var(--ink-faded); }
+  .dlg-veil { display: block; height: 12px; margin: 8px 0; border-radius: 6px; background: rgba(28, 22, 17, 0.1); }
+  .dlg-line.is-speaking .dlg-veil { background: rgba(176, 133, 64, 0.45); animation: dlg-pulse 1.1s ease-in-out infinite; }
+  @keyframes dlg-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+  @media (prefers-reduced-motion: reduce) { .dlg-line.is-speaking .dlg-veil { animation: none; } }
+  .dlg-quote { display: block; margin-top: 6px; font-family: 'DM Sans', sans-serif; font-size: 13.5px; line-height: 1.45; color: var(--ink-soft); }
+  .dlg-quote-who { margin-right: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faded); }
+  .dlg-quote-en { display: block; color: var(--ink-faded); }
+  .dlg-quiz-score { margin: 14px 0 0; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.08em; color: var(--olive); }
+  .dlg-quiz-score[hidden] { display: none; }
+  .dlg-dict-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; }
+  .dlg-dict-actions .submit { height: 52px; padding: 0 24px; }
+  .dlg-written { margin: 12px 0 0; font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: var(--ink-faded); }
+  @media (max-width: 600px) {
+    .dlg-line { grid-template-columns: minmax(0, 1fr); padding: 10px 12px; }
+    .dlg-line.spk-b { margin-left: 6%; }
+    .dlg-title { font-size: 38px; }
+  }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
   @media (max-width: 1100px) {
     .container[data-view="setup"] { max-width: 660px; }
-    .mode-toggle.subject-toggle { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .mode-toggle.subject-toggle { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .subject-toggle .mode-option { white-space: normal; }
   }
 </style>
@@ -6492,6 +6558,282 @@
   // Where each chapter's pin sits on the map
   const STORY_PINS = { c1: [414, 262, true], c2: [556, 98, false], c3: [622, 136, true] };
 
+  // ===== Dialoghi: the scenes, the player, the questions and the dictation =====
+  // Progress is { read: {scene: date of the first full listen}, quiz: {scene: best score} },
+  // the story's shape, so it syncs with the story's merge
+  const DIALOGUE_PROGRESS_KEY = 'mazzo-dialoghi-v1';
+  function loadDialogueProgress() {
+    try {
+      const o = JSON.parse(localStorage.getItem(DIALOGUE_PROGRESS_KEY) || '{}') || {};
+      return { read: o.read && typeof o.read === 'object' ? o.read : {}, quiz: o.quiz && typeof o.quiz === 'object' ? o.quiz : {} };
+    } catch (e) { return { read: {}, quiz: {} }; }
+  }
+  function saveDialogueProgress(p) {
+    try { localStorage.setItem(DIALOGUE_PROGRESS_KEY, JSON.stringify(p)); syncTouched(); } catch (e) { /* storage full */ }
+  }
+  // Lines written right at least once from dictation
+  function dialogueWritten(d) {
+    let st = {};
+    try { st = JSON.parse(localStorage.getItem(SUBJECTS.dialoghi.statsKeys.listen) || '{}') || {}; } catch (e) { /* none yet */ }
+    return d.lines.filter((_, i) => { const s = st[`${d.id}-${i + 1}`]; return !!s && (+s.seen || 0) > (+s.wrong || 0); }).length;
+  }
+  // Two voices: the two best Italian voices (different people, not two versions of
+  // one); with only one, the second speaker is the same voice pitched lower
+  function dialogueVoices() {
+    const a = chosenVoice();
+    if (!a) return null;
+    const base = v => String(v.name || '').replace(/\s*\(.*\)\s*$/, '').trim().toLowerCase();
+    const b = italianVoices().slice().sort((x, y) => voiceScore(y) - voiceScore(x)).find(v => v.voiceURI !== a.voiceURI && base(v) !== base(a));
+    return { A: { voice: a, pitch: 1 }, B: b ? { voice: b, pitch: 1 } : { voice: a, pitch: 0.75 } };
+  }
+  const DIALOGUE_RATE = { normal: 1, slow: 0.7 };
+
+  let dialogueState = null, dialogueSpeech = null, dialogueResume = null;
+  function renderDialogueHome() {
+    if (dialogueResume) { const id = dialogueResume; dialogueResume = null; openDialogue(id); return; }
+    const prog = loadDialogueProgress();
+    const cards = DIALOGUES.map((d, i) => {
+      const heard = prog.read[d.id], quiz = prog.quiz[d.id], written = dialogueWritten(d), n = d.lines.length;
+      return `
+        <article class="dlg-card${heard ? ' is-heard' : ''}" data-dlg="${d.id}">
+          <div class="dlg-card-eyebrow">Scena ${i + 1} · ${storyEsc(d.place)}</div>
+          <h3 class="dlg-card-title">${storyEsc(d.title)}</h3>
+          <p class="dlg-card-en">${storyEsc(d.en)} — <span class="dlg-cast spk-a">${storyEsc(d.speakers.A)}</span> e <span class="dlg-cast spk-b">${storyEsc(d.speakers.B)}</span></p>
+          <div class="dlg-card-steps">
+            <span class="dlg-step${heard ? ' is-done' : ''}">${heard ? '✓ ' : ''}Ascoltato</span>
+            <span class="dlg-step${quiz ? ' is-done' : ''}">Domande${quiz ? ` ${quiz.score}/${quiz.total}` : ''}</span>
+            <span class="dlg-step${written === n ? ' is-done' : ''}">Dettato ${written}/${n}</span>
+          </div>
+          <button type="button" class="story-read-btn dlg-open" data-open="${d.id}">${heard ? 'Riapri' : 'Apri'} →</button>
+        </article>`;
+    }).join('');
+    gameArea.innerHTML = `
+      <div class="dlg-home">
+        <div class="story-hero">
+          <div class="setup-eyebrow">Dialoghi · Scene di vita</div>
+          <h2 class="story-title">Scene di vita</h2>
+          <p class="story-sub">Short everyday conversations in two voices, built from the words you're learning. Listen first with the text hidden, check what you understood, then write each line as you hear it.</p>
+        </div>
+        <div class="dlg-cards">${cards}</div>
+      </div>`;
+    gameArea.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openDialogue(b.dataset.open)));
+  }
+
+  function openDialogue(id) {
+    const i = DIALOGUES.findIndex(d => d.id === id);
+    if (i < 0) return;
+    dialogueStopSpeaking();
+    container.dataset.view = 'dialogue';
+    const d = DIALOGUES[i], voiced = !!dialogueVoices();
+    dialogueState = { d, i, answers: d.questions.map(() => null), showText: !voiced, showEnglish: false, slow: false };
+    renderDialogueScene();
+    try { window.scrollTo(0, 0); } catch (e) { /* jsdom */ }
+  }
+  function dialogueLinesHTML() {
+    const { d, showText, showEnglish } = dialogueState;
+    return d.lines.map(([spk, it, en, natural], k) => `
+      <li class="dlg-line spk-${spk.toLowerCase()}" data-i="${k}" role="button" tabindex="0" aria-label="${showText ? storyEsc(it) : `Line ${k + 1}`} — listen">
+        <span class="dlg-speaker">${storyEsc(d.speakers[spk])}</span>
+        <span class="dlg-text">${showText
+          ? `<span class="dlg-it">${storyEsc(it)}</span>${showEnglish ? `<span class="dlg-en">${storyEsc(natural || en)}</span>${natural ? `<span class="dlg-lit"><span class="literal-label">Word for word</span> ${storyEsc(en)}</span>` : ''}` : ''}`
+          : `<span class="dlg-veil" style="width: ${Math.min(100, 16 + it.length * 1.5)}%"></span>`}</span>
+      </li>`).join('');
+  }
+  function dialogueTogglesHTML() {
+    const { showText, showEnglish } = dialogueState;
+    return `<button type="button" class="ghost dlg-toggle" id="dlg-text" aria-pressed="${showText}">${showText ? 'Nascondi il testo' : 'Mostra il testo'}</button>
+      ${showText ? `<button type="button" class="ghost dlg-toggle" id="dlg-en" aria-pressed="${showEnglish}">${showEnglish ? "Nascondi l'inglese" : "Mostra l'inglese"}</button>` : ''}`;
+  }
+  // The options in a fair seeded order (every order equally likely, the same on every load)
+  function dialogueOptionOrder(n, seed) {
+    const r = storyRng(seed), order = Array.from({ length: n }, (_, k) => k);
+    for (let k = n - 1; k > 0; k--) { const j = Math.floor(r() * (k + 1)); [order[k], order[j]] = [order[j], order[k]]; }
+    return order;
+  }
+  function dialogueQuestionHTML(q, qi) {
+    const order = dialogueOptionOrder(q.options.length, qi * 613 + dialogueState.i * 97 + 11);
+    return `<div class="quiz-q" data-q="${qi}">
+      <div class="quiz-num">${qi + 1}</div>
+      <div class="quiz-main">
+        <p class="quiz-text">${storyEsc(q.q)}</p>
+        <div class="quiz-opts">${order.map(k => `<button type="button" class="quiz-opt" data-q="${qi}" data-k="${k}">${storyEsc(q.options[k])}</button>`).join('')}</div>
+        <p class="quiz-fb" hidden></p>
+      </div></div>`;
+  }
+  function renderDialogueScene() {
+    const { d, i, slow } = dialogueState;
+    const heard = loadDialogueProgress().read[d.id], written = dialogueWritten(d), voiced = !!dialogueVoices();
+    gameArea.innerHTML = `
+      <div class="dlg-scene">
+        <button type="button" class="dlg-back" id="dlg-back">← Dialoghi</button>
+        <div class="dlg-head">
+          <div class="setup-eyebrow">Scena ${i + 1} · ${storyEsc(d.place)}</div>
+          <h2 class="dlg-title">${storyEsc(d.title)}</h2>
+          <p class="dlg-sub">${storyEsc(d.en)} — <span class="dlg-cast spk-a">${storyEsc(d.speakers.A)}</span> e <span class="dlg-cast spk-b">${storyEsc(d.speakers.B)}</span></p>
+        </div>
+        <section class="dlg-sec" id="dlg-listen">
+          <h3 class="dlg-sec-title"><span class="dlg-num">1</span>Ascolta</h3>
+          <p class="dlg-help">${voiced ? 'Listen to the whole scene before you read it. Tap any line to hear it again.' : "This browser has no Italian voice, so the scene can't be read aloud — here is the text."}</p>
+          ${voiced ? `<div class="dlg-player">
+            <button type="button" class="dlg-play" id="dlg-play" aria-pressed="false">▶ Ascolta il dialogo</button>
+            <div class="mode-toggle dlg-speed" id="dlg-speed" role="group" aria-label="Speed">
+              <button type="button" class="mode-option${slow ? '' : ' active'}" data-slow="0" aria-pressed="${!slow}">Normale</button>
+              <button type="button" class="mode-option${slow ? ' active' : ''}" data-slow="1" aria-pressed="${slow}">Lento</button>
+            </div>
+            <span class="dlg-heard" id="dlg-heard"${heard ? '' : ' hidden'}>${heard ? `✓ Ascoltato · ${storyEsc(storyDateLabel(heard))}` : ''}</span>
+          </div>` : ''}
+          <div class="dlg-toggles" id="dlg-toggles">${dialogueTogglesHTML()}</div>
+          <ol class="dlg-lines${dialogueState.showText ? '' : ' is-veiled'}" id="dlg-lines">${dialogueLinesHTML()}</ol>
+        </section>
+        <section class="dlg-sec" id="dlg-quiz">
+          <h3 class="dlg-sec-title"><span class="dlg-num">2</span>Capisci?</h3>
+          <p class="dlg-help">Three questions about what was said — listen again whenever you like.</p>
+          <div class="quiz">${d.questions.map(dialogueQuestionHTML).join('')}</div>
+          <p class="dlg-quiz-score" id="dlg-quiz-score" hidden></p>
+        </section>
+        <section class="dlg-sec" id="dlg-dict">
+          <h3 class="dlg-sec-title"><span class="dlg-num">3</span>Dettato</h3>
+          <p class="dlg-help">${voiced ? "Hear each line and write it, in order — or say it. The comparison and <em>Why</em> show anything that's off, and the lines come back in Ripasso." : 'Write each line from its English — the comparison and <em>Why</em> show anything that\'s off, and the lines come back in Ripasso.'}</p>
+          <div class="dlg-dict-actions">
+            ${voiced ? '<button type="button" class="submit" id="dlg-dict-btn">Inizia il dettato →</button>' : ''}
+            <button type="button" class="${voiced ? 'ghost' : 'submit'}" id="dlg-translate">Traduci dall'inglese →</button>
+          </div>
+          <p class="dlg-written" id="dlg-written">${written ? `Written right so far: ${written} of ${d.lines.length} lines.` : `${d.lines.length} lines.`}</p>
+        </section>
+      </div>`;
+    document.getElementById('dlg-back').addEventListener('click', () => { dialogueStopSpeaking(); showSetup(); });
+    const play = document.getElementById('dlg-play');
+    if (play) play.addEventListener('click', () => { if (dialogueSpeech && dialogueSpeech.whole) dialogueStopSpeaking(); else dialogueSpeak(0, dialogueState.d.lines.length); });
+    document.querySelectorAll('#dlg-speed .mode-option').forEach(b => b.addEventListener('click', () => {
+      dialogueState.slow = b.dataset.slow === '1';
+      document.querySelectorAll('#dlg-speed .mode-option').forEach(x => { const on = x === b; x.classList.toggle('active', on); x.setAttribute('aria-pressed', String(on)); });
+      if (dialogueSpeech && dialogueSpeech.whole) dialogueSpeak(0, dialogueState.d.lines.length);   // playing: start again at the new speed
+    }));
+    wireDialogueLines();
+    gameArea.querySelectorAll('#dlg-quiz .quiz-opt').forEach(b => b.addEventListener('click', () => dialogueAnswer(+b.dataset.q, +b.dataset.k)));
+    const dict = document.getElementById('dlg-dict-btn');
+    if (dict) dict.addEventListener('click', () => startDialogueRound('listen'));
+    document.getElementById('dlg-translate').addEventListener('click', () => startDialogueRound('en-it'));
+  }
+  // The text and English toggles redraw only the lines, so answers to the questions stay
+  function wireDialogueLines() {
+    const t = document.getElementById('dlg-text');
+    t.addEventListener('click', () => { dialogueState.showText = !dialogueState.showText; if (!dialogueState.showText) dialogueState.showEnglish = false; redrawDialogueLines(); });
+    const e = document.getElementById('dlg-en');
+    if (e) e.addEventListener('click', () => { dialogueState.showEnglish = !dialogueState.showEnglish; redrawDialogueLines(); });
+    document.querySelectorAll('#dlg-lines .dlg-line').forEach(row => {
+      const say = () => dialogueSpeak(+row.dataset.i, +row.dataset.i + 1);
+      row.addEventListener('click', say);
+      row.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); say(); } });
+    });
+  }
+  function redrawDialogueLines() {
+    const speaking = document.querySelector('.dlg-line.is-speaking');
+    const k = speaking ? speaking.dataset.i : null;
+    document.getElementById('dlg-toggles').innerHTML = dialogueTogglesHTML();
+    const list = document.getElementById('dlg-lines');
+    list.className = `dlg-lines${dialogueState.showText ? '' : ' is-veiled'}`;
+    list.innerHTML = dialogueLinesHTML();
+    if (k !== null) { const row = list.querySelector(`.dlg-line[data-i="${k}"]`); if (row) row.classList.add('is-speaking'); }
+    wireDialogueLines();
+  }
+
+  // ----- Reading aloud, in two voices -----
+  function dialogueStopSpeaking() {
+    if (dialogueSpeech) {
+      dialogueSpeech.cancelled = true;
+      dialogueSpeech = null;
+      try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
+    }
+    document.querySelectorAll('.dlg-line.is-speaking').forEach(e => e.classList.remove('is-speaking'));
+    const b = document.getElementById('dlg-play');
+    if (b) { b.textContent = '▶ Ascolta il dialogo'; b.setAttribute('aria-pressed', 'false'); b.classList.remove('active'); }
+  }
+  // Queue the lines together (so it also works where speech must start from a tap),
+  // each in its speaker's voice, highlighting each as it's spoken
+  function dialogueSpeak(from, to) {
+    const voices = dialogueVoices();
+    if (!voices || !dialogueState) return;
+    dialogueStopSpeaking();
+    const { d } = dialogueState, whole = from === 0 && to === d.lines.length;
+    const run = { cancelled: false, whole };
+    dialogueSpeech = run;
+    const rate = dialogueState.slow ? DIALOGUE_RATE.slow : DIALOGUE_RATE.normal;
+    try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
+    for (let k = from; k < to; k++) {
+      const [spk, it] = d.lines[k], v = voices[spk];
+      const u = new window.SpeechSynthesisUtterance(it);
+      u.voice = v.voice;
+      u.lang = v.voice.lang;
+      u.pitch = v.pitch;
+      u.rate = rate;
+      u.onstart = () => {
+        if (run.cancelled) return;
+        document.querySelectorAll('#dlg-lines .dlg-line').forEach(r => r.classList.toggle('is-speaking', +r.dataset.i === k));
+      };
+      u.onend = () => {
+        if (run.cancelled) return;
+        const row = document.querySelector(`#dlg-lines .dlg-line[data-i="${k}"]`);
+        if (row) row.classList.remove('is-speaking');
+        if (k === to - 1) { if (whole) dialogueHeard(); dialogueStopSpeaking(); }
+      };
+      window.speechSynthesis.speak(u);
+    }
+    if (whole) {
+      const b = document.getElementById('dlg-play');
+      if (b) { b.textContent = '■ Ferma'; b.setAttribute('aria-pressed', 'true'); b.classList.add('active'); }
+    }
+  }
+  // Heard from start to end: Ascoltato, dated the first time
+  function dialogueHeard() {
+    const p = loadDialogueProgress(), id = dialogueState.d.id;
+    if (!p.read[id]) { p.read[id] = storyTodayISO(); saveDialogueProgress(p); }
+    const tag = document.getElementById('dlg-heard');
+    if (tag) { tag.hidden = false; tag.textContent = `✓ Ascoltato · ${storyDateLabel(p.read[id])}`; }
+  }
+
+  // ----- The questions -----
+  function dialogueAnswer(qi, k) {
+    const st = dialogueState;
+    if (st.answers[qi] !== null) return;
+    const q = st.d.questions[qi], right = k === q.answer;
+    st.answers[qi] = right;
+    const box = document.querySelector(`#dlg-quiz .quiz-q[data-q="${qi}"]`);
+    box.classList.add(right ? 'is-right' : 'is-wrong');
+    box.querySelectorAll('.quiz-opt').forEach(b => {
+      b.disabled = true;
+      if (+b.dataset.k === q.answer) b.classList.add('is-correct');
+      else if (+b.dataset.k === k) b.classList.add('is-chosen');
+    });
+    const [spk, it, en, natural] = st.d.lines[q.line];
+    const fb = box.querySelector('.quiz-fb');
+    fb.hidden = false;
+    fb.innerHTML = `${right ? 'Esatto!' : `No — ${storyEsc(q.options[q.answer])}.`}<span class="dlg-quote"><span class="dlg-quote-who">${storyEsc(st.d.speakers[spk])}</span> «${storyEsc(it)}» <span class="dlg-quote-en">${storyEsc(natural || en)}</span></span>`;
+    if (st.answers.every(x => x !== null)) {
+      const score = st.answers.filter(Boolean).length, total = st.answers.length;
+      const p = loadDialogueProgress(), prev = p.quiz[st.d.id];
+      if (!prev || score > (+prev.score || 0)) { p.quiz[st.d.id] = { score, total }; saveDialogueProgress(p); }
+      const out = document.getElementById('dlg-quiz-score');
+      out.hidden = false;
+      out.textContent = `${score} / ${total}${score === total ? ' — perfetto!' : ''}`;
+    }
+  }
+
+  // ----- The dictation: the scene's lines, in order, as cards -----
+  function startDialogueRound(dir) {
+    const { d } = dialogueState;
+    dialogueStopSpeaking();
+    dialogueResume = d.id;   // the round's end leads back to this scene
+    selectedNouns = new Set(d.lines.map((_, i) => `${d.id}-${i + 1}`));
+    capValue = '';
+    capMode = 'random';
+    direction = dir;
+    sessionPool = null;
+    sessionMaxDeck = null;
+    sessionIsReview = false;
+    startGame();
+  }
+
   // ===== Racconto: the map, the reader, the word cards and the questions =====
   const STORY_PROGRESS_KEY = 'mazzo-story-v1';
   function storyEsc(s) {
@@ -7494,6 +7836,116 @@
   });
   const SENTENCE_THEMES = SENTENCE_LEVELS.map(([key, label, en, type]) => ({ key, label, en, type, nouns: SENTENCE_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
   const SENTENCE_TYPE_OF = Object.fromEntries(SENTENCE_ITEMS.map(n => [n.noun, n.type]));
+  // ===== Dialoghi (Oct 2026): everyday scenes, in two voices =====
+  // Each line is [speaker, Italian, English word for word (Italian order; "you" marked
+  // where the Italian is formal or plural), natural English (null when it's the same)].
+  // Every word is in the deck. Each line is also a card: dictated in the scene's order,
+  // then back in Ripasso. Each question points at the line that answers it.
+  const DIALOGUES = [
+    { id: 'bar', title: 'Al bar', en: 'At the bar', place: 'Il bar del paese', speakers: { A: 'Barista', B: 'Cliente' },
+      lines: [
+        ['A', "Buongiorno! Cosa prende?", "Good morning! What you take (formal)?", "Good morning! What are you having?"],
+        ['B', "Buongiorno. Un caffè, per favore.", "Good morning. A coffee, please.", null],
+        ['A', "Lo vuole con il latte?", "It you want (formal) with the milk?", "Would you like it with milk?"],
+        ['B', "No, grazie. Solo con lo zucchero.", "No, thanks. Only with the sugar.", "No thanks, just with sugar."],
+        ['A', "Vuole anche un bicchiere d'acqua?", "You want (formal) also a glass of water?", "Would you like a glass of water too?"],
+        ['B', "Sì, grazie. Quanto costa?", "Yes, thanks. How much costs?", "Yes, thanks. How much is it?"],
+        ['A', "Due euro.", "Two euros.", null],
+        ['B', "Grazie e buona giornata!", "Thanks and good day!", "Thanks, and have a good day!"]
+      ],
+      questions: [
+        { q: 'What does the customer order?', options: ['A coffee', 'A cappuccino', 'A glass of wine', 'A hot chocolate'], answer: 0, line: 1 },
+        { q: 'How does the customer take it?', options: ['With sugar, no milk', 'With milk and sugar', 'With milk, no sugar', 'With nothing at all'], answer: 0, line: 3 },
+        { q: 'How much does it cost?', options: ['Two euros', 'One euro', 'Five euros', 'Ten euros'], answer: 0, line: 6 }
+      ] },
+    { id: 'mercato', title: 'Al mercato', en: 'At the market', place: 'Il mercato del sabato', speakers: { A: 'Venditore', B: 'Cliente' },
+      lines: [
+        ['A', "Buongiorno, signora! Cosa le do?", "Good morning, madam! What to you I give (formal)?", "Good morning, madam! What can I get you?"],
+        ['B', "Buongiorno. Quanto costano le pesche?", "Good morning. How much cost the peaches?", "Good morning. How much are the peaches?"],
+        ['A', "Tre euro al chilo. Sono molto buone!", "Three euros at the kilo. They are very good!", "Three euros a kilo. They're very good!"],
+        ['B', "Allora un chilo di pesche, per favore.", "Then a kilo of peaches, please.", "A kilo of peaches, then, please."],
+        ['A', "Vuole anche delle mele?", "You want (formal) also some apples?", "Would you like some apples too?"],
+        ['B', "No, ma prendo un melone.", "No, but I take a melon.", "No, but I'll take a melon."],
+        ['A', "Sono cinque euro in tutto.", "They are five euros in all.", "That's five euros altogether."],
+        ['B', "Grazie mille, arrivederci!", "Thanks a thousand, goodbye!", "Thanks very much, goodbye!"]
+      ],
+      questions: [
+        { q: 'What does the customer ask first?', options: ['How much the peaches are', 'How much the apples are', 'Where the melons are', 'Whether the market is open'], answer: 0, line: 1 },
+        { q: 'How much are the peaches?', options: ['Three euros a kilo', 'Five euros a kilo', 'Two euros a kilo', 'Three euros each'], answer: 0, line: 2 },
+        { q: 'What does the customer buy?', options: ['Peaches and a melon', 'Peaches and apples', 'Just apples', 'Just a melon'], answer: 0, line: 5 }
+      ] },
+    { id: 'stazione', title: 'Alla stazione', en: 'At the station', place: 'La stazione di Varese', speakers: { A: 'Viaggiatore', B: 'Impiegata' },
+      lines: [
+        ['A', "Buongiorno. Un biglietto per Milano, per favore.", "Good morning. A ticket for Milan, please.", null],
+        ['B', "Per quando?", "For when?", null],
+        ['A', "Per domani mattina.", "For tomorrow morning.", null],
+        ['B', "Il treno parte alle otto.", "The train leaves at the eight.", "The train leaves at eight."],
+        ['A', "A che ora arriva a Milano?", "At what hour arrives at Milan?", "What time does it get to Milan?"],
+        ['B', "Arriva alle dieci.", "It arrives at the ten.", "It gets in at ten."],
+        ['A', "Perfetto. Da che binario parte?", "Perfect. From what platform leaves?", "Perfect. Which platform does it leave from?"],
+        ['B', "Dal binario tre. Buona giornata!", "From the platform three. Good day!", "From platform three. Have a good day!"]
+      ],
+      questions: [
+        { q: 'Where is the traveller going?', options: ['Milan', 'Varese', 'Rome', 'Turin'], answer: 0, line: 0 },
+        { q: 'When does the train leave?', options: ['Tomorrow at eight', 'Today at eight', 'Tomorrow at ten', 'Tonight at seven'], answer: 0, line: 3 },
+        { q: 'Which platform does it leave from?', options: ['Platform three', 'Platform eight', 'Platform ten', 'Platform two'], answer: 0, line: 7 }
+      ] },
+    { id: 'ristorante', title: 'Al ristorante', en: 'At the restaurant', place: 'La trattoria in piazza', speakers: { A: 'Cameriere', B: 'Cliente' },
+      lines: [
+        ['A', "Buonasera! Siete in due?", "Good evening! You all are in two?", "Good evening! Is it the two of you?"],
+        ['B', "Sì. Avete un tavolo vicino alla finestra?", "Yes. You all have a table near to the window?", "Yes. Do you have a table by the window?"],
+        ['A', "Certo, prego. Cosa prendete?", "Certainly, please. What you all take?", "Of course, this way. What will you have?"],
+        ['B', "Per me la pasta, e per lei il pesce.", "For me the pasta, and for her the fish.", "The pasta for me, and the fish for her."],
+        ['A', "E da bere?", "And to drink?", null],
+        ['B', "Una bottiglia di vino rosso e dell'acqua.", "A bottle of wine red and some water.", "A bottle of red wine and some water."],
+        ['A', "Va bene. Volete anche un dolce?", "Goes well. You all want also a dessert?", "Fine. Would you like a dessert too?"],
+        ['B', "No, grazie. Il conto, per favore.", "No, thanks. The bill, please.", null]
+      ],
+      questions: [
+        { q: 'How many people are eating?', options: ['Two', 'One', 'Three', 'Four'], answer: 0, line: 0 },
+        { q: 'Where do they want to sit?', options: ['By the window', 'Outside', 'By the door', 'In the garden'], answer: 0, line: 1 },
+        { q: 'What do they order to drink?', options: ['Red wine and water', 'White wine', 'Beer and water', 'Just water'], answer: 0, line: 5 }
+      ] },
+    { id: 'vicina', title: 'La vicina', en: 'The neighbour', place: 'Davanti alla casa di pietra', speakers: { A: 'Rosa', B: 'Io' },
+      lines: [
+        ['A', "Ciao! Sei il nuovo vicino?", "Hi! You are the new neighbour?", "Hi! Are you the new neighbour?"],
+        ['B', "Sì, abito nella casa di pietra.", "Yes, I live in the house of stone.", "Yes, I live in the stone house."],
+        ['A', "Che bella! Ti piace il paese?", "How beautiful! To you pleases the village?", "How lovely! Do you like the village?"],
+        ['B', "Mi piace molto. È molto tranquillo.", "To me pleases a lot. It is very quiet.", "I like it a lot. It's very quiet."],
+        ['A', "Io abito qui da molti anni.", "I live here from many years.", "I've lived here for many years."],
+        ['B', "Davvero? È un posto molto bello.", "Really? It is a place very beautiful.", "Really? It's a lovely place."],
+        ['A', "Vieni a prendere un caffè domani?", "You come to take a coffee tomorrow?", "Would you like to come for a coffee tomorrow?"],
+        ['B', "Volentieri! A domani.", "Gladly! Until tomorrow.", "I'd love to! See you tomorrow."]
+      ],
+      questions: [
+        { q: 'Where does the newcomer live?', options: ['In the stone house', 'In Varese', 'Next to the bar', 'In a flat in Milan'], answer: 0, line: 1 },
+        { q: 'How long has Rosa lived here?', options: ['Many years', 'A few months', 'Since yesterday', 'One year'], answer: 0, line: 4 },
+        { q: 'What does Rosa suggest?', options: ['A coffee tomorrow', 'Dinner this evening', 'A walk in the woods', 'A trip to Varese'], answer: 0, line: 6 }
+      ] },
+    { id: 'tetto', title: 'Il tetto', en: 'The roof', place: 'Il lavoro alla casa', speakers: { A: 'Giovanni', B: 'Io' },
+      lines: [
+        ['A', "Buongiorno! Sono qui per il tetto.", "Good morning! I am here for the roof.", "Good morning! I'm here about the roof."],
+        ['B', "Buongiorno. Il tetto è vecchio e l'acqua entra in casa.", "Good morning. The roof is old and the water enters in house.", "Good morning. The roof is old and water gets into the house."],
+        ['A', "Sì, vedo. Il muro è buono, ma il tetto no.", "Yes, I see. The wall is good, but the roof no.", "Yes, I can see. The wall is fine, but the roof isn't."],
+        ['B', "Quanto tempo ci vuole?", "How much time there wants?", "How long does it take?"],
+        ['A', "Due settimane. Ha bisogno di molto lavoro.", "Two weeks. It has need of much work.", "Two weeks. It needs a lot of work."],
+        ['B', "E quanto costa il lavoro?", "And how much costs the work?", "And how much does the work cost?"],
+        ['A', "Non lo so ancora. Domani le mando il prezzo.", "Not it I know yet. Tomorrow to you (formal) I send the price.", "I don't know yet. I'll send you the price tomorrow."],
+        ['B', "Va bene, grazie. A domani!", "Goes well, thanks. Until tomorrow!", "OK, thanks. See you tomorrow!"]
+      ],
+      questions: [
+        { q: 'Why has Giovanni come?', options: ['To look at the roof', 'To fix the windows', 'To work in the garden', 'To deliver some wood'], answer: 0, line: 0 },
+        { q: 'How long will the work take?', options: ['Two weeks', 'Two months', 'Two days', 'A year'], answer: 0, line: 4 },
+        { q: 'When will he send the price?', options: ['Tomorrow', 'Today', 'Next week', "He doesn't say"], answer: 0, line: 6 }
+      ] }
+  ];
+  const DIALOGUE_ITEMS = DIALOGUES.flatMap(d => d.lines.map(([speaker, it, en, natural], i) => {
+    const key = `${d.id}-${i + 1}`;
+    return { noun: key, display: it, it, en, natural: natural || null, scene: d.id, speaker, line: i,
+             phrase: { key, it, en, itAlts: [], enAlts: natural ? [natural] : [], reg: 'neutral' } };
+  }));
+  const DIALOGUE_THEMES = DIALOGUES.map(d => ({ key: d.id, label: d.title, en: d.en, nouns: d.lines.map((_, i) => `${d.id}-${i + 1}`) }));
+  const DIALOGUE_ORDER = DIALOGUE_THEMES.flatMap(t => t.nouns);
   // ===== Preposizioni (Oct 2026) — the old preposizioni game, rebuilt inside Il Mazzo =====
   // Two kinds of card: fusion drills (di + il libro → del libro, the English after) and
   // usage cards (natural English → the Italian; word for word after). Built on Scrittura's
@@ -8132,6 +8584,21 @@
       if (unknown.length) console.warn(`[sentences] "${n.it}": words not in the deck:`, unknown);
     }
     if (new Set(SENTENCE_ITEMS.map(n => n.noun)).size !== SENTENCE_ITEMS.length) console.warn('[sentences] two sentences share a key');
+    // Dialoghi: every word in the deck; no line, and no English prompt, twice; each line
+    // has its speaker, and each question a real answer and a line that gives it
+    check('dialoghi', DIALOGUE_ITEMS, DIALOGUE_THEMES, DIALOGUE_ORDER);
+    for (const n of DIALOGUE_ITEMS) {
+      const unknown = sentenceSegments(n.it).filter(sg => sg.unknown).map(sg => sg.text);
+      if (unknown.length) console.warn(`[dialoghi] "${n.it}": words not in the deck:`, unknown);
+    }
+    if (new Set(DIALOGUE_ITEMS.map(n => n.it.toLowerCase())).size !== DIALOGUE_ITEMS.length) console.warn('[dialoghi] two lines are the same');
+    if (new Set(DIALOGUE_ITEMS.map(n => n.en.toLowerCase())).size !== DIALOGUE_ITEMS.length) console.warn('[dialoghi] two lines share an English prompt');
+    for (const d of DIALOGUES) {
+      if (d.lines.some(([s]) => !d.speakers[s])) console.warn(`[dialoghi] ${d.id}: a line with no speaker`);
+      for (const q of d.questions) {
+        if (!q.options[q.answer] || !d.lines[q.line] || new Set(q.options).size !== q.options.length) console.warn(`[dialoghi] ${d.id}: question "${q.q}" is malformed`);
+      }
+    }
     for (const ch of STORY_CHAPTERS) {
       const unknown = [];
       for (const para of ch.paragraphs) for (const [it] of para) for (const sg of storySegments(ch, it)) if (sg.unknown) unknown.push(sg.text);
@@ -8243,6 +8710,17 @@
       statsKeys: { 'en-it': 'scrittura-stats-v1', 'it-en': 'scrittura-stats-iten-v1', listen: 'scrittura-stats-listen-v1' }, statsFormat: 'noun',
       assocKey: 'scrittura-assoc-v1'
     },
+    // The scenes: the home screen is the scenes, each with its listening, questions and
+    // dictation; each line is a card (dictated in the scene's order, then in Ripasso)
+    dialoghi: {
+      kind: 'phrase', sentences: true, dialogues: true, inOrder: true, panel: null, doneWord: 'lines', chipOrder: 'level',
+      switchLabel: 'Dialoghi', title: 'Dialoghi', subtitle: 'Il Mazzo · Scene di Vita',
+      setupTitle: 'Scene di vita', setupSub: '',
+      itemWord: 'line', itemWords: 'lines',
+      items: DIALOGUE_ITEMS, themes: DIALOGUE_THEMES, frequency: DIALOGUE_ORDER,
+      statsKeys: { 'en-it': 'dialoghi-stats-v1', 'it-en': 'dialoghi-stats-iten-v1', listen: 'dialoghi-stats-listen-v1' }, statsFormat: 'noun',
+      assocKey: 'dialoghi-assoc-v1'
+    },
     // The story: its setup screen is the map and the chapters; its items are the words
     // the story teaches, drilled like phrases in Ripasso and chapter practice
     story: {
@@ -8271,6 +8749,7 @@
     prepositions: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     phrases: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     sentences: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
+    dialoghi: { selected: new Set(), capValue: '', capMode: 'random', direction: 'listen' },
     story: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' }
   };
   let subject = null;
@@ -8913,6 +9392,7 @@
   }
 
   function showSetup() {
+    dialogueStopSpeaking();
     stopListening();
     closeChart();
     if (reviewMode) {
@@ -8945,6 +9425,12 @@
       wireSubjectToggle();
       renderRipasso();
       renderStoryHome();
+      return;
+    }
+    if (cfg.dialogues) {
+      wireSubjectToggle();
+      renderRipasso();
+      renderDialogueHome();
       return;
     }
     gameArea.innerHTML = `
@@ -9486,7 +9972,7 @@
   const BACKUP_APP = 'il-mazzo';
 
   function storageKeys() {
-    const keys = new Set([SUBJECT_KEY, AUDIO_KEY, RIPASSO_DIR_KEY, STORY_PROGRESS_KEY, VERB_PERSONS_KEY]);
+    const keys = new Set([SUBJECT_KEY, AUDIO_KEY, RIPASSO_DIR_KEY, STORY_PROGRESS_KEY, DIALOGUE_PROGRESS_KEY, VERB_PERSONS_KEY]);
     for (const s of Object.values(SUBJECTS)) {
       Object.values(s.statsKeys).forEach(k => { keys.add(k); keys.add(`${k}:srs`); });
       keys.add(s.assocKey);
@@ -9556,6 +10042,7 @@
       keys.set(cfg.assocKey, 'assoc');
     }
     keys.set(STORY_PROGRESS_KEY, 'story');
+    keys.set(DIALOGUE_PROGRESS_KEY, 'story');   // the scenes' progress has the story's shape
     keys.set(VERB_PERSONS_KEY, 'assoc');   // which persons each verb section drills
     return keys;
   }
@@ -10093,6 +10580,7 @@
   // Shuffle a round's cards; in Preposizioni each item's cards stay together, in their
   // order (del libro, then dei libri), and a deck cut to size never splits a pair
   function shuffleDeck(cards) {
+    if (SUBJECTS[subject].inOrder) return [...cards];   // a scene's lines, in the scene's order
     if (!SUBJECTS[subject].keepPairs) return shuffle(cards);
     const groups = [];
     for (const c of cards) {

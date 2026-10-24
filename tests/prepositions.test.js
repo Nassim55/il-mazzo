@@ -5,7 +5,7 @@ const { boot, ok, done } = require('./harness');
 const { w, d, ev, errors, warns } = boot({ 'flipcards-subject': 'prepositions' });
 ok(errors.length === 0 && warns.length === 0, 'loads cleanly: every word of every card is in the deck, a small word or a name');
 const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(tabs.join('|') === 'Sostantivi|Verbi regolari|Verbi irregolari|Aggettivi|Preposizioni|Frasi|Scrittura|Racconto'
+ok(tabs.join('|') === 'Sostantivi|Verbi regolari|Verbi irregolari|Aggettivi|Preposizioni|Frasi|Scrittura|Dialoghi|Racconto'
    && d.querySelector('#subject-toggle [data-subject="prepositions"]').classList.contains('active'), 'Preposizioni is a section of its own, after Aggettivi');
 ok(ev('PREP_ITEMS.length') === 196 && ev('PREP_ITEMS.flatMap(cardsForItem).length') === 245 && ev('PREP_THEMES.length') === 27 && ev('PREP_GROUPS.length') === 6,
    '196 phrases (49 of them singular/plural pairs) — 245 cards — in 27 themes, six groups');

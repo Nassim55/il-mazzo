@@ -13,6 +13,7 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 | Preposizioni | 224 phrases | fusion drills (*di + il libro* → *del libro*) and usage cards in 27 themes, six groups; a rule for every slip; the fusion table |
 | Frasi | 50 phrases | everyday expressions, with *tu* and *Lei* forms kept distinct |
 | Scrittura | 100 sentences | present-tense sentences built from the deck's own words, written in full |
+| Dialoghi | 6 scenes · 48 lines | everyday conversations in two voices: listen, answer three questions, then write each line from dictation |
 | Racconto | 3 chapters | *La casa di pietra*, an illustrated story to read, plus the 30 words it teaches |
 
 Every card section works in three directions — English → Italian, Italian → English, and Listening (hear the Italian, type it) — and each direction keeps its own progress.
@@ -35,6 +36,7 @@ Every card section works in three directions — English → Italian, Italian �
 - **Choose the persons** for the verb sections: under *Practice mode*, pick any of io, tu, lui / lei, noi, voi, loro (or *all*, *singular*, *plural*). Rounds, Ripasso del giorno and chapter practice then ask only those; each verb section keeps its own choice, and it syncs with your progress.
 - **Deck size slider** during a round, from 1 card to the whole selection. After *Practise the ones I missed* (or a mid-game Focus) it becomes two sliders — how many of the missed cards, and how many of the rest to mix back in. Growing adds unplayed cards (the rest in the round's order: random, or the next most common); shrinking trims unplayed cards from the end, so cards already played stay counted.
 - Back up and restore all progress to a file
+- **Dialoghi** — everyday scenes to listen to, understand and write from dictation (see below)
 - **Racconto** — a story to read, in which every word links to its card (see below)
 
 ## Ripasso del giorno
@@ -54,6 +56,16 @@ A hundred present-tense sentences, built only from the deck's own nouns, verbs, 
 - **Sentence types:** at the top of the setup, choose *Presente semplice*, *Mi piace*, or both (one always stays on). The levels, the grid, every pick button and Ripasso follow the choice, which syncs.
 - **Why it's wrong:** under the comparison, the rule behind each mistake — an adjective agreeing with its noun (*bella*: it agrees with *la città*, feminine singular), a verb with its subject (*beve*: the subject is *il cane*, the lui/lei form, with all six forms), the article for the noun (*l'* before a vowel), a preposition joining its article (*sul* = *su* + *il*), a noun's number, where *non* goes, word order, spelling.
 - Sentences come back in Ripasso del giorno and sync like everything else.
+
+## Dialoghi: *Scene di vita*
+
+Six short conversations from everyday life: at the bar, the market, the station in Varese, a restaurant, with Rosa the neighbour outside the stone house, and with Giovanni about the roof. Every word is in the deck (the present tense, plus phrases from *Frasi*). Each scene has three steps on one page:
+
+- **Ascolta.** The whole scene plays in two different Italian voices (with only one voice on the device, the second speaker is the same voice pitched lower), at normal speed or *Lento*. The text starts hidden — listen first — with each line a bar that lights up as it's spoken. Tap a line to hear it again; *Mostra il testo* shows the Italian, then *Mostra l'inglese* the natural English with the word for word under it. Hearing the scene to the end marks it *Ascoltato*.
+- **Capisci?** Three questions about what was said; each answer quotes the line that gives it. The best score is kept.
+- **Dettato.** The scene's lines, in order, through the card engine: hear each line and write it (or say it), with Scrittura's comparison, *Why*, the retype and *Salta*. *Traduci dall'inglese* writes them from the word-for-word English instead ("(formal)" and "(you all)" mark *Lei* and *voi*). Every line is a card, so it comes back in Ripasso del giorno.
+
+Each scene card on the home page shows its steps: *Ascoltato*, the *Domande* score and *Dettato x/8*. Without an Italian voice, the text is shown and the dictation becomes translating from the English.
 
 ## Racconto: *La casa di pietra*
 
