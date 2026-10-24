@@ -10283,7 +10283,16 @@
     const h = document.getElementById('speak-hint');
     if (h) h.textContent = text || '';
   }
+  // While listening the page itself is Italian: a recogniser that ignores its own lang
+  // falls back to the page's (the page is otherwise English)
+  let pageLang = null;
+  function italianPage(on) {
+    const html = document.documentElement;
+    if (on) { if (pageLang === null) pageLang = html.lang; html.lang = 'it-IT'; }
+    else if (pageLang !== null) { html.lang = pageLang; pageLang = null; }
+  }
   function stopListening() {
+    italianPage(false);
     if (listening && /^Listening/.test((document.getElementById('speak-hint') || {}).textContent || '')) speakHint('');
     if (rec) {
       rec.onresult = rec.onerror = rec.onend = null;
@@ -10295,17 +10304,42 @@
     if (ans) ans.classList.remove('interim');
     updateMicBtn();
   }
-  function startListening() {
+  // Chrome can now recognise speech on the device, from downloaded language packs, and
+  // left to choose it may use a pack in the wrong language (English). So where the
+  // browser can say, Parla asks for Italian on the device; if Italian isn't installed
+  // but can be, it starts the download and listens online, in Italian, meanwhile.
+  let localItalian = null;   // null until asked: 'available' | 'downloadable' | 'downloading' | 'unavailable'
+  async function askLocalItalian() {
+    if (!SpeechRec || typeof SpeechRec.available !== 'function') return 'unavailable';
+    try { return await SpeechRec.available({ langs: ['it-IT'], processLocally: true }); } catch (e) { return 'unavailable'; }
+  }
+  let askingLocal = false;
+  async function startListening() {
     if (listening) { stopListening(); return; }   // pressed again: stop
-    if (!micAvailable()) return;
+    if (!micAvailable() || askingLocal) return;   // (a second press while the first is still asking)
+    if (localItalian === null) {
+      askingLocal = true;
+      try { localItalian = await askLocalItalian(); } finally { askingLocal = false; }
+      if (localItalian === 'downloadable' && typeof SpeechRec.install === 'function') {
+        localItalian = 'downloading';   // a one-off, in the background; online until it's done
+        SpeechRec.install({ langs: ['it-IT'], processLocally: true }).then(done => { localItalian = done ? 'available' : 'unavailable'; }, () => { localItalian = 'unavailable'; });
+      }
+      if (!micAvailable() || listening) return;   // the card moved on while we asked
+    }
+    listenNow(localItalian === 'available');
+  }
+  function listenNow(onDevice) {
     try { if (window.speechSynthesis && window.speechSynthesis.speaking) window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }   // never hear itself
     const ans = document.getElementById('answer');
     const me = rec = new SpeechRec();   // each listening acts only on its own events (a late end can't stop the next)
     rec.lang = 'it-IT';
+    if (onDevice && 'processLocally' in rec) rec.processLocally = true;   // Italian, on the device
+    try { console.info(`[Parla] listening in it-IT, ${rec.processLocally === true ? 'on the device' : 'online'} (Italian on the device: ${localItalian})`); } catch (e) { /* no console */ }
     rec.interimResults = true;
     rec.maxAlternatives = 5;
     rec.continuous = false;
     listening = true;
+    italianPage(true);
     speakHint('Listening — say it in Italian…');
     updateMicBtn();
     rec.onresult = e => {
@@ -10316,6 +10350,7 @@
       ans.classList.remove('interim');
       rec = null;          // a final result ends this listening
       listening = false;
+      italianPage(false);
       updateMicBtn();
       heard(alts);
     };
@@ -10323,6 +10358,12 @@
       if (rec !== me) return;
       rec = null;
       listening = false;
+      italianPage(false);
+      if (onDevice && (e.error === 'language-not-supported' || e.error === 'service-not-allowed')) {
+        localItalian = 'unavailable';
+        listenNow(false);
+        return;
+      }
       ans.classList.remove('interim');
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
         micBlocked = true;
@@ -10336,11 +10377,12 @@
       if (rec !== me) return;
       rec = null;
       listening = false;
+      italianPage(false);
       ans.classList.remove('interim');
       if (/^Listening/.test(document.getElementById('speak-hint').textContent)) speakHint('');
       updateMicBtn();
     };
-    try { rec.start(); } catch (e) { listening = false; rec = null; updateMicBtn(); }
+    try { rec.start(); } catch (e) { listening = false; rec = null; italianPage(false); updateMicBtn(); }
   }
   function heard(alts) {
     const ans = document.getElementById('answer'), card = deck[index];
@@ -10356,8 +10398,21 @@
       return;
     }
     ans.value = alts[0];
-    speakHint(`Heard “${alts[0]}” — say it again, fix it, or press ${mustRetype ? 'Riscrivi' : 'Controlla'} to check it.`);
+    if (soundsEnglish(alts)) speakHint(`Heard “${alts[0]}” — that came back in English: your browser is listening in English, not Italian. ${isSafari()
+      ? 'In Safari, add Italian under System Settings → Keyboard → Dictation → Languages, then reload.'
+      : "In Chrome, add Italian under Settings → Languages (so Chrome can listen in Italian on your computer), then reload."}`);
+    else speakHint(`Heard “${alts[0]}” — say it again, fix it, or press ${mustRetype ? 'Riscrivi' : 'Controlla'} to check it.`);
     ans.focus();
+  }
+  // Not one word the Italian deck knows, in any guess, and an everyday English word among
+  // them: the recogniser is listening in English (heard "Young John" for il giorno)
+  const ENGLISH_TELLS = new Set(['the', 'and', 'of', 'is', 'are', 'you', 'your', 'i', 'my', 'he', 'she', 'we', 'they', 'it', 'this', 'that', 'what', 'with', 'for', 'at', 'be',
+    'was', 'have', 'has', 'do', 'does', 'not', 'young', 'john', 'girl', 'boy', 'go', 'yes', 'hello', 'hi', 'oh', 'okay', 'ok', 'all', 'can', 'just', 'like', 'know', 'me', 'him', 'her']);
+  const isSafari = () => /Safari\//.test(navigator.userAgent) && !/Chrome|Chromium|CriOS|Edg|Android/.test(navigator.userAgent);
+  function soundsEnglish(alts) {
+    const words = alts.flatMap(a => a.toLowerCase().split(/[^a-zà-ÿ']+/).filter(Boolean));
+    const italian = alts.some(a => sentenceSegments(a).some(sg => sg.ref));
+    return !italian && words.some(w => ENGLISH_TELLS.has(w));
   }
 
   // The one checker, for an answer and for its retype (it records nothing)
