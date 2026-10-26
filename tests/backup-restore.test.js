@@ -38,7 +38,7 @@ ok(B.ev('subject') === 'verbs' && B.d.getElementById('app-title').textContent ==
 ok(/1\/150 practised/.test(B.d.getElementById('setup-meta').textContent), 'verb progress restored in the strip');
 ok(JSON.parse(B.w.localStorage.getItem('verbi-regolari-stats')).capire.attempts === 6, 'verb stats restored in their original format');
 B.d.querySelector('#subject-toggle [data-subject="nouns"]').click();
-ok(/2\/883 practised · 1 with errors logged/.test(B.d.getElementById('setup-meta').textContent.replace(/\s+/g, ' ')), 'noun progress restored');
+ok(/2\/941 practised · 1 with errors logged/.test(B.d.getElementById('setup-meta').textContent.replace(/\s+/g, ' ')), 'noun progress restored');
 B.ev("selectedNouns = new Set(['pane']); updateReadout();"); B.d.getElementById('start-btn').click();
 B.d.getElementById('answer').value = 'il pane'; B.d.getElementById('submit').click();
 ok(B.d.querySelector('.assoc-text')?.textContent === 'companion', 'noun association restored and shown after answering');

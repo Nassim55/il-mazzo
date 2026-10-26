@@ -80,8 +80,8 @@ ok(d.querySelector('.feedback .pron')?.textContent === 'pen·sà·re' && /weigh/
 // Back to nouns: everything as it was
 d.getElementById('change-btn').click();
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
-ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === 64 && d.getElementById('deck-cap').value === '7' && d.getElementById('app-title').textContent === 'Sostantivi', 'nouns: Casa selection and subset "7" kept, title restored');
-ok(!d.querySelector('aside.endings') && d.querySelectorAll('.verb-chip').length === 883, 'noun setup restored (883 chips, no endings panel)');
+ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === 73 && d.getElementById('deck-cap').value === '7' && d.getElementById('app-title').textContent === 'Sostantivi', 'nouns: Casa selection and subset "7" kept, title restored');
+ok(!d.querySelector('aside.endings') && d.querySelectorAll('.verb-chip').length === 941, 'noun setup restored (941 chips, no endings panel)');
 const store = {}; for (let i = 0; i < w.localStorage.length; i++) { const k = w.localStorage.key(i); store[k] = w.localStorage.getItem(k); }
 // Reload remembers the last subject
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
