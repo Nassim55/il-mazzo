@@ -20,6 +20,8 @@ Every card section works in three directions — English → Italian, Italian �
 
 ## Features
 
+**The grid shows your record.** In every section's pick grid, each word's tile is shaded by how often you get it wrong in the current direction — continuously, from olive (rarely wrong) through gold to terracotta (wrong half the time or more). The colour is faint while a word has had only a few tries and full from five, so one slip doesn't paint it red; words you haven't tried stay plain. Hover over a tile for the numbers (*Wrong 3 of 8 times — 38%*); a key above the grid explains the scale.
+
 **Parla — say it, don't just type it.** Wherever the answer is Italian (English → Italian, and Listen, where repeating what you hear is shadowing), a microphone at the right of the answer box (or *Shift+Enter*, so the keyboard never has to be left) listens in Italian; typing stays the main way, and plain Enter still checks. Words appear as you speak; if any of the recogniser's guesses is right it's a right answer, checked as leniently as typing, and marked *Said aloud*. If none is, nothing is marked: what was heard stays in the box to say again, fix, or check. The retype after a miss can be said too. Only in browsers that can listen (Chrome, Edge, Safari), and never while the app itself is speaking.
 
 **Nothing typed is never wrong; *Salta* is.** Pressing Enter on an empty answer box (most often by accident) just shakes the box and asks for an answer; nothing is shown and nothing is counted. To skip a card you don't know, press *Salta*, beside *Controlla*: it counts as wrong in every section, shows the answer, and then asks for it to be typed out like any miss.

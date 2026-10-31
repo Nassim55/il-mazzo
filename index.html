@@ -300,6 +300,15 @@
 
   .verb-chip.unselected .verb-chip-mark { opacity: 0; }
 
+  /* Shaded by your record: the colour comes in --shade; a tile left out keeps its shade
+     (the dashed border and the fading say it's out) */
+  .verb-chip.shaded,
+  .verb-chip.unselected.shaded { background: var(--shade); }
+  .verb-chip.shaded .verb-chip-english { color: var(--ink-soft); }   /* still readable on the deepest shades */
+  .shade-key { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.04em; color: var(--ink-faded); }
+  .shade-key-bar { width: 120px; height: 10px; border-radius: 5px; border: 1px solid rgba(28, 22, 17, 0.12); }
+  .shade-key-note { flex-basis: 100%; font-size: 10px; }
+
   .setup-controls {
     display: flex;
     justify-content: space-between;
@@ -9599,15 +9608,16 @@
 
       <div class="noun-grid-head">
         <div class="theme-eyebrow">↳ Or pick individual ${cfg.itemWords} — tap, or click and drag${cfg.chipOrder === 'frequency' ? ' · most common first' : ''}</div>
+        ${shadeKeyHTML()}
       </div>
       <div class="verb-grid" id="verb-grid">
-        ${gridItems().map(n => `
-          <button type="button" class="verb-chip${selectedNouns.has(n.noun) ? '' : ' unselected'}" data-noun="${n.noun}">
+        ${gridItems().map(n => { const sh = chipShadeAttrs(n.noun); return `
+          <button type="button" class="verb-chip${selectedNouns.has(n.noun) ? '' : ' unselected'}${sh.cls}" data-noun="${n.noun}"${sh.attrs}>
             <div class="verb-chip-mark">●</div>
             <div class="verb-chip-italian">${n.display || n.noun}</div>
             <div class="verb-chip-english">${isVerbs ? n.en.split(' / ').map(m => `<span class="meaning">${m}</span>`).join('&nbsp;/ ') : n.en}</div>
           </button>
-        `).join('')}
+        `; }).join('')}
       </div>
       </div>
       ${cfg.panel ? '<div class="setup-side">' : ''}
@@ -9903,6 +9913,44 @@
   }
 
   // ===== "Da ripassare": the current 10 weakest verbs, under the reference panel =====
+  // ===== The grid, shaded by your record (Oct 2026) =====
+  // Each tile takes a colour from its error rate in the current direction, continuously:
+  // olive (rarely wrong) through gold to terracotta (wrong half the time or more). The
+  // colour is faint while a word has had few tries and full from five, so one slip
+  // doesn't paint a tile red; untried words stay plain. Hovering gives the numbers.
+  const SHADE_STOPS = [[90, 107, 58], [176, 133, 64], [162, 62, 44]];   // --olive, --gold, --terracotta
+  const SHADE_PAPER = [251, 246, 234];                                    // --paper
+  function shadeColor(t, sure) {
+    const [a, b, u] = t < 0.5 ? [SHADE_STOPS[0], SHADE_STOPS[1], t * 2] : [SHADE_STOPS[1], SHADE_STOPS[2], (t - 0.5) * 2];
+    const mix = sure * (0.16 + 0.22 * t);   // the colour's share over the paper: the bad end stands out more than the good
+    return `rgb(${a.map((x, i) => Math.round(SHADE_PAPER[i] + (x + (b[i] - x) * u - SHADE_PAPER[i]) * mix)).join(', ')})`;
+  }
+  function errorShade(s) {
+    if (!s || !(s.seen > 0)) return null;
+    const rate = Math.min(1, Math.max(0, s.wrong / s.seen));
+    const t = Math.min(1, rate / 0.5);                          // wrong half the time or more: full terracotta
+    const sure = 0.4 + 0.6 * Math.min(1, (s.seen - 1) / 4);    // one try: faint; five or more: full strength
+    return { color: shadeColor(t, sure), rate, sure };
+  }
+  function shadeTitle(s) {
+    const dir = DIR_LABELS[direction].long;
+    if (!s || !(s.seen > 0)) return `Not practised yet (${dir})`;
+    return `Wrong ${s.wrong} of ${s.seen} time${s.seen === 1 ? '' : 's'} — ${Math.round(s.wrong / s.seen * 100)}% (${dir})`;
+  }
+  function chipShadeAttrs(key) {
+    const s = stats[key], sh = errorShade(s);
+    return { cls: sh ? ' shaded' : '', attrs: `${sh ? ` style="--shade: ${sh.color}"` : ''} title="${escapeHTML(shadeTitle(s))}"` };
+  }
+  function shadeKeyHTML() {
+    if (!gridItems().some(n => stats[n.noun] && stats[n.noun].seen > 0)) return '';
+    return `<div class="shade-key" id="shade-key">
+        <span class="shade-key-end">rarely wrong</span>
+        <span class="shade-key-bar" style="background: linear-gradient(90deg, ${shadeColor(0, 1)}, ${shadeColor(0.5, 1)}, ${shadeColor(1, 1)})"></span>
+        <span class="shade-key-end">often wrong</span>
+        <span class="shade-key-note">fainter: only a few tries · plain: not tried yet · ${DIR_LABELS[direction].long}</span>
+      </div>`;
+  }
+
   // Same ranking as the verb sections' Weakest 10 button — mistakes ÷ (attempts + 2),
   // so one early slip doesn't outrank a long-running struggle — but only verbs with
   // mistakes, and ties broken A–Z so the list is stable. Follows the current direction.

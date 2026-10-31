@@ -82,6 +82,10 @@ const { makeGoogle, CLIENT_ID, ME } = require('./google-fixture');
   // ---- Both practise, then sync at the same instant ----
   practise(A, 'casa', 3); practise(B, 'casa', 2); practise(B, 'cane', 1, 1);
   net.statuses = [];
+  // The first device to save waits until the other has fetched too, so the two syncs
+  // really overlap — under load, one could otherwise finish before the other starts
+  const fetched = () => net.paths.filter(p => p === 'GET /v1/progress').length, fetched0 = fetched();
+  net.beforePut = async () => { for (let i = 0; i < 500 && fetched() < fetched0 + 2; i++) await new Promise(r => setTimeout(r, 2)); };
   const both = await Promise.all([A.ev('syncNow()'), B.ev('syncNow()')]);
   await A.ev('syncNow()');
   ok(both.every(r => r === 'ok') && net.statuses.includes(409), 'syncing at the same instant: one device is told to merge again, and both succeed');
