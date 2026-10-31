@@ -2037,6 +2037,55 @@
     .dlg-title { font-size: 38px; }
   }
 
+  /* A spasso: out and about, listen only */
+  .passive-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; margin-top: 12px; padding: 14px 18px; background: transparent;
+                 border: 1px solid var(--ink); border-radius: 3px; color: var(--ink); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
+  .passive-btn:hover:not(:disabled) { background: rgba(28, 22, 17, 0.05); }
+  .passive-btn:disabled { opacity: 0.4; cursor: default; }
+  .passive-btn[hidden] { display: none; }
+  .passive-btn-main { font-weight: 600; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; }
+  .passive-btn-sub { font-size: 13px; color: var(--ink-soft); }
+  .passive-msg { margin: 8px 0 0; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--terracotta); text-align: center; }
+  .passive-msg:empty { display: none; }
+  .container[data-view="passive"] { max-width: 720px; }
+  .container[data-view="passive"] .stats,
+  .container[data-view="passive"] .progress-bar,
+  .container[data-view="passive"] #controls { display: none; }
+  .passive-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .passive-card { padding: 44px 28px 30px; background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.12); border-radius: 4px; text-align: center;
+                  box-shadow: 0 1px 0 rgba(28, 22, 17, 0.04), 0 18px 40px -24px rgba(28, 22, 17, 0.35); }
+  .passive-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: clamp(34px, 7vw, 54px); line-height: 1.15; color: var(--ink); transition: color 0.2s; }
+  .passive-en { margin-top: 12px; font-family: 'DM Sans', sans-serif; font-size: 18px; line-height: 1.4; color: var(--ink-faded); transition: color 0.2s; }
+  .passive-it.speaking { color: var(--ink); }
+  .passive-it:not(.speaking) { color: var(--ink-soft); }
+  .passive-en.speaking { color: var(--ink); }
+  .passive-rep { margin-top: 22px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+  .passive-where { margin-top: 12px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--ink-faded); }
+  .passive-controls { display: flex; justify-content: center; align-items: center; gap: 14px; margin: 22px 0 18px; }
+  .passive-ctl { min-width: 56px; height: 56px; padding: 0 16px; background: transparent; border: 1px solid rgba(28, 22, 17, 0.25); border-radius: 28px; font-size: 18px; color: var(--ink); cursor: pointer; }
+  .passive-ctl:hover { border-color: var(--ink); }
+  .passive-play { min-width: 150px; background: var(--ink); color: var(--cream); border-color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; }
+  .passive-settings { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 24px; }
+  .passive-reps-set { display: flex; align-items: center; gap: 10px; }
+  .passive-set-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faded); }
+  .passive-step { width: 34px; height: 34px; background: transparent; border: 1px solid rgba(28, 22, 17, 0.25); border-radius: 50%; font-size: 17px; color: var(--ink); cursor: pointer; }
+  .passive-reps-n { min-width: 22px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--ink); }
+  .mode-toggle.passive-speed { margin: 0; }
+  .passive-lock-btn { display: block; width: 100%; margin: 26px 0 0; padding: 14px; background: transparent; border: 1px dashed rgba(28, 22, 17, 0.35); border-radius: 3px;
+                      font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink-soft); cursor: pointer; }
+  .passive-note { margin: 10px 0 0; font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.5; color: var(--ink-faded); text-align: center; }
+  /* The pocket lock: dark (easier on the battery), the card still showing, one long press to leave */
+  .passive-cover { position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px;
+                   background: #14100c; color: var(--cream); text-align: center; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .passive-cover[hidden] { display: none; }
+  .passive-cover-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: clamp(32px, 8vw, 52px); line-height: 1.15; color: rgba(243, 234, 216, 0.85); }
+  .passive-cover-en { font-family: 'DM Sans', sans-serif; font-size: 17px; color: rgba(243, 234, 216, 0.5); }
+  .passive-unlock { position: relative; overflow: hidden; margin-top: 40px; padding: 16px 26px; background: transparent; border: 1px solid rgba(243, 234, 216, 0.35); border-radius: 30px;
+                    color: rgba(243, 234, 216, 0.75); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; -webkit-touch-callout: none; }
+  .passive-unlock-fill { position: absolute; inset: 0; width: 0; background: rgba(176, 133, 64, 0.35); }
+  .passive-unlock.holding .passive-unlock-fill { width: 100%; transition: width 1.2s linear; }
+  .passive-unlock-text { position: relative; }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
@@ -9486,6 +9535,7 @@
   }
 
   function showSetup() {
+    if (passive) { passiveStopTimers(); passive = null; passiveWake(false); }
     dialogueStopSpeaking();
     stopListening();
     closeChart();
@@ -9605,6 +9655,8 @@
       </div>
 
       <button type="button" class="submit start-btn" id="start-btn">▶ Start practising</button>
+      <button type="button" class="passive-btn" id="passive-btn"${speechAvailable() ? '' : ' hidden'}><span class="passive-btn-main">🎧 A spasso</span><span class="passive-btn-sub">Out and about: hear each card, the Italian then the English, ${passivePrefs.reps} times over, on a loop — nothing to type</span></button>
+      <p class="passive-msg passive-msg-setup" id="passive-msg" aria-live="polite"></p>
 
       <div class="noun-grid-head">
         <div class="theme-eyebrow">↳ Or pick individual ${cfg.itemWords} — tap, or click and drag${cfg.chipOrder === 'frequency' ? ' · most common first' : ''}</div>
@@ -9790,6 +9842,8 @@
     document.getElementById('hand-pick').addEventListener('click', () => openFocusModal('setup'));
 
     document.getElementById('start-btn').addEventListener('click', startGame);
+    const passiveBtn = document.getElementById('passive-btn');
+    if (passiveBtn) passiveBtn.addEventListener('click', startPassive);
     updateReadout();
     renderSetupMeta();
   }
@@ -9806,6 +9860,8 @@
       usingWholeDeck() ? ` · drawn from all ${nounData.length} ${cfg.itemWords}` : '';
     const start = document.getElementById('start-btn');
     start.disabled = pool === 0;
+    const passiveBtn = document.getElementById('passive-btn');
+    if (passiveBtn) passiveBtn.disabled = pool === 0;
     start.textContent = pool === 0
       ? `Select some ${cfg.itemWords}, or enter a number above`
       : `▶ Start practising · ${effective}${effective < pool && capMode === 'frequent' ? ' most common' : ''} card${effective === 1 ? '' : 's'}`;
@@ -10051,6 +10107,269 @@
     const base = (isVerbSubject() && card.person) ? `${card.pronounLabel.split(' / ')[0]} ${card.italian}` : card.italian;
     return String(base).replace(/…/g, '').trim();
   }
+  // ===== A spasso: out and about — listen only (Oct 2026) =====
+  // Each card is read aloud, the Italian and then the English, five times over (the
+  // number is a setting), then the next card; at the end of the deck it goes round
+  // again, reshuffled, for as long as it's left on. Nothing to type or say, and nothing
+  // is counted. Phones stop the browser's voice when the screen locks, so this keeps
+  // the screen awake, with a pocket lock that ignores taps until you hold to unlock.
+  const PASSIVE_KEY = 'mazzo-passive-v1';   // { reps, slow } — this device only
+  const passivePrefs = { reps: 5, slow: false };
+  try { Object.assign(passivePrefs, JSON.parse(localStorage.getItem(PASSIVE_KEY) || '{}')); } catch (e) { /* defaults */ }
+  function savePassivePrefs() {
+    try { localStorage.setItem(PASSIVE_KEY, JSON.stringify(passivePrefs)); } catch (e) { /* ignore */ }
+  }
+  // The pauses (ms): Italian → English, before the next repeat, before the next card;
+  // how long a line may take before we stop waiting for it; how long to hold to unlock
+  const PASSIVE_GAPS = { itEn: 700, again: 1100, next: 1900, watchdogBase: 3500, watchdogPerChar: 160, unlock: 1200 };
+  let passive = null, passiveWakeLock = null;
+
+  // An English voice for the English: British first, then the better-quality voices
+  function englishVoice() {
+    if (!speechAvailable()) return null;
+    let vs = [];
+    try { vs = window.speechSynthesis.getVoices().filter(v => /^en([-_]|$)/i.test(v.lang || '')); } catch (e) { /* none */ }
+    if (!vs.length) return null;
+    const score = v => (/^en[-_]GB$/i.test(v.lang) ? 3 : 0) + (/premium|enhanced|natural|neural/i.test(v.name) ? 4 : 0) + (/google/i.test(v.name) ? 1 : 0) + (v.localService ? 0.5 : 0);
+    return vs.slice().sort((a, b) => score(b) - score(a))[0];
+  }
+  // A card's English, made to be read aloud: no slashes, dots or abbreviations
+  function spokenEnglish(text) {
+    return String(text || '')
+      .replace(/\byou \(pl\)/gi, 'you all').replace(/\(pl\)/gi, '(plural)')
+      .replace(/\(tu\)/g, '(informal)').replace(/\(voi\)/g, '(you all)').replace(/\(Lei\)/g, '(formal)')
+      .replace(/\(m\.\)/g, '(masculine)').replace(/\(f\.\)/g, '(feminine)')
+      .replace(/\blit\.\s/g, 'literally ')
+      .replace(/\b(he|she)\/(she|he)\b/gi, '$1 or $2')
+      .replace(/\s+\/\s+/g, ', or ').replace(/\//g, ' or ')
+      .replace(/\s*·\s*/g, ', ').replace(/…/g, '')
+      .replace(/\s{2,}/g, ' ').trim();
+  }
+  // The same cards a round would deal: the selection, the number, at random or most common first
+  function passiveDeck() {
+    if (playableKeys().size === 0) return [];
+    const pool = buildDeck(), cap = effectiveDeckSize();
+    if (capMode === 'frequent' && cap < pool.length) return shuffleDeck(takeCards([...pool].sort((a, b) => compareFrequency(a.noun, b.noun)), cap));
+    return takeCards(shuffleDeck(pool), cap);
+  }
+
+  async function passiveWake(on) {
+    try {
+      if (on && !passiveWakeLock && navigator.wakeLock && document.visibilityState === 'visible') {
+        const lock = await navigator.wakeLock.request('screen');
+        if (!passive) { lock.release(); return; }
+        passiveWakeLock = lock;
+        if (lock.addEventListener) lock.addEventListener('release', () => { if (passiveWakeLock === lock) passiveWakeLock = null; });
+      } else if (!on && passiveWakeLock) {
+        const lock = passiveWakeLock;
+        passiveWakeLock = null;
+        await lock.release();
+      }
+    } catch (e) { /* not allowed here, or not supported: the screen may sleep */ }
+  }
+
+  function startPassive() {
+    const msg = document.getElementById('passive-msg');
+    if (!chosenVoice()) { if (msg) msg.textContent = 'There’s no Italian voice on this device yet — see the note on voices below.'; return; }
+    const cards = passiveDeck();
+    if (!cards.length) return;
+    stopListening();
+    passive = { cards, index: 0, rep: 0, phase: 'it', playing: true, run: 0, pass: 1, timer: null, watchdog: null, current: null, hidden: false };
+    container.dataset.view = 'passive';
+    renderPassive();
+    passiveWake(true);
+    try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
+    passiveStep();   // the first words start from the tap itself (iPhones insist)
+  }
+  function passiveStopTimers() {
+    if (!passive) return;
+    passive.run++;   // anything still on its way from the last line is ignored
+    clearTimeout(passive.timer);
+    clearTimeout(passive.watchdog);
+    try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
+  }
+  function stopPassive() {
+    if (!passive) return;
+    passiveStopTimers();
+    passive = null;
+    passiveWake(false);
+    showSetup();
+  }
+
+  // One line: the Italian or the English of the current card, in its own voice
+  function passiveStep() {
+    if (!passive || !passive.playing) return;
+    clearTimeout(passive.timer);
+    clearTimeout(passive.watchdog);
+    const run = ++passive.run, card = passive.cards[passive.index], it = passive.phase === 'it';
+    const text = it ? sayText(card) : spokenEnglish(card.english);
+    const voice = it ? chosenVoice() : englishVoice();
+    passiveShow();
+    if (!voice || !text) { passiveAdvance(run); return; }   // no English voice: the Italian alone
+    let began = false;
+    try {
+      const u = new window.SpeechSynthesisUtterance(text);
+      u.voice = voice;
+      u.lang = voice.lang;
+      u.rate = it ? (passivePrefs.slow ? 0.7 : audioPrefs.rate) : 0.95;
+      u.onstart = () => { began = true; };
+      const done = () => { if (passive && run === passive.run) { clearTimeout(passive.watchdog); passiveAdvance(run); } };
+      u.onend = done;
+      u.onerror = e => { if (!e || (e.error !== 'interrupted' && e.error !== 'canceled')) done(); };
+      passive.current = u;   // held on to: some browsers drop the end of an utterance nobody references
+      window.speechSynthesis.speak(u);
+    } catch (e) { passivePause('The voice didn’t start — tap ▶ to carry on.'); return; }
+    // A line that never says it ended: carry on if it was heard, pause if it never began
+    passive.watchdog = setTimeout(() => {
+      if (!passive || run !== passive.run) return;
+      if (began) passiveAdvance(run);
+      else passivePause('The voice didn’t start — tap ▶ to carry on.');
+    }, PASSIVE_GAPS.watchdogBase + text.length * PASSIVE_GAPS.watchdogPerChar);
+  }
+  // After a line: the English, the next repeat, or the next card (at the end, round again)
+  function passiveAdvance(run) {
+    if (!passive || run !== passive.run || !passive.playing) return;
+    let gap;
+    if (passive.phase === 'it') { passive.phase = 'en'; gap = PASSIVE_GAPS.itEn; }
+    else {
+      passive.phase = 'it';
+      passive.rep += 1;
+      if (passive.rep < passivePrefs.reps) gap = PASSIVE_GAPS.again;
+      else { passive.rep = 0; passiveMove(1); gap = PASSIVE_GAPS.next; }
+    }
+    passive.timer = setTimeout(passiveStep, gap);
+  }
+  function passiveMove(step) {
+    let i = passive.index + step;
+    if (i >= passive.cards.length) { i = 0; passive.pass += 1; passive.cards = shuffleDeck(passive.cards); }   // round again, in a new order
+    else if (i < 0) i = passive.cards.length - 1;
+    passive.index = i;
+  }
+  function passivePause(msg) {
+    if (!passive) return;
+    passiveStopTimers();
+    passive.playing = false;
+    passive.phase = 'it';   // carry on from this card's Italian, at the same repeat
+    passiveShow(msg);
+  }
+  function passiveResume() {
+    if (!passive) return;
+    passive.playing = true;
+    passiveStep();   // from the tap
+  }
+  function passiveSkip(step) {
+    if (!passive) return;
+    passiveStopTimers();
+    passive.rep = 0;
+    passive.phase = 'it';
+    passiveMove(step);
+    if (passive.playing) passive.timer = setTimeout(passiveStep, 80);   // a moment after cancelling, or Chrome can drop the next line
+    else passiveShow();
+  }
+  // The screen went off (or another app came up): the browser has stopped the voice; start
+  // the card's Italian again when it's back
+  document.addEventListener('visibilitychange', () => {
+    if (!passive) return;
+    if (document.visibilityState === 'hidden') {
+      passiveWakeLock = null;   // the browser lets go of it when the page is hidden; ask again when it's back
+      if (passive.playing) { passiveStopTimers(); passive.phase = 'it'; passive.hidden = true; }
+    } else {
+      passiveWake(true);
+      if (passive.playing && passive.hidden) { passive.hidden = false; passiveStep(); }
+    }
+  });
+
+  function renderPassive() {
+    const cfg = SUBJECTS[subject];
+    gameArea.innerHTML = `
+      <div class="passive">
+        <div class="passive-top">
+          <div class="setup-eyebrow">A spasso · ${escapeHTML(cfg.title)}</div>
+          <button type="button" class="ghost" id="passive-end">✕ Fine</button>
+        </div>
+        <div class="passive-card">
+          <div class="passive-it" id="passive-it"></div>
+          <div class="passive-en" id="passive-en"></div>
+          <div class="passive-rep" id="passive-rep"></div>
+        </div>
+        <div class="passive-where" id="passive-where"></div>
+        <p class="passive-msg" id="passive-msg" aria-live="polite"></p>
+        <div class="passive-controls">
+          <button type="button" class="passive-ctl" id="passive-prev" aria-label="Previous card" title="Previous card">⏮</button>
+          <button type="button" class="passive-ctl passive-play" id="passive-play"></button>
+          <button type="button" class="passive-ctl" id="passive-next" aria-label="Next card" title="Next card">⏭</button>
+        </div>
+        <div class="passive-settings">
+          <div class="passive-reps-set" role="group" aria-label="Repeats">
+            <span class="passive-set-label">Ripetizioni</span>
+            <button type="button" class="passive-step" id="passive-less" aria-label="Fewer repeats">−</button>
+            <span class="passive-reps-n" id="passive-reps">${passivePrefs.reps}</span>
+            <button type="button" class="passive-step" id="passive-more" aria-label="More repeats">+</button>
+          </div>
+          <div class="mode-toggle passive-speed" id="passive-speed" role="group" aria-label="Italian speed">
+            <button type="button" class="mode-option${passivePrefs.slow ? '' : ' active'}" data-slow="0" aria-pressed="${!passivePrefs.slow}">Normale</button>
+            <button type="button" class="mode-option${passivePrefs.slow ? ' active' : ''}" data-slow="1" aria-pressed="${passivePrefs.slow}">Lento</button>
+          </div>
+        </div>
+        <button type="button" class="passive-lock-btn" id="passive-lock">🔒 Blocca lo schermo</button>
+        <p class="passive-note">Phones stop the voice when the screen locks, so A spasso keeps the screen on while it plays. Lock it here before it goes in your pocket: taps are ignored until you hold to unlock. Nothing you hear here changes your scores.</p>
+        <div class="passive-cover" id="passive-cover" hidden>
+          <div class="passive-cover-it" id="passive-cover-it"></div>
+          <div class="passive-cover-en" id="passive-cover-en"></div>
+          <button type="button" class="passive-unlock" id="passive-unlock"><span class="passive-unlock-fill"></span><span class="passive-unlock-text">Tieni premuto per sbloccare</span></button>
+        </div>
+      </div>`;
+    document.getElementById('passive-end').addEventListener('click', stopPassive);
+    document.getElementById('passive-play').addEventListener('click', () => { if (passive.playing) passivePause(); else passiveResume(); });
+    document.getElementById('passive-prev').addEventListener('click', () => passiveSkip(-1));
+    document.getElementById('passive-next').addEventListener('click', () => passiveSkip(1));
+    const setReps = n => { passivePrefs.reps = Math.max(1, Math.min(10, n)); savePassivePrefs(); if (passive.rep >= passivePrefs.reps) passive.rep = passivePrefs.reps - 1; passiveShow(); };
+    document.getElementById('passive-less').addEventListener('click', () => setReps(passivePrefs.reps - 1));
+    document.getElementById('passive-more').addEventListener('click', () => setReps(passivePrefs.reps + 1));
+    document.querySelectorAll('#passive-speed .mode-option').forEach(b => b.addEventListener('click', () => {
+      passivePrefs.slow = b.dataset.slow === '1';
+      savePassivePrefs();
+      document.querySelectorAll('#passive-speed .mode-option').forEach(x => { const on = x === b; x.classList.toggle('active', on); x.setAttribute('aria-pressed', String(on)); });
+    }));
+    // The pocket lock: a cover over everything; only a long press on its button lifts it
+    const cover = document.getElementById('passive-cover'), unlock = document.getElementById('passive-unlock');
+    document.getElementById('passive-lock').addEventListener('click', () => { cover.hidden = false; passiveShow(); });
+    let hold = null;
+    const startHold = e => {
+      if (e && e.preventDefault) e.preventDefault();
+      clearTimeout(hold);
+      unlock.classList.add('holding');
+      hold = setTimeout(() => { cover.hidden = true; unlock.classList.remove('holding'); }, PASSIVE_GAPS.unlock);
+    };
+    const endHold = () => { clearTimeout(hold); unlock.classList.remove('holding'); };
+    unlock.addEventListener('pointerdown', startHold);
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => unlock.addEventListener(t, endHold));
+    unlock.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) startHold(e); });
+    unlock.addEventListener('keyup', e => { if (e.key === 'Enter' || e.key === ' ') endHold(); });
+    unlock.addEventListener('contextmenu', e => e.preventDefault());   // a long press isn't a right-click
+    passiveShow();
+  }
+  // What's playing: the card, the repeat, where in the deck, and the play button
+  function passiveShow(msg) {
+    if (!passive) return;
+    const card = passive.cards[passive.index], el = id => document.getElementById(id);
+    if (!el('passive-it')) return;
+    const it = sayText(card), en = card.english;
+    el('passive-it').textContent = it;
+    el('passive-en').textContent = en;
+    el('passive-it').classList.toggle('speaking', passive.playing && passive.phase === 'it');
+    el('passive-en').classList.toggle('speaking', passive.playing && passive.phase === 'en');
+    el('passive-cover-it').textContent = it;
+    el('passive-cover-en').textContent = en;
+    el('passive-rep').textContent = `Ripetizione ${Math.min(passive.rep + 1, passivePrefs.reps)} di ${passivePrefs.reps}`;
+    el('passive-reps').textContent = passivePrefs.reps;
+    el('passive-where').textContent = `Carta ${passive.index + 1} di ${passive.cards.length} · giro ${passive.pass}`;
+    const play = el('passive-play');
+    play.textContent = passive.playing ? '⏸ Pausa' : '▶ Riprendi';
+    play.setAttribute('aria-label', passive.playing ? 'Pause' : 'Carry on');
+    el('passive-msg').textContent = msg || '';
+  }
+
   function speakBtnHTML() {
     return chosenVoice() ? '<button type="button" class="speak-btn" id="speak-btn" aria-label="Hear it again" title="Hear it again">🔊</button>' : '';
   }
@@ -11394,6 +11713,7 @@
       if (e.key === 'Escape') { e.preventDefault(); closeChart(); }
       return;
     }
+    if (container.dataset.view === 'passive') return;   // A spasso: nothing to submit
     if (e.key === 'Enter' && e.shiftKey && container.dataset.view === 'game' && (listening || micAvailable())) {   // ⇧ Enter: say it (again to stop)
       e.preventDefault();
       startListening();
