@@ -65,7 +65,7 @@ btn().click();
 ok(JSON.stringify(ev('deck.map(c => c.key).sort()')) === JSON.stringify(['capire|io', 'capire|noi']), 'verb review round: capire|io and capire|noi only');
 ok(slider('game-trim-focus').value === 2 && slider('game-trim-focus').max === 2 && slider('game-trim-rest').max === 4, 'verbs: Missed 2 of 2, with the other 4 forms of capire as The rest');
 setSlider('game-trim-rest', 4);
-ok(ev('deck.length') === 6 && new Set(ev('deck.map(c => c.key)')).size === 6 && ev("deck.slice(0, 2).every(c => ['capire|io', 'capire|noi'].includes(c.key))"), 'growing to all brings back the other 4 forms (after the missed 2)');
+ok(ev('deck.length') === 6 && new Set(ev('deck.map(c => c.key)')).size === 6 && ev("deck.map(c => c.person).join()") === 'io,tu,lui,noi,voi,loro', 'growing to all brings back the other 4 forms, and the six play in order, io to loro');
 d.getElementById('game-focus-btn').click();
 ev("focusChecked = new Set(['capire']); applyFocus();");
 ok(!ev('sessionIsReview') && slider('game-trim-focus').name === 'Focus' && !d.getElementById('game-trim-rest'), 'applying your own Focus pick ends the review (the slider says Focus; nothing is left over)');

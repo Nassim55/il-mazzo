@@ -20,6 +20,8 @@ Every card section works in three directions — English → Italian, Italian �
 
 ## Features
 
+**Conjugations in order.** In a conjugation round, each verb's forms come together, *io → tu → lui → noi → voi → loro*, while the verbs themselves come in random order — in every round: a fresh one, *Play all again*, *Practise the missed*, *Focus*, *A spasso*. A round cut short (*play just 20*) only ever cuts a verb at its end, and growing a round mid-way finishes the verbs in play before adding new ones, whole.
+
 **The present at a glance.** In *Verbi irregolari*, resting the mouse on a verb's tile (or tabbing to it, or a long press on a phone) opens a popout of its six present forms, with the ones that break the regular pattern highlighted: *vado, vai, va, vanno* but not *andiamo, andate*. Contracted infinitives are compared with the stem their present is built on — *proporre* on *propon-*, *produrre* on *produc-*, *dire* on *dic-*, *bere* on *bev-* — and the popout says so.
 
 **A spasso — out and about, listen only.** Under *Start practising*, *🎧 A spasso* plays the same cards with nothing to type or say: each one is read aloud, the Italian and then the English, five times over (*Ripetizioni* changes the number; *Lento* slows the Italian), then the next card — and at the end of the deck it goes round again, reshuffled, for as long as it's left on. The English is tidied for speaking (*you all*, *he or she*, *(feminine)*). Phones stop the browser's voice when the screen locks, so it keeps the screen awake while it plays, and *Blocca lo schermo* puts up a dark pocket lock that ignores taps until you hold to unlock; if the screen does go off, the card starts again when it's back. Nothing heard here changes your scores.

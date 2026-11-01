@@ -11135,14 +11135,14 @@
     } else if (newSize <= sessionPool.length) {
       const inDeck = new Set(deck.map(c => c.key));
       const inFocus = new Set(sessionMaxDeck.map(c => c.key));
-      const focusLeftovers = shuffle(sessionMaxDeck.filter(c => !inDeck.has(c.key)));
+      const focusLeftovers = verbsFirst(shuffle(sessionMaxDeck.filter(c => !inDeck.has(c.key))));
       const others = sessionPool.filter(c => !inDeck.has(c.key) && !inFocus.has(c.key));
       // In a 'most common' session, growing brings in the next most common cards
       const restOfPool = sessionPickMode === 'frequent'
         ? others.sort((a, b) => compareFrequency(a.noun, b.noun))
-        : shuffle(others);
+        : verbsFirst(shuffle(others));
       const toAdd = focusLeftovers.concat(restOfPool).slice(0, newSize - deck.length);
-      deck = deck.concat(shuffle(toAdd)); // new cards arrive in random play order
+      deck = groupConjugations(deck.concat(shuffle(toAdd)), index + 1); // new cards arrive in random play order (a verb's forms together)
     } else {
       return; // beyond the pool
     }
@@ -11173,11 +11173,11 @@
     // Grow each group from its unplayed cards
     const inDeck = new Set(kept.map(c => c.key));
     const haveF = kept.filter(isFocus).length, haveR = kept.length - haveF;
-    const addF = shuffle(sessionMaxDeck.filter(c => !inDeck.has(c.key))).slice(0, Math.max(0, fWant - haveF));
+    const addF = verbsFirst(shuffle(sessionMaxDeck.filter(c => !inDeck.has(c.key)))).slice(0, Math.max(0, fWant - haveF));
     const others = sessionPool.filter(c => !inDeck.has(c.key) && !isFocus(c));
-    const ordered = sessionPickMode === 'frequent' ? others.sort((a, b) => compareFrequency(a.noun, b.noun)) : shuffle(others);
+    const ordered = sessionPickMode === 'frequent' ? others.sort((a, b) => compareFrequency(a.noun, b.noun)) : verbsFirst(shuffle(others));
     const addR = ordered.slice(0, Math.max(0, rWant - haveR));
-    deck = kept.concat(shuffle(addF.concat(addR)));
+    deck = groupConjugations(kept.concat(shuffle(addF.concat(addR))), index + 1);
     afterResize(currentKey);
   }
 
@@ -11185,13 +11185,37 @@
   // order (del libro, then dei libri), and a deck cut to size never splits a pair
   function shuffleDeck(cards) {
     if (SUBJECTS[subject].inOrder) return [...cards];   // a scene's lines, in the scene's order
-    if (!SUBJECTS[subject].keepPairs) return shuffle(cards);
+    if (!SUBJECTS[subject].keepPairs) return groupConjugations(shuffle(cards));
     const groups = [];
     for (const c of cards) {
       const last = groups[groups.length - 1];
       if (last && last[0].noun === c.noun) last.push(c); else groups.push([c]);
     }
     return shuffle(groups).flat();
+  }
+  // A verb's conjugations play together, io to loro, where the verb first falls; the verbs
+  // themselves stay in random order, and other cards keep their places. Cards before
+  // `from` (played, or on screen) never move; if the verb on screen has more to come,
+  // those come next, then any other verb already started, then the rest.
+  function groupConjugations(cards, from = 0) {
+    const keyOf = c => (c && c.person ? `${c.subject || subject}|${c.noun}` : null);
+    const first = new Map();
+    cards.forEach((c, i) => { const k = keyOf(c); if (k && !first.has(k)) first.set(k, i); });
+    if (!first.size) return cards;
+    const onScreen = from > 0 ? keyOf(cards[from - 1]) : null;
+    const anchor = (c, i) => { const k = keyOf(c); return !k ? i : k === onScreen ? -1 : first.get(k); };
+    const rank = c => personOrder.indexOf(c.person);
+    const tail = cards.slice(from).map((c, j) => ({ c, at: anchor(c, from + j), j }));
+    tail.sort((a, b) => a.at - b.at || (keyOf(a.c) && keyOf(a.c) === keyOf(b.c) ? rank(a.c) - rank(b.c) : 0) || a.j - b.j);
+    return cards.slice(0, from).concat(tail.map(x => x.c));
+  }
+  // Cards to bring into a round as it grows: whole verbs, io first, finishing the verbs
+  // already in play before starting new ones (anything that isn't a conjugation as it was)
+  function verbsFirst(cards) {
+    const key = c => `${c.subject || subject}|${c.noun}`;
+    const started = new Set(deck.filter(c => c.person).map(key));
+    const grouped = groupConjugations(cards), inPlay = c => !!c.person && started.has(key(c));
+    return [...grouped.filter(inPlay), ...grouped.filter(c => !inPlay(c))];
   }
   function takeCards(cards, n) {
     let k = Math.min(n, cards.length);
@@ -12028,7 +12052,7 @@
       sessionMaxDeck = pickedCards;
       sessionFocused = true;
       sessionIsReview = false;   // your own pick, no longer just the missed cards
-      deck = shuffle(pickedCards);
+      deck = shuffleDeck(pickedCards);
       index = 0;
       score = 0;
       streak = 0;
