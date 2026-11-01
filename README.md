@@ -6,17 +6,33 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 
 | Section | Items | What you practise |
 |---|---|---|
-| Sostantivi | 831 nouns | the noun with its definite article (*il pane, lo zaino, l'acqua*) |
+| Sostantivi | 941 nouns | the noun with its definite article (*il pane, lo zaino, l'acqua*), in 23 themes — among them *Ristrutturazione*, 73 nouns for renovating the house |
 | Verbi regolari | 150 verbs | present-tense conjugations, or just the infinitive |
 | Verbi irregolari | 50 verbs | the most common verbs that are irregular in the present |
 | Aggettivi | 150 adjectives | the dictionary form, or every gender and number |
+| Preposizioni | 224 phrases | fusion drills (*di + il libro* → *del libro*) and usage cards in 27 themes, six groups; a rule for every slip; the fusion table |
 | Frasi | 50 phrases | everyday expressions, with *tu* and *Lei* forms kept distinct |
 | Scrittura | 100 sentences | present-tense sentences built from the deck's own words, written in full |
+| Dialoghi | 6 scenes · 48 lines | everyday conversations in two voices: listen, answer three questions, then write each line from dictation |
 | Racconto | 3 chapters | *La casa di pietra*, an illustrated story to read, plus the 30 words it teaches |
 
 Every card section works in three directions — English → Italian, Italian → English, and Listening (hear the Italian, type it) — and each direction keeps its own progress.
 
 ## Features
+
+**Conjugations in order.** In a conjugation round, each verb's forms come together, *io → tu → lui → noi → voi → loro*, while the verbs themselves come in random order — in every round: a fresh one, *Play all again*, *Practise the missed*, *Focus*, *A spasso*. A round cut short (*play just 20*) only ever cuts a verb at its end, and growing a round mid-way finishes the verbs in play before adding new ones, whole.
+
+**The present at a glance.** In *Verbi irregolari*, resting the mouse on a verb's tile (or tabbing to it, or a long press on a phone) opens a popout of its six present forms, with the ones that break the regular pattern highlighted: *vado, vai, va, vanno* but not *andiamo, andate*. Contracted infinitives are compared with the stem their present is built on — *proporre* on *propon-*, *produrre* on *produc-*, *dire* on *dic-*, *bere* on *bev-* — and the popout says so.
+
+**A spasso — out and about, listen only.** Under *Start practising*, *🎧 A spasso* plays the same cards with nothing to type or say: each one is read aloud, the Italian and then the English, five times over (*Ripetizioni* changes the number; *Lento* slows the Italian), then the next card — and at the end of the deck it goes round again, reshuffled, for as long as it's left on. The English is tidied for speaking (*you all*, *he or she*, *(feminine)*). Phones stop the browser's voice when the screen locks, so it keeps the screen awake while it plays, and *Blocca lo schermo* puts up a dark pocket lock that ignores taps until you hold to unlock; if the screen does go off, the card starts again when it's back. Nothing heard here changes your scores.
+
+**The grid shows your record.** In every section's pick grid, each word's tile is shaded by how often you get it wrong in the current direction — continuously, from olive (rarely wrong) through gold to terracotta (wrong half the time or more). The colour is faint while a word has had only a few tries and full from five, so one slip doesn't paint it red; words you haven't tried stay plain. Hover over a tile for the numbers (*Wrong 3 of 8 times — 38%*); a key above the grid explains the scale.
+
+**Parla — say it, don't just type it.** Wherever the answer is Italian (English → Italian, and Listen, where repeating what you hear is shadowing), a microphone at the right of the answer box (or *Shift+Enter*, so the keyboard never has to be left) listens in Italian; typing stays the main way, and plain Enter still checks. Words appear as you speak; if any of the recogniser's guesses is right it's a right answer, checked as leniently as typing, and marked *Said aloud*. If none is, nothing is marked: what was heard stays in the box to say again, fix, or check. The retype after a miss can be said too. Only in browsers that can listen (Chrome, Edge, Safari), and never while the app itself is speaking.
+
+**Nothing typed is never wrong; *Salta* is.** Pressing Enter on an empty answer box (most often by accident) just shakes the box and asks for an answer; nothing is shown and nothing is counted. To skip a card you don't know, press *Salta*, beside *Controlla*: it counts as wrong in every section, shows the answer, and then asks for it to be typed out like any miss.
+
+**Typing it right after a miss.** After a wrong answer the answer box clears and the button reads *Riscrivi →*: the right answer has to be typed before the next card, as leniently checked as the answer itself (accents, capitals and punctuation forgiven). It's practice only: it changes neither the score nor the card's history or review schedule. In Italian → English, *I was right — count it* lifts it.
 
 - **Ripasso del giorno** — spaced repetition across every section: every item you practise is scheduled, and the daily review brings back exactly what's due (see below)
 - Themes, quick picks (Random, Weakest), hand-picking, and "the most common" by frequency
@@ -28,6 +44,7 @@ Every card section works in three directions — English → Italian, Italian �
 - **Choose the persons** for the verb sections: under *Practice mode*, pick any of io, tu, lui / lei, noi, voi, loro (or *all*, *singular*, *plural*). Rounds, Ripasso del giorno and chapter practice then ask only those; each verb section keeps its own choice, and it syncs with your progress.
 - **Deck size slider** during a round, from 1 card to the whole selection. After *Practise the ones I missed* (or a mid-game Focus) it becomes two sliders — how many of the missed cards, and how many of the rest to mix back in. Growing adds unplayed cards (the rest in the round's order: random, or the next most common); shrinking trims unplayed cards from the end, so cards already played stay counted.
 - Back up and restore all progress to a file
+- **Dialoghi** — everyday scenes to listen to, understand and write from dictation (see below)
 - **Racconto** — a story to read, in which every word links to its card (see below)
 
 ## Ripasso del giorno
@@ -47,6 +64,16 @@ A hundred present-tense sentences, built only from the deck's own nouns, verbs, 
 - **Sentence types:** at the top of the setup, choose *Presente semplice*, *Mi piace*, or both (one always stays on). The levels, the grid, every pick button and Ripasso follow the choice, which syncs.
 - **Why it's wrong:** under the comparison, the rule behind each mistake — an adjective agreeing with its noun (*bella*: it agrees with *la città*, feminine singular), a verb with its subject (*beve*: the subject is *il cane*, the lui/lei form, with all six forms), the article for the noun (*l'* before a vowel), a preposition joining its article (*sul* = *su* + *il*), a noun's number, where *non* goes, word order, spelling.
 - Sentences come back in Ripasso del giorno and sync like everything else.
+
+## Dialoghi: *Scene di vita*
+
+Six short conversations from everyday life: at the bar, the market, the station in Varese, a restaurant, with Rosa the neighbour outside the stone house, and with Giovanni about the roof. Every word is in the deck (the present tense, plus phrases from *Frasi*). Each scene has three steps on one page:
+
+- **Ascolta.** The whole scene plays in two different Italian voices (with only one voice on the device, the second speaker is the same voice pitched lower), at normal speed or *Lento*. The text starts hidden — listen first — with each line a bar that lights up as it's spoken. Tap a line to hear it again; *Mostra il testo* shows the Italian, then *Mostra l'inglese* the natural English with the word for word under it. Hearing the scene to the end marks it *Ascoltato*.
+- **Capisci?** Three questions about what was said; each answer quotes the line that gives it. The best score is kept.
+- **Dettato.** The scene's lines, in order, through the card engine: hear each line and write it (or say it), with Scrittura's comparison, *Why*, the retype and *Salta*. *Traduci dall'inglese* writes them from the word-for-word English instead ("(formal)" and "(you all)" mark *Lei* and *voi*). Every line is a card, so it comes back in Ripasso del giorno.
+
+Each scene card on the home page shows its steps: *Ascoltato*, the *Domande* score and *Dettato x/8*. Without an Italian voice, the text is shown and the dictation becomes translating from the English.
 
 ## Racconto: *La casa di pietra*
 
@@ -148,4 +175,6 @@ tests/
 
 ## Data
 
-Frequency rankings combine written Italian (wordfreq), spoken Italian (OpenSubtitles 2018 word counts) and the Italian Universal Dependencies treebanks, which are used to count only true noun, verb or adjective uses of each form. The phrases were chosen by cross-checking native teachers' and language publishers' lists of everyday Italian with research on spoken Italian. Notes on method sit beside each data block in `index.html`. The adjectives' 101–150 are the 50 most common adjectives not in the original game, ranked like the verbs: a geometric-mean blend of written (wordfreq) and spoken (OpenSubtitles) frequency, weighted by adjective use in the UD treebanks. The story and its illustrations are original to Il Mazzo.
+Frequency rankings combine written Italian (wordfreq), spoken Italian (OpenSubtitles 2018 word counts) and the Italian Universal Dependencies treebanks, which are used to count only true noun, verb or adjective uses of each form. The phrases were chosen by cross-checking native teachers' and language publishers' lists of everyday Italian with research on spoken Italian. Notes on method sit beside each data block in `index.html`.
+
+**Preposizioni** rebuilds the old standalone *preposizioni* game inside Il Mazzo, with everything it lacked: Ripasso, sync, stats, audio and the in-round controls. It has 224 phrases in 27 themes, under the old game's six group headings, and every word is from the deck. Fusion drills follow the direction like every card, and each starts with one easy verb that goes with its preposition (*parlo di*, *vado a*, *vengo da*, *è in*, *è su*). English → Italian shows *I talk about the book* and asks for *Parlo del libro*; after you answer come the pieces (*di + il libro → del libro*) and the sentence word for word (*I speak of-the book*). Each fusion drill is a pair, the singular and then straight after its plural (*Parlo del libro*, then *Parlo dei libri*), played as two cards of one item like a verb's persons. The setup lists the singular only; a *Singolare · Plurale* toggle at the top (both on by default, synced) chooses which to play, and Ripasso deals the whole pair. *(m.)* and *(f.)* mark English that could be either (*to the friend's*). Usage cards give natural English (a word-for-word prompt would give the preposition away) and show the Italian word for word afterwards: *aspetto l'autobus*, *I wait the bus*. A wrong answer gets the same comparison and **Why** as Scrittura, plus each theme's rule when the preposition itself is wrong, such as *cities take a*, *no preposition in Italian*, or *da with the present tense*. A side panel holds the 35 joined forms, and the same chart opens during a round from the *▦ Le articolate* button. Every section with a chart has this button (*Le desinenze*, *Gli irregolari*, *Le concordanze*, *In pratica*), and in Ripasso it follows each card's own section. The old game's 16 patterns are all here with at least as many cards, including 22 each for *di* and *da* + article; new themes cover transport, place words (*vicino a*), material, *some* (*del pane*), *da* + a verb, *da* and *tra* + time, verbs with no preposition, and *con*, *per* and *tra*. The adjectives' 101–150 are the 50 most common adjectives not in the original game, ranked like the verbs: a geometric-mean blend of written (wordfreq) and spoken (OpenSubtitles) frequency, weighted by adjective use in the UD treebanks. The story and its illustrations are original to Il Mazzo.

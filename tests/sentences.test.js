@@ -6,7 +6,7 @@ const { w, d, ev, errors, warns } = boot({ 'flipcards-subject': 'sentences' });
 ok(errors.length === 0 && warns.length === 0, 'loads cleanly: every word of every sentence is in the deck');
 ok(ev('SENTENCE_ITEMS.length') === 170 && ev('SENTENCE_THEMES.length') === 11, '170 sentences, in eleven levels (six present tense, five Mi piace)');
 const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(tabs.join('|') === 'Sostantivi|Verbi regolari|Verbi irregolari|Aggettivi|Frasi|Scrittura|Racconto' && d.querySelector('#subject-toggle [data-subject="sentences"]').classList.contains('active'), 'Scrittura is a section of its own, after Frasi');
+ok(tabs.join('|') === 'Sostantivi|Verbi regolari|Verbi irregolari|Aggettivi|Preposizioni|Frasi|Scrittura|Dialoghi|Racconto' && d.querySelector('#subject-toggle [data-subject="sentences"]').classList.contains('active'), 'Scrittura is a section of its own, after Frasi');
 
 // ---- Built from the deck, in the present tense ----
 const words = ev(`SENTENCE_ITEMS.flatMap(n => sentenceSegments(n.it).filter(s => s.ref).map(s => s.ref))`);
@@ -39,7 +39,7 @@ ok(!r.right && /<mark class="sent-missing">l'<\/mark>acqua/.test(r.html.replace(
 r = play('il-cane-beve-l-acqua', 'il cane bevi acqua');
 ok(/<s class="sent-wrong">bevi<\/s>/.test(r.html) && /<mark class="sent-missing">beve<\/mark>/.test(r.html), 'a wrong verb form is struck through in yours and marked in the correct one');
 r = play('il-cane-beve-l-acqua', '');
-ok(!r.right && /Skipped — the sentence is/.test(r.text) && !/sent-diff/.test(r.html), 'a skip just shows the sentence');
+ok(!r.right && r.text.trim() === '' && !/sent-diff/.test(r.html), 'an empty answer shows nothing and counts nothing — it is asked for again');
 ok(play('i-bambini-giocano-in-giardino', 'I bambini giocano nel giardino.').right, 'natural variants are accepted (nel giardino / in giardino)');
 
 // ---- The other direction, the prompts, and Ripasso ----
@@ -184,4 +184,40 @@ const t0 = ev('today()');
 const R = boot({ 'flipcards-subject': 'nouns', 'scrittura-stats-v1:srs': JSON.stringify({ 'il-cane-beve-l-acqua': { b: 1, d: t0, l: null } }) });
 ok(/1 sentence/.test(R.d.getElementById('ripasso').textContent), 'sentences come back in Ripasso del giorno');
 ok(ev("syncedKeys().has('scrittura-stats-v1') && syncedKeys().has('scrittura-stats-v1:srs')"), 'and their progress syncs like everything else');
+// ---- The end of a round (Avanti on the last card) ----
+// A round with misses ends on the summary, its missed list naming the sentences — sentence
+// cards carry their subject as sentPerson, never person (a card with a person is a verb card
+// to the missed list, the pronoun hint and answer checking)
+ok(ev('SENTENCE_ITEMS.every(n => cardsForItem(n).every(c => !("person" in c) && "sentPerson" in c))'), 'no sentence card carries a verb\'s person (its subject is sentPerson)');
+const playRound = (keys, answers) => {
+  const errs = [];
+  w.addEventListener('error', e => errs.push(e.message));
+  ev(`selectedNouns = new Set(${JSON.stringify(keys)}); updateReadout();`);
+  d.getElementById('start-btn').click();
+  const n = ev('deck.length');
+  for (let k = 0; k < n; k++) {
+    d.getElementById('answer').value = answers(k, n) ? ev('deck[index].italian') : 'sbagliato';
+    d.getElementById('submit').click();
+    if (!answers(k, n)) d.getElementById('answer').value = ev('deck[index].italian');   // a miss: typed right to go on
+    d.getElementById('submit').click();   // Avanti
+  }
+  return { errs, done: !!d.querySelector('.complete'), missed: [...d.querySelectorAll('.missed-item')].map(e => e.textContent) };
+};
+let end = playRound(['prendo-il-treno', 'apro-la-finestra', 'mi-piacciono-i-libri', 'mi-manchi'], (k, n) => k % 2 === 1 || k === n - 1);
+ok(end.done && end.errs.length === 0 && end.missed.length === 2 && end.missed.every(m => /\.$|\?$/.test(m)), `Avanti on the last card, after misses, opens the summary — missed: ${end.missed.join(' · ')}`);
+d.getElementById('change-btn') ? d.getElementById('change-btn').click() : ev('showSetup()');
+ev('showSetup()');
+ev(`(() => { const s = loadSrs('sentences', 'en-it'); for (const k of ['bevo-un-caffe', 'ti-piace-la-pizza']) s[k] = { b: 1, d: today(), l: today() - 1 }; saveSrs('sentences', 'en-it', s); })()`);
+const errsR = [];
+w.addEventListener('error', e => errsR.push(e.message));
+ev('startRipasso()');
+const nR = ev('deck.length');
+for (let k = 0; k < nR; k++) {
+  d.getElementById('answer').value = k === 0 ? 'sbagliato' : ev('deck[index].italian');
+  d.getElementById('submit').click();
+  if (k === 0) d.getElementById('answer').value = ev('deck[index].italian');   // typed right to go on
+  d.getElementById('submit').click();
+}
+ok(nR >= 2 && !!d.querySelector('.complete') && errsR.length === 0 && d.querySelectorAll('.missed-item').length >= 1, 'and in Ripasso: a missed sentence, then Avanti on the last card — the summary opens');
+
 done();
