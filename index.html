@@ -2071,6 +2071,7 @@
   .passive-step { width: 34px; height: 34px; background: transparent; border: 1px solid rgba(28, 22, 17, 0.25); border-radius: 50%; font-size: 17px; color: var(--ink); cursor: pointer; }
   .passive-reps-n { min-width: 22px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--ink); }
   .mode-toggle.passive-speed { margin: 0; }
+  .passive-lock-btn[hidden] { display: none; }
   .passive-lock-btn { display: block; width: 100%; margin: 26px 0 0; padding: 14px; background: transparent; border: 1px dashed rgba(28, 22, 17, 0.35); border-radius: 3px;
                       font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink-soft); cursor: pointer; }
   .passive-note { margin: 10px 0 0; font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.5; color: var(--ink-faded); text-align: center; }
@@ -9684,7 +9685,7 @@
 
   function showSetup() {
     hideConjPop();
-    if (passive) { passiveStopTimers(); passive = null; passiveWake(false); }
+    if (passive) { passiveAudioStop(); passiveStopTimers(); passive = null; passiveWake(false); }
     dialogueStopSpeaking();
     stopListening();
     closeChart();
@@ -10321,14 +10322,16 @@
   }
 
   function startPassive() {
-    const msg = document.getElementById('passive-msg');
-    if (!chosenVoice()) { if (msg) msg.textContent = 'There’s no Italian voice on this device yet — see the note on voices below.'; return; }
+    const msg = document.getElementById('passive-msg'), track = passiveCanTrack();
+    if (!track && !chosenVoice()) { if (msg) msg.textContent = 'There’s no Italian voice on this device yet — see the note on voices below.'; return; }
     const cards = passiveDeck();
     if (!cards.length) return;
     stopListening();
-    passive = { cards, index: 0, rep: 0, phase: 'it', playing: true, run: 0, pass: 1, timer: null, watchdog: null, current: null, hidden: false };
+    passive = { cards, index: 0, rep: 0, phase: 'it', playing: true, run: 0, pass: 1, timer: null, watchdog: null, current: null, hidden: false,
+                mode: track ? 'audio' : 'speech', why: track ? null : 'signed-out' };
     container.dataset.view = 'passive';
     renderPassive();
+    if (track) { startPassiveAudio(); return; }   // carries on with the phone locked
     passiveWake(true);
     try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
     passiveStep();   // the first words start from the tap itself (iPhones insist)
@@ -10342,6 +10345,7 @@
   }
   function stopPassive() {
     if (!passive) return;
+    passiveAudioStop();
     passiveStopTimers();
     passive = null;
     passiveWake(false);
@@ -10399,6 +10403,7 @@
   }
   function passivePause(msg) {
     if (!passive) return;
+    if (passive.mode === 'audio') { passive.playing = false; if (passive.audio) passive.audio.pause(); passiveShow(msg); return; }
     passiveStopTimers();
     passive.playing = false;
     passive.phase = 'it';   // carry on from this card's Italian, at the same repeat
@@ -10406,11 +10411,13 @@
   }
   function passiveResume() {
     if (!passive) return;
+    if (passive.mode === 'audio') { passive.playing = true; if (passive.audio) passiveAudioPlay(); passiveShow(); return; }
     passive.playing = true;
     passiveStep();   // from the tap
   }
   function passiveSkip(step) {
     if (!passive) return;
+    if (passive.mode === 'audio') { passiveAudioSkip(step); return; }
     passiveStopTimers();
     passive.rep = 0;
     passive.phase = 'it';
@@ -10421,7 +10428,7 @@
   // The screen went off (or another app came up): the browser has stopped the voice; start
   // the card's Italian again when it's back
   document.addEventListener('visibilitychange', () => {
-    if (!passive) return;
+    if (!passive || passive.mode === 'audio') return;   // a track plays on with the screen off
     if (document.visibilityState === 'hidden') {
       passiveWakeLock = null;   // the browser lets go of it when the page is hidden; ask again when it's back
       if (passive.playing) { passiveStopTimers(); passive.phase = 'it'; passive.hidden = true; }
@@ -10430,6 +10437,250 @@
       if (passive.playing && passive.hidden) { passive.hidden = false; passiveStep(); }
     }
   });
+
+  // ===== A spasso with the phone locked: one continuous track (Nov 2026) =====
+  // Phones stop the browser's own voice when they lock, but not real audio. So where this
+  // device is signed in (and the Worker has its Google key), A spasso fetches each card's
+  // Italian and English as MP3 clips (made once by Google; kept by the Worker and in this
+  // browser), joins them with the pauses into one track, and plays that through an audio
+  // player: it carries on locked, with play, pause and skip on the lock screen and
+  // headphones. The track is built a few cards at a time, the next part while one plays.
+  // Anywhere it can't, A spasso uses the device's voice as before (screen kept on).
+  const PASSIVE_AUDIO = { chunkCards: 12, parallel: 6, cache: 'mazzo-tts-v1', rateIt: 0.9, rateSlow: 0.7, rateEn: 0.95 };
+  const ttsError = (code, msg) => Object.assign(new Error(msg || code), { code });
+  const ttsMemo = new Map();   // this visit's clips, so a pass round the deck never fetches one twice
+  async function ttsClip(text, lang, rate) {
+    const cacheKey = `${SYNC_URL}/v1/tts?lang=${lang}&rate=${rate}&text=${encodeURIComponent(text)}`;
+    if (ttsMemo.has(cacheKey)) return ttsMemo.get(cacheKey);
+    const bytes = await ttsFetchClip(cacheKey, text, lang, rate);
+    ttsMemo.set(cacheKey, bytes);
+    if (ttsMemo.size > 800) ttsMemo.delete(ttsMemo.keys().next().value);   // the oldest goes
+    return bytes;
+  }
+  async function ttsFetchClip(cacheKey, text, lang, rate) {
+    let cache = null;
+    try {
+      cache = await window.caches.open(PASSIVE_AUDIO.cache);
+      const hit = await cache.match(cacheKey);
+      if (hit) return new Uint8Array(await hit.arrayBuffer());
+    } catch (e) { cache = null; /* no Cache Storage here */ }
+    const token = syncMeta().session;
+    if (!token) throw ttsError('signed-out');
+    const res = await fetch(`${SYNC_URL}/v1/tts`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ text, lang, rate })
+    });
+    if (!res.ok) throw ttsError(res.status === 401 ? 'signed-out' : `tts-${res.status}`);
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    try { if (cache && typeof Response === 'function') await cache.put(cacheKey, new Response(bytes, { headers: { 'Content-Type': 'audio/mpeg' } })); } catch (e) { /* full: fetched again next time */ }
+    return bytes;
+  }
+  // MP3, frame by frame: keep the audio frames (no ID3 tag, no Xing/Info header — that
+  // describes one clip alone, and would make a player think the whole track was that
+  // short), and count how long they last
+  const MP3_RATES = { 3: [44100, 48000, 32000], 2: [22050, 24000, 16000], 0: [11025, 12000, 8000] };
+  const MP3_KBPS = { 1: [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320], 2: [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160] };
+  function mp3Frames(bytes) {
+    let i = 0;
+    if (bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) i = 10 + (((bytes[6] & 0x7f) << 21) | ((bytes[7] & 0x7f) << 14) | ((bytes[8] & 0x7f) << 7) | (bytes[9] & 0x7f));
+    const frames = [];
+    let samples = 0, rate = 0;
+    while (i + 4 <= bytes.length) {
+      const b1 = bytes[i + 1], b2 = bytes[i + 2];
+      const ver = (b1 >> 3) & 3, layer = (b1 >> 1) & 3, br = b2 >> 4, sr = (b2 >> 2) & 3;
+      if (bytes[i] !== 0xFF || (b1 & 0xE0) !== 0xE0 || layer !== 1 || ver === 1 || br === 0 || br === 15 || sr === 3) { i++; continue; }
+      const mpeg1 = ver === 3, hz = MP3_RATES[ver][sr];
+      const len = Math.floor((mpeg1 ? 144000 : 72000) * MP3_KBPS[mpeg1 ? 1 : 2][br] / hz) + ((b2 >> 1) & 1);
+      if (i + len > bytes.length) break;
+      const frame = bytes.subarray(i, i + len);
+      const header = frames.length === 0 && /Xing|Info|VBRI/.test(String.fromCharCode(...frame.subarray(4, Math.min(len, 48))));
+      if (!header) {
+        if (rate && hz !== rate) throw ttsError('mp3-rates');
+        frames.push(frame);
+        samples += mpeg1 ? 1152 : 576;
+        rate = hz;
+      }
+      i += len;
+    }
+    return { frames, rate, seconds: rate ? samples / rate : 0 };
+  }
+  // Silence, as MP3 frames of the same rate (Layer III, mono, 32 kbit/s, all zero inside)
+  function mp3Silence(seconds, rate) {
+    const ver = rate >= 32000 ? 3 : rate >= 16000 ? 2 : 0, mpeg1 = ver === 3, per = mpeg1 ? 1152 : 576;
+    const frame = new Uint8Array(Math.floor((mpeg1 ? 144000 : 72000) * 32 / rate));
+    frame[0] = 0xFF;
+    frame[1] = 0xE0 | (ver << 3) | 0x03;
+    frame[2] = (MP3_KBPS[mpeg1 ? 1 : 2].indexOf(32) << 4) | (MP3_RATES[ver].indexOf(rate) << 2);
+    frame[3] = 0xC0;
+    const n = Math.max(1, Math.round(seconds * rate / per));
+    return { frames: new Array(n).fill(frame), seconds: n * per / rate };
+  }
+  // A part of the track: up to chunkCards cards from `start`, each its Italian and English
+  // passivePrefs.reps times over, with the pauses; marks say what plays when
+  async function passiveChunk(cards, start, pass) {
+    const n = Math.min(PASSIVE_AUDIO.chunkCards, cards.length - start), some = cards.slice(start, start + n);
+    const reps = passivePrefs.reps, rateIt = passivePrefs.slow ? PASSIVE_AUDIO.rateSlow : PASSIVE_AUDIO.rateIt;
+    const jobs = some.flatMap(c => [[sayText(c), 'it-IT', rateIt], [spokenEnglish(c.english), 'en-GB', PASSIVE_AUDIO.rateEn]]);
+    const clips = new Array(jobs.length);
+    let next = 0;
+    await Promise.all(Array.from({ length: Math.min(PASSIVE_AUDIO.parallel, jobs.length) }, async () => {
+      while (next < jobs.length) { const k = next++; clips[k] = mp3Frames(await ttsClip(...jobs[k])); }
+    }));
+    const rate = clips[0] && clips[0].rate;
+    if (!rate || clips.some(c => c.rate !== rate || !c.frames.length)) throw ttsError('mp3-rates');
+    const parts = [], marks = [];
+    let t = 0;
+    const add = (seg, mark) => { if (mark) marks.push({ t, ...mark }); for (const f of seg.frames) parts.push(f); t += seg.seconds; };
+    const gap = ms => mp3Silence(ms / 1000, rate);
+    some.forEach((c, k) => {
+      for (let r = 0; r < reps; r++) {
+        add(clips[2 * k], { index: start + k, rep: r, phase: 'it' });
+        add(gap(PASSIVE_GAPS.itEn));
+        add(clips[2 * k + 1], { index: start + k, rep: r, phase: 'en' });
+        add(gap(r < reps - 1 ? PASSIVE_GAPS.again : PASSIVE_GAPS.next));
+      }
+    });
+    const blob = new Blob(parts, { type: 'audio/mpeg' });
+    return { url: URL.createObjectURL(blob), blob, marks, seconds: t, start, end: start + n, cards, pass };
+  }
+  // What follows a part: the rest of the deck, or round again, reshuffled
+  const passiveAfter = chunk => (chunk.end < chunk.cards.length
+    ? { cards: chunk.cards, start: chunk.end, pass: chunk.pass }
+    : { cards: shuffleDeck(chunk.cards), start: 0, pass: chunk.pass + 1 });
+  function passiveCanTrack() {
+    return !!(syncMeta().session && typeof window.Audio === 'function' && window.URL && typeof URL.createObjectURL === 'function');
+  }
+  function startPassiveAudio() {
+    const p = passive, audio = new window.Audio();
+    Object.assign(p, { audio, chunk: null, next: null, nextFailed: false, urls: new Set(), ticket: 0 });
+    audio.preload = 'auto';
+    // From the tap itself, a moment of silence unlocks the player, so the track can begin once it's ready
+    const hush = URL.createObjectURL(new Blob(mp3Silence(0.1, 24000).frames, { type: 'audio/mpeg' }));
+    p.urls.add(hush);
+    audio.src = hush;
+    passiveAudioPlay();
+    audio.addEventListener('timeupdate', passiveAudioTick);
+    audio.addEventListener('ended', passiveAudioEnded);
+    passiveMediaHandlers(true);
+    passiveShow('Preparing the audio…');
+    passiveAudioBuild(p.cards, 0, p.pass);
+  }
+  function passiveAudioPlay() {
+    try { const pr = passive.audio.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) { /* not allowed yet */ }
+  }
+  async function passiveAudioBuild(cards, start, pass) {
+    const p = passive, ticket = ++p.ticket;
+    try {
+      const chunk = await passiveChunk(cards, start, pass);
+      if (passive !== p || p.ticket !== ticket) { URL.revokeObjectURL(chunk.url); return; }
+      passivePlayChunk(chunk);
+    } catch (e) {
+      if (passive === p && p.ticket === ticket) passiveFallback(e);
+    }
+  }
+  function passivePlayChunk(chunk, at = 0) {
+    const p = passive, old = p.chunk;
+    Object.assign(p, { chunk, cards: chunk.cards, pass: chunk.pass, next: null, nextFailed: false });
+    p.urls.add(chunk.url);
+    p.audio.src = chunk.url;
+    try { p.audio.currentTime = at; } catch (e) { /* applied once it loads */ }
+    if (p.playing) passiveAudioPlay();
+    if (old && old !== chunk) { URL.revokeObjectURL(old.url); p.urls.delete(old.url); }
+    passiveAudioTick(true);
+    // The next part, made while this one plays
+    const after = passiveAfter(chunk), ticket = p.ticket;
+    p.nextBuilding = passiveChunk(after.cards, after.start, after.pass).then(
+      c => { if (passive === p && p.chunk === chunk && p.ticket === ticket) p.next = c; else URL.revokeObjectURL(c.url); },
+      () => { if (passive === p && p.chunk === chunk) p.nextFailed = true; });
+  }
+  function passiveAudioEnded() {
+    const p = passive;
+    if (!p || !p.chunk) return;
+    if (p.next) { passivePlayChunk(p.next); return; }
+    if (p.nextFailed) { passivePlayChunk(p.chunk); return; }   // couldn't make the next part: this one again (and try again), rather than stop
+    const chunk = p.chunk;
+    p.nextBuilding.then(() => { if (passive === p && p.chunk === chunk) passivePlayChunk(p.next || chunk); });
+  }
+  // Follow the track: the card, the repeat and the language now playing
+  function passiveAudioTick(force) {
+    const p = passive;
+    if (!p || !p.chunk) return;
+    const t = (p.audio && p.audio.currentTime) || 0;
+    let m = p.chunk.marks[0];
+    for (const x of p.chunk.marks) { if (x.t <= t + 0.02) m = x; else break; }
+    if (!m) return;
+    const moved = force === true || m.index !== p.index || m.rep !== p.rep || m.phase !== p.phase;
+    const newCard = force === true || m.index !== p.index;
+    Object.assign(p, { index: m.index, rep: m.rep, phase: m.phase });
+    if (moved) passiveShow();
+    if (newCard) passiveMediaMeta();
+  }
+  function passiveAudioSkip(step) {
+    const p = passive, c = p.chunk;
+    let target = p.index + step;
+    if (c && target >= c.start && target < c.end) {   // in this part: straight there
+      const m = c.marks.find(x => x.index === target && x.rep === 0 && x.phase === 'it');
+      try { p.audio.currentTime = m.t; } catch (e) { /* ignore */ }
+      passiveAudioTick(true);
+      if (p.playing) passiveAudioPlay();
+      return;
+    }
+    if (c && target === c.end && p.next) { passivePlayChunk(p.next); return; }   // the part that's ready next
+    let cards = p.cards, pass = p.pass;
+    if (target >= cards.length) { target = 0; cards = shuffleDeck(cards); pass += 1; }
+    else if (target < 0) target = cards.length - 1;
+    Object.assign(p, { index: target, rep: 0, phase: 'it', cards, pass });
+    passiveShow('Preparing the audio…');
+    passiveAudioBuild(cards, target, pass);
+  }
+  // Repeats or speed changed: the track is made again from the card playing
+  function passiveAudioRebuild() {
+    const p = passive;
+    if (!p || p.mode !== 'audio') return;
+    passiveShow('Preparing the audio…');
+    passiveAudioBuild(p.cards, p.index, p.pass);
+  }
+  function passiveAudioStop() {
+    const p = passive;
+    if (!p || !p.audio) return;
+    p.ticket++;
+    const a = p.audio;
+    try { a.pause(); } catch (e) { /* ignore */ }
+    a.removeEventListener('timeupdate', passiveAudioTick);
+    a.removeEventListener('ended', passiveAudioEnded);
+    try { a.removeAttribute('src'); if (a.load) a.load(); } catch (e) { /* ignore */ }
+    for (const u of p.urls) URL.revokeObjectURL(u);
+    if (p.next) URL.revokeObjectURL(p.next.url);
+    Object.assign(p, { audio: null, chunk: null, next: null, urls: new Set() });
+    passiveMediaHandlers(false);
+  }
+  // Couldn't make the track (signed out, voices off, offline): the device's voice instead,
+  // which must start from a tap, so it waits on ▶
+  function passiveFallback(e) {
+    const p = passive;
+    passiveAudioStop();
+    p.mode = 'speech';
+    p.why = e && e.code === 'signed-out' ? 'signed-out' : e && e.code === 'tts-503' ? 'off' : 'failed';
+    if (!chosenVoice()) { p.playing = false; passiveShow('There’s no Italian voice on this device either, so there’s nothing to play here yet.'); return; }
+    passiveWake(true);
+    passivePause('Tap ▶ to play with this device’s voice.');
+  }
+  // The lock screen and headphones: play, pause, skip; the card on the lock screen
+  function passiveMediaHandlers(on) {
+    const ms = navigator.mediaSession;
+    if (!ms) return;
+    const set = (action, fn) => { try { ms.setActionHandler(action, on ? fn : null); } catch (e) { /* not supported */ } };
+    set('play', () => passiveResume());
+    set('pause', () => passivePause());
+    set('nexttrack', () => passiveSkip(1));
+    set('previoustrack', () => passiveSkip(-1));
+    if (!on) { try { ms.metadata = null; } catch (e) { /* ignore */ } }
+  }
+  function passiveMediaMeta() {
+    const ms = navigator.mediaSession, p = passive;
+    if (!ms || !p || typeof window.MediaMetadata !== 'function') return;
+    const card = p.cards[p.index];
+    try { ms.metadata = new window.MediaMetadata({ title: `${sayText(card)} — ${card.english}`, artist: 'Il Mazzo · A spasso', album: SUBJECTS[subject].title }); } catch (e) { /* ignore */ }
+  }
 
   function renderPassive() {
     const cfg = SUBJECTS[subject];
@@ -10464,7 +10715,7 @@
           </div>
         </div>
         <button type="button" class="passive-lock-btn" id="passive-lock">🔒 Blocca lo schermo</button>
-        <p class="passive-note">Phones stop the voice when the screen locks, so A spasso keeps the screen on while it plays. Lock it here before it goes in your pocket: taps are ignored until you hold to unlock. Nothing you hear here changes your scores.</p>
+        <p class="passive-note" id="passive-note"></p>
         <div class="passive-cover" id="passive-cover" hidden>
           <div class="passive-cover-it" id="passive-cover-it"></div>
           <div class="passive-cover-en" id="passive-cover-en"></div>
@@ -10475,13 +10726,14 @@
     document.getElementById('passive-play').addEventListener('click', () => { if (passive.playing) passivePause(); else passiveResume(); });
     document.getElementById('passive-prev').addEventListener('click', () => passiveSkip(-1));
     document.getElementById('passive-next').addEventListener('click', () => passiveSkip(1));
-    const setReps = n => { passivePrefs.reps = Math.max(1, Math.min(10, n)); savePassivePrefs(); if (passive.rep >= passivePrefs.reps) passive.rep = passivePrefs.reps - 1; passiveShow(); };
+    const setReps = n => { passivePrefs.reps = Math.max(1, Math.min(10, n)); savePassivePrefs(); if (passive.rep >= passivePrefs.reps) passive.rep = passivePrefs.reps - 1; passiveShow(); passiveAudioRebuild(); };
     document.getElementById('passive-less').addEventListener('click', () => setReps(passivePrefs.reps - 1));
     document.getElementById('passive-more').addEventListener('click', () => setReps(passivePrefs.reps + 1));
     document.querySelectorAll('#passive-speed .mode-option').forEach(b => b.addEventListener('click', () => {
       passivePrefs.slow = b.dataset.slow === '1';
       savePassivePrefs();
       document.querySelectorAll('#passive-speed .mode-option').forEach(x => { const on = x === b; x.classList.toggle('active', on); x.setAttribute('aria-pressed', String(on)); });
+      passiveAudioRebuild();
     }));
     // The pocket lock: a cover over everything; only a long press on its button lifts it
     const cover = document.getElementById('passive-cover'), unlock = document.getElementById('passive-unlock');
@@ -10520,6 +10772,11 @@
     play.textContent = passive.playing ? '⏸ Pausa' : '▶ Riprendi';
     play.setAttribute('aria-label', passive.playing ? 'Pause' : 'Carry on');
     el('passive-msg').textContent = msg || '';
+    const audio = passive.mode === 'audio';
+    el('passive-lock').hidden = audio;
+    el('passive-note').textContent = audio
+      ? 'Plays with your phone locked: lock it as usual. Play, pause and skip are on the lock screen and your headphones. Nothing you hear here changes your scores.'
+      : `${{ 'signed-out': 'To keep playing with your phone locked, sign in with Google on this device. ', off: 'The locked-screen voices aren’t switched on yet. ', failed: 'Couldn’t fetch the locked-screen voices just now. ' }[passive.why] || ''}Phones stop this device’s voice when the screen locks, so A spasso keeps the screen on while it plays. Lock it here before it goes in your pocket: taps are ignored until you hold to unlock. Nothing you hear here changes your scores.`;
   }
 
   function speakBtnHTML() {
