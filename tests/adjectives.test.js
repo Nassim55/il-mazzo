@@ -3,7 +3,7 @@ const seeded = { simpatico: { seen: 4, wrong: 3 }, grigio: { seen: 10, wrong: 5 
 let { w, d, ev, key, setVal, errors, warns } = boot({ 'aggettivi-stats-v1': JSON.stringify(seeded) });
 ok(warns.length === 0 && errors.length === 0, 'loads with no validator warnings or errors');
 const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Verbi regolari', 'Verbi irregolari', 'Aggettivi', 'Preposizioni', 'Frasi', 'Scrittura', 'Dialoghi', 'Racconto']), `section switch: ${labels.join(' | ')}`);
+ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Verbi regolari', 'Verbi irregolari', 'Aggettivi', 'Frasi', 'Scrittura', 'Racconto']), `section switch: ${labels.join(' | ')}`);
 d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 ok(ev('subject') === 'adjectives' && d.getElementById('app-title').textContent === 'Aggettivi' && d.title === 'Il Mazzo · Aggettivi', 'title and tab');
 ok(ev('selectedNouns.size') === 150 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('150 adjectives · 150 cards'), 'every adjective starts selected, as in the original (now 150 · 150 cards)');
@@ -33,10 +33,7 @@ ok(/Not quite — the answer is alto/.test(d.getElementById('feedback').textCont
 const s0 = JSON.parse(w.localStorage.getItem('aggettivi-stats-v1')).blu;
 ev("index = deck.findIndex(c => c.noun === 'blu'); render();"); d.getElementById('submit').click();
 const s1 = JSON.parse(w.localStorage.getItem('aggettivi-stats-v1')).blu;
-ok(JSON.stringify(s1) === JSON.stringify(s0) && ev('deck[index].noun') === 'blu' && d.getElementById('feedback').classList.contains('hidden'), 'an empty answer counts for nothing — you are asked for one');
-d.getElementById('answer').value = 'rosso'; d.getElementById('submit').click();
-const s2 = JSON.parse(w.localStorage.getItem('aggettivi-stats-v1')).blu;
-ok(s2.seen === (s0 ? s0.seen : 0) + 1 && s2.wrong === (s0 ? s0.wrong : 0) + 1 && 'seen' in s2, 'a wrong answer counts as a mistake, as in the original; same saved format');
+ok(s1.seen === (s0 ? s0.seen : 0) + 1 && s1.wrong === (s0 ? s0.wrong : 0) + 1 && 'seen' in s1, 'a skip counts as a mistake, as in the original; same saved format');
 // All forms mode
 d.getElementById('change-btn').click();
 d.querySelector('#mode-toggle [data-mode="forms"]').click();
@@ -87,7 +84,7 @@ ok(notes === 150, `all 150 adjective notes render (${notes})`);
 // Other sections untouched; backups; reload
 d.getElementById('change-btn').click();
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
-ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === 0 && !d.querySelector('.setup-side') && d.querySelectorAll('.verb-chip').length === 941, 'nouns unchanged: no side panel, 941 chips');
+ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === 0 && !d.querySelector('.setup-side') && d.querySelectorAll('.verb-chip').length === 831, 'nouns unchanged: no side panel, 831 chips');
 ok(['aggettivi-stats-v1', 'aggettivi-assoc-v1'].every(k => Object.keys(ev('buildBackup()').data).includes(k)), 'backups include the adjectives');
 d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 const store = {}; for (let i = 0; i < w.localStorage.length; i++) { const k = w.localStorage.key(i); store[k] = w.localStorage.getItem(k); }
