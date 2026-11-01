@@ -20,15 +20,6 @@
 //   GET    /v1/progress   → { version, items: { key: { v, e } } }
 //   PUT    /v1/progress   ← { baseVersion, items: { key: { v, e } } } → { version }
 //   DELETE /v1/space      → delete everything stored for this account
-//   POST   /v1/tts        ← { text, lang, rate } → audio/mpeg
-//
-// Text-to-speech (A spasso, played with the phone locked): a phrase is made once by
-// Google Text-to-Speech (GOOGLE_TTS_API_KEY, a Worker secret — with none set, it's off)
-// and kept in the tts_clips table, so it's never paid for twice. The voice is the best
-// Google offers for the language (Chirp 3 HD, then Neural2, WaveNet, Standard), looked
-// up once a day, unless TTS_VOICE_IT / TTS_VOICE_EN name one. Every clip is MP3 at
-// 24 kHz, so the app can join clips into one track. At most TTS_DAILY_MAX new clips a
-// day (2,000 unless set), so a runaway bug can't run up a bill.
 
 const ALLOWED_ORIGINS = ['https://nassim55.github.io'];
 const LOCAL_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
@@ -39,11 +30,6 @@ const MAX_STORES = 200;
 const SESSION_DAYS = 365;
 const GOOGLE_JWKS_URL = 'https://www.googleapis.com/oauth2/v3/certs';
 const GOOGLE_ISSUERS = new Set(['accounts.google.com', 'https://accounts.google.com']);
-const TTS_API = 'https://texttospeech.googleapis.com/v1';
-const TTS_LANGS = { 'it-IT': 'FEMALE', 'en-GB': 'MALE' };   // what A spasso speaks, and the voice it prefers in each (two voices tell the languages apart)
-const TTS_SAMPLE_RATE = 24000;
-const TTS_MAX_TEXT = 300;
-const TTS_DAILY_MAX = 2000;
 
 function corsHeaders(request) {
   const origin = request.headers.get('Origin') || '';
@@ -174,83 +160,17 @@ async function signIn(request, env) {
   return json(request, 200, { token, email: claims.email, expiresAt });
 }
 
-// ----- Text-to-speech -----
-let ttsVoices = {};   // language → { name, at }: the voice chosen, looked up again after a day
-const ttsTier = name => (/Chirp3-HD/.test(name) ? 4 : /Neural2/.test(name) ? 3 : /Wavenet/i.test(name) ? 2 : /Standard/.test(name) ? 1 : 0);
-async function ttsVoice(lang, env) {
-  const fixed = env[`TTS_VOICE_${lang.slice(0, 2).toUpperCase()}`];
-  if (fixed) return fixed;
-  const known = ttsVoices[lang];
-  if (known && Date.now() - known.at < 86400000) return known.name;
-  let name = null;
-  const res = await fetch(`${TTS_API}/voices?languageCode=${lang}`, { headers: { 'X-Goog-Api-Key': env.GOOGLE_TTS_API_KEY } });
-  if (res.ok) {
-    const { voices = [] } = await res.json();
-    const want = TTS_LANGS[lang];
-    const best = voices
-      .filter(v => (v.languageCodes || []).includes(lang) && ttsTier(v.name) > 0)
-      .sort((a, b) => ttsTier(b.name) - ttsTier(a.name) || (b.ssmlGender === want) - (a.ssmlGender === want) || a.name.localeCompare(b.name))[0];
-    name = best ? best.name : null;
-  }
-  ttsVoices[lang] = { name, at: Date.now() };
-  return name;
-}
-function synthesize(env, lang, name, text, rate) {
-  return fetch(`${TTS_API}/text:synthesize`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': env.GOOGLE_TTS_API_KEY },
-    body: JSON.stringify({
-      input: { text },
-      voice: name ? { languageCode: lang, name } : { languageCode: lang, ssmlGender: TTS_LANGS[lang] },
-      audioConfig: { audioEncoding: 'MP3', sampleRateHertz: TTS_SAMPLE_RATE, speakingRate: rate }
-    })
-  });
-}
-const ttsKey = (voice, rate, text) => sha256(`${voice}|${rate}|${TTS_SAMPLE_RATE}|${text}`);
-const audioResponse = (request, b64) => new Response(Uint8Array.from(atob(b64), c => c.charCodeAt(0)), {
-  status: 200, headers: { 'Content-Type': 'audio/mpeg', 'Cache-Control': 'private, max-age=31536000, immutable', ...corsHeaders(request) }
-});
-async function tts(request, env) {
-  if (!env.GOOGLE_TTS_API_KEY) return json(request, 503, { error: 'tts-off' });
-  const { body, tooLarge } = await readBody(request);
-  if (tooLarge) return json(request, 413, { error: 'too-large' });
-  const text = body && typeof body.text === 'string' ? body.text.trim() : '';
-  const lang = body && body.lang, rate = body ? Number(body.rate) : NaN;
-  if (!text || text.length > TTS_MAX_TEXT || !TTS_LANGS[lang] || !(rate >= 0.5 && rate <= 1.5)) return json(request, 400, { error: 'bad-request' });
-  const speed = Math.round(rate * 100) / 100;
-  let voice = await ttsVoice(lang, env);
-  let key = await ttsKey(voice || lang, speed, text);
-  const hit = await env.DB.prepare('SELECT audio FROM tts_clips WHERE key = ?').bind(key).first();
-  if (hit) return audioResponse(request, hit.audio);
-  const made = await env.DB.prepare('SELECT COUNT(*) AS n FROM tts_clips WHERE created_at > ?').bind(Date.now() - 86400000).first();
-  if (made && made.n >= (+env.TTS_DAILY_MAX || TTS_DAILY_MAX)) return json(request, 429, { error: 'tts-daily-limit' });
-  let res = await synthesize(env, lang, voice, text, speed);
-  if (!res.ok && voice && res.status === 400) {   // that voice has gone: Google's default for the language, for a day
-    ttsVoices[lang] = { name: null, at: Date.now() };
-    voice = null;
-    key = await ttsKey(lang, speed, text);
-    res = await synthesize(env, lang, null, text, speed);
-  }
-  if (!res.ok) return json(request, 502, { error: 'tts-failed', status: res.status });
-  const out = await res.json();
-  if (!out || typeof out.audioContent !== 'string' || !out.audioContent) return json(request, 502, { error: 'tts-failed' });
-  await env.DB.prepare('INSERT OR IGNORE INTO tts_clips (key, voice, text, audio, created_at) VALUES (?, ?, ?, ?, ?)')
-    .bind(key, voice || lang, text, out.audioContent, Date.now()).run();
-  return audioResponse(request, out.audioContent);
-}
-
 async function handle(request, env) {
   const url = new URL(request.url);
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
   const route = `${request.method} ${url.pathname}`;
   if (route === 'GET /v1/config') return json(request, 200, { googleClientId: env.GOOGLE_CLIENT_ID || null });
   if (route === 'POST /v1/session') return signIn(request, env);
-  if (!['DELETE /v1/session', 'GET /v1/progress', 'PUT /v1/progress', 'DELETE /v1/space', 'POST /v1/tts'].includes(route)) {
+  if (!['DELETE /v1/session', 'GET /v1/progress', 'PUT /v1/progress', 'DELETE /v1/space'].includes(route)) {
     return json(request, 404, { error: 'not-found' });
   }
   const s = await session(request, env);
   if (!s) return json(request, 401, { error: 'signed-out' });
-  if (route === 'POST /v1/tts') return tts(request, env);
   const db = env.DB, id = s.spaceId, now = Date.now();
 
   if (route === 'DELETE /v1/session') {
@@ -298,8 +218,6 @@ async function handle(request, env) {
   }
   return json(request, 200, { version: base + 1 });
 }
-
-export const _testing = { resetVoices: () => { ttsVoices = {}; } };
 
 export default {
   async fetch(request, env) {
