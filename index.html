@@ -2086,6 +2086,21 @@
   .passive-unlock.holding .passive-unlock-fill { width: 100%; transition: width 1.2s linear; }
   .passive-unlock-text { position: relative; }
 
+  /* An irregular verb's present, in a popout over its tile */
+  .conj-pop { position: absolute; z-index: 150; min-width: 220px; max-width: 300px; padding: 14px 18px 12px; background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.18);
+              border-radius: 4px; box-shadow: 0 2px 0 rgba(28, 22, 17, 0.04), 0 18px 36px -14px rgba(28, 22, 17, 0.38); pointer-events: none; }
+  .conj-pop[hidden] { display: none; }
+  .conj-pop-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(28, 22, 17, 0.1); }
+  .conj-pop-inf { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 25px; line-height: 1.1; color: var(--ink); }
+  .conj-pop-en { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: var(--ink-faded); }
+  .conj-pop-forms { border-collapse: collapse; }
+  .conj-pop-forms th { padding: 3px 16px 3px 0; text-align: left; vertical-align: baseline; font-family: 'JetBrains Mono', monospace; font-weight: 400; font-size: 11px; letter-spacing: 0.06em; color: var(--ink-faded); white-space: nowrap; }
+  .conj-pop-forms td { padding: 3px 0; vertical-align: baseline; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 21px; line-height: 1.2; color: var(--ink); }
+  .conj-irr { padding: 0 5px; border-radius: 3px; background: rgba(176, 133, 64, 0.2); box-shadow: inset 0 -2px 0 rgba(176, 133, 64, 0.6); }
+  .conj-pop-key { margin-top: 10px; font-family: 'DM Sans', sans-serif; font-size: 12.5px; line-height: 1.45; color: var(--ink-soft); }
+  .conj-pop-key .conj-irr { padding: 0 4px; }
+  .verb-chip { -webkit-touch-callout: none; }   /* a long press on a phone opens the forms, not a menu */
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
@@ -4894,6 +4909,139 @@
 
   const personOrder = ["io", "tu", "lui", "noi", "voi", "loro"];
   const personLabel = { io: "io", tu: "tu", lui: "lui / lei", noi: "noi", voi: "voi", loro: "loro" };
+
+  // ===== The present at a glance: an irregular verb's forms in a popout (Nov 2026) =====
+  // Resting the mouse on an irregular verb's tile shows its six present forms, with the
+  // ones that break the regular pattern highlighted. Contracted infinitives are compared
+  // with the stem their present is built on (porre: pon-; produrre: produc-; dire: dic-;
+  // bere: bev-). It appears after a short pause (never while painting a selection), on
+  // keyboard focus, and on a long press on a phone (which doesn't toggle the tile).
+  const CONJ_POP = { delay: 280, longPress: 450 };
+  const CONJ_STEMS = { dire: 'dic', bere: 'bev' };   // contracted infinitives outside -orre/-urre
+  function conjPattern(inf) {
+    let stem, end, built = null;
+    if (CONJ_STEMS[inf]) { stem = built = CONJ_STEMS[inf]; end = 'ere'; }
+    else if (/urre$/.test(inf)) { stem = built = inf.slice(0, -4) + 'uc'; end = 'ere'; }
+    else if (/orre$/.test(inf)) { stem = built = inf.slice(0, -4) + 'on'; end = 'ere'; }
+    else {
+      const m = inf.match(/^(.+)(are|ere|ire)$/);
+      if (!m) return null;
+      [, stem, end] = m;
+    }
+    const join = (s, e) => {
+      let st = s;
+      if (end === 'are' && /[cg]$/.test(st) && /^[ie]/.test(e)) st += 'h';   // cerchi, paghiamo
+      if (/i$/.test(st) && /^i/.test(e)) st = st.slice(0, -1);              // mangi, studiamo
+      return st + e;
+    };
+    const ENDS = { are: ['o', 'i', 'a', 'iamo', 'ate', 'ano'], ere: ['o', 'i', 'e', 'iamo', 'ete', 'ono'], ire: ['o', 'i', 'e', 'iamo', 'ite', 'ono'] };
+    return {
+      end, built,
+      plain: ENDS[end].map(e => join(stem, e)),
+      isc: end === 'ire' ? ['isco', 'isci', 'isce', 'iamo', 'ite', 'iscono'].map(e => join(stem, e)) : null   // finisco counts as regular too
+    };
+  }
+  // For each person (in personOrder): does the form break the regular pattern?
+  function conjBreaks(v, pat = conjPattern(v.it)) {
+    return personOrder.map((p, i) => !!pat && v.conj[p] !== pat.plain[i] && !(pat.isc && v.conj[p] === pat.isc[i]));
+  }
+  function conjPopHTML(v) {
+    const pat = conjPattern(v.it), breaks = conjBreaks(v, pat), any = breaks.some(Boolean);
+    const rows = personOrder.map((p, i) => `<tr><th>${personLabel[p]}</th><td>${breaks[i] ? `<span class="conj-irr">${escapeHTML(v.conj[p])}</span>` : escapeHTML(v.conj[p])}</td></tr>`).join('');
+    const key = !pat ? ''
+      : pat.built ? `Built on the stem <em>${pat.built}-</em>, with <em>-ere</em> endings${any ? ` — <span class="conj-irr">highlighted</span>, where it breaks even that` : ''}.`
+      : any ? `<span class="conj-irr">Highlighted</span>: where it breaks the regular <em>-${pat.end}</em> pattern.` : '';
+    return `<div class="conj-pop-head"><span class="conj-pop-inf">${escapeHTML(v.it)}</span><span class="conj-pop-en">${escapeHTML(v.en)}</span></div>
+      <table class="conj-pop-forms">${rows}</table>${key ? `<div class="conj-pop-key">${key}</div>` : ''}`;
+  }
+  let conjPopTimer = null, conjPopChip = null, conjPopTouchAt = 0, conjPointerAt = 0;
+  function conjPopEl() {
+    let el = document.getElementById('conj-pop');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'conj-pop';
+      el.className = 'conj-pop';
+      el.setAttribute('role', 'tooltip');
+      el.hidden = true;
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+  function showConjPop(chip) {
+    if (!chip.isConnected) return;
+    const item = SUBJECTS[subject].items.find(n => n.noun === chip.dataset.noun);
+    if (!item || !item.verb) return;
+    const el = conjPopEl();
+    el.innerHTML = conjPopHTML(item.verb);
+    el.hidden = false;
+    if (conjPopChip && conjPopChip !== chip) conjPopChip.removeAttribute('aria-describedby');
+    conjPopChip = chip;
+    chip.setAttribute('aria-describedby', 'conj-pop');
+    // Above the tile where there's room, else below; always inside the window
+    const r = chip.getBoundingClientRect(), gap = 8;
+    let top = r.top - el.offsetHeight - gap;
+    if (top < 8) top = r.bottom + gap;
+    const left = Math.max(8, Math.min(r.left, window.innerWidth - el.offsetWidth - 8));
+    el.style.top = `${Math.round(top + window.scrollY)}px`;
+    el.style.left = `${Math.round(left + window.scrollX)}px`;
+  }
+  function hideConjPop() {
+    clearTimeout(conjPopTimer);
+    const el = document.getElementById('conj-pop');
+    if (el) el.hidden = true;
+    if (conjPopChip) conjPopChip.removeAttribute('aria-describedby');
+    conjPopChip = null;
+  }
+  function wireConjPop(grid) {
+    grid.addEventListener('mouseover', e => {
+      const chip = e.target.closest('.verb-chip');
+      if (!chip || chip === conjPopChip) return;
+      clearTimeout(conjPopTimer);
+      if (dragMode !== null || e.buttons) { hideConjPop(); return; }   // painting a selection
+      if (Date.now() - conjPopTouchAt < 800) return;                   // the mouse events a touch fakes
+      conjPopTimer = setTimeout(() => { if (dragMode === null) showConjPop(chip); }, CONJ_POP.delay);
+    });
+    grid.addEventListener('mouseout', e => {
+      const chip = e.target.closest('.verb-chip');
+      if (!chip || chip.contains(e.relatedTarget)) return;
+      clearTimeout(conjPopTimer);
+      if (conjPopChip === chip && Date.now() - conjPopTouchAt > 800) hideConjPop();
+    });
+    grid.addEventListener('mousedown', () => { conjPointerAt = Date.now(); if (Date.now() - conjPopTouchAt > 800) hideConjPop(); });
+    // Keyboard focus shows it too (not the focus a click brings)
+    grid.addEventListener('focusin', e => {
+      const chip = e.target.closest('.verb-chip');
+      if (!chip || Date.now() - conjPointerAt < 600) return;
+      clearTimeout(conjPopTimer);
+      conjPopTimer = setTimeout(() => showConjPop(chip), CONJ_POP.delay);
+    });
+    grid.addEventListener('focusout', e => { if (!grid.contains(e.relatedTarget)) hideConjPop(); });
+    // A long press on a phone shows it, without toggling the tile
+    let press = null;
+    grid.addEventListener('touchstart', e => {
+      conjPointerAt = Date.now();
+      const chip = e.target.closest('.verb-chip');
+      if (!chip || e.touches.length !== 1) return;
+      if (conjPopChip !== chip) hideConjPop();
+      press = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      clearTimeout(conjPopTimer);
+      conjPopTimer = setTimeout(() => { conjPopTouchAt = Date.now(); showConjPop(chip); }, CONJ_POP.longPress);
+    }, { passive: true });
+    grid.addEventListener('touchmove', e => {
+      if (!press) return;
+      const t = e.touches[0];
+      if (Math.hypot(t.clientX - press.x, t.clientY - press.y) > 10) { clearTimeout(conjPopTimer); press = null; }
+    }, { passive: true });
+    grid.addEventListener('touchend', () => {
+      press = null;
+      clearTimeout(conjPopTimer);
+      if (conjPopChip) conjPopTouchAt = Date.now();   // its release mustn't toggle the tile
+    });
+    grid.addEventListener('contextmenu', e => { if (e.target.closest('.verb-chip')) e.preventDefault(); });   // a long press isn't a menu
+  }
+  // A touch elsewhere, a scroll, or leaving the screen closes it
+  document.addEventListener('touchstart', e => { if (conjPopChip && !(e.target.closest && e.target.closest('.verb-chip'))) hideConjPop(); }, { passive: true });
+  window.addEventListener('scroll', () => { if (conjPopChip) hideConjPop(); }, { passive: true });
   // ===== Which persons to practise, per verb section =====
   // Saved per section and synced with progress, so every device drills the same ones.
   // Conjugation cards — in a round, in Ripasso del giorno, in chapter practice — come
@@ -8802,7 +8950,7 @@
       assocKey: 'verbi-regolari-assoc-v1'
     },
     irregular: {
-      kind: 'verb', panel: 'irregular', doneWord: 'irregulars', chipOrder: 'frequency',
+      kind: 'verb', panel: 'irregular', doneWord: 'irregulars', chipOrder: 'frequency', conjPopout: true,
       switchLabel: 'Verbi irregolari', title: 'Verbi Irregolari', subtitle: 'Il Mazzo · Presente Indicativo',
       setupTitle: 'Choose your irregular verbs',
       setupSub: 'The 50 most common verbs whose present tense breaks the regular patterns. Pick a practice mode — full conjugations or just the infinitive — then tap verbs, choose a pattern or topic, or use the quick picks.',
@@ -9535,6 +9683,7 @@
   }
 
   function showSetup() {
+    hideConjPop();
     if (passive) { passiveStopTimers(); passive = null; passiveWake(false); }
     dialogueStopSpeaking();
     stopListening();
@@ -9761,8 +9910,11 @@
       }
     }
 
+    if (cfg.conjPopout) wireConjPop(grid);
+
     grid.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return; // ignore right/middle clicks
+      if (Date.now() - conjPopTouchAt < 800) return;   // the release of a long press that opened the forms
       const chip = e.target.closest('.verb-chip');
       if (!chip) return;
       e.preventDefault(); // suppress text-selection caret during drag
@@ -11047,6 +11199,7 @@
     return cards.slice(0, k);
   }
   function startGame() {
+    hideConjPop();
     if (sessionMaxDeck && sessionMaxDeck.length > 0) {
       // Play again / Reshuffle — replay the current active subset in new order
       deck = shuffleDeck(deck);
