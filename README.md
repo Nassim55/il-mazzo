@@ -9,6 +9,7 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 | Sostantivi | 941 nouns | the noun with its definite article (*il pane, lo zaino, l'acqua*), in 23 themes — among them *Ristrutturazione*, 73 nouns for renovating the house |
 | Verbi regolari | 150 verbs | present-tense conjugations, or just the infinitive |
 | Verbi irregolari | 50 verbs | the most common verbs that are irregular in the present |
+| Mi piace | 116 sentences · 13 levels | verbs like *piacere*, drilled: natural English in, the Italian turned round out (*I like the beach* → *Mi piace la spiaggia*) |
 | Aggettivi | 150 adjectives | the dictionary form, or every gender and number |
 | Preposizioni | 224 phrases | fusion drills (*di + il libro* → *del libro*) and usage cards in 27 themes, six groups; a rule for every slip; the fusion table |
 | Frasi | 50 phrases | everyday expressions, with *tu* and *Lei* forms kept distinct |
@@ -19,6 +20,8 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 Every card section works in three directions — English → Italian, Italian → English, and Listening (hear the Italian, type it) — and each direction keeps its own progress.
 
 ## Features
+
+**The infinitive first.** In a conjugation round (English → Italian, or Listening), each verb starts with its infinitive: type it right before its forms begin — it counts for nothing, no score and no record, and a slip or *Salta* just asks for it to be typed. Then it stays on the card, above each form, until the next verb. *Prima l'infinito*, with the persons on the verb setup screens, turns it off (it's kept and synced with them). Not in Italian → English, where it would give the meaning away, nor in Ripasso, where each verb comes as a single form.
 
 **Conjugations in order.** In a conjugation round, each verb's forms come together, *io → tu → lui → noi → voi → loro*, while the verbs themselves come in random order — in every round: a fresh one, *Play all again*, *Practise the missed*, *Focus*, *A spasso*. A round cut short (*play just 20*) only ever cuts a verb at its end, and growing a round mid-way finishes the verbs in play before adding new ones, whole.
 
@@ -52,6 +55,12 @@ Every card section works in three directions — English → Italian, Italian �
 Every item you answer gets a review date, separately for each direction. A correct answer moves it up a box and pushes it further out — 1, 2, 4, 8, 16, 32, then 64 days — while a wrong answer brings it back tomorrow. Only the first correct answer of the day moves an item up, so six right conjugations of one verb count once. Progress from before the schedule existed seeds it: weak items come due straight away and solid ones are spread over the following days.
 
 The strip at the top of the setup screen shows what's due today in the chosen direction, by section. **Start** mixes it all into one round (up to 30 cards to begin with; Deck size reaches the rest), each card labelled with its section and checked by that section's rules. Schedules are part of backups, and resetting a section's progress clears its schedule.
+
+## Mi piace: verbs that work backwards
+
+In *mi piace il caffè* the coffee is the subject — it does the pleasing — and the person who likes it goes in the pronoun. Scrittura shows these sentences word for word; this section drills the real skill: each card gives the **natural English** (*My back hurts*, *Do they like us?*) and you write the Italian the other way round. The word for word shows after you answer, and *Why* explains any slip — the verb agreeing with the thing (*piacciono* for *le fragole*), an activity counting as singular, the pronoun for the person, a person as the subject (*ci piaci*).
+
+Thirteen levels: *piace* or *piacciono*; formal *Le*; liking to do things; people by name (*a Marco*, *ai bambini*); negatives and questions; *a me sì, a te no*; *mancare*; *servire* and *bastare*; *interessare* and *importare*; *fare male*; *sembrare*; people as the subject (*mi piaci*, *ti manco?*); and fixed expressions (*ti va?*, *tocca a te*, *ti conviene*). The stressed form (*A me piace…*) and the thing first (*La spiaggia mi piace*) are accepted too. The *Come piacere* chart — on the setup screen and behind ▦ in a round — gives the pronouns (*a me → mi* … *a loro → gli*), the agreement rule and the verbs. No sentence repeats one of Scrittura's.
 
 ## Scrittura: writing whole sentences
 

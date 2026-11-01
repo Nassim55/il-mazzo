@@ -2101,12 +2101,25 @@
   .conj-pop-key .conj-irr { padding: 0 4px; }
   .verb-chip { -webkit-touch-callout: none; }   /* a long press on a phone opens the forms, not a menu */
 
+  /* On a phone, the ten sections in two columns */
+  @media (max-width: 600px) {
+    .mode-toggle.subject-toggle { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  }
+
+  /* The infinitive first: pinned above a verb's forms once answered */
+  .inf-first { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin: 10px 0 2px; cursor: pointer; }
+  .inf-first input { accent-color: var(--olive); transform: translateY(1px); }
+  .inf-first-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); }
+  .inf-first-sub { font-family: 'DM Sans', sans-serif; font-size: 12.5px; color: var(--ink-faded); }
+  .verb-meta .meta-inf { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 2em; letter-spacing: 0; text-transform: none; color: var(--ink); }
+  .gate-note { margin-top: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink-faded); }
+
   /* Below 1100px every section's setup is one 660px column (side panels stack
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
   @media (max-width: 1100px) {
     .container[data-view="setup"] { max-width: 660px; }
-    .mode-toggle.subject-toggle { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .mode-toggle.subject-toggle { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(5, minmax(0, 1fr)); }   /* ten sections: two rows of five */
     .subject-toggle .mode-option { white-space: normal; }
   }
 </style>
@@ -5057,6 +5070,18 @@
     const list = Array.isArray(saved) ? personOrder.filter(p => saved.includes(p)) : personOrder;
     return list.length ? list : personOrder;
   }
+  // The infinitive first: on unless turned off, kept with the persons (synced) as
+  // 'infinitiveFirst'. With nothing saved, the page's default holds (the tests set it off,
+  // except tests/verb-infinitive.test.js)
+  function infinitiveFirst() {
+    const saved = verbPersonsSaved().infinitiveFirst;
+    return saved === undefined ? window.MAZZO_INFINITIVE_FIRST !== false : saved !== false;
+  }
+  function saveInfinitiveFirst(on) {
+    const all = verbPersonsSaved();
+    all.infinitiveFirst = !!on;
+    try { localStorage.setItem(VERB_PERSONS_KEY, JSON.stringify(all)); syncTouched(); } catch (e) { /* storage full */ }
+  }
   function saveVerbPersons(subj, list) {
     const all = verbPersonsSaved();
     all[subj] = personOrder.filter(p => list.includes(p));
@@ -6540,7 +6565,9 @@
   const STORY_FN = {
     "l'": 'the (before a vowel)', il: 'the', lo: 'the / it, him', la: 'the / it, her', i: 'the (plural)', gli: 'the (plural) / to him, to them', le: 'the (plural) / to her',
     ti: 'you, to you', ci: 'us, to us', vi: 'you, to you (plural)', me: 'me (after a preposition: a me)', te: 'you (after a preposition: a te)',
-    anche: 'also, too', no: 'no', poco: 'little, not much', tuo: 'your', tuoi: 'your (plural)', ai: 'to the (plural)', agli: 'to the (plural)',
+    anche: 'also, too', no: 'no', poco: 'little, not much', tuo: 'your', tuoi: 'your (plural)',
+    tutti: 'everyone, all', tutte: 'all (feminine)', neanche: 'not even, neither (neanche a me: me neither)', nemmeno: 'not even, neither', neppure: 'not even, neither',
+    così: 'like this, so', suoi: 'his, her (plural)', sue: 'his, her (feminine plural)', ai: 'to the (plural)', agli: 'to the (plural)',
     qualcosa: 'something', niente: 'nothing', sempre: 'always', davanti: 'in front (davanti a)', accanto: 'next to (accanto a)', sopra: 'on, above',
     fronte: 'front (di fronte a: opposite)', tre: 'three', cinque: 'five', "un'": 'a, an (before a vowel)',
     fra: 'between, among; in (fra un mese)',
@@ -8127,6 +8154,166 @@
   });
   const SENTENCE_THEMES = SENTENCE_LEVELS.map(([key, label, en, type]) => ({ key, label, en, type, nouns: SENTENCE_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
   const SENTENCE_TYPE_OF = Object.fromEntries(SENTENCE_ITEMS.map(n => [n.noun, n.type]));
+  // ===== Mi piace (Nov 2026): verbs like piacere, drilled =====
+  // Natural English in, the Italian turned round out: the thing liked is the subject and
+  // the person goes in the pronoun. Each row is [level, subject ('cosa' / 'cose' for a
+  // thing, else the person who is the subject), Italian, natural English (the prompt),
+  // word for word (shown after answering), accepted alternatives]. Every word is in the
+  // deck, and no sentence is one of Scrittura's.
+  const MIPIACE_LEVELS = [
+    ["piace-piacciono", "Piace o piacciono?", "One thing or more"],
+    ["lei-formale", "Le piace?", "Formal you: Le"],
+    ["piace-fare", "Mi piace fare", "Liking to do things"],
+    ["a-marco", "A Marco piace", "People by name"],
+    ["non-domande", "Non mi piace · Ti piace?", "Negatives and questions"],
+    ["a-me-si", "A me sì, a te no", "Me, not you: a me, a te"],
+    ["mancare", "Mi manca", "Missing: mancare"],
+    ["servire-bastare", "Mi serve · Mi basta", "Needing, and enough"],
+    ["interessare", "Mi interessa · Non mi importa", "Interest, and caring"],
+    ["fare-male", "Mi fa male", "What hurts"],
+    ["sembrare", "Mi sembra", "Seeming"],
+    ["mi-piaci", "Mi piaci · Mi manchi", "People as the subject"],
+    ["modi-di-dire", "Ti va? Tocca a te", "Fixed expressions"]
+  ];
+  const MIPIACE_DATA = [
+    // Piace o piacciono?
+    ["piace-piacciono", "cosa", "Mi piace la spiaggia.", "I like the beach.", "To me pleases the beach.", ["A me piace la spiaggia.", "La spiaggia mi piace."]],
+    ["piace-piacciono", "cose", "Mi piacciono le fragole.", "I like strawberries.", "To me please the strawberries.", ["A me piacciono le fragole.", "Le fragole mi piacciono."]],
+    ["piace-piacciono", "cosa", "Ti piace il formaggio.", "You like cheese. (tu)", "To you pleases the cheese. (tu)", ["A te piace il formaggio.", "Il formaggio ti piace."]],
+    ["piace-piacciono", "cose", "Ti piacciono le canzoni italiane.", "You like Italian songs. (tu)", "To you please the songs Italian. (tu)", ["A te piacciono le canzoni italiane.", "Le canzoni italiane ti piacciono."]],
+    ["piace-piacciono", "cosa", "Gli piace il treno.", "He likes the train.", "To him pleases the train.", ["A lui piace il treno.", "Il treno gli piace."]],
+    ["piace-piacciono", "cose", "Gli piacciono gli animali.", "He likes animals.", "To him please the animals.", ["A lui piacciono gli animali.", "Gli animali gli piacciono."]],
+    ["piace-piacciono", "cosa", "Le piace il cioccolato.", "She likes chocolate.", "To her pleases the chocolate.", ["A lei piace il cioccolato.", "Il cioccolato le piace."]],
+    ["piace-piacciono", "cose", "Le piacciono le scarpe rosse.", "She likes red shoes.", "To her please the shoes red.", ["A lei piacciono le scarpe rosse.", "Le scarpe rosse le piacciono."]],
+    ["piace-piacciono", "cosa", "Ci piace il paese.", "We like the village.", "To us pleases the village.", ["A noi piace il paese.", "Il paese ci piace."]],
+    ["piace-piacciono", "cose", "Ci piacciono le vacanze.", "We like holidays.", "To us please the holidays.", ["A noi piacciono le vacanze.", "Le vacanze ci piacciono."]],
+    ["piace-piacciono", "cosa", "Vi piace il giardino.", "You like the garden. (voi)", "To you pleases the garden. (voi)", ["A voi piace il giardino.", "Il giardino vi piace."]],
+    ["piace-piacciono", "cose", "Gli piacciono i film vecchi.", "They like old films.", "To them please the films old.", ["A loro piacciono i film vecchi.", "I film vecchi gli piacciono."]],
+    // Le piace?
+    ["lei-formale", "cosa", "Le piace la camera?", "Do you like the room? (formal)", "To you (formal) pleases the room?", ["A Lei piace la camera?", "La camera Le piace?"]],
+    ["lei-formale", "cose", "Le piacciono i dolci?", "Do you like sweets? (formal)", "To you (formal) please the sweets?", ["A Lei piacciono i dolci?", "I dolci Le piacciono?"]],
+    ["lei-formale", "cosa", "Le serve una borsa?", "Do you need a bag? (formal)", "To you (formal) serves a bag?", ["A Lei serve una borsa?", "Una borsa Le serve?"]],
+    ["lei-formale", "cosa", "Le manca qualcosa?", "Are you missing anything? (formal)", "To you (formal) lacks something?", ["A Lei manca qualcosa?"]],
+    ["lei-formale", "cosa", "Le interessa la casa?", "Are you interested in the house? (formal)", "To you (formal) interests the house?", ["A Lei interessa la casa?", "La casa Le interessa?"]],
+    ["lei-formale", "cosa", "Le fa male la gamba?", "Does your leg hurt? (formal)", "To you (formal) does bad the leg?", ["A Lei fa male la gamba?"]],
+    ["lei-formale", "cosa", "Le sembra giusto?", "Does it seem right to you? (formal)", "To you (formal) seems right?", ["A Lei sembra giusto?"]],
+    ["lei-formale", "cosa", "Le va bene domani?", "Does tomorrow suit you? (formal)", "To you (formal) goes well tomorrow?", ["Domani Le va bene?", "A Lei va bene domani?"]],
+    ["lei-formale", "cosa", "Le dispiace aspettare?", "Do you mind waiting? (formal)", "To you (formal) displeases to wait?", ["A Lei dispiace aspettare?"]],
+    ["lei-formale", "cosa", "Le conviene prendere il treno.", "You'd better take the train. (formal)", "To you (formal) suits to take the train.", ["A Lei conviene prendere il treno."]],
+    // Mi piace fare
+    ["piace-fare", "cosa", "Mi piace camminare nel bosco.", "I like walking in the woods.", "To me pleases to walk in the wood.", ["A me piace camminare nel bosco."]],
+    ["piace-fare", "cosa", "Le piace cucinare e leggere.", "She likes cooking and reading.", "To her pleases to cook and to read.", ["A lei piace cucinare e leggere."]],
+    ["piace-fare", "cosa", "Ci piace andare al lago.", "We like going to the lake.", "To us pleases to go to the lake.", ["A noi piace andare al lago."]],
+    ["piace-fare", "cosa", "Ti piace guidare?", "Do you like driving? (tu)", "To you pleases to drive? (tu)", ["A te piace guidare?"]],
+    ["piace-fare", "cosa", "Gli piace lavorare in giardino.", "He likes working in the garden.", "To him pleases to work in garden.", ["A lui piace lavorare in giardino."]],
+    ["piace-fare", "cosa", "Gli piace viaggiare.", "They like travelling.", "To them pleases to travel.", ["A loro piace viaggiare."]],
+    ["piace-fare", "cosa", "Vi piace ballare?", "Do you like dancing? (voi)", "To you pleases to dance? (voi)", ["A voi piace ballare?"]],
+    ["piace-fare", "cosa", "Non mi piace aspettare.", "I don't like waiting.", "Not to me pleases to wait.", ["A me non piace aspettare."]],
+    // A Marco piace
+    ["a-marco", "cosa", "A Marco piace il calcio.", "Marco likes football.", "To Marco pleases the football.", ["Il calcio piace a Marco."]],
+    ["a-marco", "cose", "A Maria piacciono i gatti.", "Maria likes cats.", "To Maria please the cats.", ["I gatti piacciono a Maria."]],
+    ["a-marco", "cosa", "Ai bambini piace la neve.", "Children like snow.", "To the children pleases the snow.", ["La neve piace ai bambini."]],
+    ["a-marco", "cosa", "Agli studenti piace la città.", "Students like the city.", "To the students pleases the city.", ["La città piace agli studenti."]],
+    ["a-marco", "cose", "A mio padre piacciono le macchine vecchie.", "My father likes old cars.", "To my father please the cars old.", ["Le macchine vecchie piacciono a mio padre."]],
+    ["a-marco", "cosa", "Ai miei amici piace il paese.", "My friends like the village.", "To the my friends pleases the village.", ["Il paese piace ai miei amici."]],
+    ["a-marco", "cosa", "Al vicino piace il vino.", "The neighbour likes wine.", "To the neighbour pleases the wine.", ["Il vino piace al vicino."]],
+    ["a-marco", "cosa", "Il gelato piace a tutti.", "Everyone likes ice cream.", "The ice cream pleases to everyone.", ["A tutti piace il gelato."]],
+    ["a-marco", "cosa", "Al cane piace il giardino.", "The dog likes the garden.", "To the dog pleases the garden.", ["Il giardino piace al cane."]],
+    ["a-marco", "cosa", "A mia madre piace cucinare.", "My mother likes cooking.", "To my mother pleases to cook.", []],
+    // Non mi piace · Ti piace?
+    ["non-domande", "cosa", "Non mi piace il freddo.", "I don't like the cold.", "Not to me pleases the cold.", ["A me non piace il freddo.", "Il freddo non mi piace."]],
+    ["non-domande", "cosa", "Non ti piace il caffè?", "Don't you like coffee? (tu)", "Not to you pleases the coffee? (tu)", ["A te non piace il caffè?", "Il caffè non ti piace?"]],
+    ["non-domande", "cosa", "Gli piace la casa?", "Does he like the house?", "To him pleases the house?", ["A lui piace la casa?", "La casa gli piace?"]],
+    ["non-domande", "cosa", "Non le piace la città.", "She doesn't like the city.", "Not to her pleases the city.", ["A lei non piace la città.", "La città non le piace."]],
+    ["non-domande", "cose", "Vi piacciono le foto?", "Do you like the photos? (voi)", "To you please the photos? (voi)", ["A voi piacciono le foto?", "Le foto vi piacciono?"]],
+    ["non-domande", "cosa", "Non ci piace il rumore.", "We don't like the noise.", "Not to us pleases the noise.", ["A noi non piace il rumore.", "Il rumore non ci piace."]],
+    ["non-domande", "cosa", "Gli piace la scuola nuova?", "Do they like the new school?", "To them pleases the school new?", ["Gli piace la nuova scuola?", "A loro piace la scuola nuova?", "La scuola nuova gli piace?"]],
+    ["non-domande", "cosa", "Che cosa ti piace?", "What do you like? (tu)", "What thing to you pleases? (tu)", ["Cosa ti piace?", "Che ti piace?"]],
+    ["non-domande", "cosa", "Perché non ti piace il film?", "Why don't you like the film? (tu)", "Why not to you pleases the film? (tu)", []],
+    ["non-domande", "cosa", "Non gli piace la spiaggia?", "Doesn't he like the beach?", "Not to him pleases the beach?", ["A lui non piace la spiaggia?", "La spiaggia non gli piace?"]],
+    // A me sì, a te no
+    ["a-me-si", "cosa", "A me piace, a lui no.", "I like it, he doesn't.", "To me pleases, to him no.", []],
+    ["a-me-si", "cosa", "Anche a me.", "Me too. (I like it too)", "Also to me.", []],
+    ["a-me-si", "cosa", "Neanche a me.", "Me neither. (I don't like it either)", "Not even to me.", ["Nemmeno a me.", "Neppure a me."]],
+    ["a-me-si", "cosa", "A lei piace il mare, a me no.", "She likes the sea, I don't.", "To her pleases the sea, to me no.", []],
+    ["a-me-si", "cosa", "Ti piace? A me sì!", "Do you like it? (tu) I do!", "To you pleases? (tu) To me yes!", ["A te piace? A me sì!"]],
+    ["a-me-si", "cosa", "A chi piace il caffè? A me!", "Who likes coffee? Me!", "To whom pleases the coffee? To me!", []],
+    ["a-me-si", "cose", "A lui piacciono le montagne, a lei piace il mare.", "He likes the mountains, she likes the sea.", "To him please the mountains, to her pleases the sea.", []],
+    ["a-me-si", "cosa", "A me piace molto, e a te?", "I like it a lot, and you? (tu)", "To me pleases much, and to you? (tu)", []],
+    // Mi manca
+    ["mancare", "cosa", "Mi manca l'Italia.", "I miss Italy.", "To me lacks the Italy.", ["A me manca l'Italia.", "L'Italia mi manca."]],
+    ["mancare", "cose", "Mi mancano le montagne.", "I miss the mountains.", "To me lack the mountains.", ["A me mancano le montagne.", "Le montagne mi mancano."]],
+    ["mancare", "cosa", "Ti manca tua madre?", "Do you miss your mother? (tu)", "To you lacks your mother? (tu)", ["A te manca tua madre?", "Tua madre ti manca?"]],
+    ["mancare", "cose", "Gli mancano i suoi amici.", "He misses his friends.", "To him lack the his friends.", ["A lui mancano i suoi amici.", "I suoi amici gli mancano."]],
+    ["mancare", "cosa", "Le manca il paese.", "She misses the village.", "To her lacks the village.", ["A lei manca il paese.", "Il paese le manca."]],
+    ["mancare", "cosa", "Ci manca il sole.", "We miss the sun.", "To us lacks the sun.", ["A noi manca il sole.", "Il sole ci manca."]],
+    ["mancare", "cosa", "Gli manca la loro casa.", "They miss their house.", "To them lacks the their house.", ["A loro manca la loro casa.", "La loro casa gli manca."]],
+    ["mancare", "cosa", "Manca qualcosa.", "Something's missing.", "Lacks something.", ["Qualcosa manca."]],
+    ["mancare", "cose", "Mancano due persone.", "Two people are missing.", "Lack two people.", []],
+    // Mi serve · Mi basta
+    ["servire-bastare", "cosa", "Mi serve una scala.", "I need a ladder.", "To me serves a ladder.", ["A me serve una scala.", "Una scala mi serve."]],
+    ["servire-bastare", "cose", "Ci servono due biglietti.", "We need two tickets.", "To us serve two tickets.", ["A noi servono due biglietti."]],
+    ["servire-bastare", "cosa", "Ti serve la macchina?", "Do you need the car? (tu)", "To you serves the car? (tu)", ["A te serve la macchina?", "La macchina ti serve?"]],
+    ["servire-bastare", "cose", "Gli servono scarpe nuove.", "He needs new shoes.", "To him serve shoes new.", ["Gli servono delle scarpe nuove.", "A lui servono scarpe nuove."]],
+    ["servire-bastare", "cosa", "Mi basta un caffè.", "A coffee is enough for me.", "To me suffices a coffee.", ["A me basta un caffè.", "Un caffè mi basta."]],
+    ["servire-bastare", "cose", "Ci bastano due giorni.", "Two days are enough for us.", "To us suffice two days.", ["A noi bastano due giorni."]],
+    ["servire-bastare", "cosa", "Ti basta?", "Is that enough for you? (tu)", "To you suffices? (tu)", ["A te basta?"]],
+    ["servire-bastare", "cosa", "Basta così.", "That's enough.", "Suffices like this.", []],
+    ["servire-bastare", "cosa", "Al muratore serve tempo.", "The builder needs time.", "To the builder serves time.", ["Al muratore serve del tempo."]],
+    // Mi interessa · Non mi importa
+    ["interessare", "cosa", "Mi interessa l'arte.", "I'm interested in art.", "To me interests the art.", ["A me interessa l'arte.", "L'arte mi interessa."]],
+    ["interessare", "cosa", "Ti interessa la politica?", "Are you interested in politics? (tu)", "To you interests the politics? (tu)", ["A te interessa la politica?", "La politica ti interessa?"]],
+    ["interessare", "cose", "Le interessano le case vecchie.", "She's interested in old houses.", "To her interest the houses old.", ["Le interessano le vecchie case.", "A lei interessano le case vecchie.", "Le case vecchie le interessano."]],
+    ["interessare", "cosa", "Non gli interessa.", "He isn't interested.", "Not to him interests.", ["A lui non interessa."]],
+    ["interessare", "cosa", "Non mi importa.", "I don't care.", "Not to me matters.", ["A me non importa."]],
+    ["interessare", "cosa", "Ti importa?", "Do you care? (tu)", "To you matters? (tu)", ["A te importa?"]],
+    ["interessare", "cosa", "Non mi importa il prezzo.", "I don't care about the price.", "Not to me matters the price.", ["A me non importa il prezzo.", "Il prezzo non mi importa."]],
+    ["interessare", "cosa", "La storia interessa a tutti.", "History interests everyone.", "The history interests to everyone.", ["A tutti interessa la storia."]],
+    // Mi fa male
+    ["fare-male", "cosa", "Mi fa male la schiena.", "My back hurts.", "To me does bad the back.", ["A me fa male la schiena."]],
+    ["fare-male", "cose", "Mi fanno male gli occhi.", "My eyes hurt.", "To me do bad the eyes.", ["A me fanno male gli occhi."]],
+    ["fare-male", "cosa", "Ti fa male il braccio?", "Does your arm hurt? (tu)", "To you does bad the arm? (tu)", ["A te fa male il braccio?"]],
+    ["fare-male", "cose", "Le fanno male le gambe.", "Her legs hurt.", "To her do bad the legs.", ["A lei fanno male le gambe."]],
+    ["fare-male", "cosa", "Gli fa male un dente.", "One of his teeth hurts.", "To him does bad a tooth.", ["A lui fa male un dente."]],
+    ["fare-male", "cosa", "Dove Le fa male?", "Where does it hurt? (formal)", "Where to you (formal) does bad?", []],
+    ["fare-male", "cosa", "Non mi fa male niente.", "Nothing hurts.", "Not to me does bad nothing.", ["A me non fa male niente."]],
+    // Mi sembra
+    ["sembrare", "cosa", "Mi sembra facile.", "It seems easy to me.", "To me seems easy.", ["A me sembra facile."]],
+    ["sembrare", "cosa", "La casa mi sembra grande.", "The house seems big to me.", "The house to me seems big.", ["Mi sembra grande la casa."]],
+    ["sembrare", "tu", "Mi sembri stanco.", "You seem tired to me. (tu)", "To me you seem tired. (tu)", ["Mi sembri stanca.", "A me sembri stanco."]],
+    ["sembrare", "cose", "I bambini mi sembrano contenti.", "The children seem happy to me.", "The children to me seem happy.", ["Mi sembrano contenti i bambini."]],
+    ["sembrare", "cosa", "Ti sembra caro?", "Does it seem expensive to you? (tu)", "To you seems expensive? (tu)", ["A te sembra caro?"]],
+    ["sembrare", "cosa", "Ci sembra un prezzo giusto.", "It seems a fair price to us.", "To us seems a price fair.", ["A noi sembra un prezzo giusto.", "Un prezzo giusto ci sembra."]],
+    // Mi piaci · Mi manchi
+    ["mi-piaci", "tu", "Ci piaci.", "We like you. (tu)", "To us you please. (tu)", ["A noi piaci."]],
+    ["mi-piaci", "noi", "Gli piacciamo?", "Do they like us?", "To them we please?", ["A loro piacciamo?"]],
+    ["mi-piaci", "voi", "Mi piacete.", "I like you. (voi)", "To me you please. (voi)", ["A me piacete."]],
+    ["mi-piaci", "lui", "Lei ti piace.", "You like her. (tu)", "She to you pleases. (tu)", ["Ti piace lei."]],
+    ["mi-piaci", "io", "Gli piaccio?", "Does he like me?", "To him I please?", ["A lui piaccio?"]],
+    ["mi-piaci", "tu", "Le manchi.", "She misses you. (tu)", "To her you lack. (tu)", ["A lei manchi."]],
+    ["mi-piaci", "voi", "Ci mancate.", "We miss you. (voi)", "To us you lack. (voi)", ["A noi mancate."]],
+    ["mi-piaci", "noi", "Ti manchiamo?", "Do you miss us? (tu)", "To you we lack? (tu)", ["A te manchiamo?"]],
+    ["mi-piaci", "io", "Manco ai miei genitori.", "My parents miss me.", "I lack to the my parents.", ["Ai miei genitori manco."]],
+    // Ti va? Tocca a te
+    ["modi-di-dire", "cosa", "Ti va una birra?", "Do you fancy a beer? (tu)", "To you goes a beer? (tu)", ["A te va una birra?", "Una birra ti va?"]],
+    ["modi-di-dire", "cosa", "Non mi va di uscire.", "I don't feel like going out.", "Not to me goes of to go out.", ["A me non va di uscire."]],
+    ["modi-di-dire", "cosa", "Ti va bene domani?", "Does tomorrow suit you? (tu)", "To you goes well tomorrow? (tu)", ["Domani ti va bene?", "A te va bene domani?"]],
+    ["modi-di-dire", "cosa", "Tocca a te.", "It's your turn. (tu)", "Touches to you. (tu)", ["Adesso tocca a te."]],
+    ["modi-di-dire", "cosa", "Tocca a me.", "It's my turn.", "Touches to me.", []],
+    ["modi-di-dire", "cosa", "A chi tocca?", "Whose turn is it?", "To whom touches?", []],
+    ["modi-di-dire", "cosa", "Ti conviene partire domani.", "You'd better leave tomorrow. (tu)", "To you suits to leave tomorrow. (tu)", ["A te conviene partire domani."]],
+    ["modi-di-dire", "cose", "Mi restano dieci euro.", "I have ten euros left.", "To me remain ten euros.", ["Mi rimangono dieci euro.", "A me restano dieci euro."]],
+    ["modi-di-dire", "cosa", "Ti dispiace?", "Do you mind? (tu)", "To you displeases? (tu)", ["A te dispiace?"]],
+    ["modi-di-dire", "cosa", "Mi dispiace, non lo so.", "Sorry, I don't know.", "To me displeases, not it I know.", ["A me dispiace, non lo so."]]
+  ];
+  const MIPIACE_ITEMS = MIPIACE_DATA.map(([level, person, it, en, literal, alts]) => {
+    const key = sentenceKey(it);
+    return { noun: key, display: it, it, en, level, type: 'piacere', person, natural: null, literal,
+             note: `<span class="literal-label">Word for word</span> <em>${literal}</em>`,
+             phrase: { key, it, en, itAlts: sentenceAccepted(person, it, alts).filter(s => s !== it), enAlts: [], reg: 'neutral' } };
+  });
+  const MIPIACE_THEMES = MIPIACE_LEVELS.map(([key, label, en]) => ({ key, label, en, nouns: MIPIACE_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
+  const MIPIACE_ORDER = MIPIACE_ITEMS.map(n => n.noun);
   // ===== Dialoghi (Oct 2026): everyday scenes, in two voices =====
   // Each line is [speaker, Italian, English word for word (Italian order; "you" marked
   // where the Italian is formal or plural), natural English (null when it's the same)].
@@ -8625,7 +8812,8 @@
   const SENT_PERSON = { io: 'io', tu: 'tu', lui: 'lui / lei', lei: 'lui / lei', noi: 'noi', voi: 'voi', loro: 'loro', cosa: 'lui / lei', cose: 'loro' };
   // Verbs like piacere: what the subject is doing, word for word
   const SENT_LIKE = { piacere: 'pleasing', dispiacere: 'displeasing', mancare: 'lacking (missing)', servire: 'serving (being needed)', interessare: 'interesting',
-                      sembrare: 'seeming', restare: 'remaining', rimanere: 'remaining', andare: 'appealing', fare: 'doing' };
+                      sembrare: 'seeming', restare: 'remaining', rimanere: 'remaining', andare: 'appealing', fare: 'doing',
+                      bastare: 'being enough', importare: 'mattering', toccare: 'falling to someone', convenire: 'suiting' };
   const SENT_WHO = { io: 'I am', tu: 'you are', lui: 'he or she is', noi: 'we are', voi: 'you all are', loro: 'they are' };
   const SENT_IOBJ = new Set(['mi', 'ti', 'gli', 'le', 'ci', 'vi']);
   const SENT_IOBJ_EN = { mi: 'to me', ti: 'to you', gli: 'to him (or to them)', le: 'to her', ci: 'to us', vi: 'to you all' };
@@ -8641,6 +8829,10 @@
     if (own(SENT_JOIN, n)) return { kind: 'join', n };
     let r = storyResolveWord(SENTENCE_CH, word.replace(/[^A-Za-zÀ-ÿ']/g, ''), prev, idx);
     if (!r.ref) { const p = sentencePluralNoun(n, idx); if (p) r = { ref: p }; }
+    if (!r.ref && SENT_EXTRA_FORMS.has(n)) {   // bastare, importare: verbs the engine knows without a card
+      const v = SENT_EXTRA_FORMS.get(n);
+      return { kind: 'verb', n, key: v.it, verb: v, persons: personOrder.filter(p => sentenceNorm(v.conj[p]) === n) };
+    }
     if (!r.ref) return { kind: 'unknown', n };
     const [k, key] = splitRef(r.ref);
     if (k === 'adjectives') {
@@ -8751,8 +8943,9 @@
             add(`${right}, not ${wrong}: the subject is ${em(person)} — ${SENT_WHO[person]} doing the ${gloss} — so the verb takes the ${SENT_PERSON[person]} form.`);
           }
         } else if (b.kind === 'pron' && (a.kind === 'pron' || SENT_PRONOUN.has(gn[i]))) {
-          if (a.kind === 'pron') add(`${right}, not ${wrong}: ${em(tn[j])} is <em>${SENT_IOBJ_EN[tn[j]]}</em> — the person goes in the pronoun: ${emForms(['mi', 'ti', 'gli', 'le', 'ci', 'vi'], tn[j])}.`);
-          else add(`${right}, not ${wrong}: the person isn't the subject here — it's <em>${SENT_IOBJ_EN[tn[j]]}</em>, ${em(tn[j])}.`);
+          const toWhom = tn[j] === 'le' && /\(formal\)/.test(card.english || card.en || '') ? 'to you (formal)' : SENT_IOBJ_EN[tn[j]];   // Le, formally
+          if (a.kind === 'pron') add(`${right}, not ${wrong}: ${em(tn[j])} is <em>${toWhom}</em> — the person goes in the pronoun: ${emForms(['mi', 'ti', 'gli', 'le', 'ci', 'vi'], tn[j])}.`);
+          else add(`${right}, not ${wrong}: the person isn't the subject here — it's <em>${toWhom}</em>, ${em(tn[j])}.`);
         } else if (b.kind === 'adj' && a.kind === 'adj' && a.key === b.key && b.slot) {
           const nk = sentNearestNoun(tInfo, j);
           const list = emForms(b.forms, tn[j]);
@@ -8823,11 +9016,21 @@
     for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
     return d[a.length][b.length];
   }
+  // Verbs that sentences use but that aren't drilled as cards: bastare and importare come
+  // up as verbs like piacere (mi basta, non mi importa); as conjugation cards they'd mean
+  // "I am enough" or "I import". The sentence engine knows their forms all the same.
+  const SENT_EXTRA_VERBS = [
+    { it: 'bastare', en: 'to be enough', conj: { io: 'basto', tu: 'basti', lui: 'basta', noi: 'bastiamo', voi: 'bastate', loro: 'bastano' } },
+    { it: 'importare', en: 'to matter', conj: { io: 'importo', tu: 'importi', lui: 'importa', noi: 'importiamo', voi: 'importate', loro: 'importano' } }
+  ];
+  const SENT_EXTRA_FORMS = new Map(SENT_EXTRA_VERBS.flatMap(v => [v.it, ...Object.values(v.conj)].map(f => [f, v])));
   function sentenceSegments(text) {
     const idx = storyIndex();
     return storySegments(SENTENCE_CH, text).map(sg => {
       if (!sg.unknown) return sg;
-      const ref = sentencePluralNoun(sg.text.toLowerCase(), idx);
+      const lower = sg.text.toLowerCase();
+      if (SENT_EXTRA_FORMS.has(lower)) return { text: sg.text, ref: `extra:${SENT_EXTRA_FORMS.get(lower).it}` };
+      const ref = sentencePluralNoun(lower, idx);
       return ref ? { text: sg.text, ref } : sg;
     });
   }
@@ -8878,6 +9081,17 @@
     // Dialoghi: every word in the deck; no line, and no English prompt, twice; each line
     // has its speaker, and each question a real answer and a line that gives it
     check('dialoghi', DIALOGUE_ITEMS, DIALOGUE_THEMES, DIALOGUE_ORDER);
+    // Mi piace: every word of every accepted answer in the deck; no sentence or English
+    // prompt twice, and none of Scrittura's sentences again
+    check('mipiace', MIPIACE_ITEMS, MIPIACE_THEMES, MIPIACE_ORDER);
+    const flat = s => s.toLowerCase().replace(/[^a-zàèéìòù' ]/g, '').trim();
+    const scrittura = new Set(SENTENCE_ITEMS.map(n => flat(n.it)));
+    for (const n of MIPIACE_ITEMS) {
+      const unknown = [n.it, ...n.phrase.itAlts].flatMap(s => sentenceSegments(s).filter(sg => sg.unknown).map(sg => sg.text));
+      if (unknown.length) console.warn(`[mipiace] "${n.it}": words not in the deck:`, unknown);
+      if (scrittura.has(flat(n.it))) console.warn(`[mipiace] "${n.it}" is one of Scrittura's sentences`);
+    }
+    if (new Set(MIPIACE_ITEMS.map(n => n.en.toLowerCase())).size !== MIPIACE_ITEMS.length) console.warn('[mipiace] two sentences share an English prompt');
     for (const n of DIALOGUE_ITEMS) {
       const unknown = sentenceSegments(n.it).filter(sg => sg.unknown).map(sg => sg.text);
       if (unknown.length) console.warn(`[dialoghi] "${n.it}": words not in the deck:`, unknown);
@@ -8959,6 +9173,18 @@
       statsKeys: { 'en-it': 'verbi-irregolari-stats', 'it-en': 'verbi-irregolari-stats-iten', listen: 'verbi-irregolari-stats-listen' }, statsFormat: 'verb',
       assocKey: 'verbi-irregolari-assoc-v1'
     },
+    // Verbs like piacere, drilled: natural English in, the Italian turned round out (the
+    // word for word after); Why explains a slip. Sentence cards, like Scrittura's.
+    mipiace: {
+      kind: 'phrase', sentences: true, panel: 'mipiace', doneWord: 'sentences', chipOrder: 'level',
+      switchLabel: 'Mi piace', title: 'Mi piace', subtitle: 'Il Mazzo · Verbi come Piacere',
+      setupTitle: 'Choose your sentences',
+      setupSub: 'Verbs like <em>piacere</em> work backwards: in <em>mi piace il caffè</em> the coffee is the subject — it does the pleasing — and the person who likes it goes in the pronoun, <em>mi</em>. Each card gives the natural English; write the Italian the other way round. The word for word shows after you answer, and <em>Why</em> explains any slip.',
+      itemWord: 'sentence', itemWords: 'sentences',
+      items: MIPIACE_ITEMS, themes: MIPIACE_THEMES, frequency: MIPIACE_ORDER,
+      statsKeys: { 'en-it': 'mipiace-stats-v1', 'it-en': 'mipiace-stats-iten-v1', listen: 'mipiace-stats-listen-v1' }, statsFormat: 'noun',
+      assocKey: 'mipiace-assoc-v1'
+    },
     adjectives: {
       kind: 'adjective', panel: 'agreement', doneWord: 'adjectives',
       switchLabel: 'Aggettivi', title: 'Aggettivi', subtitle: 'Il Mazzo · Genere e Numero',
@@ -9035,6 +9261,7 @@
     nouns: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     verbs: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     irregular: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
+    mipiace: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     // As in the original game, every adjective starts selected
     adjectives: { selected: new Set(ADJ_ITEMS.map(n => n.noun)), capValue: '', capMode: 'random', direction: 'en-it' },
     prepositions: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
@@ -9260,6 +9487,8 @@
   // ===== Verbs: which persons to practise =====
   function renderPersonPicker() {
     const on = activePersons();
+    const infFirst = document.getElementById('inf-first');
+    if (infFirst) infFirst.addEventListener('change', () => saveInfinitiveFirst(infFirst.checked));
     document.querySelectorAll('#person-picker .person-chip').forEach(b => {
       const active = on.includes(b.dataset.person);
       b.classList.toggle('active', active);
@@ -9550,6 +9779,48 @@
         </div>
       </aside>
       `,
+    mipiace: () => `
+      <aside class="endings phrases-panel" aria-label="Verbs like piacere">
+        <h3 class="endings-title">Come piacere</h3>
+        <div class="endings-sub">Verbs that work backwards</div>
+
+        <div class="eg eg-tulei">
+          <div class="eg-class">stressed</div>
+          <div class="eg-class">short</div>
+          ${[['a me', 'mi'], ['a te', 'ti'], ['a lui', 'gli'], ['a lei', 'le'], ['a Lei', 'Le'], ['a noi', 'ci'], ['a voi', 'vi'], ['a loro', 'gli']]
+            .map(([a, b]) => `<div class="eg-cell"><span class="eg-txt">${a}</span></div><div class="eg-cell"><span class="eg-txt">${b}</span></div>`).join('')}
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">The thing is the subject</div>
+          <p>In <em>mi piace il caffè</em> the coffee does the pleasing, so the verb agrees with it: one thing, or an activity, takes <em>piace</em>; more than one takes <em>piacciono</em>. The person who likes it goes in the pronoun.</p>
+          <span class="en-eg">mi piace il mare · mi piacciono i libri · mi piace leggere e scrivere</span>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">Short or stressed</div>
+          <p>The short pronoun is the everyday one. The stressed one is for a contrast, and for answering on its own.</p>
+          <span class="en-eg">mi piace · a me piace, a lui no · anche a me · neanche a me</span>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">A person by name</div>
+          <p><em>A</em> and the person — and <em>a</em> joins the article.</p>
+          <span class="en-eg">a Marco piace · ai bambini · alla nonna · agli studenti</span>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">People as the subject</div>
+          <p>When a person is liked or missed, the verb agrees with them.</p>
+          <span class="en-eg">mi piaci · ti piaccio · gli piacciamo · mi mancate</span>
+        </div>
+
+        <div class="endings-note">
+          <div class="en-label">The verbs</div>
+          <p><em>piacere</em> to like · <em>mancare</em> to miss · <em>servire</em> to need · <em>bastare</em> to be enough · <em>interessare</em> to be interested in · <em>importare</em> to care · <em>sembrare</em> to seem · <em>fare male</em> to hurt · <em>andare</em> to fancy (<em>ti va?</em>) · <em>toccare</em> to be someone's turn (<em>tocca a te</em>) · <em>dispiacere</em> to be sorry, to mind · <em>convenire</em> to be better off · <em>restare</em> to have left</p>
+        </div>
+      </aside>
+    `,
     phrases: () => `
       <aside class="endings phrases-panel" aria-label="Using everyday phrases">
         <h3 class="endings-title">In pratica</h3>
@@ -9600,7 +9871,7 @@
       </aside>
       `
   };
-  const CHART_TITLES = { endings: 'Le desinenze', irregular: 'Gli irregolari', agreement: 'Le concordanze', prepositions: 'Le articolate', phrases: 'In pratica' };
+  const CHART_TITLES = { endings: 'Le desinenze', irregular: 'Gli irregolari', agreement: 'Le concordanze', prepositions: 'Le articolate', phrases: 'In pratica', mipiace: 'Come piacere' };
   // The chart for the card on screen (in Ripasso, the card's own section)
   function chartKey() {
     const k = SUBJECTS[subject] && SUBJECTS[subject].panel;
@@ -9748,6 +10019,8 @@
           ${personOrder.map(p => `<button type="button" class="person-chip" data-person="${p}">${personLabel[p]}</button>`).join('')}
         </div>
         <p class="person-hint" id="person-hint" aria-live="polite"></p>
+        <label class="inf-first"><input type="checkbox" id="inf-first"${infinitiveFirst() ? ' checked' : ''}> <span class="inf-first-label">Prima l'infinito</span>
+          <span class="inf-first-sub">each verb's infinitive first (not scored), then kept above its forms</span></label>
       </div>` : ''}
 
       <div class="mode-label">Direction</div>
@@ -9822,11 +10095,7 @@
       </div>
       </div>
       ${cfg.panel ? '<div class="setup-side">' : ''}
-      ${cfg.panel === 'endings' ? SECTION_CHARTS.endings() : ''}
-      ${cfg.panel === 'irregular' ? SECTION_CHARTS.irregular() : ''}
-      ${cfg.panel === 'agreement' ? SECTION_CHARTS.agreement() : ''}
-      ${cfg.panel === 'prepositions' ? SECTION_CHARTS.prepositions() : ''}
-      ${cfg.panel === 'phrases' ? SECTION_CHARTS.phrases() : ''}
+      ${cfg.panel && SECTION_CHARTS[cfg.panel] ? SECTION_CHARTS[cfg.panel]() : ''}
       ${cfg.panel ? `<aside class="endings weak-panel" id="weak-panel" aria-label="Your weakest ${cfg.itemWords}"></aside></div>` : ''}
       </div>
     `;
@@ -11224,6 +11493,8 @@
   }
   function startGame() {
     hideConjPop();
+    verbGate = null;
+    gatedVerb = null;
     if (sessionMaxDeck && sessionMaxDeck.length > 0) {
       // Play again / Reshuffle — replay the current active subset in new order
       deck = shuffleDeck(deck);
@@ -11284,8 +11555,10 @@
       ansReset.classList.remove('retype', 'retype-miss');
       if (ansReset.dataset.normalPlaceholder) { ansReset.placeholder = ansReset.dataset.normalPlaceholder; delete ansReset.dataset.normalPlaceholder; }
     }
-    const card = deck[index];
+    let card = deck[index];
     if (card.subject) setCardContext(card.subject);   // mixed review: this card's section
+    verbGate = wantsInfinitive(card) ? infinitiveCard(card) : null;
+    if (verbGate) card = verbGate;   // the verb's infinitive first
     const itToEn = direction === 'it-en';
     const promptEl = document.getElementById('prompt');
     const sectionEl = document.getElementById('card-section');
@@ -11300,10 +11573,11 @@
       promptEl.innerHTML = text.split(' / ').map(m => `<span class="meaning">${escapeHTML(m)}</span>`).join('&nbsp;/ ');
       promptEl.classList.toggle('long', text.length > 20);
       const showPerson = !!card.person && !itToEn;
-      metaEl.textContent = showPerson ? card.verbMeaning : '';
+      const pinned = showPerson && gatedVerb === card.noun && !card.subject;   // the infinitive, answered, stays above its forms
+      metaEl.innerHTML = !showPerson ? '' : pinned ? `<span class="meta-inf">${escapeHTML(card.noun)}</span> · ${escapeHTML(card.verbMeaning)}` : escapeHTML(card.verbMeaning);
       metaEl.style.display = showPerson ? '' : 'none';
-      hintEl.textContent = showPerson ? card.pronounLabel : '';
-      hintEl.style.display = showPerson ? '' : 'none';
+      hintEl.textContent = showPerson ? card.pronounLabel : card.gate ? "l'infinito" : '';
+      hintEl.style.display = showPerson || card.gate ? '' : 'none';
       ans.placeholder = itToEn ? 'type the english meaning…'
         : (card.person ? 'type the italian conjugation…' : 'type the italian infinitive…');
     } else if (isPhraseSubject()) {
@@ -11502,7 +11776,7 @@
     try { rec.start(); } catch (e) { listening = false; rec = null; italianPage(false); updateMicBtn(); }
   }
   function heard(alts) {
-    const ans = document.getElementById('answer'), card = deck[index];
+    const ans = document.getElementById('answer'), card = currentCard();
     if (!card) return;
     if (!alts.length) { speakHint("Didn't catch anything — press Parla and try again."); return; }
     const right = alts.find(a => checkCard(a, card, direction === 'it-en').correct);
@@ -11544,8 +11818,9 @@
   let mustRetype = false;
   function retypeCheck() {
     const ans = document.getElementById('answer'), hint = document.getElementById('retype-hint');
-    if (ans.value.trim() && checkCard(ans.value, deck[index], direction === 'it-en').correct) {
+    if (ans.value.trim() && checkCard(ans.value, currentCard(), direction === 'it-en').correct) {
       mustRetype = false;
+      if (verbGate) { gatedVerb = verbGate.noun; verbGate = null; render(); return; }   // the infinitive, typed: on to its forms
       index++;
       render();
       return;
@@ -11576,6 +11851,52 @@
     ans.focus();
   }
 
+  // ===== The infinitive first (Nov 2026) =====
+  // In a conjugation round (English → Italian, or Listen), each verb starts with its
+  // infinitive: it must be typed right before the forms begin, and it counts for nothing
+  // — no score, no record, no review. Then it stays on the card, above each form, until
+  // the next verb. Not in Ripasso's mixed rounds, where each verb comes as a single form.
+  let verbGate = null, gatedVerb = null;
+  function wantsInfinitive(card) {
+    return !!(card && card.person && !card.subject && isVerbSubject() && verbMode === 'conjugations' && infinitiveFirst()
+      && (direction === 'en-it' || direction === 'listen') && gatedVerb !== card.noun);
+  }
+  function infinitiveCard(card) {
+    const v = SUBJECTS[subject].items.find(n => n.noun === card.noun).verb, isEre = v.it.endsWith('ere');
+    const pron = (v.pronMap && v.pronMap.it) || pronounceForm(v.it, null, { isInfinitive: true, isSdrucciola: isEre && !v.piana });
+    return { key: `${v.it}|inf`, noun: v.it, english: v.en, italian: v.it, person: null, pronounLabel: '', verbMeaning: v.en, pron, note: null, gate: true };
+  }
+  const currentCard = () => verbGate || deck[index];
+  function infinitiveAnswered(skipped) {
+    const ans = document.getElementById('answer'), sub = document.getElementById('submit'), fb = document.getElementById('feedback');
+    const card = verbGate, result = skipped ? { correct: false } : checkCard(ans.value, card, false);
+    const skipBtn = document.getElementById('skip-btn');
+    if (skipBtn) skipBtn.hidden = true;
+    answered = true;
+    ans.disabled = true;
+    sub.textContent = 'Avanti →';
+    const pron = ` <span class="pron">${card.pron}</span>`;
+    fb.className = `feedback ${result.correct ? 'correct' : 'incorrect'}`;
+    fb.innerHTML = `<div class="feedback-body">${result.correct ? `✓ Corretto — <strong>${card.italian}</strong>${pron}` : `${skipped ? 'Skipped' : '✗ Not quite'} — the infinitive is <strong>${card.italian}</strong>${pron}`}${speakBtnHTML()}`
+      + `<div class="gate-note">The infinitive doesn't count towards your score${result.correct ? ' — now its forms, io to loro.' : '.'}</div></div>`;
+    wireSpeakBtn(card);
+    if (audioPrefs.auto) speak(sayText(card));
+    if (result.correct) gatedVerb = card.noun;
+    else {   // type it right before the forms begin
+      mustRetype = true;
+      ans.disabled = false;
+      ans.value = '';
+      if (!ans.dataset.normalPlaceholder) ans.dataset.normalPlaceholder = ans.placeholder;
+      ans.placeholder = 'now type the infinitive…';
+      ans.classList.add('retype');
+      sub.textContent = 'Riscrivi →';
+      fb.querySelector('.feedback-body').insertAdjacentHTML('afterbegin', `<div class="retype-hint" id="retype-hint">Type it above to start its forms.</div>`);
+      setTimeout(() => ans.focus(), 30);
+    }
+    speakHint('');
+    updateMicBtn();
+  }
+
   // What a skip shows, before the answer is typed out
   function skipMessage(card, itToEn) {
     if (itToEn) return `Skipped — <strong>${card.italian}</strong> means <strong>${card.english}</strong>`;
@@ -11591,8 +11912,9 @@
     const skipped = skip === true;
     if (skipped && answered) return;
     if (answered && mustRetype) { retypeCheck(); return; }
-    if (answered) { index++; render(); return; }
+    if (answered) { if (verbGate) { verbGate = null; render(); return; } index++; render(); return; }   // after the infinitive: its first form
     if (!skipped && !document.getElementById('answer').value.trim()) { askForAnswer(document.getElementById('answer')); return; }
+    if (verbGate) { infinitiveAnswered(skipped); return; }   // counts for nothing
 
     const ans = document.getElementById('answer');
     const sub = document.getElementById('submit');
