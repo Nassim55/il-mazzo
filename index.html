@@ -1945,6 +1945,20 @@
     .chart-sheet { width: 100%; height: auto; max-height: 86vh; border-radius: 12px 12px 0 0; animation-name: chart-up; }
   }
   @media (prefers-reduced-motion: reduce) { .chart-sheet { animation: none; } }
+  .chart-pin { position: absolute; top: 12px; left: 16px; z-index: 1; background: none; border: none; cursor: pointer; padding: 4px 2px;
+               font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .chart-pin:hover { color: var(--gold); }
+  .chart-pin[aria-pressed="true"] { color: var(--gold); }
+  /* Pinned: beside the round, not over it — the round moves over to make room */
+  .chart-overlay.pinned { background: transparent; pointer-events: none; }
+  .chart-overlay.pinned .chart-sheet { pointer-events: auto; animation: none; box-shadow: -1px 0 0 rgba(28, 22, 17, 0.12), -8px 0 24px rgba(28, 22, 17, 0.06); }
+  @media (min-width: 1000px) { body.chart-docked { padding-right: 440px; } }
+  @media (max-width: 999px) {   /* no room beside the card: below the round instead */
+    body.chart-docked { flex-wrap: wrap; align-content: flex-start; }
+    .chart-overlay.pinned { position: static; flex-basis: 100%; display: block; pointer-events: auto; margin-top: 28px; }
+    .chart-overlay.pinned .chart-sheet { width: 100%; max-width: 660px; height: auto; max-height: none; margin: 0 auto; border-radius: 12px;
+                                          box-shadow: 0 1px 0 rgba(28, 22, 17, 0.08); animation: none; }
+  }
 
   /* After a miss: type the right answer to go on */
   .answer.retype { border-color: var(--terracotta); }
@@ -7134,7 +7148,7 @@
     const i = DIALOGUES.findIndex(d => d.id === id);
     if (i < 0) return;
     dialogueStopSpeaking();
-    container.dataset.view = 'dialogue';
+    container.dataset.view = 'dialogue'; syncPinnedChart();
     const d = DIALOGUES[i], voiced = !!dialogueVoices();
     dialogueState = { d, i, answers: d.questions.map(() => null), showText: !voiced, showEnglish: false, slow: false };
     renderDialogueScene();
@@ -7554,7 +7568,7 @@
     if (i < 0) return;
     const ch = STORY_CHAPTERS[i];
     storyStopSpeaking();
-    container.dataset.view = 'story';
+    container.dataset.view = 'story'; syncPinnedChart();
     storyState = { ch, i, answers: ch.questions.map(() => null), find: null, findTries: 0, added: new Set(),
                    sentences: ch.paragraphs.flat() };
     renderStoryReader();
@@ -10243,34 +10257,95 @@
     const k = chartKey();
     btn.hidden = !k;
     if (k) btn.textContent = `▦ ${CHART_TITLES[k]}`;
+    syncPinnedChart();
   }
-  function openChart() {
-    const k = chartKey();
-    if (!k) return;
-    stopListening();
+  // Pinned (Nov 2026): the drawer stays open beside the round instead of over it — no
+  // dimming, and typing, Enter and the microphone carry on. It follows the card's section,
+  // steps aside outside a round (the setup shows the chart already), and comes back in the
+  // next round. On a narrow screen there's no room beside the card, so it sits below the
+  // round. Remembered on this device; × closes it and unpins it.
+  const CHART_PIN_KEY = 'mazzo-chart-pinned-v1';
+  let chartPinned = (() => { try { return localStorage.getItem(CHART_PIN_KEY) === '1'; } catch (e) { return false; } })();
+  function chartOverlay() {
     let ov = document.getElementById('chart-overlay');
     if (!ov) {
       ov = document.createElement('div');
       ov.className = 'chart-overlay';
       ov.id = 'chart-overlay';
       ov.hidden = true;
-      ov.innerHTML = `<div class="chart-sheet" role="dialog" aria-modal="true"><button type="button" class="chart-close" id="chart-close" aria-label="Close the chart">×</button><div class="chart-body" id="chart-body"></div></div>`;
+      ov.innerHTML = `<div class="chart-sheet" role="dialog" aria-modal="true">`
+        + `<button type="button" class="chart-pin" id="chart-pin" aria-pressed="false" title="Keep the chart open beside the round">📌 Pin</button>`
+        + `<button type="button" class="chart-close" id="chart-close" aria-label="Close the chart">×</button><div class="chart-body" id="chart-body"></div></div>`;
       document.body.appendChild(ov);
-      ov.addEventListener('click', e => { if (e.target === ov || e.target.closest('#chart-close')) closeChart(); });
+      ov.addEventListener('click', e => {
+        if (e.target.closest('#chart-pin')) setChartPinned(!chartPinned);
+        else if (e.target === ov || e.target.closest('#chart-close')) closeChart();
+      });
     }
-    document.getElementById('chart-body').innerHTML = SECTION_CHARTS[k]();
-    ov.querySelector('.chart-sheet').setAttribute('aria-label', CHART_TITLES[k]);
-    ov.hidden = false;
-    document.getElementById('chart-close').focus();
+    return ov;
   }
-  // Back to the card, with whatever was typed still there
-  function closeChart() {
-    const ov = document.getElementById('chart-overlay');
-    if (!ov || ov.hidden) return;
-    ov.hidden = true;
+  function fillChart(ov, k) {
+    if (ov.dataset.chart !== k) {   // only when the section changes (Ripasso), so a pinned chart doesn't jump
+      document.getElementById('chart-body').innerHTML = SECTION_CHARTS[k]();
+      ov.dataset.chart = k;
+    }
+    ov.querySelector('.chart-sheet').setAttribute('aria-label', CHART_TITLES[k]);
+  }
+  function showPinnedState(ov) {
+    const sheet = ov.querySelector('.chart-sheet'), pin = document.getElementById('chart-pin');
+    ov.classList.toggle('pinned', chartPinned);
+    sheet.setAttribute('role', chartPinned ? 'complementary' : 'dialog');
+    if (chartPinned) sheet.removeAttribute('aria-modal'); else sheet.setAttribute('aria-modal', 'true');
+    pin.setAttribute('aria-pressed', String(chartPinned));
+    pin.textContent = chartPinned ? '📌 Pinned' : '📌 Pin';
+    pin.title = chartPinned ? 'Unpin: the chart opens over the round again' : 'Keep the chart open beside the round';
+    document.body.classList.toggle('chart-docked', chartPinned && !ov.hidden);
+  }
+  function openChart() {
+    const k = chartKey();
+    if (!k) return;
+    stopListening();
+    const ov = chartOverlay();
+    fillChart(ov, k);
+    ov.hidden = false;
+    showPinnedState(ov);
+    if (chartPinned) backToCard();
+    else document.getElementById('chart-close').focus();
+  }
+  function backToCard() {
     const input = document.getElementById('answer'), submit = document.getElementById('submit');
     if (input && !input.disabled) input.focus();
     else if (submit) submit.focus();
+  }
+  function setChartPinned(on) {
+    chartPinned = on;
+    try { localStorage.setItem(CHART_PIN_KEY, on ? '1' : '0'); } catch (e) { /* private mode */ }
+    const ov = chartOverlay();
+    showPinnedState(ov);
+    if (on) backToCard();   // keep going: the chart stays beside the card
+    else document.getElementById('chart-close').focus();
+  }
+  // A pinned chart shows in a round whose section has one, and steps aside anywhere else
+  function syncPinnedChart() {
+    if (!chartPinned) return;
+    const container = document.querySelector('.container'), k = chartKey();
+    const show = !!(k && container && container.dataset.view === 'game');
+    const ov = show ? chartOverlay() : document.getElementById('chart-overlay');
+    if (!ov) return;
+    if (show) fillChart(ov, k);
+    ov.hidden = !show;
+    showPinnedState(ov);
+  }
+  // Back to the card, with whatever was typed still there. The ×, Escape or a click outside
+  // close it; leaving the round only hides it (closeChart({ keepPin: true })), so a pinned
+  // chart comes back in the next round
+  function closeChart(opts) {
+    const ov = document.getElementById('chart-overlay');
+    if (!ov || ov.hidden) return;
+    ov.hidden = true;
+    if (chartPinned && !(opts && opts.keepPin)) setChartPinned(false);   // × on a pinned chart: closed, and unpinned
+    showPinnedState(ov);
+    if (!(opts && opts.keepPin)) backToCard();
   }
 
   // ===== Preposizioni: singular, plural or both, for the fusion drills =====
@@ -10318,14 +10393,14 @@
     if (passive) { passiveStopTimers(); passive = null; passiveWake(false); }
     dialogueStopSpeaking();
     stopListening();
-    closeChart();
+    closeChart({ keepPin: true });   // out of the way; a pinned one comes back in the next round
     if (reviewMode) {
       reviewMode = false;
       const back = reviewReturn;
       subject = null;   // don't save review state into a section
       applySubject(back);
     }
-    container.dataset.view = 'setup';
+    container.dataset.view = 'setup'; syncPinnedChart();
     sessionPool = null;    // returning to setup resets the session layers
     sessionMaxDeck = null;
     sessionIsReview = false;
@@ -10959,7 +11034,7 @@
     if (!cards.length) return;
     stopListening();
     passive = { cards, index: 0, rep: 0, phase: 'it', playing: true, run: 0, pass: 1, timer: null, watchdog: null, current: null, hidden: false };
-    container.dataset.view = 'passive';
+    container.dataset.view = 'passive'; syncPinnedChart();
     renderPassive();
     passiveWake(true);
     try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
@@ -11888,7 +11963,7 @@
     bestStreak = 0;
     scoreEl.textContent = '0';
     totalEl.textContent = deck.length;
-    container.dataset.view = 'game';
+    container.dataset.view = 'game'; syncPinnedChart();
     gameArea.innerHTML = cardHTML;
     showGameControls();
 
@@ -12529,7 +12604,7 @@
         </div>` : '';
     const practiseLabel = missed.length === 1 ? 'the one I missed' : `the ${missed.length} I missed`;
 
-    container.dataset.view = 'complete';
+    container.dataset.view = 'complete'; syncPinnedChart();
     gameArea.innerHTML = `
       <div class="card complete">
         <div class="badge">${sessionIsReview || reviewMode ? 'FINE DEL RIPASSO' : 'FINE DELLA SESSIONE'}</div>
@@ -12571,7 +12646,7 @@
       return;
     }
     const chart = document.getElementById('chart-overlay');
-    if (chart && !chart.hidden) {
+    if (chart && !chart.hidden && !chart.classList.contains('pinned')) {
       if (e.key === 'Escape') { e.preventDefault(); closeChart(); }
       return;
     }
