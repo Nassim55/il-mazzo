@@ -2106,6 +2106,15 @@
     .mode-toggle.subject-toggle { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   }
 
+  /* Mi piace: who is pleased, what pleases */
+  .mp-filters .mode-label { display: flex; align-items: baseline; gap: 6px; }
+  .mp-row-en { text-transform: none; letter-spacing: 0; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--ink-faded); }
+  .mp-all { margin-left: auto; font-size: 11px; }
+  .mp-toggle { flex-wrap: wrap; }
+  .mp-toggle .mode-option { display: inline-flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1.15; }
+  .mp-label { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 19px; letter-spacing: 0; text-transform: none; }   /* le and Le stay apart */
+  .mp-sub { font-family: 'DM Sans', sans-serif; font-size: 10.5px; letter-spacing: 0; text-transform: none; opacity: 0.75; }
+
   /* The infinitive first: pinned above a verb's forms once answered */
   .inf-first { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin: 10px 0 2px; cursor: pointer; }
   .inf-first input { accent-color: var(--olive); transform: translateY(1px); }
@@ -8470,13 +8479,81 @@
     ["modi-di-dire", "cosa", "Ti dispiace?", "Do you mind? (tu)", "To you displeases? (tu)", ["A te dispiace?"]],
     ["modi-di-dire", "cosa", "Mi dispiace, non lo so.", "Sorry, I don't know.", "To me displeases, not it I know.", ["A me dispiace, non lo so."]]
   ];
+  // ===== Mi piace: who is pleased, what pleases, the verb, the kind of sentence (Nov 2026) =====
+  // Read off each sentence, so a new one is sorted without extra data. Who: the
+  // pronoun or a + someone (gli and le split by the English: he/they, she/formal You).
+  // What: one thing (piace), more than one (piacciono), doing something (piace + an
+  // infinitive), or a person (mi piaci). A sentence can have two of each (A me sì, a te no).
+  const MP_INFINITIVES = new Set([...verbData, ...irregularVerbData].map(v => v.it));
+  const MP_SINGULAR = /^(piace|manca|serve|basta|interessa|importa|fa|sembra|dispiace|va|tocca|conviene|resta)$/;
+  const MP_PLURAL = /^(piacciono|mancano|servono|bastano|interessano|importano|fanno|sembrano|restano)$/;
+  const MP_FAMILY = /^(piac|manc|serv|bast|interess|import|sembr|dispiac|tocc|conven|rest|fa$|fanno$|va$)/;
+  const MP_VERB_OF = [
+    ['piacere', /^(piace|piacciono|piaci|piaccio|piacete|piacciamo|piacerebbe)$/],
+    ['mancare', /^manc/], ['servire-bastare', /^(serv|bast)/], ['interessare-importare', /^(interess|import)/],
+    ['fare-male', /^(fa|fanno)$/], ['sembrare', /^sembr/]
+  ];
+  function mipiaceTags(row) {
+    const [level, person, it, en] = row;
+    const tokens = it.toLowerCase().replace(/’/g, "'").match(/[^\s.,!?¿¡;:«»"]+|[.,!?;:]/g) || [];
+    const words = [], clauseStart = new Set();
+    tokens.forEach(tok => { if (/^[.,!?;:]$/.test(tok)) clauseStart.add(words.length); else words.push(tok); });
+    const E = ' ' + en.toLowerCase().replace(/[.,!?;:]/g, ' ') + ' ';
+    const formal = /\(formal\)/.test(en), heThey = /\b(they|them|their)\b/.test(E) ? 'loro' : 'lui';
+    const chi = new Set();
+    words.forEach((w, i) => {
+      const prev = words[i - 1], clitic = MP_FAMILY.test(words[i + 1] || '');   // mi, gli, le… right before the verb (gli occhi is an article)
+      if ((w === 'mi' && clitic) || (w === 'me' && prev === 'a')) chi.add('mi');
+      else if ((w === 'ti' && clitic) || (w === 'te' && prev === 'a')) chi.add('ti');
+      else if (w === 'gli' && clitic) chi.add(heThey);
+      else if (w === 'lui' && prev === 'a') chi.add('lui');
+      else if (w === 'loro' && prev === 'a') chi.add('loro');
+      else if (w === 'le' && clitic) chi.add(formal ? 'Lei' : 'lei');
+      else if (w === 'lei' && prev === 'a') chi.add(formal ? 'Lei' : 'lei');
+      else if ((w === 'ci' && clitic) || (w === 'noi' && prev === 'a')) chi.add('ci');
+      else if ((w === 'vi' && clitic) || (w === 'voi' && prev === 'a')) chi.add('vi');
+      else if (/^(a|al|ai|alla|alle|agli|allo|all'.*)$/.test(w) && (i === 0 || clauseStart.has(i) || MP_FAMILY.test(prev || ''))
+               && !/^(me|te|lui|lei|noi|voi|loro|chi)$/.test(words[i + 1] || '')) chi.add('nome');   // a + someone: before the verb, or straight after it
+    });
+    if (!chi.size) chi.add('nessuno');
+    const cosa = new Set();
+    if (!['cosa', 'cose'].includes(person)) cosa.add('persona');   // mi piaci, ti piaccio: a person is all it is
+    else {
+      const infinitive = words.some(w => MP_INFINITIVES.has(w));
+      if (words.some(w => MP_PLURAL.test(w))) cosa.add('piu');
+      if (words.some(w => MP_SINGULAR.test(w))) cosa.add(infinitive ? 'fare' : 'una');
+      if (!cosa.size) cosa.add(person === 'cose' ? 'piu' : 'una');   // a reply with no verb: Anche a me
+    }
+    let verb = (MP_VERB_OF.find(([key, re]) => words.some(w => re.test(w)) && (key !== 'fare-male' || words.includes('male'))) || ['espressioni'])[0];
+    if (verb === 'espressioni' && !words.some(w => MP_FAMILY.test(w))) verb = 'piacere';   // Anche a me answers a piacere question
+    const frase = new Set();
+    if (/\?/.test(it)) frase.add('domande');
+    if (words.some(w => /^(non|no|neanche|nemmeno|mai)$/.test(w))) frase.add('negative');
+    if (words.some((w, i) => /^(me|te|lui|lei|noi|voi|loro)$/.test(w) && words[i - 1] === 'a')) frase.add('a-me');
+    if (!frase.size) frase.add('affermative');
+    return { chi: [...chi], cosa: [...cosa], verb, frase: [...frase] };
+  }
   const MIPIACE_ITEMS = MIPIACE_DATA.map(([level, person, it, en, literal, alts]) => {
-    const key = sentenceKey(it);
+    const key = sentenceKey(it), tg = mipiaceTags([level, person, it, en]);
     return { noun: key, display: it, it, en, level, type: 'piacere', person, natural: null, literal,
+             chi: tg.chi, cosa: tg.cosa, verbo: tg.verb, frase: tg.frase,
              note: `<span class="literal-label">Word for word</span> <em>${literal}</em>`,
              phrase: { key, it, en, itAlts: sentenceAccepted(person, it, alts).filter(s => s !== it), enAlts: [], reg: 'neutral' } };
   });
-  const MIPIACE_THEMES = MIPIACE_LEVELS.map(([key, label, en]) => ({ key, label, en, nouns: MIPIACE_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
+  const MIPIACE_GROUPS = [['verbo', 'Il verbo', 'which verb'], ['frase', 'La frase', 'what kind of sentence']];
+  const MIPIACE_THEMES = [
+    ...[['piacere', 'Piacere', 'liking'], ['mancare', 'Mancare', 'missing'], ['servire-bastare', 'Servire · bastare', 'needing, and enough'],
+        ['interessare-importare', 'Interessare · importare', 'interest, and caring'], ['fare-male', 'Fare male', 'what hurts'],
+        ['sembrare', 'Sembrare', 'seeming'], ['espressioni', 'Ti va? Tocca a te', 'fixed expressions']]
+      .map(([key, label, en]) => ({ key, group: 'verbo', label, en, nouns: MIPIACE_ITEMS.filter(n => n.verbo === key).map(n => n.noun) })),
+    ...[['affermative', 'Affermazioni', 'plain statements'], ['negative', 'Non…', 'negatives'], ['domande', 'Domande', 'questions'], ['a-me', 'A me, a te', 'me, not you: short replies']]
+      .map(([key, label, en]) => ({ key: 'frase-' + key, group: 'frase', label, en, nouns: MIPIACE_ITEMS.filter(n => n.frase.includes(key)).map(n => n.noun) }))
+  ];
+  // Who is pleased, and what pleases: two rows at the top of the setup, kept with the persons
+  // (synced) under 'mipiace'. A sentence stays in when it matches both
+  const MP_CHI = [['mi', 'mi', 'me'], ['ti', 'ti', 'you'], ['lui', 'gli', 'him'], ['lei', 'le', 'her'], ['Lei', 'Le', 'you, formal'],
+                  ['ci', 'ci', 'us'], ['vi', 'vi', 'you all'], ['loro', 'gli', 'them'], ['nome', 'a Marco', 'someone named'], ['nessuno', 'nessuno', 'Basta così']];
+  const MP_COSA = [['una', 'una cosa', 'piace'], ['piu', 'più cose', 'piacciono'], ['fare', 'fare', 'piace + infinitive'], ['persona', 'una persona', 'mi piaci']];
   const MIPIACE_ORDER = MIPIACE_ITEMS.map(n => n.noun);
   // ===== Dialoghi (Oct 2026): everyday scenes, in two voices =====
   // Each line is [speaker, Italian, English word for word (Italian order; "you" marked
@@ -9340,7 +9417,7 @@
     // Verbs like piacere, drilled: natural English in, the Italian turned round out (the
     // word for word after); Why explains a slip. Sentence cards, like Scrittura's.
     mipiace: {
-      kind: 'phrase', sentences: true, panel: 'mipiace', doneWord: 'sentences', chipOrder: 'level',
+      kind: 'phrase', sentences: true, panel: 'mipiace', doneWord: 'sentences', chipOrder: 'level', themeGroups: MIPIACE_GROUPS, mipiaceFilter: true,
       switchLabel: 'Mi piace', title: 'Mi piace', subtitle: 'Il Mazzo · Verbi come Piacere',
       setupTitle: 'Choose your sentences',
       setupSub: 'Verbs like <em>piacere</em> work backwards: in <em>mi piace il caffè</em> the coffee is the subject — it does the pleasing — and the person who likes it goes in the pronoun, <em>mi</em>. Each card gives the natural English; write the Italian the other way round. The word for word shows after you answer, and <em>Why</em> explains any slip.',
@@ -9452,6 +9529,15 @@
     FREQUENCY_ORDER = cfg.frequency;
     selectedNouns = st.selected;
     st.hidden = [];
+    if (cfg.mipiaceFilter) {   // Mi piace: only who and what the two rows allow
+      const chi = activeMipiace('chi'), cosa = activeMipiace('cosa');
+      nounData = cfg.items.filter(n => n.chi.some(k => chi.includes(k)) && n.cosa.some(k => cosa.includes(k)));
+      const pool = new Set(nounData.map(n => n.noun));
+      THEMES = cfg.themes.map(th => ({ ...th, nouns: th.nouns.filter(k => pool.has(k)) })).filter(th => th.nouns.length);
+      FREQUENCY_ORDER = cfg.frequency.filter(k => pool.has(k));
+      st.hidden = [...st.selected].filter(k => !pool.has(k));
+      selectedNouns = new Set([...st.selected].filter(k => pool.has(k)));
+    }
     if (cfg.typeFilter) {   // only the kinds of sentence chosen at the top of the setup
       const on = activeSentenceTypes();
       nounData = cfg.items.filter(n => on.includes(n.type));
@@ -9681,6 +9767,52 @@
       saveVerbPersons(subject, next);
       renderPersonPicker();
       updateReadout();
+    });
+  }
+
+  // ===== Mi piace: who is pleased, what pleases =====
+  function activeMipiace(dim) {
+    const keys = (dim === 'chi' ? MP_CHI : MP_COSA).map(x => x[0]), saved = (verbPersonsSaved().mipiace || {})[dim];
+    const list = Array.isArray(saved) ? keys.filter(k => saved.includes(k)) : keys;
+    return list.length ? list : keys;
+  }
+  function saveMipiace(dim, list) {
+    const all = verbPersonsSaved(), keys = (dim === 'chi' ? MP_CHI : MP_COSA).map(x => x[0]);
+    all.mipiace = { ...(all.mipiace || {}), [dim]: keys.filter(k => list.includes(k)) };
+    try { localStorage.setItem(VERB_PERSONS_KEY, JSON.stringify(all)); syncTouched(); } catch (e) { /* storage full */ }
+  }
+  function mipiaceFilterHTML() {
+    const chi = activeMipiace('chi'), cosa = activeMipiace('cosa');
+    const row = (dim, list, on, other, otherOn, title, en) => `
+      <div class="mode-label">${title} <span class="mp-row-en">· ${en}</span> <button type="button" class="ghost mp-all" data-mpall="${dim}">tutti</button></div>
+      <div class="mode-toggle type-toggle mp-toggle" id="mp-${dim}" role="group" aria-label="${en}">
+        ${list.map(([k, label, sub]) => {
+          const n = MIPIACE_ITEMS.filter(it => it[dim].includes(k) && it[other].some(x => otherOn.includes(x))).length;
+          return `<button type="button" class="mode-option${on.includes(k) ? ' active' : ''}" data-mpdim="${dim}" data-mpkey="${k}" aria-pressed="${on.includes(k)}" title="${sub}"><span class="mp-label">${label}</span><span class="mp-sub">${sub}</span><span class="type-count">${n}</span></button>`;
+        }).join('')}
+      </div>`;
+    return `<div class="mp-filters">${row('chi', MP_CHI, chi, 'cosa', cosa, 'Chi', 'who is pleased')}${row('cosa', MP_COSA, cosa, 'chi', chi, 'Che cosa', 'what pleases')}
+      <p class="person-hint" id="mp-hint" aria-live="polite"></p></div>`;
+  }
+  function wireMipiaceFilter() {
+    const box = document.querySelector('.mp-filters');
+    if (!box) return;
+    box.addEventListener('click', e => {
+      const all = e.target.closest('[data-mpall]');
+      const b = e.target.closest('[data-mpkey]');
+      if (!all && !b) return;
+      const dim = all ? all.dataset.mpall : b.dataset.mpdim;
+      const keys = (dim === 'chi' ? MP_CHI : MP_COSA).map(x => x[0]), cur = activeMipiace(dim);
+      const next = all ? keys : cur.includes(b.dataset.mpkey) ? cur.filter(x => x !== b.dataset.mpkey) : [...cur, b.dataset.mpkey];
+      if (!next.length) { document.getElementById('mp-hint').textContent = 'Keep at least one in each row.'; return; }
+      const other = dim === 'chi' ? 'cosa' : 'chi', otherOn = activeMipiace(other);
+      if (!MIPIACE_ITEMS.some(it => it[dim].some(k => next.includes(k)) && it[other].some(k => otherOn.includes(k)))) {
+        document.getElementById('mp-hint').textContent = 'No sentence has both — try another, or tap tutti.';
+        return;
+      }
+      saveMipiace(dim, next);
+      applySubject(subject);   // reload the section with just these
+      showSetup();
     });
   }
 
@@ -10168,6 +10300,7 @@
         <p class="setup-sub">${cfg.setupSub}</p>
       </div>
       ${cfg.typeFilter ? sentenceTypesHTML() : ''}
+      ${cfg.mipiaceFilter ? mipiaceFilterHTML() : ''}
       ${cfg.numberToggle ? prepNumbersHTML() : ''}
       ${modeOptions ? `
       <div class="mode-label">Practice mode</div>
@@ -10268,6 +10401,7 @@
 
     if (isVerbs) wirePersonPicker();
     wireSentenceTypes();
+    wireMipiaceFilter();
     wireNumbers();
 
     // ===== Verbs: practice mode and direction (as in the verb game's setup) =====

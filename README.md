@@ -9,7 +9,7 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 | Sostantivi | 941 nouns | the noun with its definite article (*il pane, lo zaino, l'acqua*), in 23 themes — among them *Ristrutturazione*, 73 nouns for renovating the house |
 | Verbi regolari | 150 verbs | present-tense conjugations, or just the infinitive |
 | Verbi irregolari | 50 verbs | the most common verbs that are irregular in the present |
-| Mi piace | 116 sentences · 13 levels | verbs like *piacere*, drilled: natural English in, the Italian turned round out (*I like the beach* → *Mi piace la spiaggia*) |
+| Mi piace | 116 sentences, sorted by who and what | verbs like *piacere*, drilled: natural English in, the Italian turned round out (*I like the beach* → *Mi piace la spiaggia*) |
 | Aggettivi | 200 adjectives | the dictionary form, or every gender and number |
 | Preposizioni | 224 phrases | fusion drills (*di + il libro* → *del libro*) and usage cards in 27 themes, six groups; a rule for every slip; the fusion table |
 | Frasi | 50 phrases | everyday expressions, with *tu* and *Lei* forms kept distinct |
@@ -60,7 +60,7 @@ The strip at the top of the setup screen shows what's due today in the chosen di
 
 In *mi piace il caffè* the coffee is the subject — it does the pleasing — and the person who likes it goes in the pronoun. Scrittura shows these sentences word for word; this section drills the real skill: each card gives the **natural English** (*My back hurts*, *Do they like us?*) and you write the Italian the other way round. The word for word shows after you answer, and *Why* explains any slip — the verb agreeing with the thing (*piacciono* for *le fragole*), an activity counting as singular, the pronoun for the person, a person as the subject (*ci piaci*).
 
-Thirteen levels: *piace* or *piacciono*; formal *Le*; liking to do things; people by name (*a Marco*, *ai bambini*); negatives and questions; *a me sì, a te no*; *mancare*; *servire* and *bastare*; *interessare* and *importare*; *fare male*; *sembrare*; people as the subject (*mi piaci*, *ti manco?*); and fixed expressions (*ti va?*, *tocca a te*, *ti conviene*). The stressed form (*A me piace…*) and the thing first (*La spiaggia mi piace*) are accepted too. The *Come piacere* chart — on the setup screen and behind ▦ in a round — gives the pronouns (*a me → mi* … *a loro → gli*), the agreement rule and the verbs. No sentence repeats one of Scrittura's.
+**Sorted two ways.** Two rows at the top of the setup narrow the section: ***Chi*** — who is pleased (*mi*, *ti*, *gli* for him, *le* for her, formal *Le*, *ci*, *vi*, *gli* for them, someone named — *a Marco* — or nobody, as in *Basta così*) — and ***Che cosa*** — what pleases (one thing, *piace*; more than one, *piacciono*; doing something, *piace* + an infinitive; or a person, *mi piaci*). A sentence stays in when it matches both, so *ti* with *più cose* is just the *Ti piacciono…* sentences. Each button shows how many you'd get, *tutti* puts a row back, and the choice is remembered and syncs. The theme chips sort by **the verb** (*piacere*, *mancare*, *servire · bastare*, *interessare · importare*, *fare male*, *sembrare*, and fixed expressions like *ti va?* and *tocca a te*) and by **the kind of sentence** (statements, negatives, questions, and the short replies — *anche a me*, *a me sì, a te no*). Each sentence is sorted by reading it, so a new one needs no extra data. The tiles keep the old levels' order, easiest first.
 
 ## Scrittura: writing whole sentences
 
