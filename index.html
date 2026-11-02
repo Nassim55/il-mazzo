@@ -2106,21 +2106,34 @@
     .mode-toggle.subject-toggle { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   }
 
-  /* Mi piace: the backwards verbs, in Come piacere */
+  /* Verbi al contrario: one way to choose */
+  .mp-head { display: flex; align-items: baseline; justify-content: space-between; }
+  .mp-how { margin: 4px 0 14px; font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: var(--ink-faded); }
+  .mp-row-label { margin: 16px 0 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); }
+  .mp-row-label span { text-transform: none; letter-spacing: 0; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--ink-faded); }
+  .mp-verbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+  .mp-verb, .mp-chip { font: inherit; text-align: left; cursor: pointer; border: 1px dashed rgba(26, 23, 20, 0.28); border-radius: 10px; background: transparent; color: var(--ink); transition: background 0.15s, border-color 0.15s; }
+  .mp-verb { display: flex; flex-direction: column; gap: 2px; padding: 9px 11px; }
+  .mp-verb:hover, .mp-chip:hover { border-color: var(--gold); }
+  .mp-verb.on, .mp-chip.on { background: var(--gold); border: 1px solid var(--gold); color: #fff; }
+  .mp-verb.none, .mp-chip.none { opacity: 0.6; border-color: rgba(26, 23, 20, 0.14); }   /* nothing to add right now — still readable */
+  .mpv-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .mpv-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 20px; font-weight: 600; }
+  .mpv-en { font-family: 'DM Sans', sans-serif; font-size: 13.5px; }
+  .mpv-lit { font-family: 'DM Sans', sans-serif; font-size: 11.5px; opacity: 0.7; }
+  .mpv-eg { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; }
+  .mp-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; opacity: 0.7; }
+  .mp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  @media (max-width: 560px) { .mp-verbs { grid-template-columns: 1fr 1fr; gap: 6px; } .mp-verb { padding: 8px 9px; } .mpv-it { font-size: 18px; } }   /* two to a row on a phone */
+  .mp-chip { display: inline-flex; align-items: baseline; gap: 6px; padding: 5px 10px; border-radius: 999px; }
+  .mp-label { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; }   /* le and Le stay apart */
+  .mp-sub { font-family: 'DM Sans', sans-serif; font-size: 11.5px; opacity: 0.75; }
+  /* In a round's chart: the backwards verbs */
   .mpv-row { padding: 5px 0; border-top: 1px solid rgba(26, 23, 20, 0.08); font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: var(--ink); }
   .mpv-row:first-of-type { border-top: 0; }
-  .mpv-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; font-weight: 600; }
-  .mpv-lit { display: block; font-size: 12px; color: var(--ink-faded); }
-  .mpv-lit em { font-family: 'Cormorant Garamond', serif; font-size: 14px; color: var(--ink); }
-
-  /* Mi piace: who is pleased, what pleases */
-  .mp-filters .mode-label { display: flex; align-items: baseline; gap: 6px; }
-  .mp-row-en { text-transform: none; letter-spacing: 0; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--ink-faded); }
-  .mp-all { margin-left: auto; font-size: 11px; }
-  .mp-toggle { flex-wrap: wrap; }
-  .mp-toggle .mode-option { display: inline-flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1.15; }
-  .mp-label { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 19px; letter-spacing: 0; text-transform: none; }   /* le and Le stay apart */
-  .mp-sub { font-family: 'DM Sans', sans-serif; font-size: 10.5px; letter-spacing: 0; text-transform: none; opacity: 0.75; }
+  .mpv-row .mpv-it { font-size: 17px; }
+  .mpv-row .mpv-lit { display: block; font-size: 12px; color: var(--ink-faded); opacity: 1; }
+  .mpv-row .mpv-lit em { font-family: 'Cormorant Garamond', serif; font-size: 14px; color: var(--ink); }
 
   /* The infinitive first: pinned above a verb's forms once answered */
   .inf-first { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin: 10px 0 2px; cursor: pointer; }
@@ -8353,7 +8366,8 @@
     ["fare-male", "Mi fa male", "What hurts"],
     ["sembrare", "Mi sembra", "Seeming"],
     ["mi-piaci", "Mi piaci · Mi manchi", "People as the subject"],
-    ["modi-di-dire", "Ti va? Tocca a te", "Fixed expressions"]
+    ["modi-di-dire", "Ti va? Tocca a te", "Fixed expressions"],
+    ["altri-verbi", "Succede, capita, rimane…", "More backwards verbs"]
   ];
   const MIPIACE_DATA = [
     // Piace o piacciono?
@@ -8484,7 +8498,25 @@
     ["modi-di-dire", "cosa", "Ti conviene partire domani.", "You'd better leave tomorrow. (tu)", "To you suits to leave tomorrow. (tu)", ["A te conviene partire domani."]],
     ["modi-di-dire", "cose", "Mi restano dieci euro.", "I have ten euros left.", "To me remain ten euros.", ["Mi rimangono dieci euro.", "A me restano dieci euro."]],
     ["modi-di-dire", "cosa", "Ti dispiace?", "Do you mind? (tu)", "To you displeases? (tu)", ["A te dispiace?"]],
-    ["modi-di-dire", "cosa", "Mi dispiace, non lo so.", "Sorry, I don't know.", "To me displeases, not it I know.", ["A me dispiace, non lo so."]]
+    ["modi-di-dire", "cosa", "Mi dispiace, non lo so.", "Sorry, I don't know.", "To me displeases, not it I know.", ["A me dispiace, non lo so."]],
+    // More backwards verbs (Nov 2026): succedere, capitare, rimanere, occorrere, parere, spettare, stare bene
+    ['altri-verbi', 'cosa', 'Cosa ti succede?', "What's the matter with you? (tu)", 'What to you happens? (tu)', ['Che cosa ti succede?', 'Che ti succede?']],
+    ['altri-verbi', 'cosa', 'Cosa gli succede?', "What's the matter with him?", 'What to him happens?', ['Che cosa gli succede?', 'Che gli succede?']],
+    ['altri-verbi', 'cosa', 'Capita a tutti.', 'It happens to everyone.', 'Happens to everyone.', ['Succede a tutti.']],
+    ['altri-verbi', 'cosa', 'Ti capita?', 'Does it happen to you? (tu)', 'To you happens? (tu)', ['Ti succede?', 'A te capita?']],
+    ['altri-verbi', 'cose', 'Mi rimangono due giorni.', 'I have two days left.', 'To me remain two days.', ['Mi restano due giorni.', 'A me rimangono due giorni.']],
+    ['altri-verbi', 'cosa', 'Ci rimane poco tempo.', 'We have little time left.', 'To us remains little time.', ['Ci resta poco tempo.']],
+    ['altri-verbi', 'cosa', 'Ti rimane del pane?', 'Do you have any bread left? (tu)', 'To you remains some bread? (tu)', ['Ti resta del pane?']],
+    ['altri-verbi', 'cosa', 'Cosa Le occorre?', 'What do you need? (formal)', 'What to you (formal) is needed?', ['Che cosa Le occorre?', 'Cosa Le serve?', 'Che cosa Le serve?']],
+    ['altri-verbi', 'cose', 'Ci occorrono due sedie.', 'We need two chairs.', 'To us are needed two chairs.', ['Ci servono due sedie.']],
+    ['altri-verbi', 'cosa', 'Mi pare di sì.', 'I think so.', 'To me seems of yes.', ['Mi sembra di sì.']],
+    ['altri-verbi', 'cosa', 'Ti pare giusto?', 'Does it seem fair to you? (tu)', 'To you seems fair? (tu)', ['Ti sembra giusto?']],
+    ['altri-verbi', 'cosa', 'Mi pare strano.', 'It seems strange to me.', 'To me seems strange.', ['Mi sembra strano.']],
+    ['altri-verbi', 'cosa', 'Spetta a te decidere.', "It's up to you to decide. (tu)", 'Falls to you to decide. (tu)', ['Tocca a te decidere.']],
+    ['altri-verbi', 'cosa', 'Non spetta a me.', "It's not up to me.", 'Not falls to me.', ['Non tocca a me.']],
+    ['altri-verbi', 'cosa', 'Ti sta bene il rosso.', 'Red suits you. (tu)', 'To you stands well the red. (tu)', ['Il rosso ti sta bene.']],
+    ['altri-verbi', 'cose', 'Le scarpe ti stanno bene.', 'The shoes suit you. (tu)', 'The shoes to you stand well. (tu)', ['Ti stanno bene le scarpe.']],
+    ['altri-verbi', 'cosa', 'Questa giacca mi sta bene?', 'Does this jacket suit me?', 'This jacket to me stands well?', ['Mi sta bene questa giacca?']]
   ];
   // ===== Mi piace: who is pleased, what pleases, the verb, the kind of sentence (Nov 2026) =====
   // Read off each sentence, so a new one is sorted without extra data. Who: the
@@ -8492,33 +8524,37 @@
   // What: one thing (piace), more than one (piacciono), doing something (piace + an
   // infinitive), or a person (mi piaci). A sentence can have two of each (A me sì, a te no).
   const MP_INFINITIVES = new Set([...verbData, ...irregularVerbData].map(v => v.it));
-  // The backwards verbs: what each means, what it literally says, one of the deck's sentences, its chip
+  // The backwards verbs: the ones you'll meet most, roughly the most common first —
+  // [verb, what it means, what it literally says, one of the section's sentences]
   const MP_BACKWARDS = [
-    ['piacere', 'to like', 'to be pleasing to', 'Mi piace la spiaggia.', 'piacere'],
-    ['mancare', 'to miss', 'to be missing to', "Mi manca l'Italia.", 'mancare'],
-    ['servire', 'to need', 'to be of use to', 'Mi serve una scala.', 'servire-bastare'],
-    ['bastare', 'to be enough', 'to suffice for', 'Mi basta un caffè.', 'servire-bastare'],
-    ['interessare', 'to be interested in', 'to interest', "Mi interessa l'arte.", 'interessare-importare'],
-    ['importare', 'to care', 'to matter to', 'Non mi importa.', 'interessare-importare'],
-    ['fare male', 'to hurt', 'to do harm to', 'Mi fa male la schiena.', 'fare-male'],
-    ['sembrare', 'to seem · to think', 'to seem to', 'Mi sembra facile.', 'sembrare'],
-    ['dispiacere', 'to be sorry · to mind', 'to displease', 'Ti dispiace?', 'espressioni'],
-    ['andare', 'to fancy · to feel like', 'to go (well) for', 'Ti va una birra?', 'espressioni'],
-    ['toccare', "to be someone's turn", 'to fall to', 'Tocca a te.', 'espressioni'],
-    ['convenire', 'had better', 'to be worth it for', 'Ti conviene partire domani.', 'espressioni'],
-    ['restare', 'to have left', 'to remain to', 'Mi restano dieci euro.', 'espressioni']
+    ['piacere', 'to like', 'to be pleasing to', 'Mi piace la spiaggia.'],
+    ['dispiacere', 'to be sorry · to mind', 'to displease', 'Ti dispiace?'],
+    ['mancare', 'to miss', 'to be missing to', "Mi manca l'Italia."],
+    ['sembrare', 'to seem · to think', 'to seem to', 'Mi sembra facile.'],
+    ['servire', 'to need', 'to be of use to', 'Mi serve una scala.'],
+    ['succedere', "to happen to · what's the matter", 'to happen to', 'Cosa ti succede?'],
+    ['interessare', 'to be interested in', 'to interest', "Mi interessa l'arte."],
+    ['importare', 'to care', 'to matter to', 'Non mi importa.'],
+    ['bastare', 'to be enough', 'to suffice for', 'Mi basta un caffè.'],
+    ['capitare', 'to happen to', 'to befall', 'Capita a tutti.'],
+    ['restare', 'to have left', 'to remain to', 'Mi restano dieci euro.'],
+    ['rimanere', 'to have left', 'to remain to', 'Mi rimangono due giorni.'],
+    ['parere', 'to seem · to think', 'to appear to', 'Mi pare di sì.'],
+    ['fare male', 'to hurt', 'to do harm to', 'Mi fa male la schiena.'],
+    ['andare', 'to fancy · to feel like', 'to go (well) for', 'Ti va una birra?'],
+    ['toccare', "to be someone's turn", 'to fall to', 'Tocca a te.'],
+    ['convenire', 'had better', 'to be worth it for', 'Ti conviene partire domani.'],
+    ['stare bene', 'to suit', 'to stand well on', 'Ti sta bene il rosso.'],
+    ['occorrere', 'to need (formal)', 'to be required by', 'Cosa Le occorre?'],
+    ['spettare', 'to be up to', 'to be due to', 'Spetta a te decidere.']
   ];
   const MP_LEMMA_OF = [['dispiacere', /^dispiac/], ['piacere', /^piac/], ['mancare', /^manc/], ['servire', /^serv/], ['bastare', /^bast/],
     ['interessare', /^interess/], ['importare', /^import/], ['sembrare', /^sembr/], ['toccare', /^tocc/], ['convenire', /^conv(?:en|ien)/], ['restare', /^rest/],
-    ['andare', /^va$/]];
-  const MP_SINGULAR = /^(piace|manca|serve|basta|interessa|importa|fa|sembra|dispiace|va|tocca|conviene|resta)$/;
-  const MP_PLURAL = /^(piacciono|mancano|servono|bastano|interessano|importano|fanno|sembrano|restano)$/;
-  const MP_FAMILY = /^(piac|manc|serv|bast|interess|import|sembr|dispiac|tocc|conv(?:en|ien)|rest|fa$|fanno$|va$)/;
-  const MP_VERB_OF = [
-    ['piacere', /^(piace|piacciono|piaci|piaccio|piacete|piacciamo|piacerebbe)$/],
-    ['mancare', /^manc/], ['servire-bastare', /^(serv|bast)/], ['interessare-importare', /^(interess|import)/],
-    ['fare-male', /^(fa|fanno)$/], ['sembrare', /^sembr/]
-  ];
+    ['succedere', /^succed/], ['capitare', /^capit(?:a|ano)$/], ['rimanere', /^riman/], ['occorrere', /^occorr/], ['parere', /^(?:pare|paiono)$/],
+    ['spettare', /^spett/], ['andare', /^va$/]];
+  const MP_SINGULAR = /^(piace|manca|serve|basta|interessa|importa|fa|sembra|dispiace|va|tocca|conviene|resta|succede|capita|rimane|occorre|pare|spetta|sta)$/;
+  const MP_PLURAL = /^(piacciono|mancano|servono|bastano|interessano|importano|fanno|sembrano|restano|succedono|capitano|rimangono|occorrono|paiono|spettano|stanno)$/;
+  const MP_FAMILY = /^(piac|manc|serv|bast|interess|import|sembr|dispiac|tocc|conv(?:en|ien)|rest|succed|capit(?:a|ano)$|riman|occorr|pare$|paiono$|spett|sta$|stanno$|fa$|fanno$|va$)/;
   function mipiaceTags(row) {
     const [level, person, it, en] = row;
     const tokens = it.toLowerCase().replace(/’/g, "'").match(/[^\s.,!?¿¡;:«»"]+|[.,!?;:]/g) || [];
@@ -8550,16 +8586,15 @@
       if (words.some(w => MP_SINGULAR.test(w))) cosa.add(infinitive ? 'fare' : 'una');
       if (!cosa.size) cosa.add(person === 'cose' ? 'piu' : 'una');   // a reply with no verb: Anche a me
     }
-    let verb = (MP_VERB_OF.find(([key, re]) => words.some(w => re.test(w)) && (key !== 'fare-male' || words.includes('male'))) || ['espressioni'])[0];
-    if (verb === 'espressioni' && !words.some(w => MP_FAMILY.test(w))) verb = 'piacere';   // Anche a me answers a piacere question
     const frase = new Set();
     if (/\?/.test(it)) frase.add('domande');
     if (words.some(w => /^(non|no|neanche|nemmeno|mai)$/.test(w))) frase.add('negative');
     if (words.some((w, i) => /^(me|te|lui|lei|noi|voi|loro)$/.test(w) && words[i - 1] === 'a')) frase.add('a-me');
     if (!frase.size) frase.add('affermative');
     const lemma = words.includes('male') && words.some(w => /^(fa|fanno)$/.test(w)) ? 'fare male'
+      : words.includes('bene') && words.some(w => /^(sta|stanno)$/.test(w)) ? 'stare bene'
       : (MP_LEMMA_OF.find(([, re]) => words.some(w => re.test(w))) || ['piacere'])[0];   // a reply with no verb (Anche a me) answers piacere
-    return { chi: [...chi], cosa: [...cosa], verb, frase: [...frase], lemma };
+    return { chi: [...chi], cosa: [...cosa], frase: [...frase], lemma };
   }
   function mipiaceVerbNote(lemma) {
     const [v, means, says] = MP_BACKWARDS.find(r => r[0] === lemma);
@@ -8568,25 +8603,16 @@
   const MIPIACE_ITEMS = MIPIACE_DATA.map(([level, person, it, en, literal, alts]) => {
     const key = sentenceKey(it), tg = mipiaceTags([level, person, it, en]);
     return { noun: key, display: it, it, en, level, type: 'piacere', person, natural: null, literal,
-             chi: tg.chi, cosa: tg.cosa, verbo: tg.verb, frase: tg.frase, lemma: tg.lemma,
+             chi: tg.chi, cosa: tg.cosa, frase: tg.frase, lemma: tg.lemma,
              note: mipiaceVerbNote(tg.lemma) + `<span class="literal-label">Word for word</span> <em>${literal}</em>`,
              phrase: { key, it, en, itAlts: sentenceAccepted(person, it, alts).filter(s => s !== it), enAlts: [], reg: 'neutral' } };
   });
-  const MIPIACE_GROUPS = [['verbo', 'I verbi al contrario', 'the backwards verbs'], ['frase', 'La frase', 'what kind of sentence']];
-  const MIPIACE_THEMES = [
-    ...[['piacere', 'Piacere', 'liking'], ['mancare', 'Mancare', 'missing'], ['servire-bastare', 'Servire · bastare', 'needing, and enough'],
-        ['interessare-importare', 'Interessare · importare', 'interest, and caring'], ['fare-male', 'Fare male', 'what hurts'],
-        ['sembrare', 'Sembrare', 'seeming'], ['espressioni', 'Ti va? Tocca a te', 'fixed expressions']]
-      .map(([key, label, en]) => ({ key, group: 'verbo', label, en, nouns: MIPIACE_ITEMS.filter(n => n.verbo === key).map(n => n.noun),
-                                    tip: MP_BACKWARDS.filter(r => r[4] === key).map(([v, means, says]) => `${v}: ${means} (literally, ${says})`).join(' · ') })),
-    ...[['affermative', 'Affermazioni', 'plain statements'], ['negative', 'Non…', 'negatives'], ['domande', 'Domande', 'questions'], ['a-me', 'A me, a te', 'me, not you: short replies']]
-      .map(([key, label, en]) => ({ key: 'frase-' + key, group: 'frase', label, en, nouns: MIPIACE_ITEMS.filter(n => n.frase.includes(key)).map(n => n.noun) }))
-  ];
-  // Who is pleased, and what pleases: two rows at the top of the setup, kept with the persons
-  // (synced) under 'mipiace'. A sentence stays in when it matches both
+  const MIPIACE_THEMES = MP_BACKWARDS.map(([v, means]) => ({ key: v.replace(/ /g, '-'), label: v, en: means, nouns: MIPIACE_ITEMS.filter(n => n.lemma === v).map(n => n.noun) }));
+  // The rows to choose by, besides the verbs: who is pleased, what pleases, what kind of sentence
   const MP_CHI = [['mi', 'mi', 'me'], ['ti', 'ti', 'you'], ['lui', 'gli', 'him'], ['lei', 'le', 'her'], ['Lei', 'Le', 'you, formal'],
                   ['ci', 'ci', 'us'], ['vi', 'vi', 'you all'], ['loro', 'gli', 'them'], ['nome', 'a Marco', 'someone named'], ['nessuno', 'nessuno', 'Basta così']];
   const MP_COSA = [['una', 'una cosa', 'piace'], ['piu', 'più cose', 'piacciono'], ['fare', 'fare', 'piace + infinitive'], ['persona', 'una persona', 'mi piaci']];
+  const MP_FRASE = [['affermative', 'affermazioni', 'statements'], ['negative', 'non…', 'negatives'], ['domande', 'domande', 'questions'], ['a-me', 'a me, a te', 'short replies']];
   const MIPIACE_ORDER = MIPIACE_ITEMS.map(n => n.noun);
   // ===== Dialoghi (Oct 2026): everyday scenes, in two voices =====
   // Each line is [speaker, Italian, English word for word (Italian order; "you" marked
@@ -9087,7 +9113,8 @@
   // Verbs like piacere: what the subject is doing, word for word
   const SENT_LIKE = { piacere: 'pleasing', dispiacere: 'displeasing', mancare: 'lacking (missing)', servire: 'serving (being needed)', interessare: 'interesting',
                       sembrare: 'seeming', restare: 'remaining', rimanere: 'remaining', andare: 'appealing', fare: 'doing',
-                      bastare: 'being enough', importare: 'mattering', toccare: 'falling to someone', convenire: 'suiting' };
+                      bastare: 'being enough', importare: 'mattering', toccare: 'falling to someone', convenire: 'suiting',
+                      succedere: 'happening', capitare: 'happening', occorrere: 'being needed', parere: 'seeming', spettare: 'falling to someone', stare: 'suiting' };
   const SENT_WHO = { io: 'I am', tu: 'you are', lui: 'he or she is', noi: 'we are', voi: 'you all are', loro: 'they are' };
   const SENT_IOBJ = new Set(['mi', 'ti', 'gli', 'le', 'ci', 'vi']);
   const SENT_IOBJ_EN = { mi: 'to me', ti: 'to you', gli: 'to him (or to them)', le: 'to her', ci: 'to us', vi: 'to you all' };
@@ -9295,7 +9322,11 @@
   // "I am enough" or "I import". The sentence engine knows their forms all the same.
   const SENT_EXTRA_VERBS = [
     { it: 'bastare', en: 'to be enough', conj: { io: 'basto', tu: 'basti', lui: 'basta', noi: 'bastiamo', voi: 'bastate', loro: 'bastano' } },
-    { it: 'importare', en: 'to matter', conj: { io: 'importo', tu: 'importi', lui: 'importa', noi: 'importiamo', voi: 'importate', loro: 'importano' } }
+    { it: 'importare', en: 'to matter', conj: { io: 'importo', tu: 'importi', lui: 'importa', noi: 'importiamo', voi: 'importate', loro: 'importano' } },
+    { it: 'succedere', en: 'to happen', conj: { io: 'succedo', tu: 'succedi', lui: 'succede', noi: 'succediamo', voi: 'succedete', loro: 'succedono' } },
+    { it: 'capitare', en: 'to happen', conj: { io: 'capito', tu: 'capiti', lui: 'capita', noi: 'capitiamo', voi: 'capitate', loro: 'capitano' } },
+    { it: 'occorrere', en: 'to be needed', conj: { io: 'occorro', tu: 'occorri', lui: 'occorre', noi: 'occorriamo', voi: 'occorrete', loro: 'occorrono' } },
+    { it: 'spettare', en: 'to be up to', conj: { io: 'spetto', tu: 'spetti', lui: 'spetta', noi: 'spettiamo', voi: 'spettate', loro: 'spettano' } }
   ];
   const SENT_EXTRA_FORMS = new Map(SENT_EXTRA_VERBS.flatMap(v => [v.it, ...Object.values(v.conj)].map(f => [f, v])));
   function sentenceSegments(text) {
@@ -9450,10 +9481,10 @@
     // Verbs like piacere, drilled: natural English in, the Italian turned round out (the
     // word for word after); Why explains a slip. Sentence cards, like Scrittura's.
     mipiace: {
-      kind: 'phrase', sentences: true, panel: 'mipiace', doneWord: 'sentences', chipOrder: 'level', themeGroups: MIPIACE_GROUPS, mipiaceFilter: true,
-      switchLabel: 'Mi piace', title: 'Mi piace', subtitle: 'Il Mazzo · Verbi come Piacere',
+      kind: 'phrase', sentences: true, panel: 'mipiace', doneWord: 'sentences', chipOrder: 'level', facets: true,
+      switchLabel: 'Verbi al contrario', title: 'Verbi al contrario', subtitle: 'Il Mazzo · Verbs that work backwards',
       setupTitle: 'Choose your sentences',
-      setupSub: 'Verbs like <em>piacere</em> work backwards (they are the chips under <em>I verbi al contrario</em>, and <em>Come piacere</em> lists them): in <em>mi piace il caffè</em> the coffee is the subject — it does the pleasing — and the person who likes it goes in the pronoun, <em>mi</em>. Each card gives the natural English; write the Italian the other way round. The word for word shows after you answer, and <em>Why</em> explains any slip.',
+      setupSub: 'In English the person does the verb — <em>I like coffee</em>. With these verbs the thing does it, and the person goes in the pronoun: <em>mi piace il caffè</em>, the coffee pleases me. Each card gives the natural English; you write the Italian the other way round. The word for word shows after you answer, and <em>Why</em> explains any slip.',
       itemWord: 'sentence', itemWords: 'sentences',
       items: MIPIACE_ITEMS, themes: MIPIACE_THEMES, frequency: MIPIACE_ORDER,
       statsKeys: { 'en-it': 'mipiace-stats-v1', 'it-en': 'mipiace-stats-iten-v1', listen: 'mipiace-stats-listen-v1' }, statsFormat: 'noun',
@@ -9562,15 +9593,6 @@
     FREQUENCY_ORDER = cfg.frequency;
     selectedNouns = st.selected;
     st.hidden = [];
-    if (cfg.mipiaceFilter) {   // Mi piace: only who and what the two rows allow
-      const chi = activeMipiace('chi'), cosa = activeMipiace('cosa');
-      nounData = cfg.items.filter(n => n.chi.some(k => chi.includes(k)) && n.cosa.some(k => cosa.includes(k)));
-      const pool = new Set(nounData.map(n => n.noun));
-      THEMES = cfg.themes.map(th => ({ ...th, nouns: th.nouns.filter(k => pool.has(k)) })).filter(th => th.nouns.length);
-      FREQUENCY_ORDER = cfg.frequency.filter(k => pool.has(k));
-      st.hidden = [...st.selected].filter(k => !pool.has(k));
-      selectedNouns = new Set([...st.selected].filter(k => pool.has(k)));
-    }
     if (cfg.typeFilter) {   // only the kinds of sentence chosen at the top of the setup
       const on = activeSentenceTypes();
       nounData = cfg.items.filter(n => on.includes(n.type));
@@ -9803,50 +9825,55 @@
     });
   }
 
-  // ===== Mi piace: who is pleased, what pleases =====
-  function activeMipiace(dim) {
-    const keys = (dim === 'chi' ? MP_CHI : MP_COSA).map(x => x[0]), saved = (verbPersonsSaved().mipiace || {})[dim];
-    const list = Array.isArray(saved) ? keys.filter(k => saved.includes(k)) : keys;
-    return list.length ? list : keys;
+  // ===== Verbi al contrario: one way to choose (Nov 2026) =====
+  // Every tap chooses sentences. Within a row, any of those tapped; across rows, all of
+  // them: mi and più cose is just the Mi piacciono… sentences. Nothing tapped, nothing
+  // chosen. Select all, Random, Weakest and Clear all start again from scratch.
+  const mpFacet = { lemma: new Set(), chi: new Set(), cosa: new Set(), frase: new Set() };
+  const mpField = { lemma: n => [n.lemma], chi: n => n.chi, cosa: n => n.cosa, frase: n => n.frase };
+  const mpMatches = (n, skip) => Object.keys(mpFacet).every(g => g === skip || !mpFacet[g].size || mpField[g](n).some(k => mpFacet[g].has(k)));
+  const mpAnyChosen = () => Object.values(mpFacet).some(s => s.size);
+  const mpCount = (g, k) => MIPIACE_ITEMS.filter(n => mpField[g](n).includes(k) && mpMatches(n, g)).length;
+  function mpChooseHTML() {
+    const chip = (g, [k, label, sub]) => {
+      const on = mpFacet[g].has(k), n = mpCount(g, k);
+      return `<button type="button" class="mp-chip${on ? ' on' : ''}${n ? '' : ' none'}" data-mpg="${g}" data-mpk="${k}" aria-pressed="${on}">`
+        + `<span class="mp-label">${label}</span> <span class="mp-sub">${sub}</span> <span class="mp-count">${n}</span></button>`;
+    };
+    const row = (g, title, en, list) => `<div class="mp-row-label">${title} <span>· ${en}</span></div><div class="mp-chips">${list.map(x => chip(g, x)).join('')}</div>`;
+    return `
+      <div class="mp-head"><div class="theme-eyebrow">↳ Choose your sentences</div>${mpAnyChosen() ? '<button type="button" class="ghost" id="mp-clear">clear</button>' : ''}</div>
+      <p class="mp-how">Tap anything to choose its sentences. Taps in different rows narrow each other: <em>mi</em> and <em>più cose</em> is just the <em>Mi piacciono…</em> sentences.</p>
+      <div class="mp-row-label">I verbi al contrario <span>· the backwards verbs you'll meet most, roughly the most common first</span></div>
+      <div class="mp-verbs">${MP_BACKWARDS.map(([v, means, says, eg]) => {
+        const on = mpFacet.lemma.has(v), n = mpCount('lemma', v);
+        return `<button type="button" class="mp-verb${on ? ' on' : ''}${n ? '' : ' none'}" data-mpg="lemma" data-mpk="${v}" aria-pressed="${on}">`
+          + `<span class="mpv-head"><span class="mpv-it">${v}</span> <span class="mp-count">${n}</span></span> `
+          + `<span class="mpv-en">${means}</span> <span class="mpv-lit">literally, ${says}</span> <span class="mpv-eg">${eg}</span></button>`;
+      }).join('')}</div>
+      ${row('chi', 'Chi', 'who is pleased', MP_CHI)}
+      ${row('cosa', 'Che cosa', 'what pleases', MP_COSA)}
+      ${row('frase', 'La frase', 'what kind of sentence', MP_FRASE)}`;
   }
-  function saveMipiace(dim, list) {
-    const all = verbPersonsSaved(), keys = (dim === 'chi' ? MP_CHI : MP_COSA).map(x => x[0]);
-    all.mipiace = { ...(all.mipiace || {}), [dim]: keys.filter(k => list.includes(k)) };
-    try { localStorage.setItem(VERB_PERSONS_KEY, JSON.stringify(all)); syncTouched(); } catch (e) { /* storage full */ }
-  }
-  function mipiaceFilterHTML() {
-    const chi = activeMipiace('chi'), cosa = activeMipiace('cosa');
-    const row = (dim, list, on, other, otherOn, title, en) => `
-      <div class="mode-label">${title} <span class="mp-row-en">· ${en}</span> <button type="button" class="ghost mp-all" data-mpall="${dim}">tutti</button></div>
-      <div class="mode-toggle type-toggle mp-toggle" id="mp-${dim}" role="group" aria-label="${en}">
-        ${list.map(([k, label, sub]) => {
-          const n = MIPIACE_ITEMS.filter(it => it[dim].includes(k) && it[other].some(x => otherOn.includes(x))).length;
-          return `<button type="button" class="mode-option${on.includes(k) ? ' active' : ''}" data-mpdim="${dim}" data-mpkey="${k}" aria-pressed="${on.includes(k)}" title="${sub}"><span class="mp-label">${label}</span><span class="mp-sub">${sub}</span><span class="type-count">${n}</span></button>`;
-        }).join('')}
-      </div>`;
-    return `<div class="mp-filters">${row('chi', MP_CHI, chi, 'cosa', cosa, 'Chi', 'who is pleased')}${row('cosa', MP_COSA, cosa, 'chi', chi, 'Che cosa', 'what pleases')}
-      <p class="person-hint" id="mp-hint" aria-live="polite"></p></div>`;
-  }
-  function wireMipiaceFilter() {
-    const box = document.querySelector('.mp-filters');
+  function wireMipiaceFacets() {
+    const box = document.getElementById('mp-choose');
     if (!box) return;
+    const refresh = () => { box.innerHTML = mpChooseHTML(); };
     box.addEventListener('click', e => {
-      const all = e.target.closest('[data-mpall]');
-      const b = e.target.closest('[data-mpkey]');
-      if (!all && !b) return;
-      const dim = all ? all.dataset.mpall : b.dataset.mpdim;
-      const keys = (dim === 'chi' ? MP_CHI : MP_COSA).map(x => x[0]), cur = activeMipiace(dim);
-      const next = all ? keys : cur.includes(b.dataset.mpkey) ? cur.filter(x => x !== b.dataset.mpkey) : [...cur, b.dataset.mpkey];
-      if (!next.length) { document.getElementById('mp-hint').textContent = 'Keep at least one in each row.'; return; }
-      const other = dim === 'chi' ? 'cosa' : 'chi', otherOn = activeMipiace(other);
-      if (!MIPIACE_ITEMS.some(it => it[dim].some(k => next.includes(k)) && it[other].some(k => otherOn.includes(k)))) {
-        document.getElementById('mp-hint').textContent = 'No sentence has both — try another, or tap tutti.';
-        return;
-      }
-      saveMipiace(dim, next);
-      applySubject(subject);   // reload the section with just these
-      showSetup();
+      const b = e.target.closest('[data-mpg]');
+      if (e.target.closest('#mp-clear')) Object.values(mpFacet).forEach(s => s.clear());
+      else if (b) { const s = mpFacet[b.dataset.mpg]; if (s.has(b.dataset.mpk)) s.delete(b.dataset.mpk); else s.add(b.dataset.mpk); }
+      else return;
+      selectedNouns.clear();
+      if (mpAnyChosen()) MIPIACE_ITEMS.forEach(n => { if (mpMatches(n)) selectedNouns.add(n.noun); });
+      document.querySelectorAll('#verb-grid .verb-chip').forEach(c => c.classList.toggle('unselected', !selectedNouns.has(c.dataset.noun)));
+      updateReadout();
+      refresh();
     });
+    for (const id of ['select-all', 'clear-all', 'random-20', 'random-50', 'weakest-10', 'weakest-20']) {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', () => { Object.values(mpFacet).forEach(s => s.clear()); refresh(); });
+    }
   }
 
   // ===== Scrittura: which kinds of sentence =====
@@ -10108,17 +10135,19 @@
         </div>
       </aside>
       `,
-    mipiace: () => `
+    mipiace: where => `
       <aside class="endings phrases-panel" aria-label="Verbs like piacere">
         <h3 class="endings-title">Come piacere</h3>
         <div class="endings-sub">Verbs that work backwards</div>
 
-        <div class="endings-note mp-verbs">
+        ${where === 'setup' ? '' : `
+        <div class="endings-note mp-verb-table">
           <div class="en-label">I verbi al contrario · the backwards verbs</div>
           <p>In English the person does the verb (<em>I like</em>); with these, the thing does it, and the person goes in the pronoun.</p>
           ${MP_BACKWARDS.map(([v, means, says, eg]) => `
           <div class="mpv-row"><span class="mpv-it">${v}</span> — <span class="mpv-en">${means}</span><span class="mpv-lit">literally, ${says} · <em>${eg}</em></span></div>`).join('')}
         </div>
+        `}
 
         <div class="eg eg-tulei">
           <div class="eg-class">stressed</div>
@@ -10335,7 +10364,6 @@
         <p class="setup-sub">${cfg.setupSub}</p>
       </div>
       ${cfg.typeFilter ? sentenceTypesHTML() : ''}
-      ${cfg.mipiaceFilter ? mipiaceFilterHTML() : ''}
       ${cfg.numberToggle ? prepNumbersHTML() : ''}
       ${modeOptions ? `
       <div class="mode-label">Practice mode</div>
@@ -10365,6 +10393,7 @@
       <div class="setup-body">
       <div class="setup-main">
 
+      ${cfg.facets ? `<div class="theme-row" id="theme-row"><div class="mp-choose" id="mp-choose">${mpChooseHTML()}</div><div id="theme-chips" hidden></div></div>` : `
       <div class="theme-row" id="theme-row">
         <div class="theme-eyebrow">↳ Pick by theme</div>
         <div class="theme-chips${cfg.themeGroups ? ' grouped' : ''}" id="theme-chips">
@@ -10374,7 +10403,7 @@
               <div class="theme-group-chips">${THEMES.filter(t => t.group === g).map(themeChipHTML).join('')}</div>
             </div>`).join('') : THEMES.map(themeChipHTML).join('')}
         </div>
-      </div>
+      </div>`}
 
       <div class="setup-controls">
         <div>
@@ -10427,7 +10456,7 @@
       </div>
       </div>
       ${cfg.panel ? '<div class="setup-side">' : ''}
-      ${cfg.panel && SECTION_CHARTS[cfg.panel] ? SECTION_CHARTS[cfg.panel]() : ''}
+      ${cfg.panel && SECTION_CHARTS[cfg.panel] ? SECTION_CHARTS[cfg.panel]('setup') : ''}
       ${cfg.panel ? `<aside class="endings weak-panel" id="weak-panel" aria-label="Your weakest ${cfg.itemWords}"></aside></div>` : ''}
       </div>
     `;
@@ -10436,7 +10465,7 @@
 
     if (isVerbs) wirePersonPicker();
     wireSentenceTypes();
-    wireMipiaceFilter();
+    wireMipiaceFacets();
     wireNumbers();
 
     // ===== Verbs: practice mode and direction (as in the verb game's setup) =====
@@ -10660,7 +10689,7 @@
   // Sync the visual state of each theme chip (empty / partial / full)
   // No-op if the setup view isn't showing.
   const themeChipHTML = t => `
-            <button type="button" class="theme-chip" data-theme="${t.key}"${t.tip ? ` title="${escapeHTML(t.tip)}"` : ''}>
+            <button type="button" class="theme-chip" data-theme="${t.key}">
               ${t.label}<span class="theme-chip-count">${t.nouns.length}</span>
             </button>`;
   function updateThemeChips() {
