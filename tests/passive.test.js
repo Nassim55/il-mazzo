@@ -129,8 +129,11 @@ const txt = (B, id) => B.d.getElementById(id).textContent.trim();
   if (pl.english.includes('(pl)')) { while (last(B).voice.name !== 'Daniel') await finish(B); }
   ok(!/\(pl\)|\//.test(B.w.__said.filter(u => u.voice.name === 'Daniel').map(u => u.text).join(' ')), 'the English is made to be said: "you all", "he or she", no slashes');
   ok(B.ev("spokenEnglish('you (pl) send')") === 'you all send' && B.ev("spokenEnglish('he/she remembers / reminds')") === 'he or she remembers, or reminds'
-     && B.ev("spokenEnglish('I talk about the friend (f.).')") === 'I talk about the friend (feminine).' && B.ev("spokenEnglish('You speak Italian? (tu)')") === 'You speak Italian? (informal)'
-     && B.ev("spokenEnglish('fresh · cool')") === 'fresh, cool', '…as in: you all send · he or she remembers, or reminds · the friend (feminine) · (informal) for tu');
+     && B.ev("spokenEnglish('I talk about the friend (f.).')") === 'I talk about the friend.' && B.ev("spokenEnglish('You speak Italian? (tu)')") === 'You speak Italian?'
+     && B.ev("spokenEnglish('fresh · cool')") === 'fresh, cool', '…as in: you all send · he or she remembers, or reminds · fresh, cool');
+  ok(B.ev("spokenEnglish('to know (facts, how to)')") === 'to know' && B.ev("spokenEnglish('Good morning! What you take (formal)?')") === 'Good morning! What you take?'
+     && B.ev("spokenEnglish('Do you like it? (tu) I do!')") === 'Do you like it? I do!' && B.ev("spokenEnglish('the wall (of a room)')") === 'the wall',
+     'nothing in brackets is read out: "to know (facts, how to)" is said "to know"');
 
   // ---- No Italian voice ----
   B = boot({ 'flipcards-subject': 'nouns' }, fakes([VOICES[1]]));

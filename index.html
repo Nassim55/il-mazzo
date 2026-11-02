@@ -10555,15 +10555,16 @@
     return vs.slice().sort((a, b) => score(b) - score(a))[0];
   }
   // A card's English, made to be read aloud: no slashes, dots or abbreviations
+  // (Brackets aren't read out: "you (pl)" becomes "you all", and any other note in
+  // brackets — (facts, how to), (formal), (f.), (of a room) — is left out)
   function spokenEnglish(text) {
     return String(text || '')
-      .replace(/\byou \(pl\)/gi, 'you all').replace(/\(pl\)/gi, '(plural)')
-      .replace(/\(tu\)/g, '(informal)').replace(/\(voi\)/g, '(you all)').replace(/\(Lei\)/g, '(formal)')
-      .replace(/\(m\.\)/g, '(masculine)').replace(/\(f\.\)/g, '(feminine)')
-      .replace(/\blit\.\s/g, 'literally ')
+      .replace(/\byou \(pl\)/gi, 'you all')
+      .replace(/\s*\([^)]*\)/g, '')
       .replace(/\b(he|she)\/(she|he)\b/gi, '$1 or $2')
       .replace(/\s+\/\s+/g, ', or ').replace(/\//g, ' or ')
       .replace(/\s*·\s*/g, ', ').replace(/…/g, '')
+      .replace(/\s+([.,!?;:])/g, '$1')
       .replace(/\s{2,}/g, ' ').trim();
   }
   // The same cards a round would deal: the selection, the number, at random or most common first
