@@ -6,15 +6,15 @@ const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => 
 ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Verbi regolari', 'Verbi irregolari', 'Mi piace', 'Aggettivi', 'Preposizioni', 'Frasi', 'Scrittura', 'Dialoghi', 'Racconto']), `section switch: ${labels.join(' | ')}`);
 d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 ok(ev('subject') === 'adjectives' && d.getElementById('app-title').textContent === 'Aggettivi' && d.title === 'Il Mazzo · Aggettivi', 'title and tab');
-ok(ev('selectedNouns.size') === 150 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('150 adjectives · 150 cards'), 'every adjective starts selected, as in the original (now 150 · 150 cards)');
+ok(ev('selectedNouns.size') === 200 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('200 adjectives · 200 cards'), 'every adjective starts selected, as in the original (now 200 · 200 cards)');
 ok(d.querySelector('.agreement-panel .endings-title')?.textContent === 'Le concordanze' && d.querySelector('.setup-side').children[1].id === 'weak-panel', 'Le concordanze panel with Da ripassare under it');
-ok(/1\/150 practised|3\/150 practised/.test(d.getElementById('setup-meta').textContent), 'original history shows in the stats strip');
+ok(/1\/200 practised|3\/200 practised/.test(d.getElementById('setup-meta').textContent), 'original history shows in the stats strip');
 const weakRows = [...d.querySelectorAll('#weak-panel .weak-it')].map(e => e.textContent);
 ok(JSON.stringify(weakRows) === JSON.stringify(['simpatico', 'grigio']), `Da ripassare ranks by error rate like the original Weakest (${weakRows.join(', ')})`);
 const chips = [...d.querySelectorAll('.theme-chip')].map(c => c.textContent.replace(/\s+/g, ' ').trim());
-ok(chips.length === 18 && chips.some(c => /^-chi · -ghi ?9$/.test(c)), `18 theme chips (11 original + 3 new + 4 patterns): …${chips.slice(11).join(' | ')}`);
+ok(chips.length === 19 && chips.some(c => /^-chi · -ghi ?9$/.test(c)) && chips.some(c => /^Quantità ?7$/.test(c)), `19 theme chips (11 original + 4 new + 4 patterns): …${chips.slice(11).join(' | ')}`);
 d.querySelector('#mode-toggle [data-mode="forms"]').click();
-ok(d.getElementById('card-count').textContent === '511', 'All forms: 511 cards for all 150');
+ok(d.getElementById('card-count').textContent === '667', 'All forms: 667 cards for all 200');
 // Dictionary mode game
 d.querySelector('#mode-toggle [data-mode="dictionary"]').click();
 d.getElementById('clear-all').click();
@@ -83,7 +83,7 @@ ok(JSON.stringify(ev('deck.map(c => c.noun).sort()')) === JSON.stringify(['grand
 // All 100 notes render
 ev("adjMode = 'dictionary'; selectedNouns = new Set(adjData.map(a => a.it)); sessionMaxDeck = null; sessionPool = null; startGame();");
 let notes = 0; for (let i = 0; i < ev('deck.length'); i++) { ev(`index = ${i}; render();`); d.getElementById('answer').value = 'x'; d.getElementById('submit').click(); const expected = ev(`ADJ_ITEMS.find(x => x.noun === deck[${i}].noun).note`).replace(/<[^>]+>/g, ''); if (d.querySelector('.feedback-note')?.textContent === expected) notes++; }
-ok(notes === 150, `all 150 adjective notes render (${notes})`);
+ok(notes === 200, `all 200 adjective notes render (${notes})`);
 // Other sections untouched; backups; reload
 d.getElementById('change-btn').click();
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
@@ -94,4 +94,22 @@ const store = {}; for (let i = 0; i < w.localStorage.length; i++) { const k = w.
 const r = boot(store);
 ok(r.ev('subject') === 'adjectives' && r.d.getElementById('app-title').textContent === 'Aggettivi', 'reload reopens Aggettivi');
 ok(errors.length === 0 && r.errors.length === 0, `no runtime errors (${errors.join('; ')})`);
+// ---- 151–200 (Nov 2026): the next 50, chosen and ranked as 101–150 were ----
+({ w, d, ev } = boot({ 'flipcards-subject': 'adjectives' }));
+const NEXT50 = ['comune', 'grave', 'famoso', 'continuo', 'impossibile', 'pericoloso', 'solito', 'incredibile', 'naturale', 'mezzo'];
+ok(ev('ADJ_FREQUENCY_ORDER.length') === 200 && ev('ADJ_FREQUENCY_ORDER.slice(150, 160).join()') === NEXT50.join() && ev('ADJ_FREQUENCY_ORDER[199]') === 'scientifico'
+   && ev("ADJ_FREQUENCY_ORDER.slice(0, 150).join()").startsWith('primo,nuovo,grande') && ev("ADJ_FREQUENCY_ORDER[149]") === 'breve',
+   '151–200 follow on from 150 (comune, grave, famoso… scientifico); the first 150 keep their order');
+ok(!ev("['proprio', 'ii', 'aereo'].some(k => adjData.some(a => a.it === k))"), 'left out, as the rules say: a possessive (proprio), a Roman numeral (II), a word that is nearly always a noun (aereo)');
+const F = k => ev(`ADJ_FORMS[${JSON.stringify(k)}].join(' ')`);
+ok(F('economico') === 'economico economica economici economiche' && F('tecnico') === 'tecnico tecnica tecnici tecniche' && F('vario') === 'vario varia vari varie'
+   && F('medio') === 'medio media medi medie' && F('doppio') === 'doppio doppia doppi doppie' && F('europeo') === 'europeo europea europei europee'
+   && F('peggiore') === 'peggiore peggiori', 'the tricky plurals written out: economici but economiche, vari, medi, doppi, europei and europee');
+ok(ev("ADJ_THEMES.find(t => t.key === 'quantita').nouns.join()") === 'mezzo,vario,completo,medio,singolo,massimo,doppio' && ev("ADJ_THEMES.find(t => t.key === 'ordine').nouns.includes('quarto')")
+   && ev("ADJ_THEMES.find(t => t.key === 'qualita').nouns.includes('peggiore') && ADJ_THEMES.find(t => t.key === 'confronto').nouns.includes('peggiore')"),
+   'a new theme, Quantità (mezzo, doppio, singolo…); quarto with the ordinals; peggiore beside migliore');
+ok(ev("adjData.find(a => a.it === 'grave').en") === 'grave · serious (illness, problem)' && ev("adjData.find(a => a.it === 'zitto').en") === 'silent (not talking)',
+   'prompts that could be mistaken for serio or tranquillo say which is meant');
+ok(/cheap/.test(ev("ADJ_ITEMS.find(n => n.noun === 'economico').note")) && /decreto ministeriale/.test(ev("ADJ_ITEMS.find(n => n.noun === 'ministeriale').note")),
+   'each has its note: economico is usually "cheap"; the DM in DM 37/08 is a decreto ministeriale');
 done();

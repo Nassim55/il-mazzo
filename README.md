@@ -10,7 +10,7 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 | Verbi regolari | 150 verbs | present-tense conjugations, or just the infinitive |
 | Verbi irregolari | 50 verbs | the most common verbs that are irregular in the present |
 | Mi piace | 116 sentences · 13 levels | verbs like *piacere*, drilled: natural English in, the Italian turned round out (*I like the beach* → *Mi piace la spiaggia*) |
-| Aggettivi | 150 adjectives | the dictionary form, or every gender and number |
+| Aggettivi | 200 adjectives | the dictionary form, or every gender and number |
 | Preposizioni | 224 phrases | fusion drills (*di + il libro* → *del libro*) and usage cards in 27 themes, six groups; a rule for every slip; the fusion table |
 | Frasi | 50 phrases | everyday expressions, with *tu* and *Lei* forms kept distinct |
 | Scrittura | 100 sentences | present-tense sentences built from the deck's own words, written in full |
