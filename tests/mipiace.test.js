@@ -20,7 +20,7 @@ ok(B.warns.length === 0 && B.errors.length === 0, 'loads cleanly — every word 
 const tabs = [...B.d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
 ok(tabs[3] === 'Mi piace' && tabs[2] === 'Verbi irregolari' && tabs[4] === 'Aggettivi', 'Mi piace is a section of its own, after Verbi irregolari');
 const groups = [...B.d.querySelectorAll('#theme-chips .theme-group')].map(g => g.querySelector('.theme-group-btn').textContent + ': ' + g.querySelectorAll('.theme-chip').length);
-ok(B.ev('MIPIACE_ITEMS.length') === 116 && groups.join(' · ') === 'Il verbo: 7 · La frase: 4'
+ok(B.ev('MIPIACE_ITEMS.length') === 116 && groups.join(' · ') === 'I verbi al contrario: 7 · La frase: 4'
    && B.ev("MIPIACE_ITEMS.every(n => MIPIACE_THEMES.filter(t => t.group === 'verbo' && t.nouns.includes(n.noun)).length === 1 && MIPIACE_THEMES.some(t => t.group === 'frase' && t.nouns.includes(n.noun)))"),
    `116 sentences; the chips in two groups — the verb (each sentence under one) and the kind of sentence (${groups.join(' · ')})`);
 ok(B.ev("MIPIACE_LEVELS.length") === 13 && B.ev("[...document.querySelectorAll('#verb-grid [data-noun]')].map(e => e.dataset.noun).join('|')") === B.ev("MIPIACE_ORDER.join('|')"),
@@ -32,12 +32,28 @@ ok(T('Gli piacciono gli animali.') === 'lui / piu / piacere / affermative' && T(
    'each sentence sorted by who and what: gli occhi is an article, Lei ti piace is a person, al lago is a place, Gli piace viaggiare is "they"');
 ok(T('Il gelato piace a tutti.') === 'nome / una / piacere / affermative' && T('Manco ai miei genitori.') === 'nome / persona / mancare / affermative'
    && T('Anche a me.') === 'mi / una / piacere / a-me' && T('Basta così.') === 'nessuno / una / servire-bastare / affermative'
-   && T('A lui piacciono le montagne, a lei piace il mare.') === 'lui+lei / piu+una / piacere / a-me',
-   '…and a + someone, a reply with no verb, nobody at all, two people in one sentence');
+   && T('A lui piacciono le montagne, a lei piace il mare.') === 'lui+lei / piu+una / piacere / a-me'
+   && T('Ti conviene partire domani.') === 'ti / fare / espressioni / affermative' && T('Le conviene prendere il treno.') === 'Lei / fare / espressioni / affermative',
+   '…and a + someone, a reply with no verb, nobody at all, two people in one sentence, conviene');
+
+// ---- Which verbs work backwards: said in the chart, on the chips, and on every card ----
+const panel = B.d.querySelector('.phrases-panel[aria-label="Verbs like piacere"]');
+const rows = [...panel.querySelectorAll('.mpv-row')].map(r => r.textContent.replace(/\s+/g, ' ').trim());
+ok(rows.length === 13 && /^piacere — to like literally, to be pleasing to · Mi piace la spiaggia\.$/.test(rows[0].replace('like', 'like ')) && rows.some(r => r.startsWith('mancare — to miss'))
+   && rows.some(r => r.startsWith('restare — to have left')) && panel.querySelector('.mp-verbs') === panel.querySelector('.endings-note'),
+   `Come piacere opens with the backwards verbs — each with what it means, what it literally says, and a sentence (${rows.map(r => r.split(' — ')[0]).join(', ')})`);
+ok(B.ev("MP_BACKWARDS.every(r => MIPIACE_ITEMS.some(n => n.it === r[3]) && MIPIACE_ITEMS.some(n => n.lemma === r[0]))"), 'every example is one of the deck\'s sentences, and every verb has some');
+ok(B.d.querySelector('.theme-group-btn').textContent === 'I verbi al contrario' && /^piacere: to like \(literally, to be pleasing to\)$/.test(B.d.querySelector('.theme-chip[data-theme="piacere"]').getAttribute('title'))
+   && /convenire: had better/.test(B.d.querySelector('.theme-chip[data-theme="espressioni"]').getAttribute('title')), 'the chips are headed I verbi al contrario, and each says what its verbs mean');
+const noteOf = it => B.ev(`MIPIACE_ITEMS.find(n => n.it === ${JSON.stringify(it)}).note`).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+ok(/^The backwards verb mancare , to miss — literally, to be missing to Word for word To me lacks the Italy\.$/.test(noteOf("Mi manca l'Italia."))
+   && /backwards verb fare male , to hurt/.test(noteOf('Mi fa male la schiena.')) && /backwards verb andare /.test(noteOf('Ti va una birra?')) && /backwards verb piacere /.test(noteOf('Anche a me.')),
+   'after answering, each card names its backwards verb before the word for word');
+ok(/chips under <em>I verbi al contrario<\/em>/.test(B.ev("SUBJECTS.mipiace.setupSub")), 'and the setup says where to find them');
 ok(B.ev("MIPIACE_ITEMS.every(n => !SENTENCE_ITEMS.some(s => s.it === n.it))") && B.ev("syncedKeys().get('mipiace-stats-v1')") === 'counters', 'none of Scrittura\'s sentences; its progress syncs like any section\'s');
 const chart = B.d.querySelector('.phrases-panel[aria-label="Verbs like piacere"]');
 ok(chart && /Come piacere/.test(chart.textContent) && chart.querySelectorAll('.eg-cell').length === 16 && /a Lei/.test(chart.textContent) && /The thing is the subject/.test(chart.textContent)
-   && /bastare to be enough/.test(chart.textContent.replace(/\s+/g, ' ')), 'the setup shows the chart: a me → mi … a loro → gli (formal Le too), the agreement rule, the verbs');
+   && /bastare — to be enough/.test(chart.textContent.replace(/\s+/g, ' ')), 'the setup shows the chart: a me → mi … a loro → gli (formal Le too), the agreement rule, the verbs');
 
 // ---- Natural English in, the word for word after ----
 B = one('Mi piace la spiaggia.');
@@ -84,7 +100,7 @@ ok(B.errors.length === 0, 'no errors along the way');
 // ---- Chi and Che cosa: two rows that narrow the section ----
 B = boot({ 'flipcards-subject': 'mipiace' });
 const rowText = dim => [...B.d.querySelectorAll(`#mp-${dim} .mode-option`)].map(b => b.dataset.mpkey + ':' + b.querySelector('.type-count').textContent).join(' ');
-ok(rowText('chi') === 'mi:31 ti:21 lui:12 lei:10 Lei:10 ci:10 vi:3 loro:5 nome:13 nessuno:6' && rowText('cosa') === 'una:72 piu:22 fare:13 persona:10'
+ok(rowText('chi') === 'mi:31 ti:22 lui:12 lei:10 Lei:11 ci:10 vi:3 loro:5 nome:13 nessuno:4' && rowText('cosa') === 'una:72 piu:22 fare:13 persona:10'
    && B.d.querySelectorAll('.mp-toggle .mode-option.active').length === 14, 'Chi (mi, ti, gli, le, Le, ci, vi, gli for them, a Marco, nobody) and Che cosa (one thing, more, doing, a person) — all on, with counts');
 const press = (dim, k) => B.d.querySelector(`#mp-${dim} [data-mpkey="${k}"]`).click();
 const only = (dim, k) => { B.d.querySelector(`[data-mpall="${dim}"]`).click(); [...B.d.querySelectorAll(`#mp-${dim} .mode-option`)].map(b => b.dataset.mpkey).filter(x => x !== k).forEach(x => press(dim, x)); };
