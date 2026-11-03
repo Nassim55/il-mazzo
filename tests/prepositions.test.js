@@ -7,8 +7,8 @@ ok(errors.length === 0 && warns.length === 0, 'loads cleanly: every word of ever
 const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
 ok(tabs.join('|') === 'Sostantivi|Verbi regolari|Verbi irregolari|Verbi al contrario|Aggettivi|Preposizioni|Frasi|Scrittura|Dialoghi|Racconto'
    && d.querySelector('#subject-toggle [data-subject="prepositions"]').classList.contains('active'), 'Preposizioni is a section of its own, after Aggettivi');
-ok(ev('PREP_ITEMS.length') === 196 && ev('PREP_ITEMS.flatMap(cardsForItem).length') === 245 && ev('PREP_THEMES.length') === 27 && ev('PREP_GROUPS.length') === 6,
-   '196 phrases (49 of them singular/plural pairs) — 245 cards — in 27 themes, six groups');
+ok(ev('PREP_ITEMS.length') === 226 && ev('PREP_ITEMS.flatMap(cardsForItem).length') === 305 && ev('PREP_THEMES.length') === 27 && ev('PREP_GROUPS.length') === 6,
+   '226 phrases (79 of them singular/plural pairs) — 305 cards — in 27 themes, six groups');
 // Everything the old game drilled, with at least as many cards (it called some of them by English names)
 const OLD = { 'di-art': 22, 'a-art': 8, 'da-art': 22, 'in-art': 8, 'su-art': 8, citta: 6, paesi: 6, 'da-persona': 6, luoghi: 8, possesso: 6, origine: 6, momenti: 7, periodi: 8, 'verbi-a': 7, 'verbi-di': 6, 'verbi-inf': 8 };
 const size = k => ev(`PREP_ITEMS.filter(n => n.level === ${JSON.stringify(k)}).flatMap(cardsForItem).length`);   // cards, a pair counting two
@@ -118,7 +118,7 @@ ok(ev('deck.length') === 4 && pairsOk(), 'a deck cut to an odd size never splits
 d.getElementById('change-btn').click();
 ev("capValue = ''; selectedNouns = new Set(); updateReadout();");
 const grid = ev('nounData.filter(n => n.mech).map(n => n.display)');
-ok(grid.length === 49 && grid.includes('Parlo del libro.') && !grid.includes('Parlo dei libri.') && ev('nounData.every(n => !/\\|pl$/.test(n.noun))'), 'the setup lists the singular only — the plural is its second card');
+ok(grid.length === 79 && grid.includes('Parlo del libro.') && !grid.includes('Parlo dei libri.') && ev('nounData.every(n => !/\\|pl$/.test(n.noun))'), 'the setup lists the singular only — the plural is its second card');
 
 const numBtn = k => d.querySelector(`#number-toggle [data-num="${k}"]`);
 ok(numBtn('sg').classList.contains('active') && numBtn('pl').classList.contains('active') && d.getElementById('number-toggle').compareDocumentPosition(d.getElementById('theme-row')) & 4,
@@ -142,7 +142,7 @@ ok(heads.map(b => b.textContent.trim()).join('|') === 'Le articolate|Dove|Di chi
    'the 27 themes sit under their six group headings, as in the old game');
 ev('selectedNouns = new Set(); updateReadout();');
 d.querySelector('[data-group="art"]').click();
-ok(ev('selectedNouns.size') === 49 && d.querySelector('[data-group="art"]').classList.contains('full'), 'a group heading picks its whole group (all 49 fusion pairs)');
+ok(ev('selectedNouns.size') === 79 && d.querySelector('[data-group="art"]').classList.contains('full'), 'a group heading picks its whole group (all 79 fusion pairs)');
 d.querySelector('[data-group="art"]').click();
 ok(ev('selectedNouns.size') === 0, 'and clicking it again clears it');
 const cells = [...d.querySelectorAll('.prep-panel .eg-cell')].map(c => c.textContent.trim());
@@ -186,4 +186,6 @@ const sweep = ev(`(() => {
   return { tried, shown, bad };
 })()`);
 ok(sweep.tried > 1500 && sweep.shown === sweep.tried && sweep.bad === 0, `every preposition swapped for another, dropped, or joined to the wrong article: each explained, none broken (${sweep.shown}/${sweep.tried})`);
+ok(ev("sentenceSegments('le spiagge').find(s => s.text === 'spiagge').ref") === 'nouns:spiaggia' && ev("sentenceSegments('le valigie').find(s => s.text === 'valigie').ref") === 'nouns:valigia',
+   'plurals that drop the i are known: spiaggia → spiagge (and valigia → valigie keeps it)');
 done();
