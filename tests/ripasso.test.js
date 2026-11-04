@@ -7,7 +7,8 @@ const timeHook = w => { w.Date.now = () => clock; };
 const history = {
   'sostantivi-stats-v1': JSON.stringify({ pane: { seen: 6, wrong: 3 }, casa: { seen: 4, wrong: 1 }, libro: { seen: 5, wrong: 0 }, acqua: { seen: 1, wrong: 0 } }),
   'verbi-regolari-stats': JSON.stringify({ capire: { attempts: 4, wrongs: 2 } }),
-  'frasi-stats-v1': JSON.stringify({ grazie: { seen: 2, wrong: 1 } }),
+  'aggettivi-stats-v1': JSON.stringify({ piccolo: { seen: 2, wrong: 1 } }),
+  'frasi-stats-v1': JSON.stringify({ grazie: { seen: 2, wrong: 1 } }),   // weak, so due — but Ripasso is for words
   'flipcards-subject': 'nouns'
 };
 let { w, d, ev, key, errors, warns } = boot(history, timeHook);
@@ -19,7 +20,10 @@ ok(warns.length === 0 && errors.length === 0, 'loads cleanly');
 ok(rec('nouns', 'pane').b === 1 && rec('nouns', 'pane').d === t0 && rec('nouns', 'casa').d === t0, 'weak words (≥ 25% wrong) come due straight away');
 const libro = rec('nouns', 'libro'), acqua = rec('nouns', 'acqua');
 ok(libro.b === 4 && libro.d > t0 && libro.d <= t0 + 8 && acqua.b === 3 && acqua.d > t0 && acqua.d <= t0 + 4, 'solid words are spread over the coming days');
-ok(/4 due today/.test(strip()) && /2 nouns · 1 regular verb · 1 phrase/.test(strip()), `strip: "${strip()}"`);
+ok(/4 due today/.test(strip()) && /2 nouns · 1 regular verb · 1 adjective/.test(strip()), `strip: "${strip()}"`);
+ok(ev("seedSrs('phrases', 'en-it').grazie") && !ev("dueList('en-it').some(x => !RIPASSO_SECTIONS.includes(x.subj))") && !/phrase/.test(strip())
+   && ev('RIPASSO_SECTIONS.join()') === 'nouns,verbs,irregular,adjectives,story',
+   'Ripasso is for words: nouns, verbs, adjectives and the story\'s words — a due phrase stays in Frasi (its schedule is still kept)');
 // ---- The schedule rules ----
 ev("srsAnswer('nouns', 'en-it', 'gatto', true)");
 ok(rec('nouns', 'gatto').b === 1 && rec('nouns', 'gatto').d === t0 + 1, 'a first correct answer: box 1, back tomorrow');
@@ -49,9 +53,9 @@ for (let i = 0; i < 4; i++) {
   d.getElementById('submit').click();
   if (!d.getElementById('feedback').className.includes(' correct')) rightAll = false;
 }
-ok(rightAll, 'each card is checked by its own section\'s rules (nouns with articles, verbs with pronouns, phrases)');
-ok(sections.includes('Sostantivi') && sections.includes('Verbi Regolari') && sections.includes('Frasi'), `each card shows its section (${[...new Set(sections)].join(', ')})`);
-ok(JSON.parse(w.localStorage.getItem('sostantivi-stats-v1')).pane.seen === 7 && JSON.parse(w.localStorage.getItem('verbi-regolari-stats')).capire.attempts === 5 && JSON.parse(w.localStorage.getItem('frasi-stats-v1')).grazie.seen === 3, 'answers are saved to each section\'s own progress');
+ok(rightAll, 'each card is checked by its own section\'s rules (nouns with articles, verbs with pronouns, adjectives)');
+ok(sections.includes('Sostantivi') && sections.includes('Verbi Regolari') && sections.includes('Aggettivi'), `each card shows its section (${[...new Set(sections)].join(', ')})`);
+ok(JSON.parse(w.localStorage.getItem('sostantivi-stats-v1')).pane.seen === 7 && JSON.parse(w.localStorage.getItem('verbi-regolari-stats')).capire.attempts === 5 && JSON.parse(w.localStorage.getItem('aggettivi-stats-v1')).piccolo.seen === 3, 'answers are saved to each section\'s own progress');
 ok(rec('nouns', 'pane').b === 2 && rec('nouns', 'pane').d === t0 + 2 && rec('verbs', 'capire').d === t0 + 2, 'and each is rescheduled: box 2, two days out');
 ev('index = deck.length; render();');
 ok(/FINE DEL RIPASSO/.test(d.querySelector('.badge').textContent) && /Fatto!/.test(d.querySelector('.msg').textContent) && d.getElementById('back-to-setup').textContent === '← Back to setup', 'completion: "Fatto!"');

@@ -42,7 +42,7 @@ Every card section works in three directions — English → Italian, Italian �
 
 **Typing it right after a miss.** After a wrong answer the answer box clears and the button reads *Riscrivi →*: the right answer has to be typed before the next card, as leniently checked as the answer itself (accents, capitals and punctuation forgiven). It's practice only: it changes neither the score nor the card's history or review schedule. In Italian → English, *I was right — count it* lifts it.
 
-- **Ripasso del giorno** — spaced repetition across every section: every item you practise is scheduled, and the daily review brings back exactly what's due (see below)
+- **Ripasso del giorno** — spaced repetition for the words: every item you practise is scheduled, and the daily review brings back the nouns, verbs and adjectives (and the story's words) that are due (see below)
 - Themes, quick picks (Random, Weakest), hand-picking, and "the most common" by frequency
 - Deck size and Focus, to grow or narrow a round while playing
 - A history note on every item, plus your own word associations
@@ -58,6 +58,8 @@ Every card section works in three directions — English → Italian, Italian �
 ## Ripasso del giorno
 
 Every item you answer gets a review date, separately for each direction. A correct answer moves it up a box and pushes it further out — 1, 2, 4, 8, 16, 32, then 64 days — while a wrong answer brings it back tomorrow. Only the first correct answer of the day moves an item up, so six right conjugations of one verb count once. Progress from before the schedule existed seeds it: weak items come due straight away and solid ones are spread over the following days.
+
+Ripasso is for words: *Sostantivi*, both verb sections, *Aggettivi* and the words you add from *Racconto* — mostly single words. Phrases, sentences, prepositions, possessives and dialogue lines are still scheduled in their own sections, but don't come back here.
 
 The strip at the top of the setup screen shows what's due today in the chosen direction, by section. **Start** mixes it all into one round (up to 30 cards to begin with; Deck size reaches the rest), each card labelled with its section and checked by that section's rules. Schedules are part of backups, and resetting a section's progress clears its schedule.
 
@@ -83,7 +85,7 @@ A hundred present-tense sentences, built only from the deck's own nouns, verbs, 
 - **Mi piace — verbs like piacere (70 sentences):** the thing liked is the subject and the person goes in the pronoun — word for word, *Mi piace il caffè* is *To me pleases the coffee*. Five levels: *piace* or *piacciono*; every person (*ti, gli, le, ci, vi, a mio fratello*, *anche a me*); the verbs that work the same (*mancare, servire, interessare, sembrare, dispiacere, fare male, andare, restare*); people as the subject (*mi piaci, ti manco*); and *Al contrario*, where the prompt is the natural English and the word for word comes after.
 - **Sentence types:** at the top of the setup, choose *Presente semplice*, *Mi piace*, or both (one always stays on). The levels, the grid, every pick button and Ripasso follow the choice, which syncs.
 - **Why it's wrong:** under the comparison, the rule behind each mistake — an adjective agreeing with its noun (*bella*: it agrees with *la città*, feminine singular), a verb with its subject (*beve*: the subject is *il cane*, the lui/lei form, with all six forms), the article for the noun (*l'* before a vowel), a preposition joining its article (*sul* = *su* + *il*), a noun's number, where *non* goes, word order, spelling.
-- Sentences come back in Ripasso del giorno and sync like everything else.
+- Sentences sync like everything else; they stay out of Ripasso del giorno, which is for words.
 
 ## Dialoghi: *Scene di vita*
 

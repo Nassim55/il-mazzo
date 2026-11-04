@@ -150,9 +150,8 @@ ok(cells.length === 35 && cells.includes('dello') && cells.includes("nell'") && 
 
 // ---- In Ripasso, synced, and a round ends properly ----
 ev(`(() => { const s = loadSrs('prepositions', 'en-it'); s['parlo-del-libro'] = { b: 1, d: today(), l: today() - 1 }; saveSrs('prepositions', 'en-it', s); })()`);
-ok(ev("dueList('en-it').some(x => x.subj === 'prepositions' && x.n.noun === 'parlo-del-libro')") && ev('REVIEW_LABEL.prepositions') === 'preposition', 'cards come back in Ripasso del giorno');
-ev('startRipasso()');
-ok(JSON.stringify(ev("deck.filter(c => c.subject === 'prepositions').map(c => c.italian)")) === JSON.stringify(['Parlo del libro.', 'Parlo dei libri.']), 'and Ripasso deals the whole pair: Parlo del libro, then Parlo dei libri');
+ok(ev("loadSrs('prepositions', 'en-it')['parlo-del-libro']") && !ev("dueList('en-it').some(x => x.subj === 'prepositions')"),
+   'answers still schedule the cards, but Ripasso del giorno is for single words: the phrases stay here');
 d.getElementById('change-btn').click();
 ok(ev("syncedKeys().has('preposizioni-stats-v1') && syncedKeys().has('preposizioni-stats-v1:srs') && storageKeys().includes('preposizioni-stats-v1')"), 'and their progress syncs and is backed up');
 const errs = [];

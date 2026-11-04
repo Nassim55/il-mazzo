@@ -170,11 +170,10 @@ d.querySelector('[data-theme="io-tu"]').click(); d.querySelector('[data-theme="m
 ok(ev('selectedNouns.size') === 36, 'pick a level of each (20 + 16)');
 ev(`(() => { const s = loadSrs('sentences', 'en-it'); for (const k of ['mi-piace-il-caffe', 'il-cane-beve-l-acqua']) s[k] = { b: 1, d: today(), l: today() - 1 }; saveSrs('sentences', 'en-it', s); })()`);   // due today
 const dueKeys = () => ev("dueList('en-it').filter(x => x.subj === 'sentences').map(x => x.n.noun)");
-ok(dueKeys().includes('mi-piace-il-caffe') && dueKeys().includes('il-cane-beve-l-acqua'), 'both kinds come back in Ripasso');
+ok(dueKeys().length === 0, 'due sentences stay in Scrittura: Ripasso del giorno is for single words');
 d.querySelector('[data-stype="piacere"]').click();
 ok(types().items === 100 && types().chips === 6 && ev('selectedNouns.size') === 20 && !d.querySelector('.type-key') && JSON.stringify(ev('verbPersonsSaved().sentences')) === '["presente"]',
    'Mi piace off: only the present tense — 100 sentences, its 6 levels, the Mi piace picks out of the deck; the choice is saved');
-ok(!dueKeys().includes('mi-piace-il-caffe') && dueKeys().includes('il-cane-beve-l-acqua'), 'Ripasso leaves out the kind switched off, as it does verb persons');
 d.querySelector('[data-stype="presente"]').click();
 ok(ev('activeSentenceTypes().join()') === 'presente' && /at least one/.test(d.getElementById('type-hint').textContent), 'one kind always stays on');
 d.querySelector('[data-stype="piacere"]').click();
@@ -182,7 +181,7 @@ ok(types().items === 170 && ev('selectedNouns.size') === 36, 'switched back on: 
 ok(ev('syncedKeys().get(VERB_PERSONS_KEY)') === 'assoc' && ev('storageKeys().includes(VERB_PERSONS_KEY)'), 'the choice syncs and is backed up, with the verb persons');
 const t0 = ev('today()');
 const R = boot({ 'flipcards-subject': 'nouns', 'scrittura-stats-v1:srs': JSON.stringify({ 'il-cane-beve-l-acqua': { b: 1, d: t0, l: null } }) });
-ok(/1 sentence/.test(R.d.getElementById('ripasso').textContent), 'sentences come back in Ripasso del giorno');
+ok(!/sentence/.test(R.d.getElementById('ripasso').textContent), 'not counted in Ripasso del giorno either');
 ok(ev("syncedKeys().has('scrittura-stats-v1') && syncedKeys().has('scrittura-stats-v1:srs')"), 'and their progress syncs like everything else');
 // ---- The end of a round (Avanti on the last card) ----
 // A round with misses ends on the summary, its missed list naming the sentences — sentence
@@ -207,17 +206,5 @@ let end = playRound(['prendo-il-treno', 'apro-la-finestra', 'mi-piacciono-i-libr
 ok(end.done && end.errs.length === 0 && end.missed.length === 2 && end.missed.every(m => /\.$|\?$/.test(m)), `Avanti on the last card, after misses, opens the summary — missed: ${end.missed.join(' · ')}`);
 d.getElementById('change-btn') ? d.getElementById('change-btn').click() : ev('showSetup()');
 ev('showSetup()');
-ev(`(() => { const s = loadSrs('sentences', 'en-it'); for (const k of ['bevo-un-caffe', 'ti-piace-la-pizza']) s[k] = { b: 1, d: today(), l: today() - 1 }; saveSrs('sentences', 'en-it', s); })()`);
-const errsR = [];
-w.addEventListener('error', e => errsR.push(e.message));
-ev('startRipasso()');
-const nR = ev('deck.length');
-for (let k = 0; k < nR; k++) {
-  d.getElementById('answer').value = k === 0 ? 'sbagliato' : ev('deck[index].italian');
-  d.getElementById('submit').click();
-  if (k === 0) d.getElementById('answer').value = ev('deck[index].italian');   // typed right to go on
-  d.getElementById('submit').click();
-}
-ok(nR >= 2 && !!d.querySelector('.complete') && errsR.length === 0 && d.querySelectorAll('.missed-item').length >= 1, 'and in Ripasso: a missed sentence, then Avanti on the last card — the summary opens');
 
 done();

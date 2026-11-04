@@ -61,7 +61,7 @@ ok(label('nouns', 'casa') === null && label('sentences', 'bevo-un-caffe') === nu
 // ---- Ripasso: the button follows each card's own section ----
 const R = boot({ 'flipcards-subject': 'nouns' });
 R.ev(`(() => {
-  for (const [subj, k] of [['prepositions', 'parlo-del-libro'], ['nouns', 'casa'], ['verbs', 'parlare']]) {
+  for (const [subj, k] of [['adjectives', 'piccolo'], ['nouns', 'casa'], ['verbs', 'parlare']]) {
     const s = loadSrs(subj, 'en-it'); s[k] = { b: 1, d: today(), l: today() - 1 }; saveSrs(subj, 'en-it', s);
   }
   startRipasso();
@@ -74,5 +74,5 @@ for (let k = 0; k < R.ev('deck.length'); k++) {
   R.d.getElementById('submit').click();
   R.d.getElementById('submit').click();
 }
-ok(seen.includes('prepositions:▦ Le articolate') && seen.includes('verbs:▦ Le desinenze') && seen.includes('nouns:—'), `in Ripasso it follows the card: ${seen.join(' · ')}`);
+ok(seen.includes('adjectives:▦ Le concordanze') && seen.includes('verbs:▦ Le desinenze') && seen.includes('nouns:—'), `in Ripasso it follows the card: ${seen.join(' · ')}`);
 done();

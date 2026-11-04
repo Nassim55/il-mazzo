@@ -4105,12 +4105,15 @@
     lastSrsChange = null;
     return true;
   }
-  // Everything due today (or overdue) in one direction, across all sections,
-  // most overdue first, then the shakiest
+  // Everything due today (or overdue) in one direction, across the word sections —
+  // nouns, verbs and adjectives, and the words added from the story: mostly single words
+  // (Nov 2026: phrases, sentences and dialogue lines stay in their own sections, which
+  // still keep their progress) — most overdue first, then the shakiest
+  const RIPASSO_SECTIONS = ['nouns', 'verbs', 'irregular', 'adjectives', 'story'];
   const sentenceTypeOff = (subj, key, on) => SUBJECTS[subj].typeFilter && !on.includes(SENTENCE_TYPE_OF[key]);
   function dueList(dir) {
     const t = today(), out = [], on = activeSentenceTypes();
-    for (const subj of Object.keys(SUBJECTS)) {
+    for (const subj of RIPASSO_SECTIONS) {
       const srs = seedSrs(subj, dir);
       for (const n of SUBJECTS[subj].items) {
         if (sentenceTypeOff(subj, n.noun, on)) continue;
@@ -4123,7 +4126,7 @@
   function dueOnDay(dir, day) {
     let n = 0;
     const on = activeSentenceTypes();
-    for (const subj of Object.keys(SUBJECTS)) for (const [k, r] of Object.entries(seedSrs(subj, dir))) if (r.d === day && !sentenceTypeOff(subj, k, on)) n++;
+    for (const subj of RIPASSO_SECTIONS) for (const [k, r] of Object.entries(seedSrs(subj, dir))) if (r.d === day && !sentenceTypeOff(subj, k, on)) n++;
     return n;
   }
 
@@ -9974,8 +9977,8 @@
     const list = dueList(ripassoDir);
     const counts = {};
     for (const { subj } of list) counts[subj] = (counts[subj] || 0) + 1;
-    const parts = Object.keys(SUBJECTS).filter(s => counts[s]).map(s => `${counts[s]} ${REVIEW_LABEL[s]}${counts[s] === 1 ? '' : 's'}`);
-    const anyHistory = Object.keys(SUBJECTS).some(s => Object.keys(loadSrs(s, ripassoDir)).length);
+    const parts = RIPASSO_SECTIONS.filter(s => counts[s]).map(s => `${counts[s]} ${REVIEW_LABEL[s]}${counts[s] === 1 ? '' : 's'}`);
+    const anyHistory = RIPASSO_SECTIONS.some(s => Object.keys(loadSrs(s, ripassoDir)).length);
     let text;
     if (list.length) {
       text = `<strong>${list.length}</strong> due today <span class="ripasso-parts">${parts.join(' · ')}</span>`;
@@ -9983,7 +9986,7 @@
       const tomorrow = dueOnDay(ripassoDir, today() + 1);
       text = `All done for today ✓${tomorrow ? ` <span class="ripasso-parts">${tomorrow} due tomorrow</span>` : ''}`;
     } else {
-      text = `<span class="ripasso-parts">Practise some cards and they'll come back here just before you'd forget them.</span>`;
+      text = `<span class="ripasso-parts">Practise some nouns, verbs or adjectives and they'll come back here just before you'd forget them.</span>`;
     }
     el.innerHTML = `
       <div class="ripasso-main">
