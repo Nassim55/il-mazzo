@@ -22,7 +22,8 @@ ok(B.d.querySelector('.container').dataset.map === '1' && boot({ 'flipcards-subj
 
 // ---- A topic's line ----
 ok(B.ev('NOUN_THEMES').every(t => row(t.key).querySelectorAll('.map-strip .map-cell').length === t.nouns.length), 'a square for every noun in every topic');
-ok(/5 of 941 nouns practised · 3 often wrong/.test(map().querySelector('.map-overview').textContent.replace(/\s+/g, ' ')), 'above it: how many practised, how many often wrong');
+ok(map().querySelector('.theme-eyebrow') && map().querySelector('.shade-key .shade-key-bar') && /outlined: in your deck · English → Italian/.test(map().querySelector('.shade-key').textContent),
+   'in the site\'s own pieces: the theme row\'s eyebrow, the grid\'s colour key');
 const topicOf = k => B.ev(`NOUN_THEMES.find(t => t.nouns.includes(${JSON.stringify(k)})).key`);
 const animali = row(topicOf('cane'));
 const titles = [...animali.querySelectorAll('.map-strip .map-cell')].map(c => c.getAttribute('title'));
@@ -38,19 +39,21 @@ ok(scored.every((x, i) => i === 0 || scored[i - 1] <= x) && scores.slice(scored.
 map().querySelector('[data-map-sort="order"]').click();
 
 // ---- The panel ----
-ok(/Tap a topic/.test(panel().textContent) && panel().querySelector(`[data-map-open="${topicOf('cane')}"]`), 'before a topic is opened, the panel offers your weakest topics');
+ok(panel().classList.contains('endings') && panel().querySelector('.endings-title').textContent === 'I temi' && panel().querySelector(`.weak-row[data-map-open="${topicOf('cane')}"]`),
+   'before a topic is opened, the panel — a side panel like the others — lists your weakest topics, as Da ripassare lists nouns');
 panel().querySelector(`[data-map-open="${topicOf('cane')}"]`).click();
-ok(panel().querySelector('.map-panel-title').textContent === B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('cane'))}).label`)
+ok(panel().querySelector('.endings-title').textContent === B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('cane'))}).label`)
    && row(topicOf('cane')).classList.contains('open') && /To work on/.test(panel().textContent), 'tap one (here, or its line on the map): its nouns open in the panel beside the map');
-const firstChip = panel().querySelector('.map-chips .map-chip');
-ok(firstChip.textContent.includes(B.ev("NOUN_ITEMS.find(n => n.noun === 'cane').it")) && /1\/5/.test(firstChip.textContent), 'weakest first, with how often right');
+const firstChip = panel().querySelector('.map-tiles .map-tile');
+ok(firstChip.textContent.includes(B.ev("NOUN_ITEMS.find(n => n.noun === 'cane').it")) && /Right 1 of 5/.test(firstChip.title) && firstChip.querySelector('.verb-chip-italian') && firstChip.classList.contains('shaded')
+   && firstChip.classList.contains('unselected'), 'weakest first, as the grid\'s tiles: shaded by your record, dashed while not in the deck');
 
 // ---- One noun at a time ----
 firstChip.click();
-ok(B.ev('selectedNouns.has("cane")') && B.d.getElementById('selected-count').textContent === '1' && panel().querySelector('[data-map-noun="cane"]').classList.contains('in')
-   && /✓ 1 in deck/.test(row(topicOf('cane')).textContent) && row(topicOf('cane')).querySelector('.map-cell.in'), 'tap a noun: it\'s in the deck — ✓ on it, its square outlined, the topic says how many');
+ok(B.ev('selectedNouns.has("cane")') && B.d.getElementById('selected-count').textContent === '1' && !panel().querySelector('[data-map-noun="cane"]').classList.contains('unselected')
+   && /● 1 in your deck/.test(row(topicOf('cane')).textContent) && row(topicOf('cane')).querySelector('.map-cell.in'), 'tap a noun: it\'s in the deck — solid, with the gold mark; its square outlined; the topic says how many');
 panel().querySelector('[data-map-noun="cane"]').click();
-ok(!B.ev('selectedNouns.has("cane")') && !/in deck/.test(row(topicOf('cane')).querySelector('.map-name').textContent), 'tap again: out');
+ok(!B.ev('selectedNouns.has("cane")') && !/in your deck/.test(row(topicOf('cane')).querySelector('.map-name').textContent), 'tap again: out');
 
 // ---- Whole topics, added up ----
 const topicSize = k => B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(k)}).nouns.length`);
@@ -69,7 +72,7 @@ ok(!B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('casa'))}).no
 // ---- The picks above, and the map follows ----
 B.d.getElementById('select-all').click();
 redraw();
-ok(B.ev('NOUN_THEMES').every(t => new RegExp(`✓ ${t.nouns.length} in deck`).test(row(t.key).textContent)), 'Select all, above: every topic shows all its nouns in the deck');
+ok(B.ev('NOUN_THEMES').every(t => new RegExp(`● ${t.nouns.length} in your deck`).test(row(t.key).textContent)), 'Select all, above: every topic shows all its nouns in the deck');
 B.d.getElementById('clear-all').click();
 redraw();
 ok(!map().querySelector('.map-indeck') && !map().querySelector('.map-cell.in:not(.new)') && B.ev('selectedNouns.size') === 0, 'Clear all: none');
@@ -77,7 +80,7 @@ ok(!map().querySelector('.map-indeck') && !map().querySelector('.map-cell.in:not
 // ---- Practise just the weakest: picked, and off ----
 row(topicOf('cane')).querySelector('.map-head').click();
 row(topicOf('cane')).querySelector('.map-head').click();
-ok(!map().querySelector('.map-row.open') && /Tap a topic/.test(panel().textContent), 'tap an open topic\'s line again to close it');
+ok(!map().querySelector('.map-row.open') && panel().querySelector('.endings-title').textContent === 'I temi', 'tap an open topic\'s line again to close it');
 panel().querySelector(`[data-map-open="${topicOf('cane')}"]`).click();
 panel().querySelector('[data-map-pick="weak"]').click();
 const withSlips = Object.keys(stats).filter(k => stats[k].wrong > 0 && B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('cane'))}).nouns.includes(${JSON.stringify(k)})`));
@@ -90,7 +93,7 @@ map().querySelector('#map-hide').click();
 ok(map().querySelector('#map-show') && !map().querySelector('.map-row') && JSON.parse(B.w.localStorage.getItem('mazzo-noun-map-v1')).hidden === true, 'hide: folded to one line, remembered');
 map().querySelector('#map-show').click();
 B.ev("direction = 'it-en'; stats = loadStats(); showSetup();");
-ok(/^0 of 941 nouns practised/.test(B.d.querySelector('.map-overview').textContent.replace(/\s+/g, ' ').trim()) && /Italian → English/.test(B.d.querySelector('.map-legend').textContent),
+ok(!B.d.querySelector('#noun-map .map-cell:not(.new)') && /Italian → English/.test(B.d.querySelector('#noun-map .shade-key').textContent),
    'it follows the direction: Italian → English has its own record');
 ok(B.errors.length === 0, 'no errors along the way');
 done();

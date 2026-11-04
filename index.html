@@ -239,7 +239,7 @@
   .theme-chip.full .theme-chip-count { opacity: 0.7; }
   .theme-chip:focus:not(:focus-visible) { outline: none; }
 
-  .verb-chip {
+  .verb-chip, .map-tile {
     background: var(--paper);
     border: 1px solid rgba(28, 22, 17, 0.18);
     border-radius: 3px;
@@ -257,9 +257,9 @@
 
   .verb-chip:focus:not(:focus-visible) { outline: none; }
 
-  .verb-chip:hover { border-color: var(--ink); }
+  .verb-chip:hover, .map-tile:hover { border-color: var(--ink); }
 
-  .verb-chip.unselected {
+  .verb-chip.unselected, .map-tile.unselected {
     background: transparent;
     border-style: dashed;
     border-color: rgba(28, 22, 17, 0.22);
@@ -267,7 +267,7 @@
     box-shadow: none;
   }
 
-  .verb-chip.unselected:hover { opacity: 0.8; border-color: var(--ink-soft); }
+  .verb-chip.unselected:hover, .map-tile.unselected:hover { opacity: 0.8; border-color: var(--ink-soft); }
 
   .verb-chip-italian {
     font-family: 'Cormorant Garamond', serif;
@@ -298,13 +298,13 @@
     transition: opacity 0.15s;
   }
 
-  .verb-chip.unselected .verb-chip-mark { opacity: 0; }
+  .verb-chip.unselected .verb-chip-mark, .map-tile.unselected .verb-chip-mark { opacity: 0; }
 
   /* Shaded by your record: the colour comes in --shade; a tile left out keeps its shade
      (the dashed border and the fading say it's out) */
   .verb-chip.shaded,
-  .verb-chip.unselected.shaded { background: var(--shade); }
-  .verb-chip.shaded .verb-chip-english { color: var(--ink-soft); }   /* still readable on the deepest shades */
+  .verb-chip.unselected.shaded, .map-tile.shaded, .map-tile.unselected.shaded { background: var(--shade); }
+  .verb-chip.shaded .verb-chip-english, .map-tile.shaded .verb-chip-english { color: var(--ink-soft); }   /* still readable on the deepest shades */
   .shade-key { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.04em; color: var(--ink-faded); }
   .shade-key-bar { width: 120px; height: 10px; border-radius: 5px; border: 1px solid rgba(28, 22, 17, 0.12); }
   .shade-key-note { flex-basis: 100%; font-size: 10px; }
@@ -2153,90 +2153,65 @@
   .mpv-row .mpv-lit { display: block; font-size: 12px; color: var(--ink-faded); opacity: 1; }
   .mpv-row .mpv-lit em { font-family: 'Cormorant Garamond', serif; font-size: 14px; color: var(--ink); }
 
-  /* La mappa: every noun topic at a glance */
-  .noun-map { margin: 26px 0 6px; padding: 18px 18px 12px; background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.1); border-radius: 14px; }
-  .noun-map:has(.map-show) { padding: 0; background: none; border: 0; }
-  .map-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
-  .map-title { margin: 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 30px; line-height: 1; color: var(--ink); }
-  .map-sub { margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faded); }
-  .map-tools { display: flex; align-items: center; gap: 10px; }
-  .map-sort .mode-option { font-size: 10px; padding: 6px 10px; white-space: nowrap; }
-  .map-key { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 14px; margin: 14px 0 8px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--ink-faded); }
-  .map-overview strong { color: var(--ink); font-weight: 600; }
-  .map-legend { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-  .map-legend-bar { width: 84px; height: 9px; border-radius: 5px; }
-  .map-rows { border-top: 1px solid rgba(28, 22, 17, 0.08); }
-  .map-row { border-bottom: 1px solid rgba(28, 22, 17, 0.08); }
-  .map-head { display: grid; grid-template-columns: 132px minmax(0, 1fr) 40px; align-items: center; gap: 12px; width: 100%; padding: 8px 6px; margin: 0;
-              background: none; border: 0; border-radius: 8px; text-align: left; cursor: pointer; color: inherit; font: inherit; }
-  .map-head:hover, .map-row.open .map-head { background: rgba(176, 133, 64, 0.09); }
+  /* La mappa: every noun topic at a glance — in the site's own pieces: the theme row's
+     dashed rules and eyebrow, the grid's colour key and tiles, the side panels (.endings),
+     Da ripassare's rows, and the setup's text links */
+  .noun-map { margin: 4px 0 22px; padding: 14px 0 16px; border-top: 1px dashed rgba(28, 22, 17, 0.15); border-bottom: 1px dashed rgba(28, 22, 17, 0.15); }
+  .map-eyebrow-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+  .map-eyebrow { margin-bottom: 0; }
+  .map-eyebrow .ghost { margin-left: 6px; font-size: 11px; letter-spacing: 0.04em; text-transform: none; }
+  .map-key { margin: 8px 0 12px; }
+  .map-sort .meta-sep { margin: 0 6px; color: var(--ink-faded); }
+  .map-rows { border-top: 1px solid rgba(28, 22, 17, 0.1); }
+  .map-row { border-bottom: 1px solid rgba(28, 22, 17, 0.1); }
+  .map-head { display: grid; grid-template-columns: 132px minmax(0, 1fr) 40px; align-items: center; gap: 12px; width: 100%; padding: 8px 8px; margin: 0;
+              background: none; border: 0; border-radius: 0; text-align: left; cursor: pointer; color: inherit; font: inherit; transition: background 0.15s; }
+  .map-head:hover { background: rgba(28, 22, 17, 0.035); }
+  .map-row.open .map-head { background: var(--paper); box-shadow: inset 2px 0 0 var(--gold); }
   .map-head:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
-  .map-name { display: flex; flex-direction: column; line-height: 1.15; }
-  .map-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 19px; color: var(--ink); }
-  .map-en { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faded); }
+  .map-name { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .map-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 19px; color: var(--ink); }
+  .map-en { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: var(--ink-faded); }
+  .map-indeck { margin-top: 2px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: var(--gold); }
   .map-strip { display: flex; flex-wrap: wrap; gap: 2px; padding: 1px 0; }
-  .map-cell { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 2.5px; background: var(--c); }
+  .map-cell { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
   .map-cell.new { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.2); }
-  .map-score { justify-self: end; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-faded); }
-  .map-score[style] { color: var(--ink); font-weight: 600; border-bottom: 3px solid var(--c); padding-bottom: 1px; }
-  .map-inline { padding: 2px 6px 14px 150px; }
+  .map-cell.in { outline: 1.5px solid var(--ink); outline-offset: 1px; }
+  .map-score { justify-self: end; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-faded); }
+  .map-score[style] { color: var(--ink); border-bottom: 2px solid var(--c); padding-bottom: 1px; }
+  .map-panel { display: none; }
+  .map-panel, .map-inline { padding-bottom: 12px; }
+  .map-inline { position: static; margin: 6px 0 14px; }
+  .map-close { float: right; margin: -8px -6px 0 8px; background: none; border: 0; font-size: 24px; line-height: 1; cursor: pointer; color: var(--ink-faded); padding: 2px 4px; }
+  .map-close:hover { color: var(--ink); }
+  .map-sum { margin: -8px 0 10px; font-size: 13px; color: var(--ink-soft); }
+  .map-sum strong { color: var(--ink); }
+  .map-actions { margin-bottom: 6px; font-size: 13px; }
+  .map-hint, .noun-map .weak-empty { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-faded); }
+  .map-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; margin-top: 6px; }
+  .map-tile .verb-chip-italian { font-size: 19px; }
+  .map-jump { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+  .map-jump:hover { border-color: var(--ink-soft); }
+  .noun-map .weak-list li { list-style: none; }
   /* Sostantivi: the page is the map — wide, with the topic you open in a panel beside it */
   .container[data-map="1"][data-view="setup"] { max-width: 1180px; }
   .container[data-map="1"][data-view="setup"] #game-area { max-width: none; }
   .container[data-map="1"] .setup-intro, .container[data-map="1"] .setup-controls, .container[data-map="1"] .setup-meta,
   .container[data-map="1"] .audio-row, .container[data-map="1"] .deck-cap, .container[data-map="1"] .start-btn,
   .container[data-map="1"] .passive-btn, .container[data-map="1"] .passive-msg, .container[data-map="1"] .mode-label,
-  .container[data-map="1"] .mode-toggle:not(.map-sort):not(.subject-toggle), .container[data-map="1"] .grid-fold { max-width: 660px; margin-left: auto; margin-right: auto; }
+  .container[data-map="1"] .mode-toggle:not(.subject-toggle), .container[data-map="1"] .grid-fold { max-width: 660px; margin-left: auto; margin-right: auto; }
   .container[data-map="1"] .start-btn { display: block; width: 100%; }
-  .map-panel { display: none; }
-  .map-indeck { display: block; margin-top: 2px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.04em; color: var(--olive); }
-  .map-cell.in { outline: 1.5px solid var(--ink); outline-offset: 1px; }
-  .map-legend .map-cell.in { background: transparent; }
-  .map-chip { font: inherit; border: 0; cursor: pointer; }
-  .map-chip.in { box-shadow: inset 0 0 0 1.5px var(--ink); }
-  .map-chip.in em::after { content: ' ✓'; font-family: 'DM Sans', sans-serif; font-style: normal; font-size: 12px; }
-  .map-chip.new.in { box-shadow: inset 0 0 0 1.5px var(--ink); }
-  .map-chip:hover { filter: brightness(0.97); }
-  .map-hint { margin: 10px 0 0; font-family: 'DM Sans', sans-serif; font-size: 12.5px; color: var(--ink-faded); }
-  .map-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
-  .map-panel-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 30px; line-height: 1.05; color: var(--ink); }
-  .map-close { background: none; border: 0; font-size: 26px; line-height: 1; cursor: pointer; color: var(--ink-soft); padding: 0 4px; }
-  .map-jumps { display: flex; flex-direction: column; gap: 4px; }
-  .map-jump { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 6px 8px; background: none; border: 0; border-radius: 8px; cursor: pointer; text-align: left; font: inherit; color: inherit; }
-  .map-jump:hover { background: rgba(176, 133, 64, 0.09); }
-  .grid-fold { margin-top: 26px; }
-  .grid-fold > summary { cursor: pointer; padding: 10px 2px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
-  .grid-fold > summary span { color: var(--ink-faded); }
+  .grid-fold { margin-top: 4px; }
+  .grid-fold > summary { cursor: pointer; padding: 10px 0; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faded); }
+  .grid-fold > summary:hover { color: var(--ink); }
   @media (min-width: 900px) {
-    .container[data-map="1"] .map-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, 360px); gap: 20px; align-items: start; }
-    .container[data-map="1"] .map-panel { display: block; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto;
-                                          padding: 16px 16px 16px; background: #fffaf0; border: 1px solid rgba(28, 22, 17, 0.1); border-radius: 12px; }
+    .container[data-map="1"] .map-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, 360px); gap: 22px; align-items: start; }
+    .container[data-map="1"] .map-panel { display: block; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; }
     .container[data-map="1"] .map-inline { display: none; }
-    .container[data-map="1"] .map-head { grid-template-columns: 124px minmax(0, 1fr) 40px; }
   }
-  .map-sum { margin: 2px 0 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink-soft); }
-  .map-dir { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-faded); }
-  .map-list-label { margin: 10px 0 5px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
-  .map-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-  .map-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 999px; background: var(--t); color: var(--ink); }
-  .map-chip::before { content: ''; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
-  .map-chip.new::before { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.25); }
-  .map-chip em { font-family: 'Cormorant Garamond', serif; font-size: 16px; }
-  .map-chip b { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; opacity: 0.75; }
-  .map-chip.new { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.16); color: var(--ink-soft); }
-  .map-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 14px; }
-  .map-btn { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; padding: 9px 13px; border-radius: 8px;
-             border: 1px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer; }
-  .map-btn.ghostly { background: transparent; color: var(--ink); }
-  .map-picked { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--olive); }
-  .map-show { width: 100%; text-align: left; background: none; border: 1px dashed rgba(28, 22, 17, 0.22); border-radius: 12px; padding: 12px 14px; cursor: pointer;
-              color: var(--ink-soft); font-family: 'DM Sans', sans-serif; font-size: 13px; }
-  .map-title-sm { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 20px; color: var(--ink); }
   @media (max-width: 600px) {
-    .noun-map { padding: 14px 10px 8px; }
-    .map-head { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }
+    .map-head { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; padding: 8px 4px; }
     .map-strip { grid-column: 1 / -1; grid-row: 2; }
-    .map-inline { padding-left: 6px; }
   }
 
   /* The infinitive first: pinned above a verb's forms once answered */
@@ -11250,52 +11225,58 @@
   const mapCellTitle = c => `${c.it} — ${c.en}: ${c.seen ? `right ${c.seen - c.wrong} of ${c.seen}` : 'not tried yet'}`;
   const mapTopicPct = x => (x.rate === null ? '—' : `${Math.round((1 - x.rate) * 100)}%`);
   const mapWeakFirst = x => x.tried.filter(c => c.wrong > 0).sort((a, b) => b.rate - a.rate || b.wrong - a.wrong).slice(0, 10);
-  // A topic's nouns: buttons that add one to the deck or take it out; to work on, going well, not tried yet
+  // A topic's nouns, in the site's own pieces: the side panel's title and labels, the grid's
+  // tiles (shaded by your record; dashed and faded when not in the deck, the gold mark when
+  // they are), and the setup's text links for whole-topic picks
   function mapDetailHTML(x, inPanel) {
-    const pct = mapTopicPct(x), inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length, allIn = inDeck === x.cells.length;
+    const inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length, allIn = inDeck === x.cells.length;
     const work = x.tried.filter(c => c.rate >= 0.15).sort((a, b) => b.rate - a.rate || b.seen - a.seen), good = x.tried.filter(c => c.rate < 0.15);
     const weak = mapWeakFirst(x);
-    // a chip: the grid's own pale tint behind the words (so they stay readable), the map's colour in its dot
-    const chip = c => {
-      const on = selectedNouns.has(c.key);
-      return `<button type="button" class="map-chip${c.seen ? '' : ' new'}${on ? ' in' : ''}" data-map-noun="${c.key}" aria-pressed="${on}"`
-        + `${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}; --t: ${errorShade(c).color}"` : ''} title="${escapeHTML(mapCellTitle(c))}${on ? ' — in your deck' : ''}">`
-        + `<em>${escapeHTML(c.it)}</em>${c.seen ? ` <b>${c.seen - c.wrong}/${c.seen}</b>` : ''}</button>`;
+    const tile = c => {
+      const on = selectedNouns.has(c.key), sh = c.seen ? errorShade(c) : null;
+      return `<button type="button" class="map-tile${on ? '' : ' unselected'}${sh ? ' shaded' : ''}" data-map-noun="${c.key}" aria-pressed="${on}"${sh ? ` style="--shade: ${sh.color}"` : ''}`
+        + ` title="${escapeHTML(c.seen ? `Right ${c.seen - c.wrong} of ${c.seen}` : 'Not practised yet')}${on ? ' — in your deck' : ''}">`
+        + `<div class="verb-chip-mark">●</div><div class="verb-chip-italian">${escapeHTML(c.it)}</div><div class="verb-chip-english">${escapeHTML(c.en)}</div></button>`;
     };
+    const links = [
+      weak.length ? `<button type="button" class="ghost" data-map-pick="weak">Practise just the ${weak.length} weakest</button>` : '',
+      `<button type="button" class="ghost" data-map-pick="${allIn ? 'none' : 'all'}">${allIn ? `Take all ${x.cells.length} out` : `Add all ${x.cells.length}`}</button>`,
+      x.fresh.length && !x.fresh.every(c => selectedNouns.has(c.key)) ? `<button type="button" class="ghost" data-map-pick="new">Add the ${x.fresh.length} not tried</button>` : ''
+    ].filter(Boolean);
+    const group = (label, list) => list.length ? `<div class="endings-note"><div class="en-label">${label}</div><div class="map-tiles">${list.map(tile).join('')}</div></div>` : '';
     return `
-      ${inPanel ? `<div class="map-panel-head"><div><div class="map-panel-title">${x.t.label}</div><div class="map-en">${x.t.en} · ${x.cells.length} nouns</div></div>
-        <button type="button" class="map-close" data-map-close aria-label="Close ${escapeHTML(x.t.label)}">×</button></div>` : ''}
-      <p class="map-sum">${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : ` · right ${pct} of the time`}${x.often ? ` · ${x.often} often wrong` : ''}
-        · <strong>${inDeck}</strong> in your deck <span class="map-dir">${DIR_LABELS[direction].long}</span></p>
-      <div class="map-actions">
-        ${weak.length ? `<button type="button" class="map-btn" data-map-pick="weak">Practise just the ${weak.length} weakest</button>` : ''}
-        <button type="button" class="map-btn ghostly" data-map-pick="${allIn ? 'none' : 'all'}">${allIn ? `Take all ${x.cells.length} out` : `Add all ${x.cells.length}`}</button>
-        ${x.fresh.length && !x.fresh.every(c => selectedNouns.has(c.key)) ? `<button type="button" class="map-btn ghostly" data-map-pick="new">Add the ${x.fresh.length} not tried</button>` : ''}
-      </div>
-      <p class="map-hint">Tap a noun to put it in your deck, or take it out.</p>
-      ${work.length ? `<div class="map-list-label">To work on</div><div class="map-chips">${work.map(chip).join('')}</div>` : ''}
-      ${good.length ? `<div class="map-list-label">Going well</div><div class="map-chips">${good.map(chip).join('')}</div>` : ''}
-      ${x.fresh.length ? `<div class="map-list-label">Not tried yet</div><div class="map-chips">${x.fresh.map(chip).join('')}</div>` : ''}`;
+      ${inPanel ? `<button type="button" class="map-close" data-map-close aria-label="Close ${escapeHTML(x.t.label)}">×</button>` : ''}
+      <h3 class="endings-title">${x.t.label}</h3>
+      <div class="endings-sub">${x.t.en} · ${x.cells.length} nouns · ${DIR_LABELS[direction].short}</div>
+      <p class="map-sum">${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : ` · right ${mapTopicPct(x)} of the time`}${x.often ? ` · ${x.often} often wrong` : ''} · <strong>${inDeck}</strong> in your deck</p>
+      <div class="map-actions">${links.join('<span class="divider">·</span>')}</div>
+      ${group('To work on', work)}${group('Going well', good)}${group('Not tried yet', x.fresh)}
+      <p class="map-hint">Tap a noun to put it in your deck, or take it out.</p>`;
   }
-  // Before a topic is opened: what the panel is for, and the weakest topics one tap away
+  // Before a topic is opened: the weakest topics, as Da ripassare lists the weakest nouns
   function mapWelcomeHTML(topics) {
-    const weakest = topics.filter(x => x.rate !== null).sort((a, b) => b.rate - a.rate).slice(0, 5);
+    const weakest = topics.filter(x => x.wrong > 0).sort((a, b) => b.rate - a.rate).slice(0, 6);
     return `
-      <div class="map-panel-title">Tap a topic</div>
-      <p class="map-sum">Its nouns open here, weakest first. Tap any to put it in your deck — or add a whole topic, or practise just its weakest.</p>
-      ${weakest.length ? `<div class="map-list-label">Your weakest topics</div>
-      <div class="map-jumps">${weakest.map(x => `<button type="button" class="map-jump" data-map-open="${x.t.key}"><span class="map-it">${x.t.label}</span><span class="map-score" style="--c: ${mapColor(x.rate, 5)}">${mapTopicPct(x)}</span></button>`).join('')}</div>` : ''}`;
+      <h3 class="endings-title">I temi</h3>
+      <div class="endings-sub">${weakest.length ? `Your ${weakest.length > 1 ? `${weakest.length} ` : ''}weakest topics` : 'Every topic'} · ${DIR_LABELS[direction].short}</div>
+      ${weakest.length ? `<ol class="weak-list">${weakest.map((x, i) => {
+        const pct = Math.round(x.rate * 100);
+        return `<li><button type="button" class="weak-row map-jump" data-map-open="${x.t.key}" style="--rate: ${pct}%">
+          <span class="weak-rank">${i + 1}</span>
+          <span class="weak-verb"><span class="weak-it">${x.t.label}</span><span class="weak-en">${escapeHTML(x.t.en)}</span></span>
+          <span class="weak-stat">${x.wrong}/${x.seen} err<span class="weak-pct">${pct}%</span></span>
+        </button></li>`;
+      }).join('')}</ol>` : ''}
+      <p class="weak-empty">Tap a topic${weakest.length ? ' — on the map, or here —' : ' on the map'} to see its nouns, weakest first, and put any of them in your deck.</p>`;
   }
   function nounMapInner() {
     const p = mapPrefs(), dir = DIR_LABELS[direction].long;
-    if (p.hidden) return `<button type="button" class="map-show" id="map-show"><span class="map-title-sm">La mappa</span> — every topic and every noun, strongest to weakest · <u>show</u></button>`;
+    if (p.hidden) return `<div class="theme-eyebrow map-eyebrow">↳ La mappa · every topic at a glance <button type="button" class="ghost" id="map-show">show</button></div>`;
     const byKey = new Map(NOUN_ITEMS.map(n => [n.noun, n]));
     const inOrder = NOUN_THEMES.map(t => mapTopic(t, byKey));
     const topics = p.sort === 'weak'
       ? inOrder.map((x, i) => [x, i]).sort(([a, i], [b, j]) => (a.rate === null) - (b.rate === null) || (b.rate || 0) - (a.rate || 0) || i - j).map(([x]) => x)
       : inOrder;
-    const all = NOUN_ITEMS.filter(n => stats[n.noun] && stats[n.noun].seen > 0);
-    const often = all.filter(n => stats[n.noun].wrong / stats[n.noun].seen >= 0.4).length;
     const open = topics.find(x => x.t.key === mapOpen) || null;
     const sq = c => `<i class="map-cell${c.seen ? '' : ' new'}${selectedNouns.has(c.key) ? ' in' : ''}"${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}"` : ''} title="${escapeHTML(mapCellTitle(c))}"></i>`;
     const row = x => {
@@ -11303,32 +11284,28 @@
       return `
         <div class="map-row${isOpen ? ' open' : ''}" data-topic="${x.t.key}">
           <button type="button" class="map-head" aria-expanded="${isOpen}" aria-label="${escapeHTML(`${x.t.label}, ${x.t.en}: ${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : `, right ${mapTopicPct(x)} of the time`}${inDeck ? `, ${inDeck} in your deck` : ''}`)}">
-            <span class="map-name"><span class="map-it">${x.t.label}</span><span class="map-en">${x.t.en} · ${x.cells.length}</span>${inDeck ? `<span class="map-indeck">✓ ${inDeck} in deck</span>` : ''}</span>
+            <span class="map-name"><span class="map-it">${x.t.label}</span><span class="map-en">${x.t.en} · ${x.cells.length}</span>${inDeck ? `<span class="map-indeck">● ${inDeck} in your deck</span>` : ''}</span>
             <span class="map-strip" aria-hidden="true">${x.cells.map(sq).join('')}</span>
             <span class="map-score"${x.rate === null ? '' : ` style="--c: ${mapColor(x.rate, 5)}"`}>${mapTopicPct(x)}</span>
           </button>
-          ${isOpen ? `<div class="map-detail map-inline">${mapDetailHTML(x, false)}</div>` : ''}
+          ${isOpen ? `<div class="endings map-inline">${mapDetailHTML(x, false)}</div>` : ''}
         </div>`;
     };
+    const sortLinks = [['order', 'topic order'], ['weak', 'weakest first']].map(([k, l]) => `<button type="button" class="ghost${(p.sort === 'weak') === (k === 'weak') ? ' active' : ''}" data-map-sort="${k}" aria-pressed="${(p.sort === 'weak') === (k === 'weak')}">${l}</button>`).join('<span class="meta-sep">·</span>');
     return `
-      <div class="map-top">
-        <div><h3 class="map-title">La mappa</h3><div class="map-sub">every topic, every noun — strongest first along each line</div></div>
-        <div class="map-tools">
-          <div class="mode-toggle map-sort" role="group" aria-label="Order of the topics">
-            <button type="button" class="mode-option${p.sort === 'weak' ? '' : ' active'}" data-map-sort="order" aria-pressed="${p.sort !== 'weak'}">Topic order</button>
-            <button type="button" class="mode-option${p.sort === 'weak' ? ' active' : ''}" data-map-sort="weak" aria-pressed="${p.sort === 'weak'}">Weakest first</button>
-          </div>
-          <button type="button" class="ghost" id="map-hide">hide</button>
-        </div>
+      <div class="map-eyebrow-row">
+        <div class="theme-eyebrow map-eyebrow">↳ La mappa · every topic, every noun — strongest first along each line</div>
+        <span class="person-quick map-sort">${sortLinks}<span class="meta-sep">·</span><button type="button" class="ghost" id="map-hide">hide</button></span>
       </div>
-      <div class="map-key">
-        <span class="map-overview"><strong>${all.length}</strong> of ${NOUN_ITEMS.length} nouns practised${often ? ` · <strong>${often}</strong> often wrong` : ''}</span>
-        <span class="map-legend"><span>rarely wrong</span><span class="map-legend-bar" style="background: linear-gradient(90deg, ${mapColor(0, 5)}, ${mapColor(0.25, 5)}, ${mapColor(0.5, 5)})"></span><span>often wrong</span>
-          <i class="map-cell new"></i><span>not tried</span><i class="map-cell new in"></i><span>in your deck</span><span class="map-dir">· ${dir}</span></span>
+      <div class="shade-key map-key">
+        <span class="shade-key-end">rarely wrong</span>
+        <span class="shade-key-bar" style="background: linear-gradient(90deg, ${mapColor(0, 5)}, ${mapColor(0.25, 5)}, ${mapColor(0.5, 5)})"></span>
+        <span class="shade-key-end">often wrong</span>
+        <span class="shade-key-note">fainter: only a few tries · plain: not tried yet · outlined: in your deck · ${dir}</span>
       </div>
       <div class="map-layout">
         <div class="map-rows">${topics.map(row).join('')}</div>
-        <aside class="map-panel map-detail" id="map-panel" aria-label="${open ? escapeHTML(open.t.label) : 'The topic you open'}">${open ? mapDetailHTML(open, true) : mapWelcomeHTML(inOrder)}</aside>
+        <aside class="endings map-panel" id="map-panel" aria-label="${open ? escapeHTML(open.t.label) : 'The topic you open'}">${open ? mapDetailHTML(open, true) : mapWelcomeHTML(inOrder)}</aside>
       </div>`;
   }
   // The deck changed (a tap here, a pick button, the grid): redraw once, on the next frame

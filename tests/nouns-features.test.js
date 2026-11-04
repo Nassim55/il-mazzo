@@ -3,7 +3,7 @@ const { w, d, ev, key, fire, setVal, errors } = boot();
 const before = (a, b) => !!(d.getElementById(a).compareDocumentPosition(d.getElementById(b)) & w.Node.DOCUMENT_POSITION_FOLLOWING);
 // --- layout ---
 ok(before('theme-chips', 'select-all') && before('select-all', 'deck-cap') && before('deck-cap', 'start-btn') && before('start-btn', 'verb-grid'), 'layout: themes → quick picks → subset → Start → grid');
-ok(!d.querySelector('aside.endings') && !d.getElementById('mode-toggle'), 'noun setup has no verb panels');
+ok(!d.querySelector('aside.endings:not(.map-panel)') && !d.getElementById('mode-toggle'), 'noun setup has no verb panels (the map\'s panel only borrows their look)');
 d.querySelector('.theme-chip[data-theme="casa"]').click();
 const n = ev('selectedNouns.size');
 ok(n === 73 && d.getElementById('start-btn').textContent.includes('73 cards'), 'theme click updates counts and Start');
