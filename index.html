@@ -1924,6 +1924,10 @@
   .theme-group-btn:hover, .theme-group-btn.full { text-decoration: underline; text-underline-offset: 4px; }
   .theme-group-btn.partial { text-decoration: underline dotted; text-underline-offset: 4px; }
   .eg-prep { grid-template-columns: 30px repeat(5, minmax(0, 1fr)); }
+  .eg-poss { grid-template-columns: 54px repeat(4, minmax(0, 1fr)); }
+  .eg-poss .eg-cell { font-size: 14px; padding: 5px 1px 4px; }
+  .eg-poss .eg-person { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; }
+  .eg-poss .eg-class { font-family: 'JetBrains Mono', monospace; font-style: normal; font-size: 10px; letter-spacing: 0.06em; }
   .eg-prep .eg-class { font-size: 17px; }
   .eg-prep .eg-cell { font-size: 14px; padding: 5px 1px 4px; }
   .eg-prep .eg-person { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
@@ -2115,7 +2119,7 @@
   .conj-pop-key .conj-irr { padding: 0 4px; }
   .verb-chip { -webkit-touch-callout: none; }   /* a long press on a phone opens the forms, not a menu */
 
-  /* On a phone, the ten sections in two columns */
+  /* On a phone, the sections in two columns */
   @media (max-width: 600px) {
     .mode-toggle.subject-toggle { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   }
@@ -2162,7 +2166,7 @@
      Kept last so it overrides the wide-screen rules above. */
   @media (max-width: 1100px) {
     .container[data-view="setup"] { max-width: 660px; }
-    .mode-toggle.subject-toggle { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(5, minmax(0, 1fr)); }   /* ten sections: two rows of five */
+    .mode-toggle.subject-toggle { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(6, minmax(0, 1fr)); }   /* eleven sections: two rows of six */
     .subject-toggle .mode-option { white-space: normal; }
   }
 </style>
@@ -5144,16 +5148,18 @@
     try { localStorage.setItem(VERB_PERSONS_KEY, JSON.stringify(all)); syncTouched(); } catch (e) { /* storage full */ }
   }
 
-  // Preposizioni's fusion drills: singular, plural or both (stored under 'prepositions')
+  // Pairs (Preposizioni's fusion drills, Possessivi): singular, plural or both — each section
+  // its own setting, under its numberKey ('prepositions' for Preposizioni)
   const PREP_NUMBERS = [['sg', 'Singolare'], ['pl', 'Plurale']];
+  const numberKey = () => (SUBJECTS[subject] && SUBJECTS[subject].numberKey) || 'prepositions';
   function activeNumbers() {
-    const keys = PREP_NUMBERS.map(x => x[0]), saved = verbPersonsSaved().prepositions;
+    const keys = PREP_NUMBERS.map(x => x[0]), saved = verbPersonsSaved()[numberKey()];
     const list = Array.isArray(saved) ? keys.filter(k => saved.includes(k)) : keys;
     return list.length ? list : keys;
   }
   function saveNumbers(list) {
     const all = verbPersonsSaved();
-    all.prepositions = PREP_NUMBERS.map(x => x[0]).filter(k => list.includes(k));
+    all[numberKey()] = PREP_NUMBERS.map(x => x[0]).filter(k => list.includes(k));
     try { localStorage.setItem(VERB_PERSONS_KEY, JSON.stringify(all)); syncTouched(); } catch (e) { /* storage full */ }
   }
 
@@ -6789,6 +6795,8 @@
     qui: 'here', fuori: 'outside', dentro: 'inside', dietro: 'behind', vicino: 'near (vicino a)', bene: 'well, properly', male: 'badly',
     quando: 'when', 'sì': 'yes', qualcuno: 'someone', altro: 'other (altre: the others)', otto: 'eight', due: 'two', domani: 'tomorrow',
     tu: 'you', lui: 'he, him', noi: 'we, us', voi: 'you (plural)', loro: 'they, them', mio: 'my', miei: 'my (plural)', mie: 'my (plural)',
+    tue: 'your (plural)', suo: 'his, her, its — Suo: your (formal)', sua: 'his, her, its — Sua: your (formal)', nostro: 'our', nostra: 'our', nostri: 'our (plural)', nostre: 'our (plural)',
+    vostro: 'your (you all)', vostra: 'your (you all)', vostri: 'your (you all, plural)', vostre: 'your (you all, plural)',
     ogni: 'every, each', sotto: 'under', dove: 'where', "dov'": 'where', 'perché': 'why, because', stasera: 'this evening, tonight',
     molti: 'many, a lot of', molte: 'many, a lot of', "d'": 'of, in (before a vowel)', sette: 'seven', dieci: 'ten'
   };
@@ -9070,6 +9078,153 @@
   })];
   const PREP_THEMES = PREP_THEME_DEFS.map(([key, group, label, en]) => ({ key, group, label, en, nouns: PREP_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
   const PREP_ORDER = PREP_ITEMS.map(n => n.noun);
+
+  // ===== Possessivi (Nov 2026): my, your, his, her, our, their =====
+  // Every card is a phrase, English in, Italian out; most come in pairs — the singular,
+  // then its plural straight after (il mio libro, then i miei libri), like the articolate.
+  // A possessive agrees with the thing owned, not the owner (la sua casa: his house or
+  // hers), takes the article (il mio libro), goes without it for one family member (mia
+  // sorella — but le mie sorelle), and loro never changes (il loro, le loro).
+  const POSS_OWNERS = { mio: ['mio', 'mia', 'miei', 'mie'], tuo: ['tuo', 'tua', 'tuoi', 'tue'], suo: ['suo', 'sua', 'suoi', 'sue'],
+                        nostro: ['nostro', 'nostra', 'nostri', 'nostre'], vostro: ['vostro', 'vostra', 'vostri', 'vostre'], loro: ['loro', 'loro', 'loro', 'loro'] };
+  const POSS_OWNER_EN = { mio: 'my', tuo: 'your (tu)', suo: 'his, her or its — and, as Suo, your (formal)', nostro: 'our', vostro: 'your (voi)', loro: 'their' };
+  const POSS_OWNER_WHO = { mio: 'io', tuo: 'tu', suo: 'lui · lei', nostro: 'noi', vostro: 'voi', loro: 'loro' };
+  const POSS_SLOTS = ['msg', 'fsg', 'mpl', 'fpl'];
+  const POSS_SLOT_EN = { msg: 'masculine singular', fsg: 'feminine singular', mpl: 'masculine plural', fpl: 'feminine plural' };
+  const POSS_FORM = new Map(Object.entries(POSS_OWNERS).filter(([o]) => o !== 'loro').flatMap(([owner, f]) => f.map((x, k) => [x, { owner, slot: POSS_SLOTS[k] }])));
+  const POSS_ART = { il: 'msg', la: 'fsg', i: 'mpl', le: 'fpl', nel: 'msg', nella: 'fsg', nei: 'mpl', nelle: 'fpl', del: 'msg', della: 'fsg', dei: 'mpl', delle: 'fpl',
+                     al: 'msg', alla: 'fsg', ai: 'mpl', alle: 'fpl', dal: 'msg', dalla: 'fsg', dai: 'mpl', dalle: 'fpl', sul: 'msg', sulla: 'fsg', sui: 'mpl', sulle: 'fpl' };
+  const POSS_JOIN = { nella: ['in', 'la'], nelle: ['in', 'le'], nel: ['in', 'il'], nei: ['in', 'i'], dal: ['da', 'il'], sul: ['su', 'il'], sui: ['su', 'i'], del: ['di', 'il'] };
+  const POSS_GROUPS = [['chi', 'Di chi?', 'whose'], ['casi', 'Casi speciali', 'the special cases']];
+  const POSS_THEME_DEFS = [
+    ['mio', 'chi', 'mio · mia · miei · mie', 'my'],
+    ['tuo', 'chi', 'tuo · tua · tuoi · tue', 'your (tu)'],
+    ['suo', 'chi', 'suo · sua · suoi · sue', 'his, her, its'],
+    ['suo-formale', 'chi', 'Suo · Sua', 'your (formal)'],
+    ['nostro', 'chi', 'nostro · nostra · nostri · nostre', 'our'],
+    ['vostro', 'chi', 'vostro · vostra · vostri · vostre', 'your (voi)'],
+    ['loro', 'chi', 'il loro · la loro', 'their — loro never changes'],
+    ['famiglia', 'casi', 'mia sorella · le mie sorelle', 'family: no article for one'],
+    ['pronomi', 'casi', 'è mio · è il mio', 'mine, yours, theirs'],
+    ['preposizioni', 'casi', 'nella mia borsa', 'with a preposition'],
+    ['dopo', 'casi', 'a casa mia · colpa mia', 'after the noun, in set phrases']
+  ];
+  // [theme, person (who the verb is for; null for a phrase without one), [Italian, English, other English, word for word, other Italian],
+  //  the plural the same, or null]
+  const POSS_DATA = [
+    ['mio', null, ['il mio libro', 'my book', [], 'the my book'], ['i miei libri', 'my books', [], 'the my books']],
+    ['mio', null, ['la mia casa', 'my house', ['my home'], 'the my house'], ['le mie case', 'my houses', ['my homes'], 'the my houses']],
+    ['mio', null, ['il mio amico', 'my friend (m.)', [], 'the my friend'], ['i miei amici', 'my friends (m.)', [], 'the my friends']],
+    ['mio', null, ['la mia amica', 'my friend (f.)', [], 'the my friend'], ['le mie amiche', 'my friends (f.)', [], 'the my friends']],
+    ['mio', null, ['il mio telefono', 'my phone', ['my telephone'], 'the my phone'], ['i miei telefoni', 'my phones', ['my telephones'], 'the my phones']],
+    ['mio', null, ['la mia chiave', 'my key', [], 'the my key'], ['le mie chiavi', 'my keys', [], 'the my keys']],
+
+    ['tuo', null, ['il tuo cane', 'your dog (tu)', [], 'the your dog'], ['i tuoi cani', 'your dogs (tu)', [], 'the your dogs']],
+    ['tuo', null, ['la tua borsa', 'your bag (tu)', [], 'the your bag'], ['le tue borse', 'your bags (tu)', [], 'the your bags']],
+    ['tuo', null, ['il tuo biglietto', 'your ticket (tu)', [], 'the your ticket'], ['i tuoi biglietti', 'your tickets (tu)', [], 'the your tickets']],
+    ['tuo', null, ['la tua città', 'your city (tu)', ['your town (tu)'], 'the your city'], ['le tue città', 'your cities (tu)', ['your towns (tu)'], 'the your cities']],
+    ['tuo', null, ['il tuo giardino', 'your garden (tu)', [], 'the your garden'], ['i tuoi giardini', 'your gardens (tu)', [], 'the your gardens']],
+    ['tuo', null, ['la tua macchina', 'your car (tu)', [], 'the your car'], ['le tue macchine', 'your cars (tu)', [], 'the your cars']],
+
+    ['suo', null, ['il suo libro', 'her book', [], 'the her book'], ['i suoi libri', 'her books', [], 'the her books']],
+    ['suo', null, ['la sua casa', 'his house', ['his home'], 'the his house'], ['le sue case', 'his houses', ['his homes'], 'the his houses']],
+    ['suo', null, ['il suo cane', 'his dog', [], 'the his dog'], ['i suoi cani', 'his dogs', [], 'the his dogs']],
+    ['suo', null, ['la sua borsa', 'her bag', [], 'the her bag'], ['le sue borse', 'her bags', [], 'the her bags']],
+    ['suo', null, ['il suo zaino', 'her backpack', ['her rucksack'], 'the her backpack'], ['i suoi zaini', 'her backpacks', ['her rucksacks'], 'the her backpacks']],
+    ['suo', null, ['la sua macchina', 'his car', [], 'the his car'], ['le sue macchine', 'his cars', [], 'the his cars']],
+
+    ['suo-formale', null, ['il Suo biglietto', 'your ticket (formal)', [], 'the your ticket'], ['i Suoi biglietti', 'your tickets (formal)', [], 'the your tickets']],
+    ['suo-formale', null, ['la Sua valigia', 'your suitcase (formal)', [], 'the your suitcase'], ['le Sue valigie', 'your suitcases (formal)', [], 'the your suitcases']],
+    ['suo-formale', 'cosa', ['Il Suo tavolo è pronto.', 'Your table is ready. (formal)', [], 'The your table is ready.'], null],
+    ['suo-formale', 'cosa', ['La Sua chiave è qui.', 'Your key is here. (formal)', [], 'The your key is here.'], null],
+    ['suo-formale', 'cosa', ['Questa è la Sua camera.', 'This is your room. (formal)', ['This is your bedroom. (formal)'], 'This is the your room.'], null],
+
+    ['nostro', null, ['il nostro paese', 'our country', [], 'the our country'], ['i nostri paesi', 'our countries', [], 'the our countries']],
+    ['nostro', null, ['la nostra casa', 'our house', ['our home'], 'the our house'], ['le nostre case', 'our houses', ['our homes'], 'the our houses']],
+    ['nostro', null, ['il nostro giardino', 'our garden', [], 'the our garden'], ['i nostri giardini', 'our gardens', [], 'the our gardens']],
+    ['nostro', null, ['la nostra famiglia', 'our family', [], 'the our family'], ['le nostre famiglie', 'our families', [], 'the our families']],
+    ['nostro', null, ['il nostro tetto', 'our roof', [], 'the our roof'], ['i nostri tetti', 'our roofs', [], 'the our roofs']],
+    ['nostro', null, ['la nostra cucina', 'our kitchen', [], 'the our kitchen'], ['le nostre cucine', 'our kitchens', [], 'the our kitchens']],
+
+    ['vostro', null, ['il vostro cane', 'your dog (voi)', [], 'the your dog'], ['i vostri cani', 'your dogs (voi)', [], 'the your dogs']],
+    ['vostro', null, ['la vostra casa', 'your house (voi)', ['your home (voi)'], 'the your house'], ['le vostre case', 'your houses (voi)', ['your homes (voi)'], 'the your houses']],
+    ['vostro', null, ['il vostro bambino', 'your child (voi)', ['your baby (voi)'], 'the your child'], ['i vostri bambini', 'your children (voi)', [], 'the your children']],
+    ['vostro', null, ['la vostra macchina', 'your car (voi)', [], 'the your car'], ['le vostre macchine', 'your cars (voi)', [], 'the your cars']],
+    ['vostro', null, ['il vostro albergo', 'your hotel (voi)', [], 'the your hotel'], ['i vostri alberghi', 'your hotels (voi)', [], 'the your hotels']],
+    ['vostro', null, ['la vostra stanza', 'your room (voi)', [], 'the your room'], ['le vostre stanze', 'your rooms (voi)', [], 'the your rooms']],
+
+    ['loro', null, ['il loro cane', 'their dog', [], 'the their dog'], ['i loro cani', 'their dogs', [], 'the their dogs']],
+    ['loro', null, ['la loro casa', 'their house', ['their home'], 'the their house'], ['le loro case', 'their houses', ['their homes'], 'the their houses']],
+    ['loro', null, ['il loro figlio', 'their son', [], 'the their son'], ['i loro figli', 'their children', ['their sons'], 'the their children']],
+    ['loro', null, ['la loro figlia', 'their daughter', [], 'the their daughter'], ['le loro figlie', 'their daughters', [], 'the their daughters']],
+    ['loro', null, ['il loro giardino', 'their garden', [], 'the their garden'], ['i loro giardini', 'their gardens', [], 'the their gardens']],
+    ['loro', null, ['la loro macchina', 'their car', [], 'the their car'], ['le loro macchine', 'their cars', [], 'the their cars']],
+
+    ['famiglia', null, ['mia sorella', 'my sister', [], 'my sister'], ['le mie sorelle', 'my sisters', [], 'the my sisters']],
+    ['famiglia', null, ['mio fratello', 'my brother', [], 'my brother'], ['i miei fratelli', 'my brothers', ['my brothers and sisters', 'my siblings'], 'the my brothers']],
+    ['famiglia', null, ['tuo cugino', 'your cousin (tu)', [], 'your cousin'], ['i tuoi cugini', 'your cousins (tu)', [], 'the your cousins']],
+    ['famiglia', null, ['sua zia', 'her aunt', ['his aunt'], 'her aunt'], ['le sue zie', 'her aunts', ['his aunts'], 'the her aunts']],
+    ['famiglia', null, ['nostro nonno', 'our grandfather', ['our grandad', 'our grandpa'], 'our grandfather'], ['i nostri nonni', 'our grandparents', ['our grandfathers'], 'the our grandparents']],
+    ['famiglia', null, ['mio figlio', 'my son', [], 'my son'], ['i miei figli', 'my children', ['my sons'], 'the my children']],
+    ['famiglia', null, ['mia madre', 'my mother', [], 'my mother'], null],
+    ['famiglia', null, ['tuo padre', 'your father (tu)', ['your dad (tu)'], 'your father'], null],
+    ['famiglia', null, ['suo marito', 'her husband', [], 'her husband'], null],
+    ['famiglia', null, ['sua moglie', 'his wife', [], 'his wife'], null],
+
+    ['pronomi', 'cosa', ['Il libro è mio.', 'The book is mine.', [], 'The book is mine.', ['Il libro è il mio.']], null],
+    ['pronomi', 'cosa', ['La macchina è tua?', 'Is the car yours? (tu)', [], 'The car is yours?', ['La macchina è la tua?']], null],
+    ['pronomi', 'cose', ['Le chiavi sono sue.', 'The keys are hers.', ['The keys are his.'], 'The keys are hers.', ['Le chiavi sono le sue.']], null],
+    ['pronomi', 'cose', ['I libri sono nostri.', 'The books are ours.', [], 'The books are ours.', ['I libri sono i nostri.']], null],
+    ['pronomi', 'cosa', ['La casa è loro.', 'The house is theirs.', [], 'The house is theirs.', ['La casa è la loro.']], null],
+    ['pronomi', 'cosa', ['Di chi è il cane? È mio.', "Whose is the dog? It's mine.", ["Whose dog is it? It's mine."], 'Of whom is the dog? Is mine.', ['Di chi è il cane? È il mio.']], null],
+
+    ['preposizioni', null, ['nella mia borsa', 'in my bag', [], 'in-the my bag'], ['nelle mie borse', 'in my bags', [], 'in-the my bags']],
+    ['preposizioni', null, ['sul nostro tavolo', 'on our table', [], 'on-the our table'], ['sui nostri tavoli', 'on our tables', [], 'on-the our tables']],
+    ['preposizioni', null, ['dal mio medico', "at my doctor's", ["to my doctor's"], 'at-the my doctor'], null],
+    ['preposizioni', null, ['con i miei amici', 'with my friends', [], 'with the my friends'], null],
+    ['preposizioni', null, ['per la tua famiglia', 'for your family (tu)', [], 'for the your family'], null],
+    ['preposizioni', null, ['nel loro giardino', 'in their garden', [], 'in-the their garden'], null],
+    ['preposizioni', 'io', ['Parlo del suo lavoro.', 'I talk about her work.', ['I speak about her work.', 'I talk about his work.'], 'I speak of-the her work.'], null],
+
+    ['dopo', null, ['a casa mia', 'at my place', ['at my house', 'at my home'], 'at home mine'], null],
+    ['dopo', 'cosa', ['È colpa mia.', "It's my fault.", [], 'Is fault mine.'], null],
+    ['dopo', null, ['un mio amico', 'a friend of mine', [], 'a my friend'], null],
+    ['dopo', null, ['per conto mio', 'on my own', ['by myself'], 'for account mine'], null],
+    ['dopo', null, ['da parte mia', 'on my part', [], 'from part mine'], null],
+    ['dopo', null, ['a modo mio', 'my way', ['in my own way'], 'in way mine'], null],
+    ['dopo', null, ['Mamma mia!', 'Good heavens!', ['Oh my goodness!', 'My goodness!'], 'Mother mine!'], null]
+  ];
+  // After answering: what the possessive agrees with (or why it has no article), then word for word
+  function possNote(it, literal, theme) {
+    const words = it.replace(/[.?!,]/g, '').split(/\s+/), lower = words.map(x => x.toLowerCase());
+    const pi = lower.findIndex((x, k) => POSS_FORM.has(x) || (x === 'loro' && own(POSS_ART, lower[k - 1] || '')));
+    const poss = pi >= 0 ? words[pi] : null, before = pi > 0 ? lower[pi - 1] : null;
+    const join = POSS_JOIN[lower[0]];
+    let first = '';
+    if (!poss) first = '';
+    else if (theme === 'famiglia' && !own(POSS_ART, before || '')) first = `<span class="literal-label">No article</span> one family member: <em>${it}</em> — the article comes back in the plural, with <em>loro</em>, and with <em>mamma</em> or <em>papà</em>`;
+    else if (theme === 'famiglia') first = `<span class="literal-label">The article is back</span> in the plural: <em>${it}</em>`;
+    else if (theme === 'dopo') first = `<span class="literal-label">After the noun</span> in a set phrase, with no article: <em>${it}</em>`;
+    else if (lower[pi] === 'loro') first = `<span class="literal-label">Loro never changes</span> — the article shows the gender and number: <em>${words.slice(pi - 1, pi + 2).join(' ')}</em>`;
+    else {
+      const slot = POSS_FORM.get(lower[pi]).slot, next = words[pi + 1];
+      const noun = next && !/^(è|sono)$/i.test(next) ? next : words[lower.findIndex(x => own(POSS_ART, x)) + 1];
+      first = `<span class="literal-label">Agreement</span> <em>${poss}</em> agrees with <em>${noun}</em>, ${POSS_SLOT_EN[slot]}${theme === 'suo' ? ' — not with the owner: his or hers, the same word' : ''}`;
+    }
+    if (join && theme === 'preposizioni') first = `<span class="literal-label">In una parola</span> <em>${join[0]} <span class="mech-plus">+</span> ${join[1]} → ${lower[0]}</em><br>` + first;
+    return `${first}${first ? '<br>' : ''}<span class="literal-label">Word for word</span> <em>${literal}</em>`;
+  }
+  const POSS_ITEMS = POSS_DATA.map(([level, person, [it, en, enAlts, literal, itAlts = []], pl]) => {
+    const key = sentenceKey(it), [, group] = POSS_THEME_DEFS.find(d => d[0] === level);
+    const plPerson = person === 'cosa' ? 'cose' : person;
+    return { noun: key, display: it, it, en, level, group, type: 'poss', person, natural: null, literal, note: possNote(it, literal, level),
+             ...(pl ? { pl: { it: pl[0], en: pl[1], enAlts: pl[2], itAlts: sentenceAccepted(plPerson, pl[0], []).filter(s => s !== pl[0]), person: plPerson,
+                              literal: pl[3], note: possNote(pl[0], pl[3], level) } } : {}),
+             phrase: { key, it, en, itAlts: sentenceAccepted(person, it, itAlts).filter(s => s !== it), enAlts, reg: 'neutral' } };
+  });
+  const POSS_THEMES = POSS_THEME_DEFS.map(([key, group, label, en]) => ({ key, group, label, en, nouns: POSS_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
+  const POSS_ORDER = POSS_ITEMS.map(n => n.noun);
+
   // The fusion table, for the side panel: rows the article, columns di · a · da · in · su
   const PREP_TABLE = [['il', ['del', 'al', 'dal', 'nel', 'sul']], ['lo', ['dello', 'allo', 'dallo', 'nello', 'sullo']], ["l'", ["dell'", "all'", "dall'", "nell'", "sull'"]],
     ['la', ['della', 'alla', 'dalla', 'nella', 'sulla']], ['i', ['dei', 'ai', 'dai', 'nei', 'sui']], ['gli', ['degli', 'agli', 'dagli', 'negli', 'sugli']], ['le', ['delle', 'alle', 'dalle', 'nelle', 'sulle']]];
@@ -9171,6 +9326,8 @@
   const emForms = (forms, right) => forms.map(f => (sentenceNorm(f) === right ? `<em class="why-hit">${escapeHTML(f)}</em>` : em(f))).join(' · ');
   function sentWordInfo(word, prev) {
     const n = sentenceNorm(word), idx = storyIndex();
+    if (POSS_FORM.has(n)) return { kind: 'poss', n, ...POSS_FORM.get(n) };   // mio, tua, suoi…: whose, and which form
+    if (n === 'loro' && prev && own(POSS_ART, prev)) return { kind: 'poss', n, owner: 'loro', slot: POSS_ART[prev] };   // il loro: theirs
     if (own(SENT_ART, n)) return { kind: 'art', n };
     if (own(SENT_JOIN, n)) return { kind: 'join', n };
     let r = storyResolveWord(SENTENCE_CH, word.replace(/[^A-Za-zÀ-ÿ']/g, ''), prev, idx);
@@ -9263,6 +9420,14 @@
           add(`${right}, not ${wrong}: no apostrophe here — it stands for a dropped vowel, and only before another vowel: ${tn[j] === 'un' ? `${em("un'amica")}, but ${em('un amico')}` : `${em("dell'amico")}, but ${em('del pane')}`}.`);
           continue;
         }
+        if (a.kind === 'poss' && b.kind === 'poss') {   // possessives: the owner's word, in the thing's form
+          if (a.owner === b.owner && b.slot && b.owner !== 'loro') {
+            const nk = tInfo[j + 1] && tInfo[j + 1].kind === 'noun' ? j + 1 : sentNearestNoun(tInfo, j);
+            add(`${right}, not ${wrong}: it agrees with ${nk >= 0 ? em(sentNounPhrase(w, tInfo, nk)) : 'the thing owned'}, ${POSS_SLOT_EN[b.slot]} — not with the owner: ${emForms(POSS_OWNERS[b.owner], tn[j])}.`);
+          } else if (a.owner !== b.owner) add(`${right}, not ${wrong}: ${em(tn[j])} is <em>${POSS_OWNER_EN[b.owner]}</em>; ${em(gn[i])} is <em>${POSS_OWNER_EN[a.owner]}</em>.`);
+          continue;
+        }
+        if (b.kind === 'poss' && b.owner === 'loro' && /^lor/.test(gn[i])) { add(`${right}, not ${wrong}: ${em('loro')} never changes — the article shows the gender and number.`); continue; }
         const pa = sentPrepOf(gn[i]), pb = sentPrepOf(tn[j]);
         if (card.rule && pa && pb && pa !== pb) { add(`${right}, not ${wrong}: ${card.rule}`); continue; }   // the wrong preposition
         if (card.ownRule && pa && pa === pb) { add(`${right}, not ${wrong}: ${card.ownRule}`); continue; }   // the right one, wrongly joined: this card's own lesson
@@ -9338,6 +9503,12 @@
       }
       // A preposition Italian doesn't use here (aspetto per l'autobus)
       for (const i of ins.slice(pairs)) if (card.rule && sentPrepOf(gn[i])) add(`${em(g[i].toLowerCase())} isn't needed here: ${card.rule}`);
+      // An article before one family member (la mia sorella): the possessive, with no article in front of it in the answer
+      for (const i of ins.slice(pairs)) {
+        if (gInfo[i].kind !== 'art' || !gInfo[i + 1] || gInfo[i + 1].kind !== 'poss') continue;
+        const j = tn.indexOf(gn[i + 1]);
+        if (j >= 0 && (j === 0 || tInfo[j - 1].kind !== 'art')) add(`No article with one family member: ${em(w.slice(j, j + 2).join(' ').replace(/[.?!,]$/, '').toLowerCase())} — it comes back in the plural (${em('le mie sorelle')}), with ${em('loro')} (${em('il loro figlio')}), and with ${em('mamma')} or ${em('papà')}.`);
+      }
       // A missing article, or a missing non
       for (const j of del.slice(pairs)) {
         if (tInfo[j].kind === 'art' && tInfo[j + 1] && tInfo[j + 1].kind === 'noun') add(`Don't drop the article: ${em(sentNounPhrase(w, tInfo, j + 1))}.`);
@@ -9345,6 +9516,8 @@
           add(`Don't drop the article: ${em(w.slice(j, j + 3).join(' ').replace(/[.?!,]$/, '').toLowerCase())}.`);
         else if (tInfo[j].kind === 'art' && tn[j + 1] && SENT_POSSESSIVE.has(tn[j + 1]) && tInfo[j + 2] && tInfo[j + 2].kind === 'noun')
           add(`Don't drop the article: ${em(sentNounPhrase(w, tInfo, j + 2))} — possessives take the article in Italian (only a single family member goes without: ${em('mia madre')}).`);
+        else if (tInfo[j].kind === 'art' && tn[j + 1] === 'loro')
+          add(`Don't drop the article: ${em(w.slice(j, j + 3).join(' ').replace(/[.?!,]$/, '').toLowerCase())} — ${em('loro')} always takes it, even for family (${em('il loro padre')}).`);
         else if (card.rule && sentPrepOf(tn[j])) add(`Missing ${em(w[j].replace(/[.?!,]$/, '').toLowerCase())}: ${card.rule}`);
         else if (tn[j] === 'non') add(`${em('non')}, right before the verb, makes it negative.`);
         else if (like && (tn[j] === 'a' || (own(SENT_JOIN, tn[j]) && SENT_JOIN[tn[j]][0] === 'a'))) {
@@ -9422,6 +9595,15 @@
       if (unknown.length) console.warn(`[prepositions] "${n.it}": words not in the deck:`, unknown);
     }
     if (new Set(PREP_ITEMS.map(n => n.noun)).size !== PREP_ITEMS.length) console.warn('[prepositions] two cards share a key');
+    // Possessivi: every word of every accepted answer in the deck; no phrase, and no English prompt, twice
+    check('possessives', POSS_ITEMS, POSS_THEMES, POSS_ORDER);
+    for (const n of POSS_ITEMS) {
+      const unknown = [n.it, ...n.phrase.itAlts, ...(n.pl ? [n.pl.it, ...n.pl.itAlts] : [])].flatMap(x => sentenceSegments(x).filter(sg => sg.unknown).map(sg => sg.text));
+      if (unknown.length) console.warn(`[possessives] "${n.it}": words not in the deck:`, unknown);
+    }
+    const possEn = POSS_ITEMS.flatMap(n => [n.en, ...(n.pl ? [n.pl.en] : [])]);
+    if (new Set(POSS_ITEMS.map(n => n.noun)).size !== POSS_ITEMS.length) console.warn('[possessives] two cards share a key');
+    if (new Set(possEn).size !== possEn.length) console.warn('[possessives] an English prompt twice:', possEn.filter((x, i) => possEn.indexOf(x) !== i));
     // Every word of every sentence is in the deck (or a small word), and the keys are unique
     for (const n of SENTENCE_ITEMS) {
       const unknown = sentenceSegments(n.it).filter(sg => sg.unknown).map(sg => sg.text);
@@ -9546,6 +9728,18 @@
       statsKeys: { 'en-it': 'aggettivi-stats-v1', 'it-en': 'aggettivi-stats-iten-v1', listen: 'aggettivi-stats-listen-v1' }, statsFormat: 'noun',
       assocKey: 'aggettivi-assoc-v1'
     },
+    possessives: {
+      kind: 'phrase', sentences: true, panel: 'possessives', doneWord: 'phrases', chipOrder: 'level', themeGroups: POSS_GROUPS, keepPairs: true, numberToggle: true,
+      numberKey: 'possessivi', numberLabel: 'Singolare · plurale',
+      numberNote: 'Most come in pairs: the singular, then its plural straight after — <em>il mio libro</em>, then <em>i miei libri</em>; <em>mia sorella</em>, then <em>le mie sorelle</em>.',
+      switchLabel: 'Possessivi', title: 'Possessivi', subtitle: 'Il Mazzo · I Possessivi',
+      setupTitle: 'Choose your possessives',
+      setupSub: 'In Italian the possessive agrees with the thing owned, not with the owner — <em>la sua casa</em> is his house or her house — and it takes the article: <em>il mio libro</em>, <em>la tua borsa</em>. One family member goes without (<em>mia madre</em>), and <em>loro</em> never changes. Each card gives the English; write the Italian. <em>Why</em> explains any slip.',
+      itemWord: 'phrase', itemWords: 'phrases',
+      items: POSS_ITEMS, themes: POSS_THEMES, frequency: POSS_ORDER,
+      statsKeys: { 'en-it': 'possessivi-stats-v1', 'it-en': 'possessivi-stats-iten-v1', listen: 'possessivi-stats-listen-v1' }, statsFormat: 'noun',
+      assocKey: 'possessivi-assoc-v1'
+    },
     prepositions: {
       kind: 'phrase', sentences: true, panel: 'prepositions', doneWord: 'phrases', chipOrder: 'level', themeGroups: PREP_GROUPS, keepPairs: true, numberToggle: true,
       switchLabel: 'Preposizioni', title: 'Preposizioni', subtitle: 'Il Mazzo · Le Preposizioni',
@@ -9614,6 +9808,7 @@
     mipiace: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     // As in the original game, every adjective starts selected
     adjectives: { selected: new Set(ADJ_ITEMS.map(n => n.noun)), capValue: '', capMode: 'random', direction: 'en-it' },
+    possessives: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     prepositions: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     phrases: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     sentences: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
@@ -9666,7 +9861,7 @@
   // ===== Ripasso del giorno =====
   const RIPASSO_DIR_KEY = 'mazzo-ripasso-dir';
   const REVIEW_START = 30;   // cards in play at the start; Deck size reaches the rest
-  const REVIEW_LABEL = { nouns: 'noun', verbs: 'regular verb', irregular: 'irregular verb', adjectives: 'adjective', prepositions: 'preposition', phrases: 'phrase', sentences: 'sentence', story: 'story word' };
+  const REVIEW_LABEL = { nouns: 'noun', verbs: 'regular verb', irregular: 'irregular verb', adjectives: 'adjective', possessives: 'possessive', prepositions: 'preposition', phrases: 'phrase', sentences: 'sentence', story: 'story word' };
   let ripassoDir = 'en-it';
   try { const d = localStorage.getItem(RIPASSO_DIR_KEY); if (DIR_LABELS[d]) ripassoDir = d; } catch (e) { /* default */ }
 
@@ -10150,6 +10345,40 @@
         </div>
       </aside>
       `,
+    possessives: () => `
+      <aside class="endings prep-panel poss-panel" aria-label="Possessives">
+        <h3 class="endings-title">I possessivi</h3>
+        <div class="endings-sub">my, your, his, her… with the article</div>
+        <div class="eg eg-poss">
+          <div></div>${['m. sing.', 'f. sing.', 'm. plur.', 'f. plur.'].map(x => `<div class="eg-class">${x}</div>`).join('')}
+          ${Object.entries(POSS_OWNERS).map(([o, f]) => `<div class="eg-person">${POSS_OWNER_WHO[o]}</div>${f.map((x, k) => `<div class="eg-cell"><span class="eg-txt">${['il', 'la', 'i', 'le'][k]} ${x}</span></div>`).join('')}`).join('')}
+        </div>
+        <div class="endings-note">
+          <div class="en-label">It agrees with the thing</div>
+          <p>The possessive takes the gender and number of the thing owned, not the owner: <em>la sua casa</em> is his house or her house, <em>il suo libro</em> her book or his.</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">With the article</div>
+          <p><em>il mio libro, la tua borsa, i nostri amici</em> — and with a preposition, the article joins it as usual: <em>nella mia borsa</em>. In a few set phrases it comes after the noun, with no article: <em>a casa mia, è colpa mia</em>.</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">Family</div>
+          <p>One family member goes without the article: <em>mia madre, tuo fratello, sua zia</em>. It comes back in the plural (<em>i miei fratelli</em>), with <em>loro</em>, and with <em>mamma</em>, <em>papà</em> or something added (<em>la mia sorellina</em>).</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">Loro never changes</div>
+          <p><em>il loro, la loro, i loro, le loro</em> — always with the article, even for family: <em>il loro padre</em>.</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">Your, formally</div>
+          <p>The formal <em>Lei</em> uses <em>suo</em>, often with a capital: <em>il Suo biglietto, la Sua camera</em>.</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">Mine, yours</div>
+          <p>The same words: <em>il libro è mio</em> (or <em>è il mio</em>), <em>la casa è loro</em>.</p>
+        </div>
+      </aside>
+      `,
     prepositions: () => `
       <aside class="endings prep-panel" aria-label="Prepositions joined to the article">
         <h3 class="endings-title">Le articolate</h3>
@@ -10276,7 +10505,7 @@
       </aside>
       `
   };
-  const CHART_TITLES = { endings: 'Le desinenze', irregular: 'Gli irregolari', agreement: 'Le concordanze', prepositions: 'Le articolate', phrases: 'In pratica', mipiace: 'Come piacere' };
+  const CHART_TITLES = { endings: 'Le desinenze', irregular: 'Gli irregolari', agreement: 'Le concordanze', possessives: 'I possessivi', prepositions: 'Le articolate', phrases: 'In pratica', mipiace: 'Come piacere' };
   // The chart for the card on screen (in Ripasso, the card's own section)
   function chartKey() {
     const k = SUBJECTS[subject] && SUBJECTS[subject].panel;
@@ -10383,12 +10612,12 @@
   function prepNumbersHTML() {
     const on = activeNumbers();
     return `
-      <div class="mode-label">Le articolate</div>
+      <div class="mode-label">${(SUBJECTS[subject] && SUBJECTS[subject].numberLabel) || 'Le articolate'}</div>
       <div class="mode-toggle type-toggle" id="number-toggle" role="group" aria-label="Singular, plural or both">
         ${PREP_NUMBERS.map(([k, label]) => `<button type="button" class="mode-option${on.includes(k) ? ' active' : ''}" data-num="${k}" aria-pressed="${on.includes(k)}">${label}</button>`).join('')}
       </div>
       <p class="person-hint" id="number-hint" aria-live="polite"></p>
-      <p class="type-key">Each fusion drill is a pair, with one easy verb: the singular, then its plural straight after — <em>parlo del libro</em>, then <em>parlo dei libri</em>.</p>`;
+      <p class="type-key">${(SUBJECTS[subject] && SUBJECTS[subject].numberNote) || 'Each fusion drill is a pair, with one easy verb: the singular, then its plural straight after — <em>parlo del libro</em>, then <em>parlo dei libri</em>.'}</p>`;
   }
   function wireNumbers() {
     const box = document.getElementById('number-toggle');
@@ -12061,7 +12290,7 @@
       natEl.innerHTML = showNatural ? `<span class="natural-label">in natural English</span> ${escapeHTML(card.natural)}` : '';
       metaEl.style.display = 'none';
       hintEl.style.display = '';
-      hintEl.textContent = itToEn ? '→ in inglese' : (card.mech ? '+ preposizione articolata' : '+ frase');   // a fusion drill: join them
+      hintEl.textContent = itToEn ? '→ in inglese' : (card.mech ? '+ preposizione articolata' : card.type === 'poss' ? '+ possessivo' : '+ frase');   // a fusion drill: join them
       ans.placeholder = itToEn ? 'type the english meaning…' : 'type the italian phrase…';
     } else if (isAdjSubject()) {
       // As in the adjectives game: the agreement type sits above the English, and

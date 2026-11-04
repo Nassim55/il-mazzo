@@ -11,6 +11,7 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 | Verbi irregolari | 50 verbs | the most common verbs that are irregular in the present |
 | Verbi al contrario | 133 sentences · 20 backwards verbs | verbs like *piacere*, drilled: natural English in, the Italian turned round out (*I like the beach* → *Mi piace la spiaggia*) |
 | Aggettivi | 200 adjectives | the dictionary form, or every gender and number |
+| Possessivi | 71 phrases · 117 cards | *my, your, his, her…*: the article, agreement with the thing owned, family, *loro* (*il mio libro*, *mia sorella*, *la loro casa*) |
 | Preposizioni | 226 phrases · 305 cards | fusion drills (*di + il libro* → *del libro*) and usage cards in 27 themes, six groups; a rule for every slip; the fusion table |
 | Frasi | 50 phrases | everyday expressions, with *tu* and *Lei* forms kept distinct |
 | Scrittura | 100 sentences | present-tense sentences built from the deck's own words, written in full |
@@ -57,6 +58,10 @@ Every card section works in three directions — English → Italian, Italian �
 Every item you answer gets a review date, separately for each direction. A correct answer moves it up a box and pushes it further out — 1, 2, 4, 8, 16, 32, then 64 days — while a wrong answer brings it back tomorrow. Only the first correct answer of the day moves an item up, so six right conjugations of one verb count once. Progress from before the schedule existed seeds it: weak items come due straight away and solid ones are spread over the following days.
 
 The strip at the top of the setup screen shows what's due today in the chosen direction, by section. **Start** mixes it all into one round (up to 30 cards to begin with; Deck size reaches the rest), each card labelled with its section and checked by that section's rules. Schedules are part of backups, and resetting a section's progress clears its schedule.
+
+## Possessivi: my, your, his, her
+
+English in, Italian out: *my book* → *il mio libro*. Most cards come in pairs — the singular, then its plural straight after (*il mio libro*, *i miei libri*), with a *Singolare · plurale* setting of its own. The themes go by owner (*mio, tuo, suo*, formal *Suo, nostro, vostro, loro*) and then the special cases: one family member with no article (*mia sorella* — but *le mie sorelle*), *mine, yours* (*il libro è mio*), with a preposition (*nella mia borsa*) and after the noun in set phrases (*a casa mia, è colpa mia, un mio amico*). The *suo* cards mix *his* and *her* on purpose: the possessive agrees with the thing, not the owner. After each answer the card says what the possessive agrees with (or why there's no article), then word for word. *Why* knows possessives everywhere in the game: the right owner in the wrong form (*il sua libro* — it agrees with *libro*), the wrong owner (*suo* for *tuo*), an article before one family member, a missing one, and *loro*, which never changes. *I possessivi* charts every form with its article, and the rules.
 
 ## Verbi al contrario: verbs that work backwards
 
