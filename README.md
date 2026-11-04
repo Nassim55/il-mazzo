@@ -22,6 +22,8 @@ Every card section works in three directions — English → Italian, Italian �
 
 ## Features
 
+**La mappa (Sostantivi).** Below the theme chips, every topic gets a line of small squares, one per noun, in the grid's colours — olive rarely wrong, gold, terracotta often wrong; fainter after only a few tries, plain if not tried yet — strongest first, so a topic's balance shows at a glance, with how often you're right in it on the right. *Weakest first* ranks the topics; tap one for its nouns by name (to work on, going well, not tried yet) and buttons that put them in the deck: *Practise the weakest*, *Pick the not tried*, *Pick all*. It follows the setup's direction, folds away with *hide*, and remembers both.
+
 **The infinitive first.** In a conjugation round (English → Italian, or Listening), each verb starts with its infinitive: type it right before its forms begin — it counts for nothing, no score and no record, and a slip or *Salta* just asks for it to be typed. Then it stays on the card, above each form, until the next verb. *Prima l'infinito*, with the persons on the verb setup screens, turns it off (it's kept and synced with them). Not in Italian → English, where it would give the meaning away, nor in Ripasso, where each verb comes as a single form.
 
 **Conjugations in order.** In a conjugation round, each verb's forms come together, *io → tu → lui → noi → voi → loro*, while the verbs themselves come in random order — in every round: a fresh one, *Play all again*, *Practise the missed*, *Focus*, *A spasso*. A round cut short (*play just 20*) only ever cuts a verb at its end, and growing a round mid-way finishes the verbs in play before adding new ones, whole.

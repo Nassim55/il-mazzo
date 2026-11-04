@@ -2153,6 +2153,58 @@
   .mpv-row .mpv-lit { display: block; font-size: 12px; color: var(--ink-faded); opacity: 1; }
   .mpv-row .mpv-lit em { font-family: 'Cormorant Garamond', serif; font-size: 14px; color: var(--ink); }
 
+  /* La mappa: every noun topic at a glance */
+  .noun-map { margin: 26px 0 6px; padding: 18px 18px 12px; background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.1); border-radius: 14px; }
+  .noun-map:has(.map-show) { padding: 0; background: none; border: 0; }
+  .map-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+  .map-title { margin: 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 30px; line-height: 1; color: var(--ink); }
+  .map-sub { margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faded); }
+  .map-tools { display: flex; align-items: center; gap: 10px; }
+  .map-sort .mode-option { font-size: 10px; padding: 6px 10px; white-space: nowrap; }
+  .map-key { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 14px; margin: 14px 0 8px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--ink-faded); }
+  .map-overview strong { color: var(--ink); font-weight: 600; }
+  .map-legend { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .map-legend-bar { width: 84px; height: 9px; border-radius: 5px; }
+  .map-rows { border-top: 1px solid rgba(28, 22, 17, 0.08); }
+  .map-row { border-bottom: 1px solid rgba(28, 22, 17, 0.08); }
+  .map-head { display: grid; grid-template-columns: 132px minmax(0, 1fr) 40px; align-items: center; gap: 12px; width: 100%; padding: 8px 6px; margin: 0;
+              background: none; border: 0; border-radius: 8px; text-align: left; cursor: pointer; color: inherit; font: inherit; }
+  .map-head:hover, .map-row.open .map-head { background: rgba(176, 133, 64, 0.09); }
+  .map-head:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+  .map-name { display: flex; flex-direction: column; line-height: 1.15; }
+  .map-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 19px; color: var(--ink); }
+  .map-en { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faded); }
+  .map-strip { display: flex; flex-wrap: wrap; gap: 2px; padding: 1px 0; }
+  .map-cell { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 2.5px; background: var(--c); }
+  .map-cell.new { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.2); }
+  .map-score { justify-self: end; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-faded); }
+  .map-score[style] { color: var(--ink); font-weight: 600; border-bottom: 3px solid var(--c); padding-bottom: 1px; }
+  .map-detail { padding: 2px 6px 14px 150px; }
+  .map-sum { margin: 2px 0 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink-soft); }
+  .map-dir { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-faded); }
+  .map-list-label { margin: 10px 0 5px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+  .map-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .map-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 999px; background: var(--t); color: var(--ink); }
+  .map-chip::before { content: ''; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+  .map-chip.new::before { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.25); }
+  .map-chip em { font-family: 'Cormorant Garamond', serif; font-size: 16px; }
+  .map-chip b { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; opacity: 0.75; }
+  .map-chip.new { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.16); color: var(--ink-soft); }
+  .map-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 14px; }
+  .map-btn { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; padding: 9px 13px; border-radius: 8px;
+             border: 1px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer; }
+  .map-btn.ghostly { background: transparent; color: var(--ink); }
+  .map-picked { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--olive); }
+  .map-show { width: 100%; text-align: left; background: none; border: 1px dashed rgba(28, 22, 17, 0.22); border-radius: 12px; padding: 12px 14px; cursor: pointer;
+              color: var(--ink-soft); font-family: 'DM Sans', sans-serif; font-size: 13px; }
+  .map-title-sm { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 20px; color: var(--ink); }
+  @media (max-width: 600px) {
+    .noun-map { padding: 14px 10px 8px; }
+    .map-head { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }
+    .map-strip { grid-column: 1 / -1; grid-row: 2; }
+    .map-detail { padding-left: 6px; }
+  }
+
   /* The infinitive first: pinned above a verb's forms once answered */
   .inf-first { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin: 10px 0 2px; cursor: pointer; }
   .inf-first input { accent-color: var(--olive); transform: translateY(1px); }
@@ -9674,7 +9726,7 @@
   // settings and direction while the page is open.
   const SUBJECTS = {
     nouns: {
-      kind: 'noun', panel: null,
+      kind: 'noun', panel: null, nounMap: true,
       switchLabel: 'Sostantivi', title: 'Sostantivi', subtitle: 'Il Mazzo · Articolo Determinativo',
       setupTitle: 'Choose your nouns',
       setupSub: 'Tap any noun to toggle it — or click and drag to paint a selection across multiple. Each noun adds 1 card. The answer must include the article — <em>la stazione</em>, not just <em>stazione</em>.',
@@ -10739,6 +10791,7 @@
             </div>`).join('') : THEMES.map(themeChipHTML).join('')}
         </div>
       </div>`}
+      ${cfg.nounMap ? `<section class="noun-map" id="noun-map" aria-label="La mappa: your nouns by topic">${nounMapInner()}</section>` : ''}
 
       <div class="setup-controls">
         <div>
@@ -10912,6 +10965,7 @@
       updateReadout();
     });
 
+    wireNounMap(applyPick);   // La mappa's buttons pick the same way as the ones above the grid
     document.getElementById('select-all').addEventListener('click', () => {
       nounData.forEach(n => selectedNouns.add(n.noun));
       gameArea.querySelectorAll('.verb-chip').forEach(c => c.classList.remove('unselected'));
@@ -11123,6 +11177,124 @@
         <span class="shade-key-end">often wrong</span>
         <span class="shade-key-note">fainter: only a few tries · plain: not tried yet · ${DIR_LABELS[direction].long}</span>
       </div>`;
+  }
+
+  // ===== La mappa (Nov 2026): every noun topic at a glance =====
+  // One line per topic: a square per noun, strongest first, in the grid's own colours —
+  // olive rarely wrong, gold, terracotta often wrong — blended more strongly so a small
+  // square still shows them; fainter after only a few tries, plain if not tried yet. On
+  // the right, how often you're right in the topic. Tap a topic for its nouns by name,
+  // weakest first, with buttons that put them in the deck. Follows the setup's direction.
+  const MAP_KEY = 'mazzo-noun-map-v1';
+  const mapPrefs = () => { try { return JSON.parse(localStorage.getItem(MAP_KEY) || '{}') || {}; } catch (e) { return {}; } };
+  const saveMapPrefs = p => { try { localStorage.setItem(MAP_KEY, JSON.stringify({ ...mapPrefs(), ...p })); } catch (e) { /* private mode */ } };
+  let mapOpen = null;   // the topic opened, this visit
+  function mapColor(rate, seen) {
+    const t = Math.min(1, rate / 0.5), sure = 0.4 + 0.6 * Math.min(1, (seen - 1) / 4);
+    const [a, b, u] = t < 0.5 ? [SHADE_STOPS[0], SHADE_STOPS[1], t * 2] : [SHADE_STOPS[1], SHADE_STOPS[2], (t - 0.5) * 2];
+    const mix = 0.3 + 0.62 * sure;   // bolder than the grid's: a small square has to carry it alone
+    return `rgb(${a.map((x, i) => Math.round(SHADE_PAPER[i] + (x + (b[i] - x) * u - SHADE_PAPER[i]) * mix)).join(', ')})`;
+  }
+  // A topic's nouns, strongest first (then the most tried), the untried at the end
+  function mapTopic(t, byKey) {
+    const cells = t.nouns.map(k => {
+      const n = byKey.get(k), s = stats[k], seen = s && s.seen > 0 ? s.seen : 0, wrong = seen ? Math.min(s.wrong || 0, seen) : 0;
+      return { key: k, it: n ? n.it : k, en: n ? n.en : '', seen, wrong, rate: seen ? wrong / seen : null };
+    });
+    const tried = cells.filter(c => c.seen).sort((a, b) => a.rate - b.rate || b.seen - a.seen || a.key.localeCompare(b.key));
+    const fresh = cells.filter(c => !c.seen);
+    const seen = tried.reduce((x, c) => x + c.seen, 0), wrong = tried.reduce((x, c) => x + c.wrong, 0);
+    return { t, cells: [...tried, ...fresh], tried, fresh, seen, wrong, rate: seen ? wrong / seen : null,
+             often: tried.filter(c => c.rate >= 0.4).length, shaky: tried.filter(c => c.rate >= 0.15 && c.rate < 0.4).length };
+  }
+  const mapCellTitle = c => `${c.it} — ${c.en}: ${c.seen ? `right ${c.seen - c.wrong} of ${c.seen}` : 'not tried yet'}`;
+  function nounMapInner() {
+    const p = mapPrefs(), dir = DIR_LABELS[direction].long;
+    if (p.hidden) return `<button type="button" class="map-show" id="map-show"><span class="map-title-sm">La mappa</span> — every topic and every noun, strongest to weakest · <u>show</u></button>`;
+    const byKey = new Map(NOUN_ITEMS.map(n => [n.noun, n]));
+    let topics = NOUN_THEMES.map(t => mapTopic(t, byKey));
+    if (p.sort === 'weak') topics = topics.map((x, i) => [x, i]).sort(([a, i], [b, j]) => (a.rate === null) - (b.rate === null) || (b.rate || 0) - (a.rate || 0) || i - j).map(([x]) => x);
+    const all = NOUN_ITEMS.filter(n => stats[n.noun] && stats[n.noun].seen > 0);
+    const often = all.filter(n => stats[n.noun].wrong / stats[n.noun].seen >= 0.4).length;
+    const sq = c => `<i class="map-cell${c.seen ? '' : ' new'}"${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}"` : ''} title="${escapeHTML(mapCellTitle(c))}"></i>`;
+    // a chip: the grid's own pale tint behind the words (so they stay readable), the map's colour in its dot
+    const chip = c => `<span class="map-chip${c.seen ? '' : ' new'}"${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}; --t: ${errorShade(c).color}"` : ''} title="${escapeHTML(mapCellTitle(c))}"><em>${escapeHTML(c.it)}</em>${c.seen ? ` <b>${c.seen - c.wrong}/${c.seen}</b>` : ''}</span>`;
+    const row = x => {
+      const open = mapOpen === x.t.key, pct = x.rate === null ? '—' : `${Math.round((1 - x.rate) * 100)}%`;
+      const work = x.tried.filter(c => c.rate >= 0.15).sort((a, b) => b.rate - a.rate || b.seen - a.seen), good = x.tried.filter(c => c.rate < 0.15);
+      const mistakes = x.tried.filter(c => c.wrong > 0).sort((a, b) => b.rate - a.rate || b.wrong - a.wrong).slice(0, 10);
+      return `
+        <div class="map-row${open ? ' open' : ''}" data-topic="${x.t.key}">
+          <button type="button" class="map-head" aria-expanded="${open}" aria-label="${escapeHTML(`${x.t.label}, ${x.t.en}: ${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : `, right ${pct} of the time`}`)}">
+            <span class="map-name"><span class="map-it">${x.t.label}</span><span class="map-en">${x.t.en} · ${x.cells.length}</span></span>
+            <span class="map-strip" aria-hidden="true">${x.cells.map(sq).join('')}</span>
+            <span class="map-score"${x.rate === null ? '' : ` style="--c: ${mapColor(x.rate, 5)}"`}>${pct}</span>
+          </button>
+          ${open ? `
+          <div class="map-detail">
+            <p class="map-sum">${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : ` · right ${pct} of the time`}${x.often ? ` · ${x.often} often wrong` : ''} <span class="map-dir">${dir}</span></p>
+            ${work.length ? `<div class="map-list-label">To work on</div><div class="map-chips">${work.map(chip).join('')}</div>` : ''}
+            ${good.length ? `<div class="map-list-label">Going well</div><div class="map-chips">${good.map(chip).join('')}</div>` : ''}
+            ${x.fresh.length ? `<div class="map-list-label">Not tried yet</div><div class="map-chips">${x.fresh.map(chip).join('')}</div>` : ''}
+            <div class="map-actions">
+              ${mistakes.length ? `<button type="button" class="map-btn" data-map-pick="weak">Practise the ${mistakes.length} weakest</button>` : ''}
+              ${x.fresh.length ? `<button type="button" class="map-btn ghostly" data-map-pick="new">Pick the ${x.fresh.length} not tried</button>` : ''}
+              <button type="button" class="map-btn ghostly" data-map-pick="all">Pick all ${x.cells.length}</button>
+              <span class="map-picked" id="map-picked" aria-live="polite"></span>
+            </div>
+          </div>` : ''}
+        </div>`;
+    };
+    return `
+      <div class="map-top">
+        <div><h3 class="map-title">La mappa</h3><div class="map-sub">every topic, every noun — strongest first along each line</div></div>
+        <div class="map-tools">
+          <div class="mode-toggle map-sort" role="group" aria-label="Order of the topics">
+            <button type="button" class="mode-option${p.sort === 'weak' ? '' : ' active'}" data-map-sort="order" aria-pressed="${p.sort !== 'weak'}">Topic order</button>
+            <button type="button" class="mode-option${p.sort === 'weak' ? ' active' : ''}" data-map-sort="weak" aria-pressed="${p.sort === 'weak'}">Weakest first</button>
+          </div>
+          <button type="button" class="ghost" id="map-hide">hide</button>
+        </div>
+      </div>
+      <div class="map-key">
+        <span class="map-overview"><strong>${all.length}</strong> of ${NOUN_ITEMS.length} nouns practised${often ? ` · <strong>${often}</strong> often wrong` : ''}</span>
+        <span class="map-legend"><span>rarely wrong</span><span class="map-legend-bar" style="background: linear-gradient(90deg, ${mapColor(0, 5)}, ${mapColor(0.25, 5)}, ${mapColor(0.5, 5)})"></span><span>often wrong</span>
+          <i class="map-cell new"></i><span>not tried</span><span class="map-dir">· ${dir}</span></span>
+      </div>
+      <div class="map-rows">${topics.map(row).join('')}</div>`;
+  }
+  function wireNounMap(applyPick) {
+    const box = document.getElementById('noun-map');
+    if (!box) return;
+    const refresh = () => { box.innerHTML = nounMapInner(); };
+    box.addEventListener('click', e => {
+      const head = e.target.closest('.map-head'), sort = e.target.closest('[data-map-sort]'), pick = e.target.closest('[data-map-pick]');
+      if (e.target.closest('#map-hide')) { saveMapPrefs({ hidden: true }); refresh(); return; }
+      if (e.target.closest('#map-show')) { saveMapPrefs({ hidden: false }); refresh(); return; }
+      if (sort) { saveMapPrefs({ sort: sort.dataset.mapSort }); refresh(); return; }
+      if (head) {
+        const key = head.closest('.map-row').dataset.topic;
+        mapOpen = mapOpen === key ? null : key;
+        refresh();
+        const row = box.querySelector(`.map-row[data-topic="${mapOpen}"]`);
+        if (row && row.scrollIntoView) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        return;
+      }
+      if (pick) {
+        const t = NOUN_THEMES.find(x => x.key === mapOpen);
+        if (!t) return;
+        const x = mapTopic(t, new Map(NOUN_ITEMS.map(n => [n.noun, n])));
+        const keys = pick.dataset.mapPick === 'weak' ? x.tried.filter(c => c.wrong > 0).sort((a, b) => b.rate - a.rate || b.wrong - a.wrong).slice(0, 10).map(c => c.key)
+          : pick.dataset.mapPick === 'new' ? x.fresh.map(c => c.key) : t.nouns.slice();
+        applyPick(keys);
+        const note = document.getElementById('map-picked');
+        if (note) note.innerHTML = `${keys.length} picked — <button type="button" class="ghost" id="map-go">start practising ↓</button>`;
+      }
+      if (e.target.closest('#map-go')) {
+        const start = document.getElementById('start-btn');
+        if (start) { if (start.scrollIntoView) start.scrollIntoView({ block: 'center', behavior: 'smooth' }); start.focus(); }
+      }
+    });
   }
 
   // Same ranking as the verb sections' Weakest 10 button — mistakes ÷ (attempts + 2),
