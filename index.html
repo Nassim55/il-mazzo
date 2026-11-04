@@ -2179,7 +2179,41 @@
   .map-cell.new { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.2); }
   .map-score { justify-self: end; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-faded); }
   .map-score[style] { color: var(--ink); font-weight: 600; border-bottom: 3px solid var(--c); padding-bottom: 1px; }
-  .map-detail { padding: 2px 6px 14px 150px; }
+  .map-inline { padding: 2px 6px 14px 150px; }
+  /* Sostantivi: the page is the map — wide, with the topic you open in a panel beside it */
+  .container[data-map="1"][data-view="setup"] { max-width: 1180px; }
+  .container[data-map="1"][data-view="setup"] #game-area { max-width: none; }
+  .container[data-map="1"] .setup-intro, .container[data-map="1"] .setup-controls, .container[data-map="1"] .setup-meta,
+  .container[data-map="1"] .audio-row, .container[data-map="1"] .deck-cap, .container[data-map="1"] .start-btn,
+  .container[data-map="1"] .passive-btn, .container[data-map="1"] .passive-msg, .container[data-map="1"] .mode-label,
+  .container[data-map="1"] .mode-toggle:not(.map-sort):not(.subject-toggle), .container[data-map="1"] .grid-fold { max-width: 660px; margin-left: auto; margin-right: auto; }
+  .container[data-map="1"] .start-btn { display: block; width: 100%; }
+  .map-panel { display: none; }
+  .map-indeck { display: block; margin-top: 2px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.04em; color: var(--olive); }
+  .map-cell.in { outline: 1.5px solid var(--ink); outline-offset: 1px; }
+  .map-legend .map-cell.in { background: transparent; }
+  .map-chip { font: inherit; border: 0; cursor: pointer; }
+  .map-chip.in { box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .map-chip.in em::after { content: ' ✓'; font-family: 'DM Sans', sans-serif; font-style: normal; font-size: 12px; }
+  .map-chip.new.in { box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .map-chip:hover { filter: brightness(0.97); }
+  .map-hint { margin: 10px 0 0; font-family: 'DM Sans', sans-serif; font-size: 12.5px; color: var(--ink-faded); }
+  .map-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+  .map-panel-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 30px; line-height: 1.05; color: var(--ink); }
+  .map-close { background: none; border: 0; font-size: 26px; line-height: 1; cursor: pointer; color: var(--ink-soft); padding: 0 4px; }
+  .map-jumps { display: flex; flex-direction: column; gap: 4px; }
+  .map-jump { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 6px 8px; background: none; border: 0; border-radius: 8px; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+  .map-jump:hover { background: rgba(176, 133, 64, 0.09); }
+  .grid-fold { margin-top: 26px; }
+  .grid-fold > summary { cursor: pointer; padding: 10px 2px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .grid-fold > summary span { color: var(--ink-faded); }
+  @media (min-width: 900px) {
+    .container[data-map="1"] .map-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, 360px); gap: 20px; align-items: start; }
+    .container[data-map="1"] .map-panel { display: block; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto;
+                                          padding: 16px 16px 16px; background: #fffaf0; border: 1px solid rgba(28, 22, 17, 0.1); border-radius: 12px; }
+    .container[data-map="1"] .map-inline { display: none; }
+    .container[data-map="1"] .map-head { grid-template-columns: 124px minmax(0, 1fr) 40px; }
+  }
   .map-sum { margin: 2px 0 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink-soft); }
   .map-dir { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-faded); }
   .map-list-label { margin: 10px 0 5px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
@@ -2202,7 +2236,7 @@
     .noun-map { padding: 14px 10px 8px; }
     .map-head { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }
     .map-strip { grid-column: 1 / -1; grid-row: 2; }
-    .map-detail { padding-left: 6px; }
+    .map-inline { padding-left: 6px; }
   }
 
   /* The infinitive first: pinned above a verb's forms once answered */
@@ -9732,7 +9766,7 @@
       kind: 'noun', panel: null, nounMap: true,
       switchLabel: 'Sostantivi', title: 'Sostantivi', subtitle: 'Il Mazzo · Articolo Determinativo',
       setupTitle: 'Choose your nouns',
-      setupSub: 'Tap any noun to toggle it — or click and drag to paint a selection across multiple. Each noun adds 1 card. The answer must include the article — <em>la stazione</em>, not just <em>stazione</em>.',
+      setupSub: 'Pick from the map below — tap a topic for its nouns, weakest first, and put any of them in your deck — or use the quick picks. Each noun adds 1 card. The answer must include the article — <em>la stazione</em>, not just <em>stazione</em>.',
       itemWord: 'noun', itemWords: 'nouns',
       items: NOUN_ITEMS, themes: NOUN_THEMES, frequency: NOUN_FREQUENCY_ORDER,
       statsKeys: { 'en-it': 'sostantivi-stats-v1', 'it-en': 'sostantivi-stats-iten-v1', listen: 'sostantivi-stats-listen-v1' }, statsFormat: 'noun',
@@ -9906,6 +9940,7 @@
     container.dataset.subject = s;
     container.dataset.kind = cfg.kind;
     container.dataset.side = cfg.panel ? '1' : '0';   // sections with a side panel get the wide setup
+    container.dataset.map = cfg.nounMap ? '1' : '0';   // Sostantivi: the map, with its panel beside it
     document.getElementById('app-title').textContent = cfg.title;
     document.getElementById('app-subtitle').textContent = cfg.subtitle;
     document.title = `Il Mazzo · ${cfg.title}`;
@@ -10784,7 +10819,7 @@
       <div class="setup-main">
 
       ${cfg.facets ? `<div class="theme-row" id="theme-row"><div class="mp-choose" id="mp-choose">${mpChooseHTML()}</div><div id="theme-chips" hidden></div></div>` : `
-      <div class="theme-row" id="theme-row">
+      <div class="theme-row" id="theme-row"${cfg.nounMap ? ' hidden' : ''}>
         <div class="theme-eyebrow">↳ Pick by theme</div>
         <div class="theme-chips${cfg.themeGroups ? ' grouped' : ''}" id="theme-chips">
           ${cfg.themeGroups ? cfg.themeGroups.map(([g, label, en]) => `
@@ -10794,7 +10829,6 @@
             </div>`).join('') : THEMES.map(themeChipHTML).join('')}
         </div>
       </div>`}
-      ${cfg.nounMap ? `<section class="noun-map" id="noun-map" aria-label="La mappa: your nouns by topic">${nounMapInner()}</section>` : ''}
 
       <div class="setup-controls">
         <div>
@@ -10831,6 +10865,8 @@
       <button type="button" class="submit start-btn" id="start-btn">▶ Start practising</button>
       <button type="button" class="passive-btn" id="passive-btn"${speechAvailable() ? '' : ' hidden'}><span class="passive-btn-main">🎧 A spasso</span><span class="passive-btn-sub">Out and about: hear each card, the Italian then the English, ${passivePrefs.reps} times over, on a loop — nothing to type</span></button>
       <p class="passive-msg passive-msg-setup" id="passive-msg" aria-live="polite"></p>
+      ${cfg.nounMap ? `<section class="noun-map" id="noun-map" aria-label="La mappa: your nouns by topic">${nounMapInner()}</section>
+      <details class="grid-fold" id="grid-fold"><summary>Every noun, one by one <span>(${gridItems().length})</span></summary>` : ''}
 
       <div class="noun-grid-head">
         <div class="theme-eyebrow">↳ Or pick individual ${cfg.itemWords} — tap, or click and drag${cfg.chipOrder === 'frequency' ? ' · most common first' : ''}</div>
@@ -10844,7 +10880,7 @@
             <div class="verb-chip-english">${isVerbs ? n.en.split(' / ').map(m => `<span class="meaning">${m}</span>`).join('&nbsp;/ ') : n.en}</div>
           </button>
         `; }).join('')}
-      </div>
+      </div>${cfg.nounMap ? '</details>' : ''}
       </div>
       ${cfg.panel ? '<div class="setup-side">' : ''}
       ${cfg.panel && SECTION_CHARTS[cfg.panel] ? SECTION_CHARTS[cfg.panel]('setup') : ''}
@@ -11041,6 +11077,7 @@
       ? `Select some ${cfg.itemWords}, or enter a number above`
       : `▶ Start practising · ${effective}${effective < pool && capMode === 'frequent' ? ' most common' : ''} card${effective === 1 ? '' : 's'}`;
     updateThemeChips();
+    scheduleMapRefresh();   // the map shows what's in the deck
   }
 
   // Reads the cap input and returns the effective deck size (min of cap
@@ -11211,41 +11248,66 @@
              often: tried.filter(c => c.rate >= 0.4).length, shaky: tried.filter(c => c.rate >= 0.15 && c.rate < 0.4).length };
   }
   const mapCellTitle = c => `${c.it} — ${c.en}: ${c.seen ? `right ${c.seen - c.wrong} of ${c.seen}` : 'not tried yet'}`;
+  const mapTopicPct = x => (x.rate === null ? '—' : `${Math.round((1 - x.rate) * 100)}%`);
+  const mapWeakFirst = x => x.tried.filter(c => c.wrong > 0).sort((a, b) => b.rate - a.rate || b.wrong - a.wrong).slice(0, 10);
+  // A topic's nouns: buttons that add one to the deck or take it out; to work on, going well, not tried yet
+  function mapDetailHTML(x, inPanel) {
+    const pct = mapTopicPct(x), inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length, allIn = inDeck === x.cells.length;
+    const work = x.tried.filter(c => c.rate >= 0.15).sort((a, b) => b.rate - a.rate || b.seen - a.seen), good = x.tried.filter(c => c.rate < 0.15);
+    const weak = mapWeakFirst(x);
+    // a chip: the grid's own pale tint behind the words (so they stay readable), the map's colour in its dot
+    const chip = c => {
+      const on = selectedNouns.has(c.key);
+      return `<button type="button" class="map-chip${c.seen ? '' : ' new'}${on ? ' in' : ''}" data-map-noun="${c.key}" aria-pressed="${on}"`
+        + `${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}; --t: ${errorShade(c).color}"` : ''} title="${escapeHTML(mapCellTitle(c))}${on ? ' — in your deck' : ''}">`
+        + `<em>${escapeHTML(c.it)}</em>${c.seen ? ` <b>${c.seen - c.wrong}/${c.seen}</b>` : ''}</button>`;
+    };
+    return `
+      ${inPanel ? `<div class="map-panel-head"><div><div class="map-panel-title">${x.t.label}</div><div class="map-en">${x.t.en} · ${x.cells.length} nouns</div></div>
+        <button type="button" class="map-close" data-map-close aria-label="Close ${escapeHTML(x.t.label)}">×</button></div>` : ''}
+      <p class="map-sum">${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : ` · right ${pct} of the time`}${x.often ? ` · ${x.often} often wrong` : ''}
+        · <strong>${inDeck}</strong> in your deck <span class="map-dir">${DIR_LABELS[direction].long}</span></p>
+      <div class="map-actions">
+        ${weak.length ? `<button type="button" class="map-btn" data-map-pick="weak">Practise just the ${weak.length} weakest</button>` : ''}
+        <button type="button" class="map-btn ghostly" data-map-pick="${allIn ? 'none' : 'all'}">${allIn ? `Take all ${x.cells.length} out` : `Add all ${x.cells.length}`}</button>
+        ${x.fresh.length && !x.fresh.every(c => selectedNouns.has(c.key)) ? `<button type="button" class="map-btn ghostly" data-map-pick="new">Add the ${x.fresh.length} not tried</button>` : ''}
+      </div>
+      <p class="map-hint">Tap a noun to put it in your deck, or take it out.</p>
+      ${work.length ? `<div class="map-list-label">To work on</div><div class="map-chips">${work.map(chip).join('')}</div>` : ''}
+      ${good.length ? `<div class="map-list-label">Going well</div><div class="map-chips">${good.map(chip).join('')}</div>` : ''}
+      ${x.fresh.length ? `<div class="map-list-label">Not tried yet</div><div class="map-chips">${x.fresh.map(chip).join('')}</div>` : ''}`;
+  }
+  // Before a topic is opened: what the panel is for, and the weakest topics one tap away
+  function mapWelcomeHTML(topics) {
+    const weakest = topics.filter(x => x.rate !== null).sort((a, b) => b.rate - a.rate).slice(0, 5);
+    return `
+      <div class="map-panel-title">Tap a topic</div>
+      <p class="map-sum">Its nouns open here, weakest first. Tap any to put it in your deck — or add a whole topic, or practise just its weakest.</p>
+      ${weakest.length ? `<div class="map-list-label">Your weakest topics</div>
+      <div class="map-jumps">${weakest.map(x => `<button type="button" class="map-jump" data-map-open="${x.t.key}"><span class="map-it">${x.t.label}</span><span class="map-score" style="--c: ${mapColor(x.rate, 5)}">${mapTopicPct(x)}</span></button>`).join('')}</div>` : ''}`;
+  }
   function nounMapInner() {
     const p = mapPrefs(), dir = DIR_LABELS[direction].long;
     if (p.hidden) return `<button type="button" class="map-show" id="map-show"><span class="map-title-sm">La mappa</span> — every topic and every noun, strongest to weakest · <u>show</u></button>`;
     const byKey = new Map(NOUN_ITEMS.map(n => [n.noun, n]));
-    let topics = NOUN_THEMES.map(t => mapTopic(t, byKey));
-    if (p.sort === 'weak') topics = topics.map((x, i) => [x, i]).sort(([a, i], [b, j]) => (a.rate === null) - (b.rate === null) || (b.rate || 0) - (a.rate || 0) || i - j).map(([x]) => x);
+    const inOrder = NOUN_THEMES.map(t => mapTopic(t, byKey));
+    const topics = p.sort === 'weak'
+      ? inOrder.map((x, i) => [x, i]).sort(([a, i], [b, j]) => (a.rate === null) - (b.rate === null) || (b.rate || 0) - (a.rate || 0) || i - j).map(([x]) => x)
+      : inOrder;
     const all = NOUN_ITEMS.filter(n => stats[n.noun] && stats[n.noun].seen > 0);
     const often = all.filter(n => stats[n.noun].wrong / stats[n.noun].seen >= 0.4).length;
-    const sq = c => `<i class="map-cell${c.seen ? '' : ' new'}"${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}"` : ''} title="${escapeHTML(mapCellTitle(c))}"></i>`;
-    // a chip: the grid's own pale tint behind the words (so they stay readable), the map's colour in its dot
-    const chip = c => `<span class="map-chip${c.seen ? '' : ' new'}"${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}; --t: ${errorShade(c).color}"` : ''} title="${escapeHTML(mapCellTitle(c))}"><em>${escapeHTML(c.it)}</em>${c.seen ? ` <b>${c.seen - c.wrong}/${c.seen}</b>` : ''}</span>`;
+    const open = topics.find(x => x.t.key === mapOpen) || null;
+    const sq = c => `<i class="map-cell${c.seen ? '' : ' new'}${selectedNouns.has(c.key) ? ' in' : ''}"${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}"` : ''} title="${escapeHTML(mapCellTitle(c))}"></i>`;
     const row = x => {
-      const open = mapOpen === x.t.key, pct = x.rate === null ? '—' : `${Math.round((1 - x.rate) * 100)}%`;
-      const work = x.tried.filter(c => c.rate >= 0.15).sort((a, b) => b.rate - a.rate || b.seen - a.seen), good = x.tried.filter(c => c.rate < 0.15);
-      const mistakes = x.tried.filter(c => c.wrong > 0).sort((a, b) => b.rate - a.rate || b.wrong - a.wrong).slice(0, 10);
+      const isOpen = open === x, inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length;
       return `
-        <div class="map-row${open ? ' open' : ''}" data-topic="${x.t.key}">
-          <button type="button" class="map-head" aria-expanded="${open}" aria-label="${escapeHTML(`${x.t.label}, ${x.t.en}: ${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : `, right ${pct} of the time`}`)}">
-            <span class="map-name"><span class="map-it">${x.t.label}</span><span class="map-en">${x.t.en} · ${x.cells.length}</span></span>
+        <div class="map-row${isOpen ? ' open' : ''}" data-topic="${x.t.key}">
+          <button type="button" class="map-head" aria-expanded="${isOpen}" aria-label="${escapeHTML(`${x.t.label}, ${x.t.en}: ${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : `, right ${mapTopicPct(x)} of the time`}${inDeck ? `, ${inDeck} in your deck` : ''}`)}">
+            <span class="map-name"><span class="map-it">${x.t.label}</span><span class="map-en">${x.t.en} · ${x.cells.length}</span>${inDeck ? `<span class="map-indeck">✓ ${inDeck} in deck</span>` : ''}</span>
             <span class="map-strip" aria-hidden="true">${x.cells.map(sq).join('')}</span>
-            <span class="map-score"${x.rate === null ? '' : ` style="--c: ${mapColor(x.rate, 5)}"`}>${pct}</span>
+            <span class="map-score"${x.rate === null ? '' : ` style="--c: ${mapColor(x.rate, 5)}"`}>${mapTopicPct(x)}</span>
           </button>
-          ${open ? `
-          <div class="map-detail">
-            <p class="map-sum">${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : ` · right ${pct} of the time`}${x.often ? ` · ${x.often} often wrong` : ''} <span class="map-dir">${dir}</span></p>
-            ${work.length ? `<div class="map-list-label">To work on</div><div class="map-chips">${work.map(chip).join('')}</div>` : ''}
-            ${good.length ? `<div class="map-list-label">Going well</div><div class="map-chips">${good.map(chip).join('')}</div>` : ''}
-            ${x.fresh.length ? `<div class="map-list-label">Not tried yet</div><div class="map-chips">${x.fresh.map(chip).join('')}</div>` : ''}
-            <div class="map-actions">
-              ${mistakes.length ? `<button type="button" class="map-btn" data-map-pick="weak">Practise the ${mistakes.length} weakest</button>` : ''}
-              ${x.fresh.length ? `<button type="button" class="map-btn ghostly" data-map-pick="new">Pick the ${x.fresh.length} not tried</button>` : ''}
-              <button type="button" class="map-btn ghostly" data-map-pick="all">Pick all ${x.cells.length}</button>
-              <span class="map-picked" id="map-picked" aria-live="polite"></span>
-            </div>
-          </div>` : ''}
+          ${isOpen ? `<div class="map-detail map-inline">${mapDetailHTML(x, false)}</div>` : ''}
         </div>`;
     };
     return `
@@ -11262,40 +11324,68 @@
       <div class="map-key">
         <span class="map-overview"><strong>${all.length}</strong> of ${NOUN_ITEMS.length} nouns practised${often ? ` · <strong>${often}</strong> often wrong` : ''}</span>
         <span class="map-legend"><span>rarely wrong</span><span class="map-legend-bar" style="background: linear-gradient(90deg, ${mapColor(0, 5)}, ${mapColor(0.25, 5)}, ${mapColor(0.5, 5)})"></span><span>often wrong</span>
-          <i class="map-cell new"></i><span>not tried</span><span class="map-dir">· ${dir}</span></span>
+          <i class="map-cell new"></i><span>not tried</span><i class="map-cell new in"></i><span>in your deck</span><span class="map-dir">· ${dir}</span></span>
       </div>
-      <div class="map-rows">${topics.map(row).join('')}</div>`;
+      <div class="map-layout">
+        <div class="map-rows">${topics.map(row).join('')}</div>
+        <aside class="map-panel map-detail" id="map-panel" aria-label="${open ? escapeHTML(open.t.label) : 'The topic you open'}">${open ? mapDetailHTML(open, true) : mapWelcomeHTML(inOrder)}</aside>
+      </div>`;
+  }
+  // The deck changed (a tap here, a pick button, the grid): redraw once, on the next frame
+  let mapRedraw = 0;
+  function scheduleMapRefresh() {
+    const box = document.getElementById('noun-map');
+    if (!box || mapRedraw) return;
+    const go = () => { mapRedraw = 0; const b = document.getElementById('noun-map'); if (b) b.innerHTML = nounMapInner(); };
+    mapRedraw = 1;
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(go); else setTimeout(go, 0);
   }
   function wireNounMap(applyPick) {
     const box = document.getElementById('noun-map');
     if (!box) return;
     const refresh = () => { box.innerHTML = nounMapInner(); };
+    const setDeck = keys => {   // the deck as a whole: the same route as the picks above
+      applyPick(keys);
+      refresh();
+    };
     box.addEventListener('click', e => {
       const head = e.target.closest('.map-head'), sort = e.target.closest('[data-map-sort]'), pick = e.target.closest('[data-map-pick]');
+      const noun = e.target.closest('[data-map-noun]'), jump = e.target.closest('[data-map-open]');
       if (e.target.closest('#map-hide')) { saveMapPrefs({ hidden: true }); refresh(); return; }
       if (e.target.closest('#map-show')) { saveMapPrefs({ hidden: false }); refresh(); return; }
       if (sort) { saveMapPrefs({ sort: sort.dataset.mapSort }); refresh(); return; }
-      if (head) {
-        const key = head.closest('.map-row').dataset.topic;
-        mapOpen = mapOpen === key ? null : key;
+      if (e.target.closest('[data-map-close]')) { mapOpen = null; refresh(); return; }
+      if (head || jump) {
+        const key = jump ? jump.dataset.mapOpen : head.closest('.map-row').dataset.topic;
+        mapOpen = mapOpen === key && head ? null : key;
         refresh();
-        const row = box.querySelector(`.map-row[data-topic="${mapOpen}"]`);
-        if (row && row.scrollIntoView) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        const panel = document.getElementById('map-panel'), row = box.querySelector(`.map-row[data-topic="${mapOpen}"]`);
+        const wide = panel && panel.offsetParent !== null && getComputedStyle(panel).display !== 'none';
+        if (row && !wide && row.scrollIntoView) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        return;
+      }
+      if (noun) {   // one noun in or out of the deck
+        const k = noun.dataset.mapNoun, keys = new Set(selectedNouns);
+        if (keys.has(k)) keys.delete(k); else keys.add(k);
+        setDeck([...keys]);
         return;
       }
       if (pick) {
         const t = NOUN_THEMES.find(x => x.key === mapOpen);
         if (!t) return;
         const x = mapTopic(t, new Map(NOUN_ITEMS.map(n => [n.noun, n])));
-        const keys = pick.dataset.mapPick === 'weak' ? x.tried.filter(c => c.wrong > 0).sort((a, b) => b.rate - a.rate || b.wrong - a.wrong).slice(0, 10).map(c => c.key)
-          : pick.dataset.mapPick === 'new' ? x.fresh.map(c => c.key) : t.nouns.slice();
-        applyPick(keys);
-        const note = document.getElementById('map-picked');
-        if (note) note.innerHTML = `${keys.length} picked — <button type="button" class="ghost" id="map-go">start practising ↓</button>`;
-      }
-      if (e.target.closest('#map-go')) {
-        const start = document.getElementById('start-btn');
-        if (start) { if (start.scrollIntoView) start.scrollIntoView({ block: 'center', behavior: 'smooth' }); start.focus(); }
+        const what = pick.dataset.mapPick;
+        if (what === 'weak') {   // just these, and off you go
+          applyPick(mapWeakFirst(x).map(c => c.key));
+          const start = document.getElementById('start-btn');
+          if (start) start.click();
+          return;
+        }
+        const keys = new Set(selectedNouns);
+        if (what === 'all') t.nouns.forEach(k => keys.add(k));
+        else if (what === 'none') t.nouns.forEach(k => keys.delete(k));
+        else if (what === 'new') x.fresh.forEach(c => keys.add(c.key));
+        setDeck([...keys]);
       }
     });
   }
