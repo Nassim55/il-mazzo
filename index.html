@@ -2217,6 +2217,10 @@
     .map-strip { grid-column: 1 / -1; grid-row: 2; }
   }
 
+  /* Il mazzo salvato: under Ripasso del giorno, in its style */
+  .ripasso.saved-deck { margin-top: -6px; }
+  .ripasso.saved-deck[hidden] { display: none; }
+
   /* The infinitive first: pinned above a verb's forms once answered */
   .inf-first { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin: 10px 0 2px; cursor: pointer; }
   .inf-first input { accent-color: var(--olive); transform: translateY(1px); }
@@ -10374,6 +10378,7 @@
     Object.assign(subjectState[subject], { selected: selectedNouns, capValue, capMode, direction });
     reviewReturn = subject;
     reviewMode = true;
+    savedLive = false;
     direction = ripassoDir;
     // One card per due item: a noun, a phrase, an adjective's dictionary form, or one
     // conjugation of a verb (a different person each time)
@@ -10401,6 +10406,7 @@
   }
 
   function renderRipasso() {
+    renderSavedDeck();   // the saved deck sits just below
     const el = document.getElementById('ripasso');
     if (!el) return;
     const list = dueList(ripassoDir);
@@ -11156,6 +11162,7 @@
     document.getElementById('setup-top').innerHTML = `
       <div class="setup-top-inner">
         <div class="ripasso" id="ripasso"></div>
+        <div class="ripasso saved-deck" id="saved-deck" hidden></div>
         <div class="mode-toggle subject-toggle" id="subject-toggle" role="group" aria-label="What to practise">
           ${Object.entries(SUBJECTS).map(([key, s]) => `
             <button type="button" class="mode-option${key === subject ? ' active' : ''}" data-subject="${key}" aria-pressed="${key === subject}">${s.switchLabel}</button>
@@ -12296,6 +12303,7 @@
     keys.set(STORY_PROGRESS_KEY, 'story');
     keys.set(DIALOGUE_PROGRESS_KEY, 'story');   // the scenes' progress has the story's shape
     keys.set(VERB_PERSONS_KEY, 'assoc');   // which persons each verb section drills
+    keys.set(SAVED_DECK_KEY, 'latest');    // the saved deck: the newer snapshot wins
     return keys;
   }
   const syncIsObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -12354,7 +12362,8 @@
     for (const [ch, q] of Object.entries(syncObj(local.quiz))) if (syncIsObj(q) && (!syncIsObj(quiz[ch]) || (+q.score || 0) > (+quiz[ch].score || 0))) quiz[ch] = q;
     return { read, quiz };
   }
-  const SYNC_MERGERS = { counters: syncMergeCounters, schedule: syncMergeSchedule, assoc: syncMergeAssoc, story: syncMergeStory };
+  const syncMergeLatest = (base, local, remote) => syncMergeItems(base, local, remote, (l, r) => ((syncObj(r).at || 0) > (syncObj(l).at || 0) ? r : l));
+  const SYNC_MERGERS = { counters: syncMergeCounters, schedule: syncMergeSchedule, assoc: syncMergeAssoc, story: syncMergeStory, latest: syncMergeLatest };
   // Each side is { storage key: { v: value, e: epoch } }; returns the merged copy
   function syncMergeAll(base, local, remote) {
     base = syncObj(base); local = syncObj(local); remote = syncObj(remote);
@@ -12697,6 +12706,7 @@
         <div class="game-trim" id="game-trim"></div>
         ${reviewMode ? '' : '<button type="button" class="ghost" id="game-focus-btn">→ Focus…</button>'}
         <button type="button" class="ghost chart-btn" id="chart-btn" hidden></button>
+        <button type="button" class="ghost" id="save-deck-btn" title="Keep this exact deck — pick it up from the home page next time">${savedLive ? '✓ Deck saved' : '💾 Save deck'}</button>
         <span class="direction-toggle" role="group" aria-label="Translation direction"${reviewMode ? ' hidden' : ''}>
           <button type="button" data-dir="en-it" class="${direction === 'en-it' ? 'active' : ''}" aria-pressed="${direction === 'en-it'}">EN → IT</button>
           <button type="button" data-dir="it-en" class="${direction === 'it-en' ? 'active' : ''}" aria-pressed="${direction === 'it-en'}">IT → EN</button>
@@ -12706,6 +12716,12 @@
       <span><kbd>Enter</kbd> submits · then again for next<span id="mic-help" hidden> · <kbd>⇧ Enter</kbd> or the microphone to say it</span></span>
     `;
     document.getElementById('reshuffle-btn').addEventListener('click', () => startGame());
+    document.getElementById('save-deck-btn').addEventListener('click', e => {
+      if (!saveDeckNow()) { e.currentTarget.textContent = 'Couldn\'t save'; return; }
+      savedLive = true;
+      e.currentTarget.textContent = '✓ Deck saved — it\'s on the home page';
+      setTimeout(() => { const b = document.getElementById('save-deck-btn'); if (b) b.textContent = '✓ Deck saved'; }, 2600);
+    });
     document.getElementById('change-btn').addEventListener('click', showSetup);
     document.getElementById('chart-btn').addEventListener('click', openChart);
     updateChartBtn();
@@ -12870,14 +12886,134 @@
     if (SUBJECTS[subject].keepPairs) while (k > 0 && k < cards.length && cards[k].noun === cards[k - 1].noun) k++;
     return cards.slice(0, k);
   }
-  function startGame() {
+  // ===== Il mazzo salvato (Nov 2026): save the deck you're playing, pick it up next visit =====
+  // A snapshot of the round as it stands: its cards — each stored once, the after-answer
+  // notes left out and re-attached on the way back in, so they're current — the pool and
+  // focus behind the deck (so Deck size and Focus still work), where you were, the score,
+  // the missed cards, the section, direction and modes. Once saved, the round keeps its
+  // snapshot up to date as you play, so Riprendi picks up where you stopped. One saved
+  // deck: saving another replaces it. Synced between devices, the newer one winning.
+  const SAVED_DECK_KEY = 'mazzo-saved-deck-v1';
+  let savedLive = false;   // this round is the saved one: keep its snapshot current
+  function savedDeck() {
+    try { const v = JSON.parse(localStorage.getItem(SAVED_DECK_KEY) || 'null'); return v && v.deck && Array.isArray(v.deck.cards) ? v.deck : null; } catch (e) { return null; }
+  }
+  function deckSnapshot(fresh) {   // fresh: the card at index is a new one, not yet answered
+    const cards = new Map();
+    for (const c of [...(sessionPool || []), ...(sessionMaxDeck || []), ...deck]) {
+      if (!cards.has(c.key)) { const { note, ...rest } = c; cards.set(c.key, rest); }
+    }
+    const at = Math.min(deck.length, !fresh && (answered || mustRetype) ? index + 1 : index);   // an answered card counts as done
+    return {
+      v: 1, at: Date.now(),
+      subject: reviewMode ? null : subject, review: reviewMode, ret: reviewMode ? reviewReturn : null,
+      labels: reviewMode ? { title: document.getElementById('app-title').textContent, subtitle: document.getElementById('app-subtitle').textContent, doc: document.title } : null,
+      direction, verbMode, adjMode,
+      cards: [...cards.values()],
+      pool: (sessionPool || []).map(c => c.key), max: (sessionMaxDeck || []).map(c => c.key), deck: deck.map(c => c.key),
+      focused: sessionFocused, isReview: sessionIsReview, pickMode: sessionPickMode,
+      index: at, score, streak, best: bestStreak, missed: [...roundMissed.keys()], done: at >= deck.length
+    };
+  }
+  function saveDeckNow(fresh) {
+    if (!deck.length) return false;
+    try { localStorage.setItem(SAVED_DECK_KEY, JSON.stringify({ deck: deckSnapshot(fresh) })); syncTouched(); return true; } catch (e) { return false; }   // storage full
+  }
+  function forgetSavedDeck() {
+    savedLive = false;
+    try { localStorage.removeItem(SAVED_DECK_KEY); syncTouched(); } catch (e) { /* ignore */ }
+  }
+  // A card's note, as the game has it now (the snapshot leaves notes out)
+  function savedWithNote(c, s) {
+    const subj = c.subject || s.subject, cfg = SUBJECTS[subj];
+    if (!cfg) return c;
+    try {
+      const n = cfg.items.find(x => x.noun === c.noun);
+      if (!n) return c;
+      if (c.subject) setCardContext(c.subject);
+      const fresh = cardsForItem(n).find(x => (c.subject ? `${subj}:${x.key}` : x.key) === c.key);
+      return fresh && fresh.note ? { ...c, note: fresh.note } : c;
+    } catch (e) { return c; }
+  }
+  function resumeSavedDeck(fromStart) {
+    const s = savedDeck();
+    if (!s || !s.deck.length || (!s.review && !SUBJECTS[s.subject])) return;
+    if (s.review) {   // a Ripasso round: as Ripasso starts one, remembering where we were
+      Object.assign(subjectState[subject], { selected: selectedNouns, capValue, capMode, direction });
+      reviewReturn = subject;   // leaving goes back to where you are now
+      reviewMode = true;
+    } else if (subject !== s.subject) {
+      applySubject(s.subject);
+    }
+    direction = s.direction || direction;
+    verbMode = s.verbMode || verbMode;
+    adjMode = s.adjMode || adjMode;
+    if (!s.review) stats = loadStats();
+    const byKey = new Map(s.cards.map(c => [c.key, savedWithNote(c, s)]));
+    const pick = keys => (keys || []).map(k => byKey.get(k)).filter(Boolean);
+    sessionPool = pick(s.pool);
+    sessionMaxDeck = pick(s.max);
+    deck = pick(s.deck);
+    sessionFocused = !!s.focused;
+    sessionIsReview = !!s.isReview;
+    sessionPickMode = s.pickMode || 'random';
+    if (s.review && s.labels) {
+      document.getElementById('app-title').textContent = s.labels.title;
+      document.getElementById('app-subtitle').textContent = s.labels.subtitle;
+      document.title = s.labels.doc;
+    }
+    savedLive = true;
+    startGame({ resumeRound: true, index: fromStart || s.done ? 0 : s.index, score: fromStart || s.done ? 0 : s.score,
+                streak: fromStart || s.done ? 0 : s.streak, best: fromStart || s.done ? 0 : s.best, missed: fromStart || s.done ? [] : pick(s.missed) });
+  }
+  function savedWhen(t) {
+    const d = new Date(t), now = new Date(), hm = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (d.toDateString() === now.toDateString()) return `today at ${hm}`;
+    const y = new Date(now); y.setDate(now.getDate() - 1);
+    if (d.toDateString() === y.toDateString()) return `yesterday at ${hm}`;
+    return d.toLocaleDateString([], { day: 'numeric', month: 'short' });
+  }
+  // On the home page (every section's setup), under Ripasso del giorno
+  function renderSavedDeck() {
+    const el = document.getElementById('saved-deck');
+    if (!el) return;
+    const s = savedDeck();
+    el.hidden = !s;
+    if (!s) { el.innerHTML = ''; return; }
+    const what = s.review ? 'Ripasso del giorno' : SUBJECTS[s.subject] ? SUBJECTS[s.subject].title : s.subject;
+    const n = s.deck.length;
+    const where = s.done ? `finished · ${s.score} of ${n} right` : s.index ? `card ${s.index + 1} of ${n} · ${s.score} right so far` : `${n} cards, not started`;
+    el.innerHTML = `
+      <div class="ripasso-main">
+        <span class="ripasso-title">Il mazzo salvato</span>
+        <span class="ripasso-text"><strong>${escapeHTML(what)}</strong> · ${where} <span class="ripasso-parts">${DIR_LABELS[s.direction] ? DIR_LABELS[s.direction].short : ''} · saved ${savedWhen(s.at)}</span></span>
+      </div>
+      <div class="ripasso-actions">
+        <button type="button" class="ghost" id="saved-forget" title="Forget the saved deck">forget it</button>
+        ${s.done || !s.index ? '' : '<button type="button" class="ghost" id="saved-restart">from the start</button>'}
+        <button type="button" class="submit ripasso-start" id="saved-resume">▶ ${s.done ? 'Play it again' : 'Riprendi'}</button>
+      </div>`;
+    document.getElementById('saved-resume').addEventListener('click', () => resumeSavedDeck(false));
+    const restart = document.getElementById('saved-restart');
+    if (restart) restart.addEventListener('click', () => resumeSavedDeck(true));
+    document.getElementById('saved-forget').addEventListener('click', () => { forgetSavedDeck(); renderSavedDeck(); });
+  }
+  // Leaving the page mid-round: the saved round keeps its place
+  window.addEventListener('pagehide', () => { if (savedLive && container.dataset.view === 'game') saveDeckNow(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && savedLive && container.dataset.view === 'game') saveDeckNow(); });
+
+  function startGame(resume) {
+    if (!(resume && resume.resumeRound)) resume = null;   // a click passes its event: only a saved round resumes
     hideConjPop();
     verbGate = null;
     gatedVerb = null;
-    if (sessionMaxDeck && sessionMaxDeck.length > 0) {
+    if (resume) {
+      // Riprendi: the saved deck, in its own order
+    } else if (sessionMaxDeck && sessionMaxDeck.length > 0) {
       // Play again / Reshuffle — replay the current active subset in new order
       deck = shuffleDeck(deck);
     } else {
+      savedLive = false;   // a new deck: the saved one stays as it was
       // Fresh entry from setup — the pool is the selection (or the whole deck
       // when nothing is selected but a number is set); the number only decides
       // how many of those cards start in play
@@ -12902,7 +13038,14 @@
     score = 0;
     streak = 0;
     bestStreak = 0;
-    scoreEl.textContent = '0';
+    if (resume) {   // where the saved round had got to
+      roundMissed = new Map(resume.missed.map(c => [c.key, c]));
+      index = Math.min(resume.index, deck.length);
+      score = resume.score;
+      streak = resume.streak;
+      bestStreak = resume.best;
+    }
+    scoreEl.textContent = String(score);
     totalEl.textContent = deck.length;
     container.dataset.view = 'game'; syncPinnedChart();
     gameArea.innerHTML = cardHTML;
@@ -12916,6 +13059,7 @@
   }
 
   function render() {
+    if (savedLive) saveDeckNow(true);   // the saved round: its place, kept as you go (this card not yet answered)
     if (index >= deck.length) {
       stopListening();
       showComplete();
@@ -13472,6 +13616,7 @@
     sessionMaxDeck = cards.slice();   // these are the pool's own card objects
     sessionFocused = true;
     sessionIsReview = true;
+    savedLive = false;   // the missed cards are a round of their own; the saved deck stays as it was
     deck = cards.slice();
     startGame();   // the session is set, so this shuffles these cards and starts
   }
