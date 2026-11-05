@@ -48,6 +48,15 @@ const firstChip = panel().querySelector('.map-tiles .map-tile');
 ok(firstChip.textContent.includes(B.ev("NOUN_ITEMS.find(n => n.noun === 'cane').it")) && /Right 1 of 5/.test(firstChip.title) && firstChip.querySelector('.verb-chip-italian') && firstChip.classList.contains('shaded')
    && firstChip.classList.contains('unselected'), 'weakest first, as the grid\'s tiles: shaded by your record, dashed while not in the deck');
 
+// ---- The panel's actions are buttons; the panel scrolls with the page ----
+const acts = panel().querySelector('.map-actions');
+ok(acts.querySelector('button.submit.map-practise[data-map-pick="weak"]') && /▶ Practise the \d+ weakest/.test(acts.textContent)
+   && acts.querySelector('button.submit.secondary[data-map-pick="all"]') && /\+ Add all \d+/.test(acts.textContent),
+   'the actions are the game\'s buttons: dark to practise the weakest, outlined to add to the deck');
+const st = (prev, dy, h, win) => B.ev(`mapStickTop(${prev}, ${dy}, ${h}, ${win})`);
+ok(st(12, 500, 600, 800) === 12 && st(12, 300, 2000, 800) === -288 && st(-288, 5000, 2000, 800) === -1212 && st(-1212, -400, 2000, 800) === -812 && st(-812, -5000, 2000, 800) === 12,
+   'one scroll, not two: a short panel stays put; a tall one moves with the page until its foot shows, holds, and comes back on the way up');
+
 // ---- One noun at a time ----
 firstChip.click();
 ok(B.ev('selectedNouns.has("cane")') && B.d.getElementById('selected-count').textContent === '1' && !panel().querySelector('[data-map-noun="cane"]').classList.contains('unselected')

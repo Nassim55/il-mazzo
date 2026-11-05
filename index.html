@@ -2186,8 +2186,11 @@
   .map-close:hover { color: var(--ink); }
   .map-sum { margin: -8px 0 10px; font-size: 13px; color: var(--ink-soft); }
   .map-sum strong { color: var(--ink); }
-  .map-actions { margin-bottom: 6px; font-size: 13px; }
-  .map-hint, .noun-map .weak-empty { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-faded); }
+  .map-actions { display: flex; flex-direction: column; gap: 8px; margin: 2px 0 4px; }
+  .map-actions button.submit { width: 100%; padding: 13px 14px; white-space: normal; line-height: 1.3; }
+  .map-actions-more { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+  .map-actions-more button.submit { font-size: 11px; letter-spacing: 0.12em; }
+  .map-hint, .noun-map .weak-empty { margin: 8px 0 4px; font-size: 12.5px; color: var(--ink-faded); }
   .map-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; margin-top: 6px; }
   .map-tile .verb-chip-italian { font-size: 19px; }
   .map-jump { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
@@ -2206,7 +2209,7 @@
   .grid-fold > summary:hover { color: var(--ink); }
   @media (min-width: 900px) {
     .container[data-map="1"] .map-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, 360px); gap: 22px; align-items: start; }
-    .container[data-map="1"] .map-panel { display: block; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; }
+    .container[data-map="1"] .map-panel { display: block; position: sticky; top: 12px; }   /* no scrollbar of its own: mapPanelFollow moves it with the page */
     .container[data-map="1"] .map-inline { display: none; }
   }
   @media (max-width: 600px) {
@@ -11238,10 +11241,10 @@
         + ` title="${escapeHTML(c.seen ? `Right ${c.seen - c.wrong} of ${c.seen}` : 'Not practised yet')}${on ? ' — in your deck' : ''}">`
         + `<div class="verb-chip-mark">●</div><div class="verb-chip-italian">${escapeHTML(c.it)}</div><div class="verb-chip-english">${escapeHTML(c.en)}</div></button>`;
     };
-    const links = [
-      weak.length ? `<button type="button" class="ghost" data-map-pick="weak">Practise just the ${weak.length} weakest</button>` : '',
-      `<button type="button" class="ghost" data-map-pick="${allIn ? 'none' : 'all'}">${allIn ? `Take all ${x.cells.length} out` : `Add all ${x.cells.length}`}</button>`,
-      x.fresh.length && !x.fresh.every(c => selectedNouns.has(c.key)) ? `<button type="button" class="ghost" data-map-pick="new">Add the ${x.fresh.length} not tried</button>` : ''
+    // The actions, as the game's buttons: the dark one starts a round, the outlined ones fill the deck
+    const more = [
+      `<button type="button" class="submit secondary" data-map-pick="${allIn ? 'none' : 'all'}">${allIn ? `− Take all ${x.cells.length} out` : `+ Add all ${x.cells.length}`}</button>`,
+      x.fresh.length && !x.fresh.every(c => selectedNouns.has(c.key)) ? `<button type="button" class="submit secondary" data-map-pick="new">+ Add the ${x.fresh.length} not tried</button>` : ''
     ].filter(Boolean);
     const group = (label, list) => list.length ? `<div class="endings-note"><div class="en-label">${label}</div><div class="map-tiles">${list.map(tile).join('')}</div></div>` : '';
     return `
@@ -11249,9 +11252,12 @@
       <h3 class="endings-title">${x.t.label}</h3>
       <div class="endings-sub">${x.t.en} · ${x.cells.length} nouns · ${DIR_LABELS[direction].short}</div>
       <p class="map-sum">${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : ` · right ${mapTopicPct(x)} of the time`}${x.often ? ` · ${x.often} often wrong` : ''} · <strong>${inDeck}</strong> in your deck</p>
-      <div class="map-actions">${links.join('<span class="divider">·</span>')}</div>
-      ${group('To work on', work)}${group('Going well', good)}${group('Not tried yet', x.fresh)}
-      <p class="map-hint">Tap a noun to put it in your deck, or take it out.</p>`;
+      <div class="map-actions">
+        ${weak.length ? `<button type="button" class="submit map-practise" data-map-pick="weak">▶ Practise the ${weak.length} weakest</button>` : ''}
+        <div class="map-actions-more">${more.join('')}</div>
+      </div>
+      <p class="map-hint">Or tap nouns one by one to put them in your deck — or take them out.</p>
+      ${group('To work on', work)}${group('Going well', good)}${group('Not tried yet', x.fresh)}`;
   }
   // Before a topic is opened: the weakest topics, as Da ripassare lists the weakest nouns
   function mapWelcomeHTML(topics) {
@@ -11308,19 +11314,35 @@
         <aside class="endings map-panel" id="map-panel" aria-label="${open ? escapeHTML(open.t.label) : 'The topic you open'}">${open ? mapDetailHTML(open, true) : mapWelcomeHTML(inOrder)}</aside>
       </div>`;
   }
+  // One scroll, not two: the panel has no scrollbar of its own. Taller than the window, it
+  // moves with the page until its foot shows, then holds; scrolling back up brings its top
+  // back. (A sticky panel whose top goes negative: from 12px down to window − panel − 12px.)
+  const MAP_GAP = 12;
+  const mapStickTop = (prev, dy, panelH, winH) => Math.max(Math.min(MAP_GAP, winH - panelH - MAP_GAP), Math.min(MAP_GAP, prev - dy));
+  const mapStick = { top: MAP_GAP, y: 0 };
+  function mapPanelFollow() {
+    const panel = document.getElementById('map-panel');
+    const y = window.scrollY || 0, dy = y - mapStick.y;
+    mapStick.y = y;
+    if (!panel || getComputedStyle(panel).position !== 'sticky') return;
+    mapStick.top = mapStickTop(mapStick.top, dy, panel.offsetHeight, window.innerHeight);
+    panel.style.top = `${mapStick.top}px`;
+  }
+  window.addEventListener('scroll', mapPanelFollow, { passive: true });
+  window.addEventListener('resize', mapPanelFollow);
   // The deck changed (a tap here, a pick button, the grid): redraw once, on the next frame
   let mapRedraw = 0;
   function scheduleMapRefresh() {
     const box = document.getElementById('noun-map');
     if (!box || mapRedraw) return;
-    const go = () => { mapRedraw = 0; const b = document.getElementById('noun-map'); if (b) b.innerHTML = nounMapInner(); };
+    const go = () => { mapRedraw = 0; const b = document.getElementById('noun-map'); if (b) { b.innerHTML = nounMapInner(); mapPanelFollow(); } };
     mapRedraw = 1;
     if (typeof requestAnimationFrame === 'function') requestAnimationFrame(go); else setTimeout(go, 0);
   }
   function wireNounMap(applyPick) {
     const box = document.getElementById('noun-map');
     if (!box) return;
-    const refresh = () => { box.innerHTML = nounMapInner(); };
+    const refresh = () => { box.innerHTML = nounMapInner(); mapPanelFollow(); };
     const setDeck = keys => {   // the deck as a whole: the same route as the picks above
       applyPick(keys);
       refresh();
@@ -11335,6 +11357,7 @@
       if (head || jump) {
         const key = jump ? jump.dataset.mapOpen : head.closest('.map-row').dataset.topic;
         mapOpen = mapOpen === key && head ? null : key;
+        mapStick.top = MAP_GAP;   // a topic opens at its top
         refresh();
         const panel = document.getElementById('map-panel'), row = box.querySelector(`.map-row[data-topic="${mapOpen}"]`);
         const wide = panel && panel.offsetParent !== null && getComputedStyle(panel).display !== 'none';
