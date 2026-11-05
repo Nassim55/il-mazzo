@@ -2,14 +2,14 @@
 const { boot, ok, done } = require('./harness');
 let { w, d, ev, key, warns, errors } = boot();
 ok(warns.length === 0 && errors.length === 0, 'loads with no validator warnings or errors');
-ok(ev('subject') === 'nouns' && ev('nounData.length') === 941, 'opens on nouns with 941 nouns');
+ok(ev('subject') === 'nouns' && ev('nounData.length') === 1061, 'opens on nouns with 1061 nouns');
 const keys = ev('nounData.map(n => n.noun)');
-ok(new Set(keys).size === 941 && new Set(ev('nounData.map(n => n.en)')).size === 941 && new Set(ev('nounData.map(n => n.it)')).size === 941, 'no duplicate keys, English prompts or Italian forms');
+ok(new Set(keys).size === 1061 && new Set(ev('nounData.map(n => n.en)')).size === 1061 && new Set(ev('nounData.map(n => n.it)')).size === 1061, 'no duplicate keys, English prompts or Italian forms');
 const themed = new Set(ev('THEMES.flatMap(t => t.nouns)'));
 ok(keys.every(k => themed.has(k)) && [...themed].every(k => keys.includes(k)), 'every noun themed, no unknown theme keys');
-ok(ev('FREQUENCY_ORDER.length') === 941 && keys.every(k => ev(`Number.isFinite(rankOf(${JSON.stringify(k)}))`)), 'every noun ranked');
+ok(ev('FREQUENCY_ORDER.length') === 1061 && keys.every(k => ev(`Number.isFinite(rankOf(${JSON.stringify(k)}))`)), 'every noun ranked');
 const fails = ev('nounData.filter(n => !checkEnglish(n.en, { english: n.en }).correct || !checkEnglish(n.en.replace(/\\([^)]*\\)/g, "").replace(/^the /i, "").trim(), { english: n.en }).correct).map(n => n.en)');
-ok(fails.length === 0, `English checker accepts all 941 prompts (${fails.slice(0, 3).join(', ')})`);
+ok(fails.length === 0, `English checker accepts all 1061 prompts (${fails.slice(0, 3).join(', ')})`);
 ok(ev("checkAnswer('l amico', { italian: \"l'amico\", noun: 'amico' }).correct") && ev("checkAnswer('la pane', { italian: 'il pane', noun: 'pane' }).reason") === 'wrong-article'
    && ev("checkAnswer('pane', { italian: 'il pane', noun: 'pane' }).reason") === 'missing-article', 'article checking: apostrophes, wrong article, missing article');
 
