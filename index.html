@@ -4683,8 +4683,50 @@
     return n;
   }
 
+  // Practising a word anywhere counts for Ripasso del giorno: every answer, in any round, moves
+  // the word's schedule just as Ripasso would (that's srsAnswer, below). And when the same word
+  // lives in two Ripasso sections — a story word that's also a noun or an adjective (buio,
+  // lontano…) — an answer to one counts for the other too, where it's already on the schedule.
+  let ripassoTwinMap = null;
+  function ripassoTwins(subj, key) {
+    if (!ripassoTwinMap) {
+      ripassoTwinMap = new Map();
+      for (const s of RIPASSO_SECTIONS) for (const n of SUBJECTS[s].items) {
+        const k = n.noun.toLowerCase();
+        ripassoTwinMap.set(k, [...(ripassoTwinMap.get(k) || []), s]);
+      }
+    }
+    return (ripassoTwinMap.get(String(key).toLowerCase()) || []).filter(s => s !== subj);
+  }
+  let lastTwinChange = null;   // so "I was right" can put the twins right too
+  function srsAnswerTwins(subj, dir, key, correct) {
+    lastTwinChange = null;
+    if (!RIPASSO_SECTIONS.includes(subj)) return;
+    const changed = [], keep = lastSrsChange;
+    for (const other of ripassoTwins(subj, key)) {
+      if (!loadSrs(other, dir)[key] && !((readStats(other, dir)[key] || {}).seen > 0)) continue;   // not on that section's schedule
+      srsAnswer(other, dir, key, correct);
+      changed.push(lastSrsChange);
+    }
+    lastSrsChange = keep;
+    if (changed.length) lastTwinChange = { subj, dir, key, changed };
+  }
+  function srsTwinsRight(subj, dir, key) {
+    if (!lastTwinChange || lastTwinChange.subj !== subj || lastTwinChange.dir !== dir || lastTwinChange.key !== key) return;
+    const keep = lastSrsChange;
+    for (const ch of lastTwinChange.changed) {
+      const srs = loadSrs(ch.subj, dir);
+      if (ch.prev) srs[key] = ch.prev; else delete srs[key];
+      saveSrs(ch.subj, dir, srs);
+      srsAnswer(ch.subj, dir, key, true);
+    }
+    lastSrsChange = keep;
+    lastTwinChange = null;
+  }
+
   function recordAnswer(nounKey, isCorrect) {
     srsAnswer(subject, direction, nounKey, isCorrect);
+    srsAnswerTwins(subject, direction, nounKey, isCorrect);
     const s = stats[nounKey] || { seen: 0, wrong: 0 };
     s.seen += 1;
     if (!isCorrect) s.wrong += 1;
@@ -10548,6 +10590,7 @@
     renderSavedDeck();   // the saved deck sits just below
     const el = document.getElementById('ripasso');
     if (!el) return;
+    el.title = 'A word counts as reviewed whichever deck you practise it in — Ripasso just gathers what\'s due, in the direction chosen here';
     const list = dueList(ripassoDir);
     const counts = {};
     for (const { subj } of list) counts[subj] = (counts[subj] || 0) + 1;
@@ -13731,6 +13774,7 @@
   function acceptOverride(card, prevStreak) {
     roundMissed.delete(card.key);
     if (srsUndoLast(subject, direction, card.noun)) srsAnswer(subject, direction, card.noun, true);
+    srsTwinsRight(subject, direction, card.noun);
     const s = stats[card.noun];
     if (s && s.wrong > 0) { s.wrong -= 1; saveStats(); }
     score++;

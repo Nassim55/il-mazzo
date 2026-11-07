@@ -65,7 +65,7 @@ Every card section works in three directions — English → Italian, Italian �
 
 Every item you answer gets a review date, separately for each direction. A correct answer moves it up a box and pushes it further out — 1, 2, 4, 8, 16, 32, then 64 days — while a wrong answer brings it back tomorrow. Only the first correct answer of the day moves an item up, so six right conjugations of one verb count once. Progress from before the schedule existed seeds it: weak items come due straight away and solid ones are spread over the following days.
 
-Ripasso is for words: *Sostantivi*, both verb sections, *Aggettivi* and the words you add from *Racconto* — mostly single words. Phrases, sentences, prepositions, possessives and dialogue lines are still scheduled in their own sections, but don't come back here.
+Ripasso is for words: *Sostantivi*, both verb sections, *Aggettivi* and the words you add from *Racconto* — mostly single words. Practice anywhere counts: a due word answered in any deck is rescheduled exactly as Ripasso would, so it leaves today's list (in that direction — each direction keeps its own schedule). A word held twice — a story word that's also a noun or an adjective, like *il buio* or *lontano* — counts for both when either is practised. Phrases, sentences, prepositions, possessives and dialogue lines are still scheduled in their own sections, but don't come back here.
 
 The strip at the top of the setup screen shows what's due today in the chosen direction, by section. **Start** mixes it all into one round (up to 30 cards to begin with; Deck size reaches the rest), each card labelled with its section and checked by that section's rules. Schedules are part of backups, and resetting a section's progress clears its schedule.
 
