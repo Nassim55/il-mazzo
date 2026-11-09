@@ -75,7 +75,7 @@ ok(JSON.parse(w.localStorage.getItem('verbi-regolari-stats-listen')).capire.atte
 key(d.body, 'Enter');
 ok(w.__spoken.length >= k + 3, 'moving on speaks the next card');
 d.getElementById('change-btn').click();
-ok(/🔊 Listening/.test(d.getElementById('setup-meta').textContent) && /🔊 Listening/.test(d.querySelector('#weak-panel .endings-sub').textContent), 'setup labels say Listening');
+ok(/🔊 Listening/.test(d.getElementById('setup-meta').textContent) && /🔊 Listening/.test(d.querySelector('#map-panel .endings-sub').textContent), 'setup labels say Listening');
 ok(d.querySelector('#direction-toggle [data-direction="listen"]').classList.contains('active'), 'the setup direction toggle has Listening too');
 // ---- Nouns & phrases in listening ----
 d.querySelector('#subject-toggle [data-subject="phrases"]').click();

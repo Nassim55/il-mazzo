@@ -6,7 +6,7 @@ const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => 
 ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Verbi regolari', 'Verbi irregolari', 'Verbi al contrario', 'Aggettivi', 'Possessivi', 'Preposizioni', 'Frasi', 'Scrittura', 'Dialoghi', 'Racconto']), `subject switch: ${labels.join(' | ')}`);
 // Regular section keeps its own panel
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
-ok(d.querySelector('.endings-title')?.textContent === 'Le desinenze' && !d.querySelector('.irregular-panel') && d.querySelectorAll('.verb-chip').length === 150, 'regular section: Le desinenze panel, 150 verbs');
+ok(d.querySelector('.map-chart .endings-title')?.textContent === 'Le desinenze' && !d.querySelector('.irregular-panel') && d.querySelectorAll('.verb-chip').length === 150, 'regular section: Le desinenze in the map\'s panel, 150 verbs');
 ev("selectedNouns = new Set(['parlare']); updateReadout();");
 // Irregular section
 d.querySelector('#subject-toggle [data-subject="irregular"]').click();

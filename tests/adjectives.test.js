@@ -7,10 +7,10 @@ ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Verbi regolari', 'V
 d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 ok(ev('subject') === 'adjectives' && d.getElementById('app-title').textContent === 'Aggettivi' && d.title === 'Il Mazzo · Aggettivi', 'title and tab');
 ok(ev('selectedNouns.size') === 200 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('200 adjectives · 200 cards'), 'every adjective starts selected, as in the original (now 200 · 200 cards)');
-ok(d.querySelector('.agreement-panel .endings-title')?.textContent === 'Le concordanze' && d.querySelector('.setup-side').children[1].id === 'weak-panel', 'Le concordanze panel with Da ripassare under it');
+ok(d.querySelector('#map-panel .map-chart .agreement-panel .endings-title')?.textContent === 'Le concordanze' && !d.querySelector('.setup-side') && d.getElementById('noun-map').querySelectorAll('.map-row').length === ev('ADJ_THEMES.length'), 'La mappa, a line per topic — with Le concordanze in its panel');
 ok(/1\/200 practised|3\/200 practised/.test(d.getElementById('setup-meta').textContent), 'original history shows in the stats strip');
-const weakRows = [...d.querySelectorAll('#weak-panel .weak-it')].map(e => e.textContent);
-ok(JSON.stringify(weakRows) === JSON.stringify(['simpatico', 'grigio']), `Da ripassare ranks by error rate like the original Weakest (${weakRows.join(', ')})`);
+const weakRows = ev('weakestNouns(10)').slice(0, 2);
+ok(JSON.stringify(weakRows) === JSON.stringify(['simpatico', 'grigio']), `the Weakest picks rank by error rate like the original Weakest (${weakRows.join(', ')})`);
 const chips = [...d.querySelectorAll('.theme-chip')].map(c => c.textContent.replace(/\s+/g, ' ').trim());
 ok(chips.length === 19 && chips.some(c => /^-chi · -ghi ?9$/.test(c)) && chips.some(c => /^Quantità ?7$/.test(c)), `19 theme chips (11 original + 4 new + 4 patterns): …${chips.slice(11).join(' | ')}`);
 d.querySelector('#mode-toggle [data-mode="forms"]').click();

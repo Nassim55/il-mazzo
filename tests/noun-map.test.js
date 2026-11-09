@@ -21,7 +21,7 @@ ok(parts.indexOf('bench-left') < parts.indexOf('noun-map') && parts.indexOf('ben
    `the controls for picking (left) and everything that starts a round (right) come above the map (${parts.filter(x => x !== 'theme-row').join(' → ')})`);
 ok(B.d.getElementById('theme-row').hidden && B.d.getElementById('verb-grid').closest('details.grid-fold') && !B.d.getElementById('grid-fold').open
    && /Every noun, one by one \(1061\)/.test(B.d.querySelector('.grid-fold summary').textContent), 'the theme chips give way to the map; the 1061 nouns fold away underneath');
-ok(B.d.querySelector('.container').dataset.map === '1' && boot({ 'flipcards-subject': 'adjectives' }).d.querySelector('.container').dataset.map === '0', 'a wide page for the map — Sostantivi only');
+ok(B.d.querySelector('.container').dataset.map === '1' && ['verbs', 'irregular', 'adjectives'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '1') && ['phrases', 'prepositions'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '0'), 'a wide page for the map — the word sections');
 
 // ---- A topic's line ----
 ok(B.ev('NOUN_THEMES').every(t => row(t.key).querySelectorAll('.map-strip .map-cell').length === t.nouns.length), 'a square for every noun in every topic');

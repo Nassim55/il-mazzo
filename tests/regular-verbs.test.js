@@ -6,7 +6,7 @@ d.querySelector('.theme-chip[data-theme="casa"]').click();        // a noun sele
 setVal('deck-cap', '7');
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
 ok(ev('subject') === 'verbs' && d.getElementById('app-title').textContent === 'Verbi Regolari' && d.title === 'Il Mazzo · Verbi Regolari', 'switch → Verbi Regolari title and page title');
-ok(!!d.querySelector('aside.endings .eg') && d.querySelector('.endings-title').textContent === 'Le desinenze', 'endings panel present beside the grid');
+ok(!!d.querySelector('.map-chart aside.endings .eg') && d.querySelector('.map-chart .endings-title').textContent === 'Le desinenze', 'Le desinenze, in the map\'s panel');
 ok(ev('selectedNouns.size') === 0 && d.getElementById('deck-cap').value === '', 'verbs start with their own empty selection and subset box');
 ok(/[134]\/150 practised/.test(d.getElementById('setup-meta').textContent), `old verb history shows in the stats strip ("${d.getElementById('setup-meta').textContent.replace(/\s+/g, ' ').trim()}")`);
 // Weakest 10 uses the verb game's smoothed formula: capire 15/22, finire 8/12, pulire 1/8
