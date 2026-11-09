@@ -1,11 +1,14 @@
 // La mappa: the nouns page is the map. The picks and Start come first; then a line of
 // squares per topic in the grid's colours (strongest first, the untried plain at the end,
 // those in the deck outlined), and beside it a panel: tap a topic and its nouns open
-// there, weakest first, each one tap away from the deck. The grid folds away below.
+// there, each one tap away from the deck. The % is how much of the topic you know (box 5 of
+// the schedule or more), the known first along the line; topics ranked by it. The grid folds away below.
 const { boot, ok, done } = require('./harness');
 
 const stats = { casa: { seen: 6, wrong: 0 }, cane: { seen: 5, wrong: 4 }, gatto: { seen: 2, wrong: 1 }, libro: { seen: 8, wrong: 1 }, acqua: { seen: 3, wrong: 3 } };
-let B = boot({ 'flipcards-subject': 'nouns', 'sostantivi-stats-v1': JSON.stringify(stats) });
+// Known = box 5 of the schedule: casa and libro have got there; cane and gatto haven't
+const srs = { casa: { b: 5, d: 99999, l: 1 }, libro: { b: 6, d: 99999, l: 1 }, cane: { b: 1, d: 99999, l: 1 }, gatto: { b: 4, d: 99999, l: 1 }, acqua: { b: 1, d: 99999, l: 1 } };
+let B = boot({ 'flipcards-subject': 'nouns', 'sostantivi-stats-v1': JSON.stringify(stats), 'sostantivi-stats-v1:srs': JSON.stringify(srs) });
 const map = () => B.d.getElementById('noun-map');
 const panel = () => B.d.getElementById('map-panel');
 const row = k => map().querySelector(`.map-row[data-topic="${k}"]`);
@@ -32,19 +35,38 @@ const firstNew = titles.findIndex(x => /not tried yet/.test(x));
 ok(titles.slice(0, firstNew).every(x => /right \d+ of \d+/.test(x)) && titles.slice(firstNew).every(x => /not tried yet/.test(x)), 'tried squares first, coloured; the untried plain at the end');
 const order = titles.slice(0, firstNew).map(x => x.split(' — ')[0]);
 const rateOf = it => { const k = B.ev(`NOUN_ITEMS.find(n => n.it === ${JSON.stringify(it)}).noun`); return stats[k].wrong / stats[k].seen; };
-ok(order.every((it, i) => i === 0 || rateOf(order[i - 1]) <= rateOf(it)), `strongest first along the line (${order.join(', ')})`);
-map().querySelector('[data-map-sort="weak"]').click();
-const scores = [...map().querySelectorAll('.map-rows .map-row')].map(r => r.querySelector('.map-score').textContent);
-const scored = scores.filter(x => x !== '—').map(x => parseInt(x, 10));
-ok(scored.every((x, i) => i === 0 || scored[i - 1] <= x) && scores.slice(scored.length).every(x => x === '—'), 'Weakest first: the topics you get wrong most at the top');
+const knownIts = ['casa', 'libro'].map(k => B.ev(`NOUN_ITEMS.find(n => n.noun === ${JSON.stringify(k)}).it`));
+const rest = order.filter(it => !knownIts.includes(it));
+ok(order.slice(0, order.length - rest.length).every(it => knownIts.includes(it)) && rest.every((it, i) => i === 0 || rateOf(rest[i - 1]) <= rateOf(it)), `the known first along the line, then the rest strongest first (${order.join(', ')})`);
+ok([...row(topicOf('casa')).querySelectorAll('.map-cell.known')].length === B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('casa'))}).nouns.filter(k => ['casa', 'libro'].includes(k)).length`) && !row(topicOf('cane')).querySelector('.map-cell.known') === !B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('cane'))}).nouns.some(k => ['casa', 'libro'].includes(k))`), 'the known squares are dotted — what the % counts');
+// ---- The percentage: how much of the topic you know ----
+const pctOf = key => B.ev(`(() => { const t = NOUN_THEMES.find(t => t.key === ${JSON.stringify(key)}); return Math.round(t.nouns.filter(k => ['casa', 'libro'].includes(k)).length / t.nouns.length * 100); })()`);
+const shown = key => row(key).querySelector('.map-score').textContent;
+ok(shown(topicOf('casa')) === `${pctOf(topicOf('casa'))}%` && shown(topicOf('casa')) !== '0%' && shown(topicOf('cane')) === `${pctOf(topicOf('cane'))}%`,
+   `the % is the share of the topic's nouns you know — box 5 or more: casa's topic ${shown(topicOf('casa'))}, cane's ${shown(topicOf('cane'))} (gatto, at box 4, doesn't count yet)`);
+ok(row('arabo').querySelector('.map-score').textContent === '0%' && row('arabo').querySelector('.map-score').classList.contains('untried'), 'a topic not started: 0%, faded');
+const scores = [...map().querySelectorAll('.map-rows .map-row')].map(r => parseInt(r.querySelector('.map-score').textContent, 10));
+const keysNow = [...map().querySelectorAll('.map-rows .map-row')].map(r => r.dataset.topic);
+ok(scores.every((x, i) => i === 0 || scores[i - 1] >= x) && keysNow[0] === [topicOf('casa'), topicOf('libro')].sort((a, b) => pctOf(b) - pctOf(a))[0] && map().querySelector('[data-map-sort="known"].active'),
+   'topics in order of how much you know, the highest at the top');
 map().querySelector('[data-map-sort="order"]').click();
+ok([...map().querySelectorAll('.map-rows .map-row')].map(r => r.dataset.topic).join() === B.ev('NOUN_THEMES.map(t => t.key)').join(), '…or in the topics\' own order, if you\'d rather');
+ok(B.ev("mapPrefs().sortBy") === 'order', '(remembered)');
+map().querySelector('[data-map-sort="known"]').click();
+ok(/dotted: known — right on five separate days in a row · the % is how much of the topic you know/.test(map().querySelector('.shade-key').textContent), 'the key says what the dots and the % mean');
 
 // ---- The panel ----
-ok(panel().classList.contains('endings') && panel().querySelector('.endings-title').textContent === 'I temi' && panel().querySelector(`.weak-row[data-map-open="${topicOf('cane')}"]`),
-   'before a topic is opened, the panel — a side panel like the others — lists your weakest topics, as Da ripassare lists nouns');
+ok(panel().classList.contains('endings') && panel().querySelector('.endings-title').textContent === 'I temi' && panel().querySelector(`.weak-row[data-map-open="${topicOf('cane')}"]`)
+   && /least known topics/.test(panel().textContent) && /\d+\/\d+ known/.test(panel().textContent),
+   'before a topic is opened, the panel — a side panel like the others — lists the topics you\'ve started that you know least');
 panel().querySelector(`[data-map-open="${topicOf('cane')}"]`).click();
 ok(panel().querySelector('.endings-title').textContent === B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('cane'))}).label`)
    && row(topicOf('cane')).classList.contains('open') && /To work on/.test(panel().textContent), 'tap one (here, or its line on the map): its nouns open in the panel beside the map');
+B.ev(`mapOpen = ${JSON.stringify(topicOf('casa'))}`); redraw();
+ok(/Known/.test(panel().textContent) && [...panel().querySelectorAll('.endings-note')].find(g => /Known/.test(g.textContent)).textContent.includes(B.ev("NOUN_ITEMS.find(n => n.noun === 'casa').it"))
+   && new RegExp(`${B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('casa'))}).nouns.filter(k => ['casa', 'libro'].includes(k)).length`)} of \\d+ known`).test(panel().querySelector('.map-sum').textContent),
+   'in the panel: To work on, Known, Not tried yet — and how many of the topic you know');
+B.ev(`mapOpen = ${JSON.stringify(topicOf('cane'))}`); redraw();
 const firstChip = panel().querySelector('.map-tiles .map-tile');
 ok(firstChip.textContent.includes(B.ev("NOUN_ITEMS.find(n => n.noun === 'cane').it")) && /Right 1 of 5/.test(firstChip.title) && firstChip.querySelector('.verb-chip-italian') && firstChip.classList.contains('shaded')
    && firstChip.classList.contains('unselected'), 'weakest first, as the grid\'s tiles: shaded by your record, dashed while not in the deck');

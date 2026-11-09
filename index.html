@@ -2177,6 +2177,8 @@
   .map-cell { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
   .map-cell.new { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.2); }
   .map-cell.in { outline: 1.5px solid var(--ink); outline-offset: 1px; }
+  .map-cell.known { position: relative; }   /* known: counted in the topic's % */
+  .map-cell.known::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(250, 246, 236, 0.9); }
   .map-score { justify-self: end; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-faded); }
   .map-score[style] { color: var(--ink); border-bottom: 2px solid var(--c); padding-bottom: 1px; }
   .map-panel { display: none; }
@@ -11821,26 +11823,36 @@
     return `rgb(${a.map((x, i) => Math.round(SHADE_PAPER[i] + (x + (b[i] - x) * u - SHADE_PAPER[i]) * mix)).join(', ')})`;
   }
   // A topic's nouns, strongest first (then the most tried), the untried at the end
-  function mapTopic(t, byKey) {
+  // A topic's percentage is how much of it you know: a noun counts once it has reached box 5
+  // of the Ripasso schedule in this direction — right on about five separate days in a row
+  // (each day's first correct answer moves it up a box; any mistake sends it back to box 1,
+  // so after a slip it has to earn its place again). Untried nouns count as not known.
+  const MAP_KNOWN_BOX = 5;
+  function mapTopic(t, byKey, srs = seedSrs('nouns', direction)) {
     const cells = t.nouns.map(k => {
       const n = byKey.get(k), s = stats[k], seen = s && s.seen > 0 ? s.seen : 0, wrong = seen ? Math.min(s.wrong || 0, seen) : 0;
-      return { key: k, it: n ? n.it : k, en: n ? n.en : '', seen, wrong, rate: seen ? wrong / seen : null };
+      const box = srs[k] ? srs[k].b : 0;
+      return { key: k, it: n ? n.it : k, en: n ? n.en : '', seen, wrong, rate: seen ? wrong / seen : null, box, known: box >= MAP_KNOWN_BOX };
     });
-    const tried = cells.filter(c => c.seen).sort((a, b) => a.rate - b.rate || b.seen - a.seen || a.key.localeCompare(b.key));
-    const fresh = cells.filter(c => !c.seen);
+    const tried = cells.filter(c => c.seen || c.known)
+      .sort((a, b) => (b.known - a.known) || (a.known && b.known ? b.box - a.box : 0) || (a.rate || 0) - (b.rate || 0) || b.seen - a.seen || a.key.localeCompare(b.key));
+    const fresh = cells.filter(c => !c.seen && !c.known);
     const seen = tried.reduce((x, c) => x + c.seen, 0), wrong = tried.reduce((x, c) => x + c.wrong, 0);
+    const known = cells.filter(c => c.known).length;
     return { t, cells: [...tried, ...fresh], tried, fresh, seen, wrong, rate: seen ? wrong / seen : null,
+             known, pct: cells.length ? Math.round(known / cells.length * 100) : 0,
              often: tried.filter(c => c.rate >= 0.4).length, shaky: tried.filter(c => c.rate >= 0.15 && c.rate < 0.4).length };
   }
-  const mapCellTitle = c => `${c.it} — ${c.en}: ${c.seen ? `right ${c.seen - c.wrong} of ${c.seen}` : 'not tried yet'}`;
-  const mapTopicPct = x => (x.rate === null ? '—' : `${Math.round((1 - x.rate) * 100)}%`);
+  const mapCellTitle = c => `${c.it} — ${c.en}: ${c.seen ? `right ${c.seen - c.wrong} of ${c.seen}${c.known ? ' · known' : ''}` : 'not tried yet'}`;
+  const mapTopicPct = x => `${x.pct}%`;
+  const mapPctColor = x => mapColor((100 - x.pct) / 200, 5);   // 100% known: olive · none: terracotta
   const mapWeakFirst = x => x.tried.filter(c => c.wrong > 0).sort((a, b) => b.rate - a.rate || b.wrong - a.wrong).slice(0, 10);
   // A topic's nouns, in the site's own pieces: the side panel's title and labels, the grid's
   // tiles (shaded by your record; dashed and faded when not in the deck, the gold mark when
   // they are), and the setup's text links for whole-topic picks
   function mapDetailHTML(x, inPanel) {
     const inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length, allIn = inDeck === x.cells.length;
-    const work = x.tried.filter(c => c.rate >= 0.15).sort((a, b) => b.rate - a.rate || b.seen - a.seen), good = x.tried.filter(c => c.rate < 0.15);
+    const work = x.tried.filter(c => !c.known).sort((a, b) => b.rate - a.rate || b.seen - a.seen), good = x.tried.filter(c => c.known);
     const weak = mapWeakFirst(x);
     const tile = c => {
       const on = selectedNouns.has(c.key), sh = c.seen ? errorShade(c) : null;
@@ -11858,56 +11870,52 @@
       ${inPanel ? `<button type="button" class="map-close" data-map-close aria-label="Close ${escapeHTML(x.t.label)}">×</button>` : ''}
       <h3 class="endings-title">${x.t.label}</h3>
       <div class="endings-sub">${x.t.en} · ${x.cells.length} nouns · ${DIR_LABELS[direction].short}</div>
-      <p class="map-sum">${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : ` · right ${mapTopicPct(x)} of the time`}${x.often ? ` · ${x.often} often wrong` : ''} · <strong>${inDeck}</strong> in your deck</p>
+      <p class="map-sum"><strong>${x.known}</strong> of ${x.cells.length} known · ${x.tried.length} practised${x.often ? ` · ${x.often} often wrong` : ''} · <strong>${inDeck}</strong> in your deck</p>
       <div class="map-actions">
         ${weak.length ? `<button type="button" class="submit map-practise" data-map-pick="weak">▶ Practise the ${weak.length} weakest</button>` : ''}
         <div class="map-actions-more">${more.join('')}</div>
       </div>
       <p class="map-hint">Or tap nouns one by one to put them in your deck — or take them out.</p>
-      ${group('To work on', work)}${group('Going well', good)}${group('Not tried yet', x.fresh)}`;
+      ${group('To work on', work)}${group('Known', good)}${group('Not tried yet', x.fresh)}`;
   }
-  // Before a topic is opened: the weakest topics, as Da ripassare lists the weakest nouns
+  // Before a topic is opened: of the topics you've started, the ones you know least
   function mapWelcomeHTML(topics) {
-    const weakest = topics.filter(x => x.wrong > 0).sort((a, b) => b.rate - a.rate).slice(0, 6);
+    const weakest = topics.map((x, i) => [x, i]).filter(([x]) => x.tried.length).sort(([a, i], [b, j]) => a.pct - b.pct || b.tried.length - a.tried.length || i - j).map(([x]) => x).slice(0, 6);
     return `
       <h3 class="endings-title">I temi</h3>
-      <div class="endings-sub">${weakest.length ? `Your ${weakest.length > 1 ? `${weakest.length} ` : ''}weakest topics` : 'Every topic'} · ${DIR_LABELS[direction].short}</div>
-      ${weakest.length ? `<ol class="weak-list">${weakest.map((x, i) => {
-        const pct = Math.round(x.rate * 100);
-        return `<li><button type="button" class="weak-row map-jump" data-map-open="${x.t.key}" style="--rate: ${pct}%">
+      <div class="endings-sub">${weakest.length ? `Your ${weakest.length > 1 ? `${weakest.length} ` : ''}least known topics` : 'Every topic'} · ${DIR_LABELS[direction].short}</div>
+      ${weakest.length ? `<ol class="weak-list">${weakest.map((x, i) => `<li><button type="button" class="weak-row map-jump" data-map-open="${x.t.key}" style="--rate: ${100 - x.pct}%">
           <span class="weak-rank">${i + 1}</span>
           <span class="weak-verb"><span class="weak-it">${x.t.label}</span><span class="weak-en">${escapeHTML(x.t.en)}</span></span>
-          <span class="weak-stat">${x.wrong}/${x.seen} err<span class="weak-pct">${pct}%</span></span>
-        </button></li>`;
-      }).join('')}</ol>` : ''}
+          <span class="weak-stat">${x.known}/${x.cells.length} known<span class="weak-pct">${x.pct}%</span></span>
+        </button></li>`).join('')}</ol>` : ''}
       <p class="weak-empty">Tap a topic${weakest.length ? ' — on the map, or here —' : ' on the map'} to see its nouns, weakest first, and put any of them in your deck.</p>`;
   }
   function nounMapInner() {
     const p = mapPrefs(), dir = DIR_LABELS[direction].long;
     if (p.hidden) return `<div class="theme-eyebrow map-eyebrow">↳ La mappa · every topic at a glance <button type="button" class="ghost" id="map-show">show</button></div>`;
-    const byKey = new Map(NOUN_ITEMS.map(n => [n.noun, n]));
-    const inOrder = NOUN_THEMES.map(t => mapTopic(t, byKey));
-    const topics = p.sort === 'weak'
-      ? inOrder.map((x, i) => [x, i]).sort(([a, i], [b, j]) => (a.rate === null) - (b.rate === null) || (b.rate || 0) - (a.rate || 0) || i - j).map(([x]) => x)
-      : inOrder;
+    const byKey = new Map(NOUN_ITEMS.map(n => [n.noun, n])), srs = seedSrs('nouns', direction);
+    const inOrder = NOUN_THEMES.map(t => mapTopic(t, byKey, srs));
+    const topics = p.sortBy === 'order' ? inOrder   // the most known at the top, unless you ask for the topics' own order
+      : inOrder.map((x, i) => [x, i]).sort(([a, i], [b, j]) => b.pct - a.pct || i - j).map(([x]) => x);
     const open = topics.find(x => x.t.key === mapOpen) || null;
-    const sq = c => `<i class="map-cell${c.seen ? '' : ' new'}${selectedNouns.has(c.key) ? ' in' : ''}"${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}"` : ''} title="${escapeHTML(mapCellTitle(c))}"></i>`;
+    const sq = c => `<i class="map-cell${c.seen ? '' : ' new'}${c.known ? ' known' : ''}${selectedNouns.has(c.key) ? ' in' : ''}"${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}"` : ''} title="${escapeHTML(mapCellTitle(c))}"></i>`;
     const row = x => {
       const isOpen = open === x, inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length;
       return `
         <div class="map-row${isOpen ? ' open' : ''}" data-topic="${x.t.key}">
-          <button type="button" class="map-head" aria-expanded="${isOpen}" aria-label="${escapeHTML(`${x.t.label}, ${x.t.en}: ${x.tried.length} of ${x.cells.length} practised${x.rate === null ? '' : `, right ${mapTopicPct(x)} of the time`}${inDeck ? `, ${inDeck} in your deck` : ''}`)}">
+          <button type="button" class="map-head" aria-expanded="${isOpen}" aria-label="${escapeHTML(`${x.t.label}, ${x.t.en}: ${x.known} of ${x.cells.length} known (${mapTopicPct(x)}), ${x.tried.length} practised${inDeck ? `, ${inDeck} in your deck` : ''}`)}">
             <span class="map-name"><span class="map-it">${x.t.label}</span><span class="map-en">${x.t.en} · ${x.cells.length}</span>${inDeck ? `<span class="map-indeck">● ${inDeck} in your deck</span>` : ''}</span>
             <span class="map-strip" aria-hidden="true">${x.cells.map(sq).join('')}</span>
-            <span class="map-score"${x.rate === null ? '' : ` style="--c: ${mapColor(x.rate, 5)}"`}>${mapTopicPct(x)}</span>
+            <span class="map-score${x.tried.length ? '' : ' untried'}"${x.tried.length ? ` style="--c: ${mapPctColor(x)}"` : ''} title="${x.known} of ${x.cells.length} known">${mapTopicPct(x)}</span>
           </button>
           ${isOpen ? `<div class="endings map-inline">${mapDetailHTML(x, false)}</div>` : ''}
         </div>`;
     };
-    const sortLinks = [['order', 'topic order'], ['weak', 'weakest first']].map(([k, l]) => `<button type="button" class="ghost${(p.sort === 'weak') === (k === 'weak') ? ' active' : ''}" data-map-sort="${k}" aria-pressed="${(p.sort === 'weak') === (k === 'weak')}">${l}</button>`).join('<span class="meta-sep">·</span>');
+    const sortLinks = [['known', 'most known first'], ['order', 'topic order']].map(([k, l]) => `<button type="button" class="ghost${(p.sortBy === 'order') === (k === 'order') ? ' active' : ''}" data-map-sort="${k}" aria-pressed="${(p.sortBy === 'order') === (k === 'order')}">${l}</button>`).join('<span class="meta-sep">·</span>');
     return `
       <div class="map-eyebrow-row">
-        <div class="theme-eyebrow map-eyebrow">↳ La mappa · every topic, every noun — strongest first along each line</div>
+        <div class="theme-eyebrow map-eyebrow">↳ La mappa · every topic, every noun — the ones you know first along each line</div>
         <span class="person-quick map-sort">${sortLinks}<span class="meta-sep">·</span><button type="button" class="ghost" id="map-hide">hide</button></span>
       </div>
       <div class="shade-key map-key">
@@ -11915,6 +11923,7 @@
         <span class="shade-key-bar" style="background: linear-gradient(90deg, ${mapColor(0, 5)}, ${mapColor(0.25, 5)}, ${mapColor(0.5, 5)})"></span>
         <span class="shade-key-end">often wrong</span>
         <span class="shade-key-note">fainter: only a few tries · plain: not tried yet · outlined: in your deck · ${dir}</span>
+        <span class="shade-key-note">dotted: known — right on five separate days in a row · the % is how much of the topic you know</span>
       </div>
       <div class="map-layout">
         <div class="map-rows">${topics.map(row).join('')}</div>
@@ -11959,7 +11968,7 @@
       const noun = e.target.closest('[data-map-noun]'), jump = e.target.closest('[data-map-open]');
       if (e.target.closest('#map-hide')) { saveMapPrefs({ hidden: true }); refresh(); return; }
       if (e.target.closest('#map-show')) { saveMapPrefs({ hidden: false }); refresh(); return; }
-      if (sort) { saveMapPrefs({ sort: sort.dataset.mapSort }); refresh(); return; }
+      if (sort) { saveMapPrefs({ sortBy: sort.dataset.mapSort }); refresh(); return; }
       if (e.target.closest('[data-map-close]')) { mapOpen = null; refresh(); return; }
       if (head || jump) {
         const key = jump ? jump.dataset.mapOpen : head.closest('.map-row').dataset.topic;
