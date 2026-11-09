@@ -4648,9 +4648,34 @@
       r.d = t + 1;
     }
     r.l = t;
+    r.h = `${r.h || ''}${correct ? 1 : 0}`.slice(-KNOW_WINDOW);   // the last answers, for knowState
     srs[key] = r;
     saveSrs(subj, dir, srs);
     lastSrsChange = { subj, dir, key, prev };
+  }
+  // Knowing a word (Nov 2026) — not the schedule's question (when to see it again) but your
+  // track record: known once you've got it right at least 5 times and at least 8 of your last
+  // 10 answers were right. Every answer counts, any day, any deck. A slip or two, scattered,
+  // doesn't undo it; two mistakes in a row do, until you've got it right 3 times in a row
+  // again — and mistakes from while you were learning a word drop out once 10 newer answers
+  // push them out. The last 10 are logged as you answer (r.h); answers from before the log
+  // come from your totals and fill the rest of the 10, so old history counts straight away.
+  const KNOW_WINDOW = 10, KNOW_MIN_RIGHT = 5, KNOW_AT = 0.8, KNOW_BACK = 3;
+  function knowState(r, s) {
+    const log = String((r && r.h) || '').slice(-KNOW_WINDOW);
+    const seen = s && s.seen > 0 ? s.seen : 0, wrong = seen ? Math.min(s.wrong || 0, seen) : 0;
+    const olderN = Math.max(0, seen - log.length), olderWrong = Math.max(0, Math.min(olderN, wrong - (log.split('0').length - 1)));
+    const fromOld = Math.min(KNOW_WINDOW - log.length, olderN);
+    const n = log.length + fromOld;
+    const right = (log.split('1').length - 1) + (olderN ? fromOld * (olderN - olderWrong) / olderN : 0);
+    const run = log.lastIndexOf('00'), blocked = run >= 0 && !log.slice(run + 2).startsWith('1'.repeat(KNOW_BACK));
+    const pct = n ? right / n : 0, known = right >= KNOW_MIN_RIGHT && pct >= KNOW_AT && !blocked;
+    // Why it isn't known yet, for the map's tooltips
+    const short = Math.ceil(KNOW_MIN_RIGHT - right - 1e-9);
+    const why = known || !n ? '' : blocked ? 'two mistakes in a row — 3 right in a row win it back'
+      : short > 0 ? `${short} more right answer${short > 1 ? 's' : ''} to count`
+      : `right ${Math.round(right)} of your last ${n} — needs ${Math.ceil(KNOW_AT * n - 1e-9)}`;
+    return { n, right, pct, blocked, known, why };
   }
   function srsUndoLast(subj, dir, key) {
     if (!lastSrsChange || lastSrsChange.subj !== subj || lastSrsChange.dir !== dir || lastSrsChange.key !== key) return false;
@@ -11823,19 +11848,16 @@
     return `rgb(${a.map((x, i) => Math.round(SHADE_PAPER[i] + (x + (b[i] - x) * u - SHADE_PAPER[i]) * mix)).join(', ')})`;
   }
   // A topic's nouns, strongest first (then the most tried), the untried at the end
-  // A topic's percentage is how much of it you know: a noun counts once it has reached box 5
-  // of the Ripasso schedule in this direction — right on about five separate days in a row
-  // (each day's first correct answer moves it up a box; any mistake sends it back to box 1,
-  // so after a slip it has to earn its place again). Untried nouns count as not known.
-  const MAP_KNOWN_BOX = 5;
-  function mapTopic(t, byKey, srs = seedSrs('nouns', direction)) {
+  // A topic's percentage is how much of it you know (knowState: your track record on each noun,
+  // in this direction). Untried nouns count as not known.
+  function mapTopic(t, byKey, srs = loadSrs('nouns', direction)) {
     const cells = t.nouns.map(k => {
       const n = byKey.get(k), s = stats[k], seen = s && s.seen > 0 ? s.seen : 0, wrong = seen ? Math.min(s.wrong || 0, seen) : 0;
-      const box = srs[k] ? srs[k].b : 0;
-      return { key: k, it: n ? n.it : k, en: n ? n.en : '', seen, wrong, rate: seen ? wrong / seen : null, box, known: box >= MAP_KNOWN_BOX };
+      const ks = knowState(srs[k], s);
+      return { key: k, it: n ? n.it : k, en: n ? n.en : '', seen, wrong, rate: seen ? wrong / seen : null, kpct: ks.pct, known: ks.known, why: ks.why };
     });
     const tried = cells.filter(c => c.seen || c.known)
-      .sort((a, b) => (b.known - a.known) || (a.known && b.known ? b.box - a.box : 0) || (a.rate || 0) - (b.rate || 0) || b.seen - a.seen || a.key.localeCompare(b.key));
+      .sort((a, b) => (b.known - a.known) || (a.known && b.known ? b.kpct - a.kpct : 0) || (a.rate || 0) - (b.rate || 0) || b.seen - a.seen || a.key.localeCompare(b.key));
     const fresh = cells.filter(c => !c.seen && !c.known);
     const seen = tried.reduce((x, c) => x + c.seen, 0), wrong = tried.reduce((x, c) => x + c.wrong, 0);
     const known = cells.filter(c => c.known).length;
@@ -11843,7 +11865,7 @@
              known, pct: cells.length ? Math.round(known / cells.length * 100) : 0,
              often: tried.filter(c => c.rate >= 0.4).length, shaky: tried.filter(c => c.rate >= 0.15 && c.rate < 0.4).length };
   }
-  const mapCellTitle = c => `${c.it} — ${c.en}: ${c.seen ? `right ${c.seen - c.wrong} of ${c.seen}${c.known ? ' · known' : ''}` : 'not tried yet'}`;
+  const mapCellTitle = c => `${c.it} — ${c.en}: ${c.seen ? `right ${c.seen - c.wrong} of ${c.seen} · ${c.known ? 'known' : c.why}` : 'not tried yet'}`;
   const mapTopicPct = x => `${x.pct}%`;
   const mapPctColor = x => mapColor((100 - x.pct) / 200, 5);   // 100% known: olive · none: terracotta
   const mapWeakFirst = x => x.tried.filter(c => c.wrong > 0).sort((a, b) => b.rate - a.rate || b.wrong - a.wrong).slice(0, 10);
@@ -11857,7 +11879,7 @@
     const tile = c => {
       const on = selectedNouns.has(c.key), sh = c.seen ? errorShade(c) : null;
       return `<button type="button" class="map-tile${on ? '' : ' unselected'}${sh ? ' shaded' : ''}" data-map-noun="${c.key}" aria-pressed="${on}"${sh ? ` style="--shade: ${sh.color}"` : ''}`
-        + ` title="${escapeHTML(c.seen ? `Right ${c.seen - c.wrong} of ${c.seen}` : 'Not practised yet')}${on ? ' — in your deck' : ''}">`
+        + ` title="${escapeHTML(c.seen ? `Right ${c.seen - c.wrong} of ${c.seen} · ${c.known ? 'known' : c.why}` : 'Not practised yet')}${on ? ' — in your deck' : ''}">`
         + `<div class="verb-chip-mark">●</div><div class="verb-chip-italian">${escapeHTML(c.it)}</div><div class="verb-chip-english">${escapeHTML(c.en)}</div></button>`;
     };
     // The actions, as the game's buttons: the dark one starts a round, the outlined ones fill the deck
@@ -11894,7 +11916,7 @@
   function nounMapInner() {
     const p = mapPrefs(), dir = DIR_LABELS[direction].long;
     if (p.hidden) return `<div class="theme-eyebrow map-eyebrow">↳ La mappa · every topic at a glance <button type="button" class="ghost" id="map-show">show</button></div>`;
-    const byKey = new Map(NOUN_ITEMS.map(n => [n.noun, n])), srs = seedSrs('nouns', direction);
+    const byKey = new Map(NOUN_ITEMS.map(n => [n.noun, n])), srs = loadSrs('nouns', direction);
     const inOrder = NOUN_THEMES.map(t => mapTopic(t, byKey, srs));
     const topics = p.sortBy === 'order' ? inOrder   // the most known at the top, unless you ask for the topics' own order
       : inOrder.map((x, i) => [x, i]).sort(([a, i], [b, j]) => b.pct - a.pct || i - j).map(([x]) => x);
@@ -11923,7 +11945,7 @@
         <span class="shade-key-bar" style="background: linear-gradient(90deg, ${mapColor(0, 5)}, ${mapColor(0.25, 5)}, ${mapColor(0.5, 5)})"></span>
         <span class="shade-key-end">often wrong</span>
         <span class="shade-key-note">fainter: only a few tries · plain: not tried yet · outlined: in your deck · ${dir}</span>
-        <span class="shade-key-note">dotted: known — right on five separate days in a row · the % is how much of the topic you know</span>
+        <span class="shade-key-note">dotted: known — right 5 times or more, and on 8 of your last 10 answers; a slip won't undo it, two mistakes in a row will (3 right in a row win it back) · the % is how much of the topic you know · hover a square for why</span>
       </div>
       <div class="map-layout">
         <div class="map-rows">${topics.map(row).join('')}</div>

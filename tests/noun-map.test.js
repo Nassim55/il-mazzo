@@ -1,14 +1,13 @@
 // La mappa: the nouns page is the map. The picks and Start come first; then a line of
 // squares per topic in the grid's colours (strongest first, the untried plain at the end,
 // those in the deck outlined), and beside it a panel: tap a topic and its nouns open
-// there, each one tap away from the deck. The % is how much of the topic you know (box 5 of
-// the schedule or more), the known first along the line; topics ranked by it. The grid folds away below.
+// there, each one tap away from the deck. The % is how much of the topic you know (knowState:
+// the track record), the known first along the line; topics ranked by it. The grid folds away below.
 const { boot, ok, done } = require('./harness');
 
 const stats = { casa: { seen: 6, wrong: 0 }, cane: { seen: 5, wrong: 4 }, gatto: { seen: 2, wrong: 1 }, libro: { seen: 8, wrong: 1 }, acqua: { seen: 3, wrong: 3 } };
-// Known = box 5 of the schedule: casa and libro have got there; cane and gatto haven't
-const srs = { casa: { b: 5, d: 99999, l: 1 }, libro: { b: 6, d: 99999, l: 1 }, cane: { b: 1, d: 99999, l: 1 }, gatto: { b: 4, d: 99999, l: 1 }, acqua: { b: 1, d: 99999, l: 1 } };
-let B = boot({ 'flipcards-subject': 'nouns', 'sostantivi-stats-v1': JSON.stringify(stats), 'sostantivi-stats-v1:srs': JSON.stringify(srs) });
+// Known, by the track record: casa (6 of 6) and libro (7 of 8) are; cane, gatto and acqua aren't
+let B = boot({ 'flipcards-subject': 'nouns', 'sostantivi-stats-v1': JSON.stringify(stats) });
 const map = () => B.d.getElementById('noun-map');
 const panel = () => B.d.getElementById('map-panel');
 const row = k => map().querySelector(`.map-row[data-topic="${k}"]`);
@@ -33,6 +32,8 @@ const animali = row(topicOf('cane'));
 const titles = [...animali.querySelectorAll('.map-strip .map-cell')].map(c => c.getAttribute('title'));
 const firstNew = titles.findIndex(x => /not tried yet/.test(x));
 ok(titles.slice(0, firstNew).every(x => /right \d+ of \d+/.test(x)) && titles.slice(firstNew).every(x => /not tried yet/.test(x)), 'tried squares first, coloured; the untried plain at the end');
+const casaTitles = [...row(topicOf('casa')).querySelectorAll('.map-cell')].map(c => c.getAttribute('title'));
+ok(titles.some(x => /right 1 of 2 · 4 more right answers to count/.test(x)) && casaTitles.some(x => /^.+ — .+: right 6 of 6 · known$/.test(x)), 'each square\'s tooltip says whether it\'s known — or what it still needs');
 const order = titles.slice(0, firstNew).map(x => x.split(' — ')[0]);
 const rateOf = it => { const k = B.ev(`NOUN_ITEMS.find(n => n.it === ${JSON.stringify(it)}).noun`); return stats[k].wrong / stats[k].seen; };
 const knownIts = ['casa', 'libro'].map(k => B.ev(`NOUN_ITEMS.find(n => n.noun === ${JSON.stringify(k)}).it`));
@@ -43,7 +44,7 @@ ok([...row(topicOf('casa')).querySelectorAll('.map-cell.known')].length === B.ev
 const pctOf = key => B.ev(`(() => { const t = NOUN_THEMES.find(t => t.key === ${JSON.stringify(key)}); return Math.round(t.nouns.filter(k => ['casa', 'libro'].includes(k)).length / t.nouns.length * 100); })()`);
 const shown = key => row(key).querySelector('.map-score').textContent;
 ok(shown(topicOf('casa')) === `${pctOf(topicOf('casa'))}%` && shown(topicOf('casa')) !== '0%' && shown(topicOf('cane')) === `${pctOf(topicOf('cane'))}%`,
-   `the % is the share of the topic's nouns you know — box 5 or more: casa's topic ${shown(topicOf('casa'))}, cane's ${shown(topicOf('cane'))} (gatto, at box 4, doesn't count yet)`);
+   `the % is the share of the topic's nouns you know: casa's topic ${shown(topicOf('casa'))}, cane's ${shown(topicOf('cane'))} (gatto, right 1 of 2, doesn't count yet)`);
 ok(row('arabo').querySelector('.map-score').textContent === '0%' && row('arabo').querySelector('.map-score').classList.contains('untried'), 'a topic not started: 0%, faded');
 const scores = [...map().querySelectorAll('.map-rows .map-row')].map(r => parseInt(r.querySelector('.map-score').textContent, 10));
 const keysNow = [...map().querySelectorAll('.map-rows .map-row')].map(r => r.dataset.topic);
@@ -53,7 +54,7 @@ map().querySelector('[data-map-sort="order"]').click();
 ok([...map().querySelectorAll('.map-rows .map-row')].map(r => r.dataset.topic).join() === B.ev('NOUN_THEMES.map(t => t.key)').join(), '…or in the topics\' own order, if you\'d rather');
 ok(B.ev("mapPrefs().sortBy") === 'order', '(remembered)');
 map().querySelector('[data-map-sort="known"]').click();
-ok(/dotted: known — right on five separate days in a row · the % is how much of the topic you know/.test(map().querySelector('.shade-key').textContent), 'the key says what the dots and the % mean');
+ok(/dotted: known — right 5 times or more, and on 8 of your last 10 answers/.test(map().querySelector('.shade-key').textContent) && /the % is how much of the topic you know/.test(map().querySelector('.shade-key').textContent), 'the key says what the dots and the % mean');
 
 // ---- The panel ----
 ok(panel().classList.contains('endings') && panel().querySelector('.endings-title').textContent === 'I temi' && panel().querySelector(`.weak-row[data-map-open="${topicOf('cane')}"]`)
