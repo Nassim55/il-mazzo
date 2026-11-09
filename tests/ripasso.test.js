@@ -22,8 +22,8 @@ const libro = rec('nouns', 'libro'), acqua = rec('nouns', 'acqua');
 ok(libro.b === 4 && libro.d > t0 && libro.d <= t0 + 8 && acqua.b === 3 && acqua.d > t0 && acqua.d <= t0 + 4, 'solid words are spread over the coming days');
 ok(/4 due today/.test(strip()) && /2 nouns · 1 regular verb · 1 adjective/.test(strip()), `strip: "${strip()}"`);
 ok(ev("seedSrs('phrases', 'en-it').grazie") && !ev("dueList('en-it').some(x => !RIPASSO_SECTIONS.includes(x.subj))") && !/phrase/.test(strip())
-   && ev('RIPASSO_SECTIONS.join()') === 'nouns,verbs,irregular,adjectives,story',
-   'Ripasso is for words: nouns, verbs, adjectives and the story\'s words — a due phrase stays in Frasi (its schedule is still kept)');
+   && ev('RIPASSO_SECTIONS.join()') === 'nouns,verbs,irregular,adjectives,avverbi,story',
+   'Ripasso is for words: nouns, verbs, adjectives, the little words and the story\'s words — a due phrase stays in Frasi (its schedule is still kept)');
 // ---- The schedule rules ----
 ev("srsAnswer('nouns', 'en-it', 'gatto', true)");
 ok(rec('nouns', 'gatto').b === 1 && rec('nouns', 'gatto').d === t0 + 1, 'a first correct answer: box 1, back tomorrow');

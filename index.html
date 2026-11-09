@@ -1275,13 +1275,14 @@
   .container:not([data-view="setup"]) .setup-top { display: none; }
   .setup-top-inner { display: grid; gap: 14px; }
   /* Five equal columns: auto-sized 1fr columns all grow to the widest label */
-  .mode-toggle.subject-toggle {
+  .mode-toggle.subject-toggle {   /* twelve sections: two rows of six (one row of twelve doesn't fit the page) */
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
+    grid-auto-flow: row;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     max-width: none;
     margin: 0;
   }
+  .subject-toggle .mode-option { white-space: normal; }
 
   /* Ripasso del giorno: today's spaced-repetition review, across all sections */
   .ripasso {
@@ -2260,7 +2261,7 @@
      Kept last so it overrides the wide-screen rules above. */
   @media (max-width: 1100px) {
     .container[data-view="setup"] { max-width: 660px; }
-    .mode-toggle.subject-toggle { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(6, minmax(0, 1fr)); }   /* eleven sections: two rows of six */
+    .mode-toggle.subject-toggle { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(6, minmax(0, 1fr)); }   /* twelve sections: two rows of six */
     .subject-toggle .mode-option { white-space: normal; }
   }
 </style>
@@ -4698,7 +4699,7 @@
   // nouns, verbs and adjectives, and the words added from the story: mostly single words
   // (Nov 2026: phrases, sentences and dialogue lines stay in their own sections, which
   // still keep their progress) — most overdue first, then the shakiest
-  const RIPASSO_SECTIONS = ['nouns', 'verbs', 'irregular', 'adjectives', 'story'];
+  const RIPASSO_SECTIONS = ['nouns', 'verbs', 'irregular', 'adjectives', 'avverbi', 'story'];
   const sentenceTypeOff = (subj, key, on) => SUBJECTS[subj].typeFilter && !on.includes(SENTENCE_TYPE_OF[key]);
   function dueList(dir) {
     const t = today(), out = [], on = activeSentenceTypes();
@@ -7269,6 +7270,268 @@
   ];
 
   const PHRASE_ITEMS = phraseData.map(p => ({ noun: p.key, display: p.it, it: p.it, en: p.en, phrase: p, note: PHRASE_NOTES[p.key] || null }));
+
+  // ===== Avverbi e congiunzioni (Nov 2026): the little words — when, where, how much, how;
+  // yes, no and maybe; the words of talking it through; question words; and, but, or; and the
+  // words that link two clauses. Single words, as phrase cards: itAlts — other Italian just as
+  // right; enAlts — other English accepted. Each card's English names its senses, so the whole
+  // prompt points to one Italian word; Italian → English accepts any sense. Keys ending -avv
+  // share their word with another section (piano, the floor; solo, alone) but not its schedule;
+  // spesso, finalmente and cioè are the story's words too, and count together in Ripasso.
+  const AVV_DATA = [
+    { key: "sempre", it: "sempre", en: "always", enAlts: ["all the time"], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>semper</em> — English 'sempiternal', everlasting. <em>Per sempre</em>: forever. <em>Studio sempre la sera</em>: I always study in the evening." },
+    { key: "mai", it: "mai", en: "never / ever", enAlts: [], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>magis</em>, more — the same word as <em>ma</em>, but. With <em>non</em> it's never: <em>non mangio mai la carne</em>. In a question, ever: <em>vieni mai a Milano?</em>" },
+    { key: "già", it: "già", en: "already", enAlts: [], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>iam</em>, already. <em>È già qui</em>: he's already here. On its own, <em>già!</em> means 'right!' — agreeing with someone." },
+    { key: "ancora", it: "ancora", en: "still / yet / again / more", enAlts: ["any more"], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "Probably from Latin <em>hanc horam</em>, this hour — the same word as French <em>encore</em>, which English borrowed. <em>Sei ancora qui?</em>: are you still here? <em>Non ancora</em>: not yet. <em>Ancora un caffè</em>: another coffee." },
+    { key: "spesso", it: "spesso", en: "often", enAlts: ["frequently"], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>spissus</em>, thick, packed close — what happens close together happens often. As an adjective it's still thick: <em>un libro spesso</em>. <em>Vado spesso al mare</em>: I often go to the sea." },
+    { key: "presto", it: "presto", en: "soon / early", enAlts: ["quickly"], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>praesto</em>, at hand, ready — music's 'presto', very fast. <em>A presto!</em>: see you soon! <em>Mi alzo presto</em>: I get up early." },
+    { key: "tardi", it: "tardi", en: "late", enAlts: [], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>tarde</em>, slowly (<em>tardus</em>) — English 'tardy'. <em>È tardi</em>: it's late; <em>a più tardi!</em>: see you later! Late for something is <em>in ritardo</em>." },
+    { key: "subito", it: "subito", en: "straight away / immediately", enAlts: ["at once", "right away"], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>subito</em>, suddenly — music's 'subito', at once. <em>Arrivo subito!</em>: I'm coming right away! — the waiter's promise." },
+    { key: "adesso", it: "adesso", en: "now", enAlts: ["right now"], itAlts: ["ora"], reg: 'neutral', themes: ["tempo"],
+      note: "Probably from Latin <em>ad ipsum (tempus)</em>, at that very time. <em>Ora</em> means the same and is just as common — it's also the hour. <em>Adesso no</em>: not now." },
+    { key: "poi", it: "poi", en: "then (next)", enAlts: ["afterwards", "later"], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>post</em>, after — English 'postpone', 'postscript'. <em>Prima mangio, poi esco</em>: first I eat, then I go out. <em>Prima o poi</em>: sooner or later." },
+    { key: "dopo", it: "dopo", en: "after / later / afterwards", enAlts: [], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>de post</em>, from after — English 'post-'. On its own, later: <em>ci vediamo dopo</em>. Before a word, after: <em>dopo cena</em>, after dinner." },
+    { key: "prima", it: "prima", en: "before / first / earlier", enAlts: [], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>prima</em>, first — English 'prime', 'primary'. <em>Prima di uscire</em>: before going out. <em>Prima mangio, poi esco</em>: first I eat, then I go out." },
+    { key: "ieri", it: "ieri", en: "yesterday", enAlts: [], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>heri</em> — a distant cousin of English 'yesterday'. <em>Ieri sera</em>: last night; <em>l'altro ieri</em>: the day before yesterday." },
+    { key: "oggi", it: "oggi", en: "today", enAlts: [], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>hodie</em>, <em>hoc die</em>: on this day. <em>Oggi pomeriggio</em>: this afternoon; <em>al giorno d'oggi</em>: nowadays." },
+    { key: "domani", it: "domani", en: "tomorrow", enAlts: [], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>de mane</em>, from the morning. <em>Domani mattina</em>: tomorrow morning; <em>dopodomani</em>: the day after tomorrow. <em>A domani!</em>: see you tomorrow!" },
+    { key: "stasera", it: "stasera", en: "this evening / tonight", enAlts: [], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "<em>Questa sera</em>, worn down to one word — like <em>stamattina</em>, this morning, and <em>stanotte</em>, tonight. <em>Che fai stasera?</em>: what are you doing tonight?" },
+    { key: "ormai", it: "ormai", en: "by now / by this point", enAlts: ["by then", "now"], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "<em>Ora</em> + <em>mai</em>: now and ever. It says a moment has passed: <em>ormai è tardi</em> — it's too late now; <em>ormai lo so</em> — I know it by now." },
+    { key: "intanto", it: "intanto", en: "meanwhile / in the meantime", enAlts: ["for now"], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "<em>In</em> + <em>tanto</em>: in so much (time). <em>Tu cucini, io intanto apparecchio</em>: you cook, and meanwhile I lay the table. Also 'for now': <em>intanto grazie</em>." },
+    { key: "finalmente", it: "finalmente", en: "at last", enAlts: ["finally"], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "Half a false friend: <em>finalmente</em> is 'at last!', said with relief — <em>finalmente sei qui!</em> For the last item in a list, 'finally' is <em>infine</em>." },
+    { key: "infine", it: "infine", en: "finally (lastly) / in the end", enAlts: ["lastly"], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "<em>In</em> + <em>fine</em>, end — English 'final'. The last step: <em>infine, aggiungi il sale</em> — finally, add the salt." },
+    { key: "di-solito", it: "di solito", en: "usually", enAlts: ["normally"], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "From Latin <em>solitus</em>, accustomed — English 'insolent' first meant unaccustomed. <em>Di solito ceno alle otto</em>: I usually have dinner at eight." },
+    { key: "qualche-volta", it: "qualche volta", en: "sometimes", enAlts: [], itAlts: ["a volte", "talvolta"], reg: 'neutral', themes: ["tempo"],
+      note: "Literally 'some time'; <em>a volte</em> means the same. <em>Volta</em> is a turn, an occasion: <em>una volta</em>, once; <em>due volte</em>, twice." },
+    { key: "raramente", it: "raramente", en: "rarely / seldom", enAlts: [], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "<em>Rara</em> + <em>-mente</em> — English 'rare'. Most English '-ly' words are made this way in Italian, from the feminine adjective. <em>Esco raramente</em>: I rarely go out." },
+    { key: "ultimamente", it: "ultimamente", en: "lately / recently", enAlts: [], itAlts: [], reg: 'neutral', themes: ["tempo"],
+      note: "<em>Ultima</em> + <em>-mente</em>, from <em>ultimo</em>, last — English 'ultimate'. <em>Ultimamente dormo poco</em>: lately I haven't been sleeping much." },
+    { key: "appena", it: "appena", en: "just / as soon as / hardly", enAlts: ["barely"], itAlts: [], reg: 'neutral', themes: ["tempo", "collegare"],
+      note: "From <em>a pena</em>, with difficulty (Latin <em>poena</em>, pain — English 'pain'). Barely: <em>lo conosco appena</em>. As soon as: <em>appena posso, ti chiamo</em> — as soon as I can, I'll call you." },
+    { key: "qui", it: "qui", en: "here", enAlts: [], itAlts: ["qua"], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>eccu(m) hic</em>, look, here. <em>Qua</em> means the same, often a little more loosely. <em>Vieni qui!</em>: come here! <em>Qui vicino</em>: near here." },
+    { key: "lì", it: "lì", en: "there", enAlts: [], itAlts: ["là"], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>illic</em>, there — <em>là</em>, from <em>illac</em>, means the same. Mind the accent when you write: <em>li</em> is 'them', <em>la</em> is 'the'. <em>È lì</em>: it's there." },
+    { key: "sopra", it: "sopra", en: "above / on top / upstairs", enAlts: ["over"], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>supra</em> — English 'supreme', and the soprano, the highest voice. <em>Abito sopra</em>: I live upstairs; <em>sopra il tavolo</em>: on the table." },
+    { key: "sotto", it: "sotto", en: "under / below / downstairs", enAlts: ["underneath", "beneath"], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>subtus</em> (<em>sub</em>, under) — English 'sub-'. <em>Sotto voce</em>: under the breath; <em>il gatto è sotto il letto</em>: the cat's under the bed." },
+    { key: "dentro", it: "dentro", en: "inside / in", enAlts: ["indoors", "within"], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>de intro</em>, from within — English 'interior', 'intro-'. <em>Vieni dentro!</em>: come inside! <em>Dentro la scatola</em>: inside the box." },
+    { key: "fuori", it: "fuori", en: "outside / out", enAlts: ["outdoors"], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>foris</em>, out of doors (<em>fores</em>, doors) — English 'foreign', and 'forest', the land outside. <em>Ceniamo fuori?</em>: shall we eat out?" },
+    { key: "vicino-avv", it: "vicino", en: "near / nearby / close", enAlts: ["close by"], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>vicinus</em>, a neighbour (<em>vicus</em>, a village) — English 'vicinity'. <em>Abito qui vicino</em>: I live nearby; <em>vicino a casa</em>: near home. <em>Il vicino</em> is the neighbour." },
+    { key: "lontano-avv", it: "lontano", en: "far / far away", enAlts: ["a long way"], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>longus</em>, long — English 'long'. <em>Abito lontano</em>: I live far away; <em>lontano da qui</em>: far from here. As an adjective it agrees: <em>paesi lontani</em>." },
+    { key: "davanti", it: "davanti", en: "in front / ahead", enAlts: ["opposite"], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "<em>Da</em> + <em>avanti</em>, forward (Latin <em>ab ante</em>) — English 'advance', 'ante-'. <em>Davanti alla stazione</em>: in front of the station." },
+    { key: "dietro", it: "dietro", en: "behind / at the back", enAlts: [], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>de retro</em>, from behind — English 'retro', 'retrograde'. <em>Dietro la casa</em>: behind the house; <em>mi siedo dietro</em>: I sit at the back." },
+    { key: "accanto", it: "accanto", en: "next to / beside / next door", enAlts: [], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "<em>A</em> + <em>canto</em>, a side or corner — English 'canton'. <em>Accanto a me</em>: next to me; <em>abita accanto</em>: she lives next door." },
+    { key: "giù", it: "giù", en: "down / downstairs", enAlts: ["below"], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>deorsum</em>, downwards. <em>Su e giù</em>: up and down. <em>Sono giù</em>: I'm downstairs — or I'm feeling down." },
+    { key: "su-avv", it: "su", en: "up / upstairs", enAlts: [], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>sursum</em>, upwards. As a preposition it's 'on' (<em>sul tavolo</em>); on its own, up: <em>vado su</em>, I'm going upstairs. <em>Su!</em>: come on!" },
+    { key: "ovunque", it: "ovunque", en: "everywhere / anywhere", enAlts: ["wherever"], itAlts: ["dappertutto", "dovunque"], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>ubicumque</em>, wherever — English 'ubiquitous'. <em>Dappertutto</em> means the same. <em>Ti seguo ovunque</em>: I'll follow you anywhere." },
+    { key: "altrove", it: "altrove", en: "elsewhere", enAlts: ["somewhere else"], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "From Latin <em>alter</em>, other + <em>ubi</em>, where: other-where — English 'alter', and 'alibi', Latin for 'elsewhere'. <em>Cerchiamo altrove</em>: let's look elsewhere." },
+    { key: "intorno", it: "intorno", en: "around", enAlts: ["round"], itAlts: [], reg: 'neutral', themes: ["luogo"],
+      note: "<em>In</em> + <em>torno</em>, a turn (<em>tornare</em>) — English 'turn', 'tour'. <em>Intorno alla casa</em>: around the house. <em>Mi guardo intorno</em>: I look around." },
+    { key: "molto-avv", it: "molto", en: "very / a lot / much", enAlts: ["really"], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "From Latin <em>multum</em> — English 'multi-', 'multitude'. As an adverb it never changes: <em>molto bella</em>, <em>lavoro molto</em>. Before a noun it agrees: <em>molte case</em>." },
+    { key: "poco-avv", it: "poco", en: "not much / not very / little", enAlts: ["a little"], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "From Latin <em>paucus</em>, few — English 'paucity', and a distant cousin of 'few'. <em>Mangio poco</em>: I don't eat much; <em>poco chiaro</em>: not very clear. <em>Un po'</em>: a bit." },
+    { key: "troppo-avv", it: "troppo", en: "too / too much", enAlts: [], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "From a Frankish word for a heap or crowd — a cousin of English 'troop'. <em>Troppo caro</em>: too expensive; <em>lavori troppo</em>: you work too much. Before a noun it agrees: <em>troppi soldi</em>." },
+    { key: "abbastanza", it: "abbastanza", en: "enough / quite / fairly", enAlts: ["pretty"], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "<em>A</em> + <em>bastanza</em>, from <em>bastare</em>, to be enough — as in <em>basta!</em> <em>Abbastanza bene</em>: quite well; <em>non dormo abbastanza</em>: I don't sleep enough." },
+    { key: "più", it: "più", en: "more / no longer (with non)", enAlts: ["plus", "any more", "anymore", "most"], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "From Latin <em>plus</em> — English 'plus', 'plural'. More: <em>più forte</em>. With <em>non</em>, no longer: <em>non fumo più</em>, I don't smoke any more." },
+    { key: "meno", it: "meno", en: "less / minus", enAlts: ["fewer"], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "From Latin <em>minus</em> — English 'minus', 'minor'. <em>Meno caro</em>: less expensive; <em>le otto meno dieci</em>: ten to eight. <em>Meno male!</em>: thank goodness!" },
+    { key: "tanto-avv", it: "tanto", en: "so much / so", enAlts: ["such a lot"], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "From Latin <em>tantum</em>, so much — English 'tantamount', from Italian <em>tanto montare</em>, to amount to as much. <em>Ti voglio tanto bene</em>: I love you so much. <em>Ogni tanto</em>: every now and then." },
+    { key: "quasi", it: "quasi", en: "almost / nearly", enAlts: [], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "Latin <em>quasi</em>, as if — English 'quasi-'. <em>Sono quasi pronto</em>: I'm almost ready; <em>quasi mai</em>: hardly ever." },
+    { key: "almeno", it: "almeno", en: "at least", enAlts: [], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "<em>Al</em> + <em>meno</em>, at the least. <em>Almeno una volta</em>: at least once; <em>almeno non piove</em>: at least it isn't raining." },
+    { key: "circa", it: "circa", en: "about / roughly / around", enAlts: ["approximately"], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "Latin <em>circa</em>, around — English 'circa', 'circle'. <em>Circa venti persone</em>: about twenty people; <em>alle otto circa</em>: around eight." },
+    { key: "solo-avv", it: "solo", en: "only / just", enAlts: ["merely"], itAlts: ["soltanto", "solamente"], reg: 'neutral', themes: ["quantita"],
+      note: "From Latin <em>solus</em>, alone — English 'solo', 'sole'. <em>Solo un caffè</em>: just a coffee. As an adjective it means alone: <em>sono solo</em>. <em>Soltanto</em> and <em>solamente</em> mean the same." },
+    { key: "parecchio", it: "parecchio", en: "quite a lot / a fair bit", enAlts: ["a good deal"], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "From late Latin <em>pariculus</em>, a little equal (<em>par</em>) — English 'pair', 'par'. <em>Costa parecchio</em>: it costs quite a lot. Before a noun it agrees: <em>parecchie volte</em>, quite a few times." },
+    { key: "piuttosto", it: "piuttosto", en: "rather / quite", enAlts: ["instead"], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "<em>Più</em> + <em>tosto</em>, sooner — 'sooner' became 'rather'. <em>Piuttosto caro</em>: rather expensive; <em>piuttosto che</em>: rather than." },
+    { key: "affatto", it: "affatto", en: "at all (with non)", enAlts: ["completely"], itAlts: [], reg: 'neutral', themes: ["quantita"],
+      note: "<em>A</em> + <em>fatto</em>: completely, in fact. With <em>non</em> it's 'not at all': <em>non sono affatto stanco</em>. Without <em>non</em> it can still mean 'completely' — a classic trap." },
+    { key: "bene", it: "bene", en: "well", enAlts: ["fine", "good"], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "From Latin <em>bene</em> — English 'benefit', 'benevolent'. <em>Sto bene</em>: I'm well; <em>va bene</em>: OK. The adjective 'good' is <em>buono</em>." },
+    { key: "male", it: "male", en: "badly", enAlts: ["bad", "poorly"], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "From Latin <em>male</em> — English 'malfunction', 'maladroit'. <em>Dormo male</em>: I sleep badly; <em>non c'è male</em>: not bad. The adjective 'bad' is <em>cattivo</em>." },
+    { key: "così", it: "così", en: "so / like this / like that", enAlts: ["thus", "this way", "that way"], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "From Latin <em>eccum sic</em>, look, thus — English 'sic'. <em>Così così</em>: so-so; <em>è così bello</em>: it's so beautiful; <em>fai così</em>: do it like this." },
+    { key: "meglio", it: "meglio", en: "better", enAlts: ["best"], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "From Latin <em>melius</em> — English 'ameliorate'. The adverb of <em>bene</em>: <em>sto meglio</em>, I'm better. The adjective 'better' is <em>migliore</em>." },
+    { key: "peggio", it: "peggio", en: "worse", enAlts: ["worst"], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "From Latin <em>peius</em> — English 'pejorative'. The adverb of <em>male</em>: <em>va peggio</em>, it's going worse. The adjective is <em>peggiore</em>." },
+    { key: "insieme", it: "insieme", en: "together", enAlts: [], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "From Latin <em>insimul</em>, at the same time — English 'simultaneous', and French <em>ensemble</em>. <em>Usciamo insieme?</em>: shall we go out together?" },
+    { key: "piano-avv", it: "piano", en: "softly / quietly / gently", enAlts: ["slowly", "quietly"], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "From Latin <em>planus</em>, flat, level — music's 'piano', soft, and the pianoforte. <em>Parla piano</em>: speak softly. <em>Piano piano</em>: little by little." },
+    { key: "forte-avv", it: "forte", en: "loudly / hard", enAlts: ["strongly", "loud", "fast"], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "From Latin <em>fortis</em>, strong — music's 'forte', loud. <em>Parla più forte!</em>: speak up! <em>Piove forte</em>: it's raining hard." },
+    { key: "volentieri", it: "volentieri", en: "gladly / with pleasure", enAlts: ["willingly", "happily"], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "From <em>volere</em>, to want — English 'voluntary'. <em>Volentieri!</em> is the warm answer to an invitation: I'd love to." },
+    { key: "apposta", it: "apposta", en: "on purpose", enAlts: ["deliberately", "specially"], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "<em>A</em> + <em>posta</em>, placed, arranged — English 'post', a position. <em>Lo fai apposta?</em>: are you doing it on purpose?" },
+    { key: "velocemente", it: "velocemente", en: "quickly / fast", enAlts: ["rapidly"], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "<em>Veloce</em> + <em>-mente</em>, from Latin <em>mente</em>, with a mind — 'with a quick mind' became 'quickly'. English 'velocity'. Adjectives in <em>-e</em> simply add <em>-mente</em>." },
+    { key: "lentamente", it: "lentamente", en: "slowly", enAlts: [], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "<em>Lenta</em> + <em>-mente</em>: <em>-mente</em> joins the feminine form, <em>lenta</em>, not <em>lento</em> — music's 'lento', slow. <em>Guida lentamente</em>: drive slowly." },
+    { key: "facilmente", it: "facilmente", en: "easily", enAlts: [], itAlts: [], reg: 'neutral', themes: ["modo"],
+      note: "<em>Facile</em> + <em>-mente</em>, the <em>e</em> dropped: adjectives in <em>-le</em> and <em>-re</em> usually do that — <em>facilmente</em>, <em>regolarmente</em>. English 'facile', 'facility'." },
+    { key: "sì", it: "sì", en: "yes", enAlts: [], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "From Latin <em>sic</em>, thus — 'thus it is'. The accent matters in writing: <em>si</em>, without it, is 'oneself'. <em>Credo di sì</em>: I think so." },
+    { key: "no", it: "no", en: "no", enAlts: [], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "From Latin <em>non</em>. <em>Credo di no</em>: I don't think so; <em>perché no?</em>: why not?" },
+    { key: "non", it: "non", en: "not", enAlts: ["do not", "does not"], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "From Latin <em>non</em> — English 'non-'. It goes straight before the verb: <em>non parlo inglese</em>. Italian happily doubles negatives: <em>non vedo niente</em>, I don't see anything." },
+    { key: "forse", it: "forse", en: "maybe / perhaps", enAlts: ["possibly"], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "From Latin <em>forsit</em>, <em>fors sit</em>, 'chance may be' — <em>fors</em>, chance, as in English 'fortune'. <em>Forse domani</em>: maybe tomorrow." },
+    { key: "davvero", it: "davvero", en: "really / truly", enAlts: ["seriously"], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "<em>Da</em> + <em>vero</em>, true — English 'very', 'verify'. <em>Davvero?</em>: really? <em>È davvero bello</em>: it's truly beautiful." },
+    { key: "proprio", it: "proprio", en: "really / exactly / just", enAlts: ["quite"], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "From Latin <em>proprius</em>, one's own — English 'proper', 'property'. <em>Proprio così!</em>: exactly! <em>Non ho proprio tempo</em>: I really don't have time. As an adjective: own." },
+    { key: "certo-avv", it: "certo", en: "of course / sure / certainly", enAlts: ["definitely"], itAlts: ["certamente"], reg: 'neutral', themes: ["certezza"],
+      note: "From Latin <em>certus</em>, sure — English 'certain', 'certify'. <em>Certo!</em>: of course! As an adjective it means certain: <em>sono certo</em>." },
+    { key: "anche", it: "anche", en: "also / too", enAlts: ["as well", "even"], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "Of uncertain origin. It goes before the word it's about: <em>anch'io</em>, me too; <em>anche lui</em>, him too. <em>Anche se</em>: even if." },
+    { key: "neanche", it: "neanche", en: "not even / neither (me neither)", enAlts: ["either", "not either"], itAlts: ["nemmeno", "neppure"], reg: 'neutral', themes: ["certezza"],
+      note: "<em>Né</em> + <em>anche</em>: and not even. <em>Neanch'io</em>: me neither. <em>Non ci penso neanche</em>: I won't even think about it. <em>Nemmeno</em> and <em>neppure</em> mean the same." },
+    { key: "purtroppo", it: "purtroppo", en: "unfortunately", enAlts: ["sadly"], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "<em>Pure</em> + <em>troppo</em>: all too (true). <em>Purtroppo non posso</em>: unfortunately I can't." },
+    { key: "magari", it: "magari", en: "maybe / if only!", enAlts: ["perhaps", "i wish"], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "From Greek <em>makárie</em>, 'blessed (be you)!' — a wish. <em>Magari!</em>: if only! And, more softly, perhaps: <em>magari domani</em>, maybe tomorrow." },
+    { key: "sicuramente", it: "sicuramente", en: "surely / definitely", enAlts: ["certainly", "for sure"], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "<em>Sicura</em> + <em>-mente</em> — from Latin <em>securus</em>, free from care, like English 'secure'. <em>Viene sicuramente</em>: he's definitely coming." },
+    { key: "probabilmente", it: "probabilmente", en: "probably", enAlts: ["likely"], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "<em>Probabile</em> + <em>-mente</em>, the <em>e</em> dropped as with most <em>-le</em> adjectives — English 'probable'. <em>Probabilmente piove</em>: it'll probably rain." },
+    { key: "soprattutto", it: "soprattutto", en: "above all / especially", enAlts: ["mostly"], itAlts: [], reg: 'neutral', themes: ["certezza"],
+      note: "<em>Sopra</em> + <em>tutto</em>: above everything. <em>Mi piace la pasta, soprattutto la carbonara</em>: I like pasta, especially carbonara." },
+    { key: "perfino", it: "perfino", en: "even (surprisingly)", enAlts: [], itAlts: ["persino"], reg: 'neutral', themes: ["certezza"],
+      note: "<em>Per</em> + <em>fino</em>, right up to the end — for the surprising extreme: <em>lavora perfino la domenica</em>, she even works on Sundays. <em>Persino</em> means the same." },
+    { key: "infatti", it: "infatti", en: "in fact / indeed", enAlts: ["actually"], itAlts: [], reg: 'neutral', themes: ["discorso"],
+      note: "<em>In</em> + <em>fatti</em>, in facts. A trap: it agrees — 'and indeed' — <em>fa freddo? Infatti è inverno</em>. To contradict, Italians say <em>in realtà</em>." },
+    { key: "invece", it: "invece", en: "instead / whereas", enAlts: ["on the other hand"], itAlts: [], reg: 'neutral', themes: ["discorso"],
+      note: "<em>In</em> + <em>vece</em>, a place, a turn (Latin <em>vicis</em>) — English 'vice-president', in place of. <em>Io bevo vino, lui invece birra</em>: I drink wine, whereas he drinks beer. <em>Invece di</em>: instead of." },
+    { key: "comunque", it: "comunque", en: "anyway / however", enAlts: ["in any case", "still"], itAlts: [], reg: 'neutral', themes: ["discorso"],
+      note: "From Latin <em>quomodocumque</em>, in whatever way. <em>Grazie comunque</em>: thanks anyway. <em>Comunque vada</em>: whatever happens." },
+    { key: "insomma", it: "insomma", en: "in short / well…", enAlts: ["basically", "all in all"], itAlts: [], reg: 'neutral', themes: ["discorso"],
+      note: "<em>In</em> + <em>somma</em>, sum — English 'sum'. Summing up: <em>insomma, è finita</em>. Said with a sigh, it's 'so-so': <em>come va? Insomma…</em>" },
+    { key: "cioè", it: "cioè", en: "that is / I mean", enAlts: ["i.e.", "namely"], itAlts: [], reg: 'neutral', themes: ["discorso"],
+      note: "<em>Ciò</em> + <em>è</em>: that is. <em>Ci vediamo dopodomani, cioè giovedì</em>. In speech, an all-purpose 'I mean…'." },
+    { key: "anzi", it: "anzi", en: "on the contrary / or rather", enAlts: ["actually", "in fact"], itAlts: [], reg: 'neutral', themes: ["discorso"],
+      note: "From Latin <em>ante</em>, before — English 'ante-'. It corrects, upwards: <em>non è brutto, anzi!</em> — it's not ugly, quite the opposite!" },
+    { key: "allora", it: "allora", en: "well then / back then", enAlts: ["so", "then", "at that time"], itAlts: [], reg: 'neutral', themes: ["discorso"],
+      note: "From Latin <em>ad illam horam</em>, at that hour. Starting a sentence it's 'so' or 'well then': <em>allora, cosa facciamo?</em> Looking back, 'back then': <em>allora era tutto diverso</em>." },
+    { key: "eppure", it: "eppure", en: "and yet / even so", enAlts: ["yet"], itAlts: [], reg: 'neutral', themes: ["discorso"],
+      note: "<em>E</em> + <em>pure</em>: and still. <em>Studio molto, eppure non ricordo</em>: I study a lot, and yet I don't remember." },
+    { key: "inoltre", it: "inoltre", en: "besides / moreover", enAlts: ["furthermore", "also", "what's more"], itAlts: [], reg: 'neutral', themes: ["discorso"],
+      note: "<em>In</em> + <em>oltre</em>, beyond (Latin <em>ultra</em>) — English 'ultra'. <em>È bello, e inoltre economico</em>: it's nice, and what's more, cheap." },
+    { key: "dove", it: "dove", en: "where", enAlts: [], itAlts: [], reg: 'neutral', themes: ["domande"],
+      note: "From Latin <em>de ubi</em>, from where — English 'ubiquity'. <em>Dove abiti?</em>: where do you live? Before <em>è</em> it shortens: <em>dov'è?</em>" },
+    { key: "quando", it: "quando", en: "when", enAlts: [], itAlts: [], reg: 'neutral', themes: ["domande", "collegare"],
+      note: "Latin <em>quando</em>, unchanged in two thousand years. A question — <em>quando parti?</em> — or a link between two clauses: <em>quando piove, resto a casa</em>." },
+    { key: "come", it: "come", en: "how / like / as", enAlts: [], itAlts: [], reg: 'neutral', themes: ["domande"],
+      note: "From Latin <em>quomodo</em>, in what way. <em>Come stai?</em>: how are you? <em>Come?</em>: pardon? <em>Come te</em>: like you. Before <em>è</em>: <em>com'è?</em>, what's it like?" },
+    { key: "perché", it: "perché", en: "why / because", enAlts: [], itAlts: [], reg: 'neutral', themes: ["domande", "collegare"],
+      note: "<em>Per</em> + <em>che</em>: for what. One word asks and answers: <em>Perché?</em> — <em>Perché sì!</em> Its accent is the closed é." },
+    { key: "quanto", it: "quanto", en: "how much", enAlts: ["how many", "how long"], itAlts: [], reg: 'neutral', themes: ["domande"],
+      note: "From Latin <em>quantum</em> — English 'quantity', 'quantum'. <em>Quanto costa?</em>: how much is it? Before a noun it agrees: <em>quanti anni hai?</em>" },
+    { key: "e", it: "e", en: "and", enAlts: [], itAlts: ["ed"], reg: 'neutral', themes: ["unire"],
+      note: "From Latin <em>et</em> — English 'et cetera'. Before a vowel, mostly another e, it often becomes <em>ed</em>: <em>io ed Elena</em>." },
+    { key: "ma", it: "ma", en: "but", enAlts: [], itAlts: [], reg: 'neutral', themes: ["unire"],
+      note: "From Latin <em>magis</em>, more, rather — the same word as <em>mai</em>. <em>Piccolo ma bello</em>: small but beautiful. On its own, <em>ma!</em> is a puzzled 'who knows'." },
+    { key: "o", it: "o", en: "or", enAlts: ["either"], itAlts: ["oppure"], reg: 'neutral', themes: ["unire"],
+      note: "From Latin <em>aut</em>. <em>O… o</em>: either… or. <em>Oppure</em>, 'or else', is a longer 'or': <em>caffè oppure tè?</em>" },
+    { key: "però", it: "però", en: "however / though", enAlts: ["but"], itAlts: [], reg: 'neutral', themes: ["unire"],
+      note: "From Latin <em>per hoc</em>, for this. A softer, often later 'but': <em>è caro, però è buono</em> — it's expensive, but it's good. It can even end a sentence: <em>bello, però!</em>" },
+    { key: "né", it: "né", en: "nor / neither… nor", enAlts: ["neither"], itAlts: [], reg: 'neutral', themes: ["unire"],
+      note: "From Latin <em>nec</em>, and not. <em>Né… né</em>: neither… nor — <em>non bevo né vino né birra</em>. The accent tells it from <em>ne</em>, of it." },
+    { key: "tuttavia", it: "tuttavia", en: "nevertheless", enAlts: ["however", "yet", "still"], itAlts: [], reg: 'neutral', themes: ["unire"],
+      note: "<em>Tutta</em> + <em>via</em>: all the way. A more formal <em>però</em>: <em>è difficile, tuttavia è possibile</em>." },
+    { key: "quindi", it: "quindi", en: "so / therefore", enAlts: ["thus"], itAlts: ["dunque"], reg: 'neutral', themes: ["unire"],
+      note: "From Latin <em>eccum inde</em>, from there on. <em>Piove, quindi resto a casa</em>: it's raining, so I'm staying home. <em>Dunque</em> means the same, a little more formal." },
+    { key: "perciò", it: "perciò", en: "that's why / for this reason", enAlts: ["therefore", "so"], itAlts: [], reg: 'neutral', themes: ["unire"],
+      note: "<em>Per</em> + <em>ciò</em>: for that. <em>Sono stanco, perciò vado a letto</em>: I'm tired, so I'm going to bed." },
+    { key: "se", it: "se", en: "if / whether", enAlts: [], itAlts: [], reg: 'neutral', themes: ["collegare"],
+      note: "From Latin <em>si</em>. <em>Se vuoi, vengo</em>: if you like, I'll come. <em>Non so se viene</em>: I don't know whether he's coming. With an accent, <em>sé</em> is 'oneself'." },
+    { key: "mentre", it: "mentre", en: "while / whereas", enAlts: ["whilst"], itAlts: [], reg: 'neutral', themes: ["collegare"],
+      note: "From Latin <em>dum interim</em>, while in the meantime. <em>Ascolto la radio mentre cucino</em>: I listen to the radio while I cook." },
+    { key: "anche-se", it: "anche se", en: "even if / even though", enAlts: [], itAlts: [], reg: 'neutral', themes: ["collegare"],
+      note: "<em>Anche</em> + <em>se</em>: also if. <em>Esco anche se piove</em>: I'm going out even though it's raining." },
+    { key: "siccome", it: "siccome", en: "since / as (because)", enAlts: [], itAlts: [], reg: 'neutral', themes: ["collegare"],
+      note: "<em>Sì</em>, so + <em>come</em>, as. It comes at the start: <em>siccome piove, resto a casa</em> — since it's raining, I'm staying in." },
+    { key: "finché", it: "finché", en: "until / as long as", enAlts: ["till"], itAlts: [], reg: 'neutral', themes: ["collegare"],
+      note: "<em>Fino</em> + <em>che</em>: up to when. A quirk: 'until' often takes a <em>non</em> that doesn't negate — <em>aspetto finché non arrivi</em>, I'll wait until you arrive." },
+    { key: "che-cong", it: "che", en: "that (I know that…)", enAlts: ["that"], itAlts: [], reg: 'neutral', themes: ["collegare"],
+      note: "From Latin <em>quid</em>, what. It joins a thought to what's thought: <em>so che vieni</em>, I know (that) you're coming; <em>dice che è tardi</em>. English can drop 'that'; Italian never drops <em>che</em>." },
+    { key: "nonostante", it: "nonostante", en: "despite / even though", enAlts: ["in spite of", "although"], itAlts: [], reg: 'neutral', themes: ["collegare"],
+      note: "<em>Non</em> + <em>ostante</em>, not standing in the way (Latin <em>obstare</em>) — English 'obstacle'. <em>Nonostante la pioggia, esco</em>: despite the rain, I'm going out." }
+  ];
+  const AVV_ITEMS = AVV_DATA.map(p => ({ noun: p.key, display: p.it, it: p.it, en: p.en, phrase: p, note: p.note }));
+  const AVV_THEMES = [
+    { key: 'tempo', label: "Tempo", en: "Time — when", nouns: AVV_DATA.filter(p => p.themes.includes('tempo')).map(p => p.key) },
+    { key: 'luogo', label: "Luogo", en: "Place — where", nouns: AVV_DATA.filter(p => p.themes.includes('luogo')).map(p => p.key) },
+    { key: 'quantita', label: "Quantità", en: "Amount — how much", nouns: AVV_DATA.filter(p => p.themes.includes('quantita')).map(p => p.key) },
+    { key: 'modo', label: "Modo", en: "Manner — how", nouns: AVV_DATA.filter(p => p.themes.includes('modo')).map(p => p.key) },
+    { key: 'certezza', label: "Sì, no, forse", en: "Yes, no & maybe", nouns: AVV_DATA.filter(p => p.themes.includes('certezza')).map(p => p.key) },
+    { key: 'discorso', label: "Nel discorso", en: "Talking it through", nouns: AVV_DATA.filter(p => p.themes.includes('discorso')).map(p => p.key) },
+    { key: 'domande', label: "Domande", en: "Question words", nouns: AVV_DATA.filter(p => p.themes.includes('domande')).map(p => p.key) },
+    { key: 'unire', label: "E, ma, o", en: "And, but, or", nouns: AVV_DATA.filter(p => p.themes.includes('unire')).map(p => p.key) },
+    { key: 'collegare', label: "Collegare", en: "Linking two clauses", nouns: AVV_DATA.filter(p => p.themes.includes('collegare')).map(p => p.key) }
+  ];
+  // Most common first: wordfreq, each word weighted by how often the Italian treebanks tag it as an
+  // adverb or conjunction (so su, mostly 'on', and che, mostly a pronoun, rank by that role)
+  const AVV_ORDER = [
+    "e", "non", "che-cong", "ma", "più", "se", "anche", "o", "come", "solo-avv",
+    "anche-se", "quando", "perché", "così", "sempre", "poi", "ancora", "molto-avv", "mai", "dove",
+    "già", "quindi", "prima", "no", "qui", "mentre", "bene", "oggi", "però", "tanto-avv",
+    "invece", "meno", "forse", "meglio", "allora", "proprio", "troppo-avv", "davvero", "comunque", "quasi",
+    "sì", "fuori", "insieme", "dopo", "adesso", "circa", "poco-avv", "qualche-volta", "almeno", "infatti",
+    "quanto", "spesso", "inoltre", "appena", "soprattutto", "certo-avv", "subito", "male", "ormai", "tuttavia",
+    "lì", "cioè", "neanche", "ieri", "piuttosto", "magari", "abbastanza", "probabilmente", "davanti", "né",
+    "presto", "domani", "finalmente", "su-avv", "intorno", "anzi", "sicuramente", "di-solito", "infine", "dentro",
+    "sotto", "tardi", "peggio", "purtroppo", "dietro", "insomma", "stasera", "sopra", "intanto", "finché",
+    "facilmente", "vicino-avv", "ovunque", "giù", "eppure", "perciò", "accanto", "affatto", "lontano-avv", "nonostante",
+    "siccome", "velocemente", "altrove", "perfino", "ultimamente", "parecchio", "lentamente", "raramente", "volentieri", "piano-avv",
+    "apposta", "forte-avv"
+  ];
 
   // Answers: punctuation, accents, apostrophes and spacing never count. English
   // contractions are expanded, so "don't" and "do not" are the same answer.
@@ -10299,6 +10562,9 @@
       if (!n) console.warn(`[nouns] a note for "${k}", which isn't a noun in the deck`);
       else if (n.note !== NOUN_NOTES[k]) console.warn(`[nouns] "${k}" has a note of its own already`);
     }
+    check('avverbi', AVV_ITEMS, AVV_THEMES, AVV_ORDER);
+    if (new Set(AVV_ITEMS.map(n => n.en)).size !== AVV_ITEMS.length) console.warn('[avverbi] an English prompt twice');
+    if (new Set(AVV_ITEMS.map(n => n.it)).size !== AVV_ITEMS.length) console.warn('[avverbi] an Italian word twice');
     // Possessivi: every word of every accepted answer in the deck; no phrase, and no English prompt, twice
     check('possessives', POSS_ITEMS, POSS_THEMES, POSS_ORDER);
     for (const n of POSS_ITEMS) {
@@ -10432,6 +10698,16 @@
       statsKeys: { 'en-it': 'aggettivi-stats-v1', 'it-en': 'aggettivi-stats-iten-v1', listen: 'aggettivi-stats-listen-v1' }, statsFormat: 'noun',
       assocKey: 'aggettivi-assoc-v1'
     },
+    avverbi: {
+      kind: 'phrase', panel: 'avverbi', map: true, doneWord: 'words', chipOrder: 'frequency',
+      switchLabel: 'Avverbi e congiunzioni', title: 'Avverbi e congiunzioni', subtitle: 'Il Mazzo · Le Parole Piccole',
+      setupTitle: 'Choose your little words',
+      setupSub: 'The small words in every sentence — when, where, how much, yes and no, and the ones that join two thoughts together. Type the Italian: accents and punctuation don\'t count, and where two words mean the same (<em>adesso</em> or <em>ora</em>) either is right. After each answer, a note: where the word comes from, and an example.',
+      itemWord: 'word', itemWords: 'words',
+      items: AVV_ITEMS, themes: AVV_THEMES, frequency: AVV_ORDER,
+      statsKeys: { 'en-it': 'avverbi-stats-v1', 'it-en': 'avverbi-stats-iten-v1', listen: 'avverbi-stats-listen-v1' }, statsFormat: 'noun',
+      assocKey: 'avverbi-assoc-v1'
+    },
     possessives: {
       kind: 'phrase', sentences: true, panel: 'possessives', doneWord: 'phrases', chipOrder: 'level', themeGroups: POSS_GROUPS, keepPairs: true, numberToggle: true,
       numberKey: 'possessivi', numberLabel: 'Singolare · plurale',
@@ -10512,6 +10788,7 @@
     mipiace: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     // As in the original game, every adjective starts selected
     adjectives: { selected: new Set(ADJ_ITEMS.map(n => n.noun)), capValue: '', capMode: 'random', direction: 'en-it' },
+    avverbi: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     possessives: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     prepositions: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     phrases: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
@@ -10567,7 +10844,7 @@
   // ===== Ripasso del giorno =====
   const RIPASSO_DIR_KEY = 'mazzo-ripasso-dir';
   const REVIEW_START = 30;   // cards in play at the start; Deck size reaches the rest
-  const REVIEW_LABEL = { nouns: 'noun', verbs: 'regular verb', irregular: 'irregular verb', adjectives: 'adjective', possessives: 'possessive', prepositions: 'preposition', phrases: 'phrase', sentences: 'sentence', story: 'story word' };
+  const REVIEW_LABEL = { nouns: 'noun', verbs: 'regular verb', irregular: 'irregular verb', adjectives: 'adjective', avverbi: 'small word', possessives: 'possessive', prepositions: 'preposition', phrases: 'phrase', sentences: 'sentence', story: 'story word' };
   let ripassoDir = 'en-it';
   try { const d = localStorage.getItem(RIPASSO_DIR_KEY); if (DIR_LABELS[d]) ripassoDir = d; } catch (e) { /* default */ }
 
@@ -10853,6 +11130,35 @@
 
   // ===== Each section's chart: on its setup screen, and on demand in a round =====
   const SECTION_CHARTS = {
+    avverbi: () => `
+      <aside class="endings avverbi-panel" aria-label="The little words: where they go, and the traps">
+        <h3 class="endings-title">Le parole piccole</h3>
+        <div class="endings-sub">Where they go · the traps</div>
+        <div class="endings-note">
+          <div class="en-label">Non comes first</div>
+          <p><em>Non</em> goes straight before the verb, and Italian happily says no twice: <em>non… mai</em>, never · <em>non… più</em>, no longer · <em>non… ancora</em>, not yet · <em>non… affatto</em>, not at all · <em>non… neanche</em>, not even. <em>Non mangio mai la carne.</em></p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">Where the others go</div>
+          <p>Most come after the verb: <em>parli bene</em>, <em>vado spesso al mare</em>. Words of amount go before the word they qualify: <em>molto bello</em>, <em>troppo caro</em>. <em>Anche</em> goes before the word it's about: <em>anch'io</em>, me too.</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">Molto, tanto, troppo, poco</div>
+          <p>As adverbs they never change: <em>molto bella</em>, <em>lavoro troppo</em>. Before a noun they're adjectives and agree: <em>molte case</em>, <em>troppi soldi</em>, <em>poca acqua</em>.</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">Making the -ly words</div>
+          <p>Take the feminine adjective and add <em>-mente</em>: <em>lenta → lentamente</em>, <em>veloce → velocemente</em>. Adjectives ending in <em>-le</em> or <em>-re</em> usually drop the <em>e</em>: <em>facile → facilmente</em>, <em>regolare → regolarmente</em>. 'Well' and 'badly' are their own words: <em>bene</em>, <em>male</em>.</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">An accent changes the word</div>
+          <p><em>sì</em> yes · <em>si</em> oneself — <em>là</em>, <em>lì</em> there · <em>la</em>, <em>li</em> the, them — <em>né</em> nor · <em>ne</em> of it — <em>sé</em> oneself · <em>se</em> if. The cards forgive a missing accent; written Italian doesn't.</p>
+        </div>
+        <div class="endings-note">
+          <div class="en-label">E becomes ed</div>
+          <p>Before a vowel — mostly another <em>e</em> — <em>e</em> often becomes <em>ed</em>: <em>io ed Elena</em>, <em>ed è vero</em>.</p>
+        </div>
+      </aside>`,
     endings: () => `
       <aside class="endings" aria-label="Regular verb endings, present tense">
         <h3 class="endings-title">Le desinenze</h3>
@@ -11214,7 +11520,7 @@
       </aside>
       `
   };
-  const CHART_TITLES = { endings: 'Le desinenze', irregular: 'Gli irregolari', agreement: 'Le concordanze', possessives: 'I possessivi', prepositions: 'Le articolate', phrases: 'In pratica', mipiace: 'Come piacere' };
+  const CHART_TITLES = { endings: 'Le desinenze', irregular: 'Gli irregolari', agreement: 'Le concordanze', avverbi: 'Le parole piccole', possessives: 'I possessivi', prepositions: 'Le articolate', phrases: 'In pratica', mipiace: 'Come piacere' };
   // The chart for the card on screen (in Ripasso, the card's own section)
   function chartKey() {
     const k = SUBJECTS[subject] && SUBJECTS[subject].panel;

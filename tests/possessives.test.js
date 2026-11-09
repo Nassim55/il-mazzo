@@ -8,8 +8,8 @@ let B = boot({ 'flipcards-subject': 'possessives' });
 const { d, ev } = B;
 ok(B.errors.length === 0 && B.warns.length === 0, 'loads cleanly — every word of every accepted answer in the deck, no phrase or English prompt twice');
 const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(tabs.length === 11 && tabs[5] === 'Possessivi' && tabs[4] === 'Aggettivi' && tabs[6] === 'Preposizioni' && d.getElementById('app-title').textContent === 'Possessivi',
-   'a section of its own, after Aggettivi');
+ok(tabs.length === 12 && tabs[6] === 'Possessivi' && tabs[5] === 'Avverbi e congiunzioni' && tabs[7] === 'Preposizioni' && d.getElementById('app-title').textContent === 'Possessivi',
+   'a section of its own, after Avverbi e congiunzioni');
 ok(ev('POSS_ITEMS.length') === 71 && ev('POSS_ITEMS.filter(n => n.pl).length') === 46 && ev('POSS_ITEMS.flatMap(cardsForItem).length') === 117,
    '71 phrases — 46 of them singular/plural pairs — 117 cards');
 const groups = [...d.querySelectorAll('#theme-chips .theme-group')].map(g => g.querySelector('.theme-group-btn').textContent + ': ' + g.querySelectorAll('.theme-chip').length);

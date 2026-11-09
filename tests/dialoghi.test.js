@@ -30,7 +30,7 @@ const progress = B => JSON.parse(B.w.localStorage.getItem('mazzo-dialoghi-v1') |
 let B = boot({ 'flipcards-subject': 'dialoghi' }, fakeSpeech(TWO));
 ok(B.warns.length === 0 && B.errors.length === 0, 'loads cleanly — every word of every line is in the deck, no line or English prompt twice, every question sound');
 const tabs = [...B.d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(tabs[9] === 'Dialoghi' && tabs[8] === 'Scrittura' && tabs[10] === 'Racconto', 'Dialoghi is a section of its own, between Scrittura and Racconto');
+ok(tabs[10] === 'Dialoghi' && tabs[9] === 'Scrittura' && tabs[11] === 'Racconto', 'Dialoghi is a section of its own, between Scrittura and Racconto');
 const cards = [...B.d.querySelectorAll('.dlg-card')];
 ok(cards.map(c => c.querySelector('.dlg-card-title').textContent).join('|') === 'Al bar|Al mercato|Alla stazione|Al ristorante|La vicina|Il tetto',
    'six scenes: the bar, the market, the station, the restaurant, the neighbour, the roof');
