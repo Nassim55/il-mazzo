@@ -2256,7 +2256,7 @@
   .container[data-map="1"] .mode-toggle:not(.subject-toggle), .container[data-map="1"] .grid-fold { max-width: 660px; margin-left: auto; margin-right: auto; }
   .container[data-map="1"] .start-btn { display: block; width: 100%; }
   @media (min-width: 900px) {   /* the nouns page's top, laid out across the page like the map below it */
-    .container[data-map="1"][data-view="setup"] #game-area { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, 360px); column-gap: 22px; align-items: start; }   /* the same columns as the map below */
+    .container[data-map="1"][data-view="setup"] #game-area { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, 360px); grid-template-rows: auto auto 1fr; column-gap: 22px; align-items: start; }   /* the same columns as the map below; a spare third row takes the deck card's extra height */
     .container[data-map="1"] .setup-body, .container[data-map="1"] .setup-main { display: contents; }
     .container[data-map="1"] .setup-intro { grid-column: 1; grid-row: 1; text-align: left; max-width: none; margin: 0 0 18px; }
     .container[data-map="1"] .bench-intro { grid-column: 1; grid-row: 1; }
@@ -2269,7 +2269,7 @@
     .container[data-map="1"] .bench-left { grid-column: 1; grid-row: 2; }
     .container[data-map="1"] .bench-intro + .setup-body .bench-left { grid-row: 2; }
     .container[data-map="1"] .bench-left > * { max-width: none; margin-left: 0; margin-right: 0; }
-    .container[data-map="1"] .bench-actions { grid-column: 2; grid-row: 1 / span 2; align-self: start; margin-top: 30px; padding: 20px 22px 18px; background: var(--paper);
+    .container[data-map="1"] .bench-actions { grid-column: 2; grid-row: 1 / span 3; align-self: start; margin-top: 6px; padding: 20px 22px 18px; background: var(--paper);
                                               border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.08); }
     .container[data-map="1"] .bench-actions > * { max-width: none; margin-left: 0; margin-right: 0; }
     .container[data-map="1"] .bench-actions .deck-cap { justify-content: flex-start; text-align: left; flex-wrap: wrap; gap: 6px 8px; margin-top: 0; }
@@ -2277,6 +2277,58 @@
     .container[data-map="1"] .noun-map { margin-top: 26px; }
     .container[data-map="1"] .bench-actions button.submit.start-btn { padding: 16px 12px; font-size: 12px; letter-spacing: 0.13em; }
   }
+  /* The setup's top (Nov 2026): a title and one line; the options as one row of toggles;
+     four quick picks; a deck card with Start and A spasso; everything else in Settings & more */
+  .setup-intro .setup-sub { font-size: 15px; margin-top: 4px; }
+  .setup-options { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; margin: 14px 0 6px; }
+  .setup-options .opt { display: flex; align-items: center; gap: 10px; }
+  .opt-label, .quick-label, .more-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faded); }
+  .setup-options .mode-toggle { margin: 0; max-width: none; width: auto; }
+  .setup-options .mode-option { padding: 7px 14px; font-size: 11px; white-space: nowrap; }
+  .bench-intro .setup-intro { text-align: left; }   /* every section: the title and its line from the left */
+  .bench-intro .setup-intro .setup-sub { margin-left: 0; margin-right: 0; }
+  .setup-controls .quick-picks { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; }
+  .quick-label { margin-right: 6px; }
+  .deck-card { padding: 18px 20px 14px; background: var(--paper); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.08); }
+  .container:not([data-map="1"]) .deck-card { margin: 16px 0 18px; }
+  .deck-card .deck-readout { margin: 0 0 12px; text-align: left; }
+  .deck-card .start-btn { display: block; width: 100%; margin: 0; }
+  .deck-card .passive-btn { display: block; width: 100%; margin: 8px 0 0; padding: 10px 12px; }
+  .deck-card .passive-btn-main { font-size: 12px; }
+  .deck-card .passive-msg:empty { display: none; }
+  .setup-more { margin-top: 12px; border-top: 1px solid rgba(28, 22, 17, 0.08); padding-top: 8px; }
+  .setup-more > summary { cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faded); padding: 4px 0; }
+  .setup-more > summary:hover, .setup-more[open] > summary { color: var(--ink); }
+  .more-block { margin: 14px 0 4px; text-align: left; }
+  .more-label { margin-bottom: 6px; }
+  .more-block > *:not(.more-label) { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; text-align: left; justify-content: flex-start; }
+  .more-block .deck-cap, .more-block .audio-row { flex-wrap: wrap; gap: 6px 8px; }
+  .more-block .setup-meta { margin-top: 0; }
+  .more-block .person-label { justify-content: flex-start; }
+  .more-about { font-size: 13px; line-height: 1.5; color: var(--ink-soft); margin: 0; }
+  .more-block .divider { margin: 0 6px; color: var(--ink-faded); }
+  .map-key .mk { display: inline-flex; align-items: center; gap: 5px; margin-left: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-soft); }
+  .mk-cell { display: inline-block; position: relative; width: 9px; height: 9px; border-radius: 2px; background: var(--c); }   /* the key's samples: their own classes, never counted as words */
+  .mk-cell.mk-new { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.2); }
+  .mk-cell.mk-in { outline: 1.5px solid var(--ink); outline-offset: 1px; }
+  .mk-cell.mk-known::after { content: ''; position: absolute; left: 50%; top: 50%; width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; border-radius: 50%; background: rgba(250, 246, 236, 0.9); }
+  .map-how { display: inline-block; margin-left: 12px; }
+  .map-how > summary { cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-faded); text-decoration: underline; text-decoration-color: rgba(28, 22, 17, 0.25); text-underline-offset: 3px; }
+  .map-how[open] { display: block; margin: 8px 0 0; }
+  .map-how p { margin: 6px 0 0; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; line-height: 1.55; color: var(--ink-soft); max-width: 760px; }
+  .map-line { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding-right: 6px; }
+  .map-add { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; padding: 5px 11px; border-radius: 999px; border: 1px solid rgba(28, 22, 17, 0.25);
+             background: transparent; color: var(--ink-soft); cursor: pointer; white-space: nowrap; transition: background 0.15s, border-color 0.15s; }
+  .map-add.in { background: var(--olive); border-color: var(--olive); color: var(--paper); }
+  @media (hover: hover) {   /* a phone keeps :hover after a tap — the take-it-out colour only where there's a pointer */
+    .map-add:hover { border-color: var(--ink); color: var(--ink); }
+    .map-add.in:hover { background: transparent; color: var(--terracotta); border-color: var(--terracotta); }
+  }
+  .map-actions button.map-addall.in { background: var(--olive); border-color: var(--olive); }
+  .deck-topics { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: -6px 0 12px; font-size: 13px; color: var(--ink-soft); }
+  .deck-topic-list { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; color: var(--ink); }
+  .deck-hint { font-size: 12.5px; color: var(--ink-faded); }
+  .deck-clear { font-size: 11px; }
   .grid-fold { margin-top: 4px; }
   .grid-fold > summary { cursor: pointer; padding: 10px 0; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faded); }
   .grid-fold > summary:hover { color: var(--ink); }
@@ -11176,6 +11228,30 @@
   }
 
   // ===== Each section's chart: on its setup screen, and on demand in a round =====
+  // The setup's one line: what to do, and the one rule that matters (the longer story is in Settings & more)
+  const SETUP_LINES = {
+    nouns: 'Add whole topics from the map, then start. Answer with the article: <em>la stazione</em>.',
+    verbs: 'Add whole topics from the map, then start — every person, or just the infinitive.',
+    irregular: 'Add whole topics from the map, then start — every person, or just the infinitive.',
+    mipiace: 'Tap a verb or a pattern below to choose its sentences, then start.',
+    adjectives: 'Add whole topics from the map, then start — the dictionary form, or all four forms.',
+    avverbi: 'Add whole topics from the map, then start. Accents don\'t count.',
+    possessives: 'Add whole groups below, then start.',
+    prepositions: 'Add whole groups below, then start.',
+    phrases: 'Add whole groups below, then start.',
+    sentences: 'Add whole groups of sentences below, then start.'
+  };
+  // The deck card: which whole topics are in, and a way to clear it
+  function renderDeckTopics() {
+    const el = document.getElementById('deck-topics');
+    if (!el) return;
+    const cfg = SUBJECTS[subject], full = (cfg.themes || []).filter(th => th.nouns.length && th.nouns.every(k => selectedNouns.has(k)));
+    el.innerHTML = selectedNouns.size
+      ? `${full.length ? `<span class="deck-topic-list">${full.slice(0, 5).map(th => escapeHTML(th.label)).join(' · ')}${full.length > 5 ? ` · +${full.length - 5} more` : ''}</span>` : ''}<button type="button" class="ghost deck-clear" data-deck-clear>clear</button>`
+      : `<span class="deck-hint">${cfg.map ? 'Your deck is empty — tap ＋ Add on a topic below.' : 'Your deck is empty — tap a group to add it.'}</span>`;
+    const c = el.querySelector('[data-deck-clear]');
+    if (c) c.addEventListener('click', () => { const b = document.getElementById('clear-all'); if (b) b.click(); });
+  }
   const SECTION_CHARTS = {
     avverbi: () => `
       <aside class="endings avverbi-panel" aria-label="The little words: where they go, and the traps">
@@ -11756,40 +11832,29 @@
       return;
     }
     gameArea.innerHTML = `
-      ${cfg.map ? '<div class="bench-intro">' : ''}
+      <div class="bench-intro">
       <div class="setup-intro">
-        <div class="setup-eyebrow">Step 01 · Build your deck</div>
         <h2 class="setup-title">${cfg.setupTitle}</h2>
-        <p class="setup-sub">${cfg.setupSub}</p>
+        <p class="setup-sub">${SETUP_LINES[subject] || (cfg.map ? `Tap a topic on the map to add its ${cfg.itemWords} — or use a quick pick.` : `Pick a group below — or use a quick pick.`)}</p>
       </div>
       ${cfg.typeFilter ? sentenceTypesHTML() : ''}
       ${cfg.numberToggle ? prepNumbersHTML() : ''}
       ${modeOptions ? `
-      <div class="mode-label">Practice mode</div>
+      <div class="setup-options">
+      <div class="opt"><span class="opt-label">Practise</span>
       <div class="mode-toggle" id="mode-toggle">
         ${modeOptions.map(([key, label]) => `<button type="button" class="mode-option${currentMode === key ? ' active' : ''}" data-mode="${key}">${label}</button>`).join('')}
-      </div>
-      ${isVerbs ? `
-      <div class="person-picker" id="person-picker"${verbMode === 'conjugations' ? '' : ' hidden'}>
-        <div class="mode-label person-label">Persons
-          <span class="person-quick">${Object.entries({ all: 'all', sing: 'singular', plur: 'plural' }).map(([k, l]) => `<button type="button" class="ghost" data-set="${k}">${l}</button>`).join('<span class="meta-sep">·</span>')}</span>
-        </div>
-        <div class="person-chips" role="group" aria-label="Which persons to practise">
-          ${personOrder.map(p => `<button type="button" class="person-chip" data-person="${p}">${personLabel[p]}</button>`).join('')}
-        </div>
-        <p class="person-hint" id="person-hint" aria-live="polite"></p>
-        <label class="inf-first"><input type="checkbox" id="inf-first"${infinitiveFirst() ? ' checked' : ''}> <span class="inf-first-label">Prima l'infinito</span>
-          <span class="inf-first-sub">each verb's infinitive first (not scored), then kept above its forms</span></label>
-      </div>` : ''}
+      </div></div>
 
-      <div class="mode-label">Direction</div>
+      <div class="opt"><span class="opt-label">Direction</span>
       <div class="mode-toggle" id="direction-toggle">
-        <button type="button" class="mode-option${direction === 'en-it' ? ' active' : ''}" data-direction="en-it">English → Italian</button>
-        <button type="button" class="mode-option${direction === 'it-en' ? ' active' : ''}" data-direction="it-en">Italian → English</button>
-        <button type="button" class="mode-option${direction === 'listen' ? ' active' : ''}" data-direction="listen">🔊 Listening</button>
+        <button type="button" class="mode-option${direction === 'en-it' ? ' active' : ''}" data-direction="en-it">EN → IT</button>
+        <button type="button" class="mode-option${direction === 'it-en' ? ' active' : ''}" data-direction="it-en">IT → EN</button>
+        <button type="button" class="mode-option${direction === 'listen' ? ' active' : ''}" data-direction="listen">🔊 Listen</button>
+      </div></div>
       </div>
       ` : ''}
-      ${cfg.map ? '</div>' : ''}
+      </div>
       <div class="setup-body">
       <div class="setup-main">
 
@@ -11805,43 +11870,44 @@
         </div>
       </div>`}
 
-      ${cfg.map ? '<div class="bench-left">' : ''}
-      <div class="setup-controls">
-        <div>
-          <button type="button" class="ghost" id="select-all">Select all</button>
-          <span class="divider">·</span>
-          <button type="button" class="ghost" id="random-20">Random 20</button>
-          <span class="divider">·</span>
-          <button type="button" class="ghost" id="random-50">Random 50</button>
-          <span class="divider">·</span>
-          <button type="button" class="ghost" id="weakest-10">Weakest 10</button>
-          <span class="divider">·</span>
-          <button type="button" class="ghost" id="weakest-20">Weakest 20</button>
-          <span class="divider">·</span>
-          <button type="button" class="ghost" id="clear-all">Clear all</button>
-          <span class="divider">·</span>
-          <button type="button" class="ghost hand-pick-btn" id="hand-pick">→ Hand-pick…</button>
-        </div>
+      <div class="bench-actions deck-card">
         <div class="deck-readout">
           <strong id="selected-count">${selectedNouns.size}</strong> ${cfg.itemWords} &nbsp;·&nbsp; <strong id="card-count">${selectedNouns.size}</strong> cards<span id="readout-scope"></span>
         </div>
-      </div>
-
-      <div class="setup-meta" id="setup-meta"></div>
-      <div class="audio-row" id="audio-row"></div>
-      ${cfg.map ? '</div><div class="bench-actions">' : ''}
+        <div class="deck-topics" id="deck-topics"></div>
+        <button type="button" class="submit start-btn" id="start-btn">▶ Start practising</button>
+        <button type="button" class="passive-btn" id="passive-btn" title="Out and about: hear each card, the Italian then the English, ${passivePrefs.reps} times over, on a loop — nothing to type"${speechAvailable() ? '' : ' hidden'}><span class="passive-btn-main">🎧 A spasso</span></button>
+        <p class="passive-msg passive-msg-setup" id="passive-msg" aria-live="polite"></p>
+        <details class="setup-more" id="setup-more">
+          <summary>⚙ Settings &amp; more</summary>
+          <div class="more-block quick-picks"><div class="more-label">More ways to pick</div>
+            <button type="button" class="ghost" id="weakest-20">Weakest 20</button><span class="divider">·</span><button type="button" class="ghost" id="weakest-10">Weakest 10</button><span class="divider">·</span><button type="button" class="ghost" id="random-20">Random 20</button><span class="divider">·</span><button type="button" class="ghost" id="random-50">Random 50</button><span class="divider">·</span><button type="button" class="ghost" id="select-all">All</button><span class="divider">·</span><button type="button" class="ghost" id="clear-all">None</button><span class="divider">·</span><button type="button" class="ghost hand-pick-btn" id="hand-pick">Search for a word…</button></div>
+          <div class="more-block"><div class="more-label">Deck size</div>
       <div class="deck-cap">
-        ↳ Or play just <input type="number" id="deck-cap" placeholder="all" min="1" inputmode="numeric" autocomplete="off" /> cards,
+        Play just <input type="number" id="deck-cap" placeholder="all" min="1" inputmode="numeric" autocomplete="off" /> cards,
         <select id="deck-cap-mode" aria-label="How to choose the subset">
           <option value="random">picked at random</option>
           <option value="frequent">the most common</option>
         </select>
       </div>
-
-      <button type="button" class="submit start-btn" id="start-btn">▶ Start practising</button>
-      <button type="button" class="passive-btn" id="passive-btn"${speechAvailable() ? '' : ' hidden'}><span class="passive-btn-main">🎧 A spasso</span><span class="passive-btn-sub">Out and about: hear each card, the Italian then the English, ${passivePrefs.reps} times over, on a loop — nothing to type</span></button>
-      <p class="passive-msg passive-msg-setup" id="passive-msg" aria-live="polite"></p>
-      ${cfg.map ? '</div>' : ''}
+          </div>
+      ${isVerbs ? `<div class="more-block"><div class="more-label">Verbs</div>
+      <div class="person-picker" id="person-picker"${verbMode === 'conjugations' ? '' : ' hidden'}>
+        <div class="mode-label person-label">Persons
+          <span class="person-quick">${Object.entries({ all: 'all', sing: 'singular', plur: 'plural' }).map(([k, l]) => `<button type="button" class="ghost" data-set="${k}">${l}</button>`).join('<span class="meta-sep">·</span>')}</span>
+        </div>
+        <div class="person-chips" role="group" aria-label="Which persons to practise">
+          ${personOrder.map(p => `<button type="button" class="person-chip" data-person="${p}">${personLabel[p]}</button>`).join('')}
+        </div>
+        <p class="person-hint" id="person-hint" aria-live="polite"></p>
+        <label class="inf-first"><input type="checkbox" id="inf-first"${infinitiveFirst() ? ' checked' : ''}> <span class="inf-first-label">Prima l'infinito</span>
+          <span class="inf-first-sub">each verb's infinitive first (not scored), then kept above its forms</span></label>
+      </div></div>` : ''}
+          <div class="more-block"><div class="more-label">Voice</div><div class="audio-row" id="audio-row"></div></div>
+          <div class="more-block"><div class="more-label">Your progress</div><div class="setup-meta" id="setup-meta"></div></div>
+          ${cfg.setupSub ? `<div class="more-block"><div class="more-label">How this section works</div><p class="more-about">${cfg.setupSub}</p></div>` : ''}
+        </details>
+      </div>
       ${cfg.map ? `<section class="noun-map" id="noun-map" aria-label="La mappa: your ${cfg.itemWords} by topic">${nounMapInner()}</section>
       <details class="grid-fold" id="grid-fold"><summary>Every ${cfg.itemWord}, one by one <span>(${gridItems().length})</span></summary>` : ''}
 
@@ -12037,6 +12103,7 @@
   }
 
   function updateReadout() {
+    renderDeckTopics();
     const countEl = document.getElementById('selected-count');
     if (!countEl) return; // not in setup view — nothing to update
     const cfg = SUBJECTS[subject];
@@ -12249,7 +12316,6 @@
     };
     // The actions, as the game's buttons: the dark one starts a round, the outlined ones fill the deck
     const more = [
-      `<button type="button" class="submit secondary" data-map-pick="${allIn ? 'none' : 'all'}">${allIn ? `− Take all ${x.cells.length} out` : `+ Add all ${x.cells.length}`}</button>`,
       x.fresh.length && !x.fresh.every(c => selectedNouns.has(c.key)) ? `<button type="button" class="submit secondary" data-map-pick="new">+ Add the ${x.fresh.length} not tried</button>` : ''
     ].filter(Boolean);
     const group = (label, list) => list.length ? `<div class="endings-note"><div class="en-label">${label}</div><div class="map-tiles">${list.map(tile).join('')}</div></div>` : '';
@@ -12259,8 +12325,8 @@
       <div class="endings-sub">${x.t.en} · ${x.cells.length} ${SUBJECTS[subject].itemWords} · ${DIR_LABELS[direction].short}</div>
       <p class="map-sum"><strong>${x.known}</strong> of ${x.cells.length} known · ${x.tried.length} practised${x.often ? ` · ${x.often} often wrong` : ''} · <strong>${inDeck}</strong> in your deck</p>
       <div class="map-actions">
-        ${weak.length ? `<button type="button" class="submit map-practise" data-map-pick="weak">▶ Practise the ${weak.length} weakest</button>` : ''}
-        <div class="map-actions-more">${more.join('')}</div>
+        <button type="button" class="submit map-addall${allIn ? ' in' : ''}" data-map-pick="${allIn ? 'none' : 'all'}">${allIn ? `✓ All ${x.cells.length} in your deck — take them out` : `＋ Add all ${x.cells.length} to your deck`}</button>
+        <div class="map-actions-more">${weak.length ? `<button type="button" class="submit secondary map-practise" data-map-pick="weak">▶ Practise the ${weak.length} weakest</button>` : ''}${more.join('')}</div>
       </div>
       <p class="map-hint">Or tap ${SUBJECTS[subject].itemWords} one by one to put them in your deck — or take them out.</p>
       ${group('To work on', work)}${group('Known', good)}${group('Not tried yet', x.fresh)}`;
@@ -12467,26 +12533,34 @@
       const isOpen = open === x, inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length;
       return `
         <div class="map-row${isOpen ? ' open' : ''}" data-topic="${x.t.key}">
+          <div class="map-line">
           <button type="button" class="map-head" aria-expanded="${isOpen}" aria-label="${escapeHTML(`${x.t.label}, ${x.t.en}: ${x.known} of ${x.cells.length} known (${mapTopicPct(x)}), ${x.tried.length} practised${inDeck ? `, ${inDeck} in your deck` : ''}`)}">
             <span class="map-name"><span class="map-it">${x.t.label}</span><span class="map-en">${x.t.en} · ${x.cells.length}</span>${inDeck ? `<span class="map-indeck">● ${inDeck} in your deck</span>` : ''}</span>
             <span class="map-strip" aria-hidden="true">${x.cells.map(sq).join('')}</span>
             <span class="map-score${x.tried.length ? '' : ' untried'}"${x.tried.length ? ` style="--c: ${mapPctColor(x)}"` : ''} title="${x.known} of ${x.cells.length} known">${mapTopicPct(x)}</span>
           </button>
+          <button type="button" class="map-add${inDeck === x.cells.length ? ' in' : ''}" data-map-toggle="${x.t.key}" aria-pressed="${inDeck === x.cells.length}" title="${inDeck === x.cells.length ? `Take ${escapeHTML(x.t.label)} out of your deck` : `Put all ${x.cells.length} of ${escapeHTML(x.t.label)} in your deck`}">${inDeck === x.cells.length ? '✓ In deck' : '＋ Add'}</button>
+          </div>
           ${isOpen ? `<div class="endings map-inline">${mapDetailHTML(x, false)}</div>` : ''}
         </div>`;
     };
     const sortLinks = [['known', 'most known first'], ['order', 'topic order']].map(([k, l]) => `<button type="button" class="ghost${(p.sortBy === 'order') === (k === 'order') ? ' active' : ''}" data-map-sort="${k}" aria-pressed="${(p.sortBy === 'order') === (k === 'order')}">${l}</button>`).join('<span class="meta-sep">·</span>');
     return `
       <div class="map-eyebrow-row">
-        <div class="theme-eyebrow map-eyebrow">↳ La mappa · every topic, every ${SUBJECTS[subject].itemWord} — the ones you know first along each line</div>
+        <div class="theme-eyebrow map-eyebrow">La mappa · ${dir}</div>
         <span class="person-quick map-sort">${sortLinks}<span class="meta-sep">·</span><button type="button" class="ghost" id="map-hide">hide</button></span>
       </div>
       <div class="shade-key map-key">
         <span class="shade-key-end">rarely wrong</span>
         <span class="shade-key-bar" style="background: linear-gradient(90deg, ${mapColor(0, 5)}, ${mapColor(0.25, 5)}, ${mapColor(0.5, 5)})"></span>
         <span class="shade-key-end">often wrong</span>
-        <span class="shade-key-note">fainter: only a few tries · plain: not tried yet · outlined: in your deck · ${dir}</span>
-        <span class="shade-key-note">dotted: known — right 5 times or more, and on 8 of your last 10 answers; a slip won't undo it, two mistakes in a row will (3 right in a row win it back) · the % is how much of the topic you know · hover a square for why</span>
+        <span class="mk"><i class="mk-cell mk-known" style="--c: ${mapColor(0, 5)}"></i>known</span>
+        <span class="mk"><i class="mk-cell mk-new"></i>not tried</span>
+        <span class="mk"><i class="mk-cell mk-in" style="--c: ${mapColor(0.25, 5)}"></i>in your deck</span>
+        <details class="map-how"><summary>How it's scored</summary>
+          <p>A square's colour is your record with that word — olive if rarely wrong, terracotta if often; fainter after only a few tries.</p>
+          <p>dotted: known — right 5 times or more, and on 8 of your last 10 answers; a slip won't undo it, two mistakes in a row will (3 right in a row win it back) · the % is how much of the topic you know · hover a square for why</p>
+        </details>
       </div>
       <div class="map-layout">
         <div class="map-rows">${topics.map(row).join('')}</div>
@@ -12535,6 +12609,15 @@
       if (chart && !chart.contains(e.relatedTarget)) progHideTip(chart);
     });
     box.addEventListener('click', e => {
+      const tog = e.target.closest('[data-map-toggle]');
+      if (tog) {   // a whole topic, in or out
+        const th = SUBJECTS[subject].themes.find(x => x.key === tog.dataset.mapToggle);
+        if (!th) return;
+        const keys = new Set(selectedNouns), allIn = th.nouns.every(k => keys.has(k));
+        th.nouns.forEach(k => (allIn ? keys.delete(k) : keys.add(k)));
+        setDeck([...keys]);
+        return;
+      }
       const pr = e.target.closest('[data-prog-range]');
       if (pr) { saveMapPrefs({ progRange: pr.dataset.progRange }); refresh(); return; }
       const head = e.target.closest('.map-head'), sort = e.target.closest('[data-map-sort]'), pick = e.target.closest('[data-map-pick]');

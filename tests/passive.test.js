@@ -30,7 +30,7 @@ const txt = (B, id) => B.d.getElementById(id).textContent.trim();
   // ---- On the setup screen ----
   let B = boot({ 'flipcards-subject': 'nouns' }, fakes());
   const btn = B.d.getElementById('passive-btn');
-  ok(btn && /A spasso/.test(btn.textContent) && /the Italian then the English, 5 times over, on a loop/.test(btn.textContent) && btn.previousElementSibling.id === 'start-btn',
+    ok(btn && /A spasso/.test(btn.textContent) && /the Italian then the English, 5 times over, on a loop/.test(btn.title) && btn.previousElementSibling.id === 'start-btn',
      'A spasso sits under Start practising: hear each card, Italian then English, 5 times over, on a loop');
   B.ev("selectedNouns = new Set(); capValue = ''; updateReadout();");
   ok(btn.disabled, 'with nothing to play, it waits like Start does');

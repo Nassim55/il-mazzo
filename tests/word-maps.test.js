@@ -11,9 +11,9 @@ for (const [subj, chart, word] of [['verbs', 'Le desinenze', 'verb'], ['irregula
      `${subj}: La mappa — a line per topic, a square per ${word}`);
   ok(B.d.getElementById('theme-row').hidden && !B.d.querySelector('.setup-side') && B.d.querySelector('details.grid-fold summary').textContent.startsWith(`Every ${word}, one by one`), `${subj}: the theme chips and side column give way to it; the ${word}s fold away underneath`);
   ok(B.d.querySelector('#map-panel .endings-title').textContent === 'I progressi' && B.d.querySelector('#map-panel .map-chart .endings-title').textContent === chart, `${subj}: the panel — I progressi, and ${chart} under it`);
-  ok(B.d.querySelector('.bench-intro #mode-toggle') && B.d.querySelector('.bench-intro #direction-toggle') && (subj === 'adjectives' || B.d.querySelector('.bench-intro #person-picker')) && B.d.querySelector('.bench-actions #start-btn'),
-     `${subj}: the intro and its controls on the left — practice mode${subj === 'adjectives' ? '' : ', persons'}, direction — Start on the right`);
-  ok(new RegExp(`every topic, every ${word}`).test(map.textContent) && B.errors.length === 0, `${subj}: in its own words, without errors`);
+  ok(B.d.querySelector('.bench-intro .setup-options #mode-toggle') && B.d.querySelector('.bench-intro .setup-options #direction-toggle') && (subj === 'adjectives' || B.d.querySelector('#setup-more #person-picker')) && B.d.querySelector('.bench-actions #start-btn'),
+     `${subj}: practice mode and direction in one row under the intro${subj === 'adjectives' ? '' : ', the persons in Settings & more'} — Start on the right`);
+  ok(new RegExp(`to see its ${word}s`).test(map.textContent) && B.errors.length === 0, `${subj}: in its own words, without errors`);
 }
 
 // ---- Verb history in the verbs' own format counts; conjugating a verb right through makes it known ----

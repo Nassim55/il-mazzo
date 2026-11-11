@@ -16,16 +16,16 @@ ok(B.errors.length === 0 && map() && map().querySelectorAll('.map-row').length =
 
 // ---- The page: the picks and Start first, then the map; no theme chips; the grid folded ----
 const parts = [...B.d.querySelectorAll('.setup-main > *')].map(e => e.id || e.className.split(' ')[0]);
-ok(parts.indexOf('bench-left') < parts.indexOf('noun-map') && parts.indexOf('bench-actions') < parts.indexOf('noun-map') && parts.indexOf('noun-map') < parts.indexOf('grid-fold')
-   && B.d.querySelector('.bench-left #setup-meta') && B.d.querySelector('.bench-left .setup-controls') && B.d.querySelector('.bench-actions #start-btn') && B.d.querySelector('.bench-actions #passive-btn') && B.d.querySelector('.bench-actions .deck-cap'),
-   `the controls for picking (left) and everything that starts a round (right) come above the map (${parts.filter(x => x !== 'theme-row').join(' → ')})`);
+ok(parts.indexOf('bench-actions') < parts.indexOf('noun-map') && parts.indexOf('noun-map') < parts.indexOf('grid-fold')
+   && B.d.querySelector('.bench-actions #start-btn') && B.d.querySelector('.bench-actions #passive-btn') && B.d.querySelector('#setup-more .deck-cap') && B.d.querySelector('#setup-more #setup-meta') && B.d.querySelector('#setup-more #audio-row') && B.d.querySelector('#setup-more #weakest-20') && !B.d.querySelector('#setup-more').open,
+   `the deck card — Start, A spasso, and Settings & more (quick picks, deck size, voice, progress), closed — comes above the map (${parts.filter(x => x !== 'theme-row').join(' → ')})`);
 ok(B.d.getElementById('theme-row').hidden && B.d.getElementById('verb-grid').closest('details.grid-fold') && !B.d.getElementById('grid-fold').open
    && /Every noun, one by one \(1061\)/.test(B.d.querySelector('.grid-fold summary').textContent), 'the theme chips give way to the map; the 1061 nouns fold away underneath');
 ok(B.d.querySelector('.container').dataset.map === '1' && ['verbs', 'irregular', 'adjectives'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '1') && ['phrases', 'prepositions'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '0'), 'a wide page for the map — the word sections');
 
 // ---- A topic's line ----
 ok(B.ev('NOUN_THEMES').every(t => row(t.key).querySelectorAll('.map-strip .map-cell').length === t.nouns.length), 'a square for every noun in every topic');
-ok(map().querySelector('.theme-eyebrow') && map().querySelector('.shade-key .shade-key-bar') && /outlined: in your deck · English → Italian/.test(map().querySelector('.shade-key').textContent),
+ok(map().querySelector('.theme-eyebrow') && map().querySelector('.shade-key .shade-key-bar') && /La mappa · English → Italian/.test(map().querySelector('.map-eyebrow').textContent) && /in your deck/.test(map().querySelector('.shade-key').textContent) && map().querySelector('details.map-how'),
    'in the site\'s own pieces: the theme row\'s eyebrow, the grid\'s colour key');
 const topicOf = k => B.ev(`NOUN_THEMES.find(t => t.nouns.includes(${JSON.stringify(k)})).key`);
 const animali = row(topicOf('cane'));
@@ -73,9 +73,9 @@ ok(firstChip.textContent.includes(B.ev("NOUN_ITEMS.find(n => n.noun === 'cane').
 
 // ---- The panel's actions are buttons; the panel scrolls with the page ----
 const acts = panel().querySelector('.map-actions');
-ok(acts.querySelector('button.submit.map-practise[data-map-pick="weak"]') && /▶ Practise the \d+ weakest/.test(acts.textContent)
-   && acts.querySelector('button.submit.secondary[data-map-pick="all"]') && /\+ Add all \d+/.test(acts.textContent),
-   'the actions are the game\'s buttons: dark to practise the weakest, outlined to add to the deck');
+ok(acts.querySelector('button.submit.map-addall[data-map-pick="all"]') && /＋ Add all \d+ to your deck/.test(acts.textContent)
+     && acts.querySelector('button.submit.secondary.map-practise[data-map-pick="weak"]') && /▶ Practise the \d+ weakest/.test(acts.textContent),
+     'the actions are the game\'s buttons: dark to add the whole topic, outlined to practise just the weakest');
 const st = (prev, dy, h, win) => B.ev(`mapStickTop(${prev}, ${dy}, ${h}, ${win})`);
 ok(st(12, 500, 600, 800) === 12 && st(12, 300, 2000, 800) === -288 && st(-288, 5000, 2000, 800) === -1212 && st(-1212, -400, 2000, 800) === -812 && st(-812, -5000, 2000, 800) === 12,
    'one scroll, not two: a short panel stays put; a tall one moves with the page until its foot shows, holds, and comes back on the way up');
@@ -91,7 +91,7 @@ ok(!B.ev('selectedNouns.has("cane")') && !/in your deck/.test(row(topicOf('cane'
 const topicSize = k => B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(k)}).nouns.length`);
 panel().querySelector('[data-map-pick="all"]').click();
 const animaliN = topicSize(topicOf('cane'));
-ok(B.ev('selectedNouns.size') === animaliN && /Take all \d+ out/.test(panel().textContent), `Add all: the whole topic (${animaliN}) is in`);
+ok(B.ev('selectedNouns.size') === animaliN && /take them out/.test(panel().textContent) && row(topicOf('cane')).querySelector('.map-add.in'), `Add all: the whole topic (${animaliN}) is in — its line says ✓ In deck`);
 row(topicOf('casa')).querySelector('.map-head').click();
 panel().querySelector('[data-map-pick="new"]').click();
 const newInCasa = B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('casa'))}).nouns.filter(k => !${JSON.stringify(Object.keys(stats))}.includes(k)).length`);
@@ -125,7 +125,7 @@ map().querySelector('#map-hide').click();
 ok(map().querySelector('#map-show') && !map().querySelector('.map-row') && JSON.parse(B.w.localStorage.getItem('mazzo-noun-map-v1')).hidden === true, 'hide: folded to one line, remembered');
 map().querySelector('#map-show').click();
 B.ev("direction = 'it-en'; stats = loadStats(); showSetup();");
-ok(!B.d.querySelector('#noun-map .map-cell:not(.new)') && /Italian → English/.test(B.d.querySelector('#noun-map .shade-key').textContent),
+ok(!B.d.querySelector('#noun-map .map-cell:not(.new)') && /Italian → English/.test(B.d.querySelector('#noun-map .map-eyebrow').textContent),
    'it follows the direction: Italian → English has its own record');
 ok(B.errors.length === 0, 'no errors along the way');
 done();
