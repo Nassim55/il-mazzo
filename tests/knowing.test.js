@@ -30,6 +30,13 @@ ok(B.ev("knowState(loadSrs('nouns', 'en-it').pane, null).why") === '' && B.ev("k
    && B.ev("knowState({ h: '1111100' }, null).why") === 'two mistakes in a row — 3 right in a row win it back' && B.ev("knowState({ h: '1101101101' }, null).why") === 'right 7 of your last 10 — needs 8',
    'and why a noun isn\'t known yet: one more right · two mistakes in a row · right 7 of 10, needs 8');
 
+// ---- Wrong often overall: not known, however good the last 10 ----
+const ks = (h, seen, wrong) => B.ev(`knowState({ h: ${JSON.stringify(h)} }, { seen: ${seen}, wrong: ${wrong} })`);
+ok(!ks('1111111111', 16, 6).known && /wrong 6 of 16 times — 8 more right answers bring it to 1 in 4/.test(ks('1111111111', 16, 6).why),
+   'six mistakes while learning, then ten right: wrong 6 of 16 times overall — not known yet, and the tooltip says how far off');
+ok(ks('1111111111', 24, 6).known, '…eight more right (6 of 24, 1 in 4): known');
+ok(ks('1111111110', 20, 1).known && ks('1111111111', 20, 5).known && !ks('1111111111', 20, 6).known, 'one slip in 20 is fine; 5 of 20 wrong (1 in 4) is the limit; 6 of 20 is over it');
+
 // ---- Old history, from the totals ----
 const hist = (seen, wrong) => B.ev(`knowState(null, { seen: ${seen}, wrong: ${wrong} }).known`);
 ok(hist(5, 0) && hist(8, 1) && hist(20, 2) && hist(7, 1) && hist(10, 2), 'from before the log: 5 of 5, 7 of 8, 18 of 20, 6 of 7 and 8 of 10 right count as known');

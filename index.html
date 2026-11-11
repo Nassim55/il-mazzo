@@ -4797,7 +4797,10 @@
   // again — and mistakes from while you were learning a word drop out once 10 newer answers
   // push them out. The last 10 are logged as you answer (r.h); answers from before the log
   // come from your totals and fill the rest of the 10, so old history counts straight away.
-  const KNOW_WINDOW = 10, KNOW_MIN_RIGHT = 5, KNOW_AT = 0.8, KNOW_BACK = 3;
+  // And a word you get wrong often isn't known, however good its last 10: wrong more than 1 time
+  // in 4 overall (the square's colour past gold, towards terracotta) keeps it out — so the dots
+  // and the colours never disagree, and a word that was hard has to bring its record back.
+  const KNOW_WINDOW = 10, KNOW_MIN_RIGHT = 5, KNOW_AT = 0.8, KNOW_BACK = 3, KNOW_MAX_WRONG = 0.25;
   function knowState(r, s) {
     const log = String((r && r.h) || '').slice(-KNOW_WINDOW);
     const seen = s && s.seen > 0 ? s.seen : 0, wrong = seen ? Math.min(s.wrong || 0, seen) : 0;
@@ -4806,13 +4809,15 @@
     const n = log.length + fromOld;
     const right = (log.split('1').length - 1) + (olderN ? fromOld * (olderN - olderWrong) / olderN : 0);
     const run = log.lastIndexOf('00'), blocked = run >= 0 && !log.slice(run + 2).startsWith('1'.repeat(KNOW_BACK));
-    const pct = n ? right / n : 0, known = right >= KNOW_MIN_RIGHT && pct >= KNOW_AT && !blocked;
+    const often = seen > 0 && wrong / seen > KNOW_MAX_WRONG;   // wrong more than 1 time in 4, overall
+    const pct = n ? right / n : 0, known = right >= KNOW_MIN_RIGHT && pct >= KNOW_AT && !blocked && !often;
     // Why it isn't known yet, for the map's tooltips
     const short = Math.ceil(KNOW_MIN_RIGHT - right - 1e-9);
     const why = known || !n ? '' : blocked ? 'two mistakes in a row — 3 right in a row win it back'
       : short > 0 ? `${short} more right answer${short > 1 ? 's' : ''} to count`
-      : `right ${Math.round(right)} of your last ${n} — needs ${Math.ceil(KNOW_AT * n - 1e-9)}`;
-    return { n, right, pct, blocked, known, why };
+      : pct < KNOW_AT ? `right ${Math.round(right)} of your last ${n} — needs ${Math.ceil(KNOW_AT * n - 1e-9)}`
+      : `wrong ${wrong} of ${seen} times — ${Math.max(1, Math.ceil(wrong / KNOW_MAX_WRONG - seen))} more right answer${Math.ceil(wrong / KNOW_MAX_WRONG - seen) === 1 ? '' : 's'} bring it to 1 in 4`;
+    return { n, right, pct, blocked, often, known, why };
   }
   function srsUndoLast(subj, dir, key) {
     if (!lastSrsChange || lastSrsChange.subj !== subj || lastSrsChange.dir !== dir || lastSrsChange.key !== key) return false;
@@ -12619,7 +12624,7 @@
         <span class="mk"><i class="mk-cell mk-in" style="--c: ${mapColor(0.25, 5)}"></i>in your deck</span>
         <details class="map-how"><summary>How it's scored</summary>
           <p>A square's colour is your record with that word — olive if rarely wrong, terracotta if often; fainter after only a few tries.</p>
-          <p>dotted: known — right 5 times or more, and on 8 of your last 10 answers; a slip won't undo it, two mistakes in a row will (3 right in a row win it back) · the % is how much of the topic you know · hover a square for why</p>
+          <p>dotted: known — right 5 times or more, and on 8 of your last 10 answers, and wrong no more than 1 time in 4 overall (so a square in the red half is never dotted); a slip won't undo it, two mistakes in a row will (3 right in a row win it back) · the % is how much of the topic you know · hover a square for why</p>
         </details>
       </div>
       <div class="map-layout">
