@@ -16,9 +16,9 @@ ok(B.errors.length === 0 && map() && map().querySelectorAll('.map-row').length =
 
 // ---- The page: the picks and Start first, then the map; no theme chips; the grid folded ----
 const parts = [...B.d.querySelectorAll('.setup-main > *')].map(e => e.id || e.className.split(' ')[0]);
-ok(parts.indexOf('bench-actions') < parts.indexOf('noun-map') && parts.indexOf('noun-map') < parts.indexOf('grid-fold')
-   && B.d.querySelector('.bench-actions #start-btn') && B.d.querySelector('.bench-actions #passive-btn') && B.d.querySelector('#setup-more .deck-cap') && B.d.querySelector('#setup-more #setup-meta') && B.d.querySelector('#setup-more #audio-row') && B.d.querySelector('#setup-more #weakest-20') && !B.d.querySelector('#setup-more').open,
-   `the deck card — Start, A spasso, and Settings & more (quick picks, deck size, voice, progress), closed — comes above the map (${parts.filter(x => x !== 'theme-row').join(' → ')})`);
+ok(B.d.getElementById('hand').compareDocumentPosition(B.d.getElementById('noun-map')) & 4 && parts.indexOf('noun-map') < parts.indexOf('grid-fold')
+   && B.d.querySelector('#hand #start-btn') && B.d.querySelector('#hand #passive-btn') && B.d.querySelector('#setup-more .deck-cap') && B.d.querySelector('#setup-more #setup-meta') && B.d.querySelector('#setup-more #audio-row') && B.d.querySelector('#setup-more #weakest-20') && !B.d.querySelector('#setup-more').open,
+   `the hand — Start, A spasso, and Settings & more (quick picks, deck size, voice, progress), closed — comes above the map (${parts.filter(x => x !== 'theme-row').join(' → ')})`);
 ok(B.d.getElementById('theme-row').hidden && B.d.getElementById('verb-grid').closest('details.grid-fold') && !B.d.getElementById('grid-fold').open
    && /Every noun, one by one \(1061\)/.test(B.d.querySelector('.grid-fold summary').textContent), 'the theme chips give way to the map; the 1061 nouns fold away underneath');
 ok(B.d.querySelector('.container').dataset.map === '1' && ['verbs', 'irregular', 'adjectives'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '1') && ['phrases', 'prepositions'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '0'), 'a wide page for the map — the word sections');

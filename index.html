@@ -2255,28 +2255,6 @@
   .container[data-map="1"] .passive-btn, .container[data-map="1"] .passive-msg, .container[data-map="1"] .mode-label,
   .container[data-map="1"] .mode-toggle:not(.subject-toggle), .container[data-map="1"] .grid-fold { max-width: 660px; margin-left: auto; margin-right: auto; }
   .container[data-map="1"] .start-btn { display: block; width: 100%; }
-  @media (min-width: 900px) {   /* the nouns page's top, laid out across the page like the map below it */
-    .container[data-map="1"][data-view="setup"] #game-area { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, 360px); grid-template-rows: auto auto 1fr; column-gap: 22px; align-items: start; }   /* the same columns as the map below; a spare third row takes the deck card's extra height */
-    .container[data-map="1"] .setup-body, .container[data-map="1"] .setup-main { display: contents; }
-    .container[data-map="1"] .setup-intro { grid-column: 1; grid-row: 1; text-align: left; max-width: none; margin: 0 0 18px; }
-    .container[data-map="1"] .bench-intro { grid-column: 1; grid-row: 1; }
-    .container[data-map="1"] .bench-intro .setup-intro { margin-bottom: 14px; }
-    .container[data-map="1"] .bench-intro .mode-label { text-align: left; margin-left: 0; }
-    .container[data-map="1"] .bench-intro .mode-toggle { margin-left: 0; margin-right: 0; justify-content: flex-start; }
-    .container[data-map="1"] .bench-intro .person-picker { margin-left: 0; margin-right: 0; text-align: left; }
-    .container[data-map="1"] .bench-intro .person-label { justify-content: flex-start; text-align: left; }
-    .container[data-map="1"] .setup-intro .setup-sub { margin-left: 0; margin-right: 0; max-width: 620px; }
-    .container[data-map="1"] .bench-left { grid-column: 1; grid-row: 2; }
-    .container[data-map="1"] .bench-intro + .setup-body .bench-left { grid-row: 2; }
-    .container[data-map="1"] .bench-left > * { max-width: none; margin-left: 0; margin-right: 0; }
-    .container[data-map="1"] .bench-actions { grid-column: 2; grid-row: 1 / span 3; align-self: start; margin-top: 6px; padding: 20px 22px 18px; background: var(--paper);
-                                              border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.08); }
-    .container[data-map="1"] .bench-actions > * { max-width: none; margin-left: 0; margin-right: 0; }
-    .container[data-map="1"] .bench-actions .deck-cap { justify-content: flex-start; text-align: left; flex-wrap: wrap; gap: 6px 8px; margin-top: 0; }
-    .container[data-map="1"] .theme-row, .container[data-map="1"] .noun-map, .container[data-map="1"] .grid-fold { grid-column: 1 / -1; }
-    .container[data-map="1"] .noun-map { margin-top: 26px; }
-    .container[data-map="1"] .bench-actions button.submit.start-btn { padding: 16px 12px; font-size: 12px; letter-spacing: 0.13em; }
-  }
   /* The setup's top (Nov 2026): a title and one line; the options as one row of toggles;
      four quick picks; a deck card with Start and A spasso; everything else in Settings & more */
   .setup-intro .setup-sub { font-size: 15px; margin-top: 4px; }
@@ -2329,6 +2307,57 @@
   .deck-topic-list { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; color: var(--ink); }
   .deck-hint { font-size: 12.5px; color: var(--ink-faded); }
   .deck-clear { font-size: 11px; }
+  /* Il mazzo in mano: the deck as a fanned hand of cards */
+  .hand { display: flex; flex-wrap: wrap; align-items: center; gap: 22px 44px; margin: 22px 0 8px; padding: 26px 34px; background: var(--paper); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.1); }
+  .hand-fan { flex: 1 1 520px; min-width: 0; display: flex; align-items: center; justify-content: center; min-height: 236px; padding: 16px 48px 30px; }
+  .hand-card { position: relative; flex: none; width: 150px; height: 206px; margin: 0 calc(var(--ov, 18px) * -1); box-sizing: border-box; padding: 12px 12px 14px;
+               display: flex; flex-direction: column; justify-content: space-between; background: #fffaf0; border-radius: 9px;
+               box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.16), 0 8px 18px rgba(28, 22, 17, 0.14); transform: translateY(var(--lift, 0)) rotate(var(--rot, 0deg)); transition: transform 0.2s ease; }
+  @media (hover: hover) { .hand-card:not(.hand-slot):hover { transform: translateY(calc(var(--lift, 0px) - 12px)) rotate(var(--rot, 0deg)); } }
+  .hand-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .hand-n { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink); }
+  .hand-x { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; margin: -7px -7px 0 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink-soft); font-size: 12px; cursor: pointer; }
+  .hand-x:hover, .hand-x:focus-visible { color: var(--terracotta); background: rgba(162, 62, 44, 0.08); }
+  .hand-mid { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .hand-name { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 30px; line-height: 1; color: var(--ink); }
+  .hand-en { margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #6f6152;
+             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .hand-name.long { font-size: 24px; } .hand-name.longer { font-size: 19px; }
+  .hand-known { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--ink-soft); }
+  .hand-bar { display: block; height: 5px; margin-bottom: 5px; border-radius: 3px; background: rgba(28, 22, 17, 0.09); overflow: hidden; }
+  .hand-bar i { display: block; height: 100%; background: var(--olive); }
+  .hand-slot { z-index: 0 !important; margin-left: 16px !important; align-items: center; justify-content: center; gap: 10px; text-align: center; background: transparent; box-shadow: none; border: 1.5px dashed rgba(28, 22, 17, 0.28);
+               color: var(--ink-soft); font-size: 12.5px; line-height: 1.35; padding: 16px; }
+  .hand-plus { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.28); font-size: 15px; }
+  .hand-more, .hand-loose { background: #f6efe0; }
+  .hand-more { justify-content: center; }
+  .hand-loose .hand-name { font-size: 24px; }
+  .hand-side { flex: 1 1 300px; min-width: 260px; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px 12px; }
+  .hand-side > * { grid-column: 1 / -1; margin: 0; max-width: none !important; }
+  .hand-side > #passive-btn { grid-column: 1; width: auto; margin: 0; padding: 10px 18px; }
+  .hand-side > #setup-more { grid-column: 2; justify-self: end; margin: 0; padding: 0; border: 0; }
+  .hand-side > #setup-more[open] { grid-column: 1 / -1; justify-self: stretch; border-top: 1px solid rgba(28, 22, 17, 0.1); padding-top: 8px; }
+  .hand-side > .start-btn { width: 100%; margin: 0; }
+  .hand-side > .passive-msg:empty { display: none; }
+  .hand-title { margin: 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 38px; line-height: 1; color: var(--ink); }
+  .hand-sub { margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6f6152; }
+  .hand-line { font-size: 13.5px; color: var(--ink-soft); margin: -4px 0 0; text-align: left; }
+  .hand-count { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; text-align: left; }
+  .hand-big { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 64px; line-height: 0.9; color: var(--ink); }
+  .hand-unit { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--ink-soft); }
+  .hand-side .setup-options { margin: 0; }
+  .hand-side .sentence-types, .hand-side .prep-numbers { margin: 0; }
+  @media (max-width: 600px) {
+    .hand { padding: 18px 12px; gap: 14px; }
+    .hand-fan { flex-basis: 100%; min-height: 160px; padding: 6px 30px 22px; overflow: visible; }
+    .hand-card { width: 96px; height: 136px; padding: 8px 8px 10px; margin: 0 calc(var(--ov, 18px) * -1 - 6px); border-radius: 7px; }
+    .hand-slot { margin-left: 12px !important; font-size: 10.5px; padding: 8px; }
+    .hand-plus { width: 26px; height: 26px; }
+    .hand-name { font-size: 19px; } .hand-name.long { font-size: 16px; } .hand-name.longer { font-size: 14px; } .hand-loose .hand-name { font-size: 15px; }
+    .hand-en { font-size: 8px; letter-spacing: 0.1em; } .hand-known { font-size: 8px; } .hand-n { font-size: 10.5px; }
+    .hand-x { width: 26px; height: 26px; margin: -6px -6px 0 0; }
+    .hand-big { font-size: 52px; }
+  }
   .grid-fold { margin-top: 4px; }
   .grid-fold > summary { cursor: pointer; padding: 10px 0; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faded); }
   .grid-fold > summary:hover { color: var(--ink); }
@@ -11241,16 +11270,41 @@
     phrases: 'Add whole groups below, then start.',
     sentences: 'Add whole groups of sentences below, then start.'
   };
-  // The deck card: which whole topics are in, and a way to clear it
-  function renderDeckTopics() {
-    const el = document.getElementById('deck-topics');
-    if (!el) return;
-    const cfg = SUBJECTS[subject], full = (cfg.themes || []).filter(th => th.nouns.length && th.nouns.every(k => selectedNouns.has(k)));
-    el.innerHTML = selectedNouns.size
-      ? `${full.length ? `<span class="deck-topic-list">${full.slice(0, 5).map(th => escapeHTML(th.label)).join(' · ')}${full.length > 5 ? ` · +${full.length - 5} more` : ''}</span>` : ''}<button type="button" class="ghost deck-clear" data-deck-clear>clear</button>`
-      : `<span class="deck-hint">${cfg.map ? 'Your deck is empty — tap ＋ Add on a topic below.' : 'Your deck is empty — tap a group to add it.'}</span>`;
-    const c = el.querySelector('[data-deck-clear]');
-    if (c) c.addEventListener('click', () => { const b = document.getElementById('clear-all'); if (b) b.click(); });
+  // ===== Il mazzo in mano (Nov 2026): the deck as a hand of cards, one per whole topic =====
+  // Newest on top; words picked one by one share a card of their own (Parole scelte); past
+  // seven topics the oldest fold into a +N card; an empty slot says what to do next.
+  let handOrder = [];   // whole topics, in the order they joined the hand
+  const HAND_MAX = 7;
+  function handTopics() {
+    const themes = SUBJECTS[subject].themes || [];
+    return themes.filter(th => th.nouns.length && th.nouns.every(k => selectedNouns.has(k)));
+  }
+  function renderHand() {
+    const fan = document.getElementById('hand-fan');
+    if (!fan) return;
+    const cfg = SUBJECTS[subject], themes = cfg.themes || [], every = handTopics();
+    const full = every.filter(th => !every.some(o => o !== th && o.nouns.length > th.nouns.length && th.nouns.every(k => o.nouns.includes(k))));
+    const fullKeys = new Set(full.map(th => th.key));
+    handOrder = handOrder.filter(k => fullKeys.has(k));
+    for (const th of full) if (!handOrder.includes(th.key)) handOrder.push(th.key);
+    const covered = new Set(full.flatMap(th => th.nouns)), loose = [...selectedNouns].filter(k => !covered.has(k)).length;
+    const byKey = new Map(cfg.items.map(n => [n.noun, n])), srs = loadSrs(subject, direction), st = readStats(subject, direction);
+    const cards = handOrder.map(k => { const th = themes.find(x => x.key === k); return { key: k, label: th.label, en: th.en, n: th.nouns.length, pct: mapTopic(th, byKey, srs, st).pct }; });
+    const shown = cards.slice(-HAND_MAX), folded = cards.length - shown.length;
+    const items = [...(folded ? [{ more: folded }] : []), ...shown, ...(loose ? [{ loose }] : []), { slot: true }];
+    const count = items.length, spread = Math.min(26, 7 * (count - 1)), step = count > 1 ? spread / (count - 1) : 0;
+    const overlap = count <= 4 ? 18 : Math.min(58, 18 + (count - 4) * 10);
+    fan.innerHTML = items.map((it, i) => {
+      const rot = count > 1 ? -spread / 2 + step * i : 0, lift = Math.round(Math.abs(rot) * 1.6);
+      const pos = `style="--rot: ${rot.toFixed(1)}deg; --lift: ${lift}px; --ov: ${overlap}px; z-index: ${i + 1}"`;
+      if (it.slot) return `<div class="hand-card hand-slot" ${pos}><span class="hand-plus" aria-hidden="true">＋</span><span>${cfg.map ? 'Tap ＋ Add on a topic below' : 'Tap a group below to add it'}</span></div>`;
+      if (it.more) return `<div class="hand-card hand-more" ${pos}><div class="hand-mid"><span class="hand-name">+${it.more}</span><span class="hand-en">more topic${it.more === 1 ? '' : 's'}</span></div></div>`;
+      if (it.loose) return `<div class="hand-card hand-loose" ${pos}><div class="hand-top"><span class="hand-n">${it.loose}</span><button type="button" class="hand-x" data-hand-remove="__loose" aria-label="Take the single ${cfg.itemWords} out">✕</button></div>`
+        + `<div class="hand-mid"><span class="hand-name">Parole scelte</span><span class="hand-en">picked one by one</span></div><div></div></div>`;
+      return `<div class="hand-card" ${pos} data-topic="${it.key}"><div class="hand-top"><span class="hand-n">${it.n}</span><button type="button" class="hand-x" data-hand-remove="${it.key}" aria-label="Take ${escapeHTML(it.label)} out of your deck">✕</button></div>`
+        + `<div class="hand-mid"><span class="hand-name${it.label.length > 13 ? ' longer' : it.label.length > 9 ? ' long' : ''}">${escapeHTML(it.label)}</span><span class="hand-en">${escapeHTML(it.en)}</span></div>`
+        + `<div class="hand-known"><span class="hand-bar"><i style="width: ${it.pct}%"></i></span><span>${it.pct}% known</span></div></div>`;
+    }).join('');
   }
   const SECTION_CHARTS = {
     avverbi: () => `
@@ -11832,52 +11886,24 @@
       return;
     }
     gameArea.innerHTML = `
-      <div class="bench-intro">
-      <div class="setup-intro">
-        <h2 class="setup-title">${cfg.setupTitle}</h2>
-        <p class="setup-sub">${SETUP_LINES[subject] || (cfg.map ? `Tap a topic on the map to add its ${cfg.itemWords} — or use a quick pick.` : `Pick a group below — or use a quick pick.`)}</p>
-      </div>
-      ${cfg.typeFilter ? sentenceTypesHTML() : ''}
-      ${cfg.numberToggle ? prepNumbersHTML() : ''}
-      ${modeOptions ? `
-      <div class="setup-options">
-      <div class="opt"><span class="opt-label">Practise</span>
-      <div class="mode-toggle" id="mode-toggle">
-        ${modeOptions.map(([key, label]) => `<button type="button" class="mode-option${currentMode === key ? ' active' : ''}" data-mode="${key}">${label}</button>`).join('')}
-      </div></div>
-
-      <div class="opt"><span class="opt-label">Direction</span>
-      <div class="mode-toggle" id="direction-toggle">
-        <button type="button" class="mode-option${direction === 'en-it' ? ' active' : ''}" data-direction="en-it">EN → IT</button>
-        <button type="button" class="mode-option${direction === 'it-en' ? ' active' : ''}" data-direction="it-en">IT → EN</button>
-        <button type="button" class="mode-option${direction === 'listen' ? ' active' : ''}" data-direction="listen">🔊 Listen</button>
-      </div></div>
-      </div>
-      ` : ''}
-      </div>
-      <div class="setup-body">
-      <div class="setup-main">
-
-      ${cfg.facets ? `<div class="theme-row" id="theme-row"><div class="mp-choose" id="mp-choose">${mpChooseHTML()}</div><div id="theme-chips" hidden></div></div>` : `
-      <div class="theme-row" id="theme-row"${cfg.map ? ' hidden' : ''}>
-        <div class="theme-eyebrow">↳ Pick by theme</div>
-        <div class="theme-chips${cfg.themeGroups ? ' grouped' : ''}" id="theme-chips">
-          ${cfg.themeGroups ? cfg.themeGroups.map(([g, label, en]) => `
-            <div class="theme-group">
-              <button type="button" class="theme-group-btn" data-group="${g}" title="${en}">${label}</button>
-              <div class="theme-group-chips">${THEMES.filter(t => t.group === g).map(themeChipHTML).join('')}</div>
-            </div>`).join('') : THEMES.map(themeChipHTML).join('')}
-        </div>
-      </div>`}
-
-      <div class="bench-actions deck-card">
-        <div class="deck-readout">
-          <strong id="selected-count">${selectedNouns.size}</strong> ${cfg.itemWords} &nbsp;·&nbsp; <strong id="card-count">${selectedNouns.size}</strong> cards<span id="readout-scope"></span>
-        </div>
-        <div class="deck-topics" id="deck-topics"></div>
-        <button type="button" class="submit start-btn" id="start-btn">▶ Start practising</button>
+      <section class="hand" id="hand" aria-label="Il mazzo — your hand">
+        <div class="hand-fan" id="hand-fan"></div>
+        <div class="hand-side">
+          <div class="hand-head"><h2 class="hand-title">Il mazzo</h2><div class="hand-sub">Your hand · ${cfg.title}</div></div>
+          <p class="setup-sub hand-line">${SETUP_LINES[subject] || (cfg.map ? 'Add whole topics from the map, then start.' : 'Add whole groups below, then start.')}</p>
+          <div class="deck-readout hand-count"><strong class="hand-big" id="selected-count">${selectedNouns.size}</strong> <span class="hand-unit">${cfg.itemWords} · <strong id="card-count">${selectedNouns.size}</strong> cards<span id="readout-scope"></span></span> <button type="button" class="ghost deck-clear" data-deck-clear>clear</button></div>
+          ${cfg.typeFilter ? sentenceTypesHTML() : ''}
+          ${cfg.numberToggle ? prepNumbersHTML() : ''}
+          <div class="setup-options">
+            ${modeOptions ? `<div class="opt"><span class="opt-label">Practise</span><div class="mode-toggle" id="mode-toggle">${modeOptions.map(([key, label]) => `<button type="button" class="mode-option${currentMode === key ? ' active' : ''}" data-mode="${key}">${label}</button>`).join('')}</div></div>` : ''}
+            <div class="opt"><span class="opt-label">Direction</span><div class="mode-toggle" id="direction-toggle">
+              <button type="button" class="mode-option${direction === 'en-it' ? ' active' : ''}" data-direction="en-it">EN → IT</button>
+              <button type="button" class="mode-option${direction === 'it-en' ? ' active' : ''}" data-direction="it-en">IT → EN</button>
+              <button type="button" class="mode-option${direction === 'listen' ? ' active' : ''}" data-direction="listen">🔊 Listen</button>
+            </div></div>
+          </div>
+          <button type="button" class="submit start-btn" id="start-btn">▶ Start practising</button>
         <button type="button" class="passive-btn" id="passive-btn" title="Out and about: hear each card, the Italian then the English, ${passivePrefs.reps} times over, on a loop — nothing to type"${speechAvailable() ? '' : ' hidden'}><span class="passive-btn-main">🎧 A spasso</span></button>
-        <p class="passive-msg passive-msg-setup" id="passive-msg" aria-live="polite"></p>
         <details class="setup-more" id="setup-more">
           <summary>⚙ Settings &amp; more</summary>
           <div class="more-block quick-picks"><div class="more-label">More ways to pick</div>
@@ -11907,7 +11933,24 @@
           <div class="more-block"><div class="more-label">Your progress</div><div class="setup-meta" id="setup-meta"></div></div>
           ${cfg.setupSub ? `<div class="more-block"><div class="more-label">How this section works</div><p class="more-about">${cfg.setupSub}</p></div>` : ''}
         </details>
-      </div>
+          <p class="passive-msg passive-msg-setup" id="passive-msg" aria-live="polite"></p>
+        </div>
+      </section>
+      <div class="setup-body">
+      <div class="setup-main">
+
+      ${cfg.facets ? `<div class="theme-row" id="theme-row"><div class="mp-choose" id="mp-choose">${mpChooseHTML()}</div><div id="theme-chips" hidden></div></div>` : `
+      <div class="theme-row" id="theme-row"${cfg.map ? ' hidden' : ''}>
+        <div class="theme-eyebrow">↳ Pick by theme</div>
+        <div class="theme-chips${cfg.themeGroups ? ' grouped' : ''}" id="theme-chips">
+          ${cfg.themeGroups ? cfg.themeGroups.map(([g, label, en]) => `
+            <div class="theme-group">
+              <button type="button" class="theme-group-btn" data-group="${g}" title="${en}">${label}</button>
+              <div class="theme-group-chips">${THEMES.filter(t => t.group === g).map(themeChipHTML).join('')}</div>
+            </div>`).join('') : THEMES.map(themeChipHTML).join('')}
+        </div>
+      </div>`}
+
       ${cfg.map ? `<section class="noun-map" id="noun-map" aria-label="La mappa: your ${cfg.itemWords} by topic">${nounMapInner()}</section>
       <details class="grid-fold" id="grid-fold"><summary>Every ${cfg.itemWord}, one by one <span>(${gridItems().length})</span></summary>` : ''}
 
@@ -11949,17 +11992,6 @@
           const picker = document.getElementById('person-picker');
           if (picker) picker.hidden = verbMode !== 'conjugations';
           updateReadout();
-        });
-      });
-      gameArea.querySelectorAll('#direction-toggle .mode-option').forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (btn.dataset.direction === direction) return;
-          direction = btn.dataset.direction;
-          gameArea.querySelectorAll('#direction-toggle .mode-option').forEach(b => {
-            b.classList.toggle('active', b.dataset.direction === direction);
-          });
-          stats = loadStats();   // each direction keeps its own progress
-          renderSetupMeta();
         });
       });
     }
@@ -12085,6 +12117,34 @@
       updateReadout();
     }
 
+    // The hand: ✕ takes a topic out (keeping any word another topic in the hand also has); clear empties it
+    const handEl = document.getElementById('hand');
+    if (handEl) handEl.addEventListener('click', e => {
+      if (e.target.closest('[data-deck-clear]')) { applyPick([]); return; }
+      const rm = e.target.closest('[data-hand-remove]');
+      if (!rm) return;
+      const full = handTopics(), which = rm.dataset.handRemove;
+      if (which === '__loose') { const inTopics = new Set(full.flatMap(th => th.nouns)); applyPick([...selectedNouns].filter(k => inTopics.has(k))); return; }
+      const th = full.find(x => x.key === which);
+      if (!th) return;
+      const keep = new Set(full.filter(x => x.key !== which).flatMap(x => x.nouns));
+      applyPick([...selectedNouns].filter(k => !th.nouns.includes(k) || keep.has(k)));
+    });
+    gameArea.querySelectorAll('#direction-toggle .mode-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.direction === direction) return;
+        direction = btn.dataset.direction;
+        gameArea.querySelectorAll('#direction-toggle .mode-option').forEach(b => {
+          b.classList.toggle('active', b.dataset.direction === direction);
+        });
+        stats = loadStats();   // each direction keeps its own progress
+        renderSetupMeta();
+        updateReadout();       // the hand's known %, and the map, are per direction
+        const mapBox = document.getElementById('noun-map');
+        if (mapBox) mapBox.innerHTML = nounMapInner();   // at once, not on the next tick
+      });
+    });
+
     const capEl = document.getElementById('deck-cap');
     capEl.value = capValue;
     capEl.addEventListener('input', () => { capValue = capEl.value; updateReadout(); });
@@ -12103,7 +12163,7 @@
   }
 
   function updateReadout() {
-    renderDeckTopics();
+    renderHand();
     const countEl = document.getElementById('selected-count');
     if (!countEl) return; // not in setup view — nothing to update
     const cfg = SUBJECTS[subject];
@@ -12118,7 +12178,7 @@
     const passiveBtn = document.getElementById('passive-btn');
     if (passiveBtn) passiveBtn.disabled = pool === 0;
     start.textContent = pool === 0
-      ? `Select some ${cfg.itemWords}, or enter a number above`
+      ? `Add some ${cfg.itemWords} to start`
       : `▶ Start practising · ${effective}${effective < pool && capMode === 'frequent' ? ' most common' : ''} card${effective === 1 ? '' : 's'}`;
     updateThemeChips();
     scheduleMapRefresh();   // the map shows what's in the deck

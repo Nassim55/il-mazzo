@@ -119,7 +119,7 @@ d.getElementById('change-btn').click();
 ok(d.getElementById('container').dataset.view === 'story' && d.querySelector('.reader-title').textContent === 'La casa', 'afterwards, straight back to the chapter');
 d.getElementById('reader-back').click();
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
-ok(ev('subject') === 'nouns' && d.querySelector('.setup-title') && !d.querySelector('.story-home'), 'switching section leaves the story for the usual setup');
+ok(ev('subject') === 'nouns' && d.getElementById('hand') && !d.querySelector('.story-home'), 'switching section leaves the story for the usual setup — the hand');
 
 // ---- Backups ----
 const backup = JSON.stringify(ev('buildBackup()'));   // as the Back up button saves it

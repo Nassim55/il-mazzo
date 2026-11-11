@@ -2,7 +2,7 @@ const { boot, ok, done } = require('./harness');
 const { w, d, ev, key, fire, setVal, errors } = boot();
 const before = (a, b) => !!(d.getElementById(a).compareDocumentPosition(d.getElementById(b)) & w.Node.DOCUMENT_POSITION_FOLLOWING);
 // --- layout ---
-ok(before('theme-chips', 'start-btn') && before('start-btn', 'setup-more') && before('setup-more', 'verb-grid') && d.getElementById('setup-more').contains(d.getElementById('select-all')) && d.getElementById('setup-more').contains(d.getElementById('deck-cap')), 'layout: themes → Start → Settings & more (quick picks, deck size) → grid');
+ok(before('start-btn', 'theme-chips') && before('theme-chips', 'verb-grid') && d.getElementById('setup-more').contains(d.getElementById('select-all')) && d.getElementById('setup-more').contains(d.getElementById('deck-cap')), 'layout: the hand (Start, Settings & more: quick picks, deck size) → themes → grid');
 ok(!d.querySelector('aside.endings:not(.map-panel)') && !d.getElementById('mode-toggle'), 'noun setup has no verb panels (the map\'s panel only borrows their look)');
 d.querySelector('.theme-chip[data-theme="casa"]').click();
 const n = ev('selectedNouns.size');
