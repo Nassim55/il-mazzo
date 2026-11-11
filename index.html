@@ -2178,7 +2178,53 @@
   .map-cell { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
   .map-cell.new { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.2); }
   .map-cell.in { outline: 1.5px solid var(--ink); outline-offset: 1px; }
-  .map-chart { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--rule); }   /* the section's chart, in the map's panel */
+  .map-chart { margin-top: 22px; padding-top: 16px; border-top: 1px solid rgba(28, 22, 17, 0.1); }
+  /* I progressi: the analytics in the map's panel */
+  .prog-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 16px 0 6px; }
+  .prog-tile { display: flex; flex-direction: column; padding: 10px 10px 9px; background: var(--cream); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.06); min-width: 0; }
+  .prog-big { font-family: 'Cormorant Garamond', serif; font-size: 30px; line-height: 1; color: var(--ink); }
+  .prog-what { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); margin-top: 5px; }
+  .prog-sub { font-size: 11.5px; color: var(--ink-faded); margin-top: 3px; line-height: 1.3; }
+  .prog-sub b, .prog-cap b { color: var(--olive); font-weight: 600; }
+  .prog-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 18px 0 4px; }
+  .prog-head .en-label { margin: 0; }
+  .prog-range { font-size: 10.5px; }
+  .prog-range .meta-sep { margin: 0 4px; color: var(--ink-faded); }
+  .prog-chart { position: relative; }
+  .prog-chart svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
+  .prog-grid { stroke: rgba(28, 22, 17, 0.08); stroke-width: 1; }
+  .prog-axis { font-family: 'JetBrains Mono', monospace; font-size: 8px; fill: var(--ink-faded); }
+  .prog-area { fill: rgba(90, 107, 58, 0.14); }
+  .prog-line { fill: none; stroke: var(--olive); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+  .prog-dot { fill: var(--olive); }
+  .prog-bar-due { fill: var(--gold); opacity: 0.75; }
+  .prog-bar-due.now { opacity: 1; }
+  .prog-cross { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 2 2; pointer-events: none; }
+  .prog-hit { fill: transparent; cursor: crosshair; }
+  .prog-tip { position: absolute; top: 2px; transform: translate(-50%, 0); background: var(--ink); color: var(--paper); font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+              line-height: 1.35; padding: 5px 8px; border-radius: 3px; white-space: nowrap; pointer-events: none; z-index: 3; box-shadow: 0 2px 6px var(--shadow); }
+  .prog-tip.flip { transform: translate(-92%, 0); }
+  .prog-tip.flip-l { transform: translate(-8%, 0); }
+  .prog-line2 { fill: none; stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 3 2; stroke-linejoin: round; }
+  .prog-line2-pt { fill: var(--gold); }
+  .prog-line-pt { fill: var(--olive); }
+  .prog-vol { fill: rgba(28, 22, 17, 0.07); }
+  .prog-legend .s-p { background: var(--gold); }
+  .prog-gap { color: var(--ink-faded); }
+  .prog-cap { font-size: 12px; color: var(--ink-soft); margin: 4px 0 0; }
+  .prog-key { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-faded); }
+  .prog-key i, .prog-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin: 0 3px 0 8px; vertical-align: -1px; }
+  .prog-legend .s-k { background: var(--olive); }
+  .prog-legend .s-l { background: var(--gold); }
+  .prog-legend .s-n { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.25); }
+  .prog-split { display: flex; height: 12px; border-radius: 3px; overflow: hidden; background: var(--cream); box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.08); }
+  .prog-seg { display: block; min-width: 2px; }
+  .prog-seg.k { background: var(--olive); }
+  .prog-seg.k2 { background: rgba(90, 107, 58, 0.62); }
+  .prog-seg.l { background: var(--gold); opacity: 0.85; }
+  .prog-seg.n { background: transparent; }
+  .prog-legend { display: flex; flex-wrap: wrap; gap: 2px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-soft); margin: 7px 0 0; }
+  .prog-legend span:first-child i { margin-left: 0; }   /* the section's chart, in the map's panel */
   .map-chart > .endings { border: 0; box-shadow: none; background: none; padding: 0; margin: 0; position: static; max-height: none; }
   .map-cell.known { position: relative; }   /* known: counted in the topic's % */
   .map-cell.known::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(250, 246, 236, 0.9); }
@@ -4769,6 +4815,7 @@
     if (!isCorrect) s.wrong += 1;
     stats[nounKey] = s;
     saveStats();
+    histRecord(subject, direction, isCorrect);
   }
 
   // ===== Personal word associations, persisted to localStorage =====
@@ -12103,8 +12150,8 @@
       if (confirm(`Reset all ${which} ${SUBJECTS[subject].itemWord} practice history? This cannot be undone.`)) {
         stats = {};
         saveStats();
-        try { localStorage.removeItem(srsKey(subject, direction)); } catch (e) { /* ignore */ }
-        syncMarkReset([statsKey(), srsKey(subject, direction)]);
+        try { localStorage.removeItem(srsKey(subject, direction)); localStorage.removeItem(histKey(subject, direction)); } catch (e) { /* ignore */ }
+        syncMarkReset([statsKey(), srsKey(subject, direction), ...(SUBJECTS[subject].map ? [histKey(subject, direction)] : [])]);
         renderSetupMeta();
       }
     });
@@ -12218,19 +12265,194 @@
       <p class="map-hint">Or tap ${SUBJECTS[subject].itemWords} one by one to put them in your deck — or take them out.</p>
       ${group('To work on', work)}${group('Known', good)}${group('Not tried yet', x.fresh)}`;
   }
-  // Before a topic is opened: of the topics you've started, the ones you know least
-  function mapWelcomeHTML(topics) {
-    const weakest = topics.map((x, i) => [x, i]).filter(([x]) => x.tried.length).sort(([a, i], [b, j]) => a.pct - b.pct || b.tried.length - a.tried.length || i - j).map(([x]) => x).slice(0, 6);
+  // ===== I progressi (Nov 2026): analytics in the map's panel, in place of I temi =====
+  // A day-by-day record for each word section and direction — answers (n), right (r), and, at the
+  // end of the day, how many of the section's words you knew (k) and had practised (p) — written on
+  // every answer and synced (answers add up across devices; k and p take the larger). The app kept
+  // no daily record before Nov 2026, so the lines over time start then.
+  const histKey = (subj, dir) => `${SUBJECTS[subj].statsKeys[dir]}:hist`;
+  function loadHist(subj, dir) {
+    try { const o = JSON.parse(localStorage.getItem(histKey(subj, dir)) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; }
+  }
+  function saveHist(subj, dir, h) { try { localStorage.setItem(histKey(subj, dir), JSON.stringify(h)); syncTouched(); } catch (e) { /* storage full */ } }
+  function knowCounts(subj, dir) {   // { k: known, p: practised }
+    const srs = loadSrs(subj, dir), st = readStats(subj, dir);
+    let k = 0, p = 0;
+    for (const n of SUBJECTS[subj].items) {
+      if (st[n.noun] && st[n.noun].seen > 0) p++;
+      if (knowState(srs[n.noun], st[n.noun]).known) k++;
+    }
+    return { k, p };
+  }
+  function histRecord(subj, dir, correct) {   // after an answer
+    if (!SUBJECTS[subj] || !SUBJECTS[subj].map) return;
+    const h = loadHist(subj, dir), t = today(), e = h[t] || { n: 0, r: 0 };
+    e.n = (e.n || 0) + 1;
+    if (correct) e.r = (e.r || 0) + 1;
+    Object.assign(e, knowCounts(subj, dir));
+    h[t] = e;
+    saveHist(subj, dir, h);
+  }
+  function histRight(subj, dir) {   // "I was right": today's wrong answer becomes a right one
+    if (!SUBJECTS[subj] || !SUBJECTS[subj].map) return;
+    const h = loadHist(subj, dir), e = h[today()];
+    if (!e) return;
+    if ((e.r || 0) < (e.n || 0)) e.r = (e.r || 0) + 1;
+    Object.assign(e, knowCounts(subj, dir));
+    saveHist(subj, dir, h);
+  }
+  function syncMergeHistory(base, local, remote) {
+    const nr = o => Object.fromEntries(Object.entries(syncObj(o)).filter(([, v]) => syncIsObj(v)).map(([d, v]) => [d, { n: +v.n || 0, r: +v.r || 0 }]));
+    const counts = syncMergeCounters(syncIsObj(base) ? nr(base) : base, nr(local), nr(remote));
+    local = syncObj(local); remote = syncObj(remote);
+    const out = {}, big = (d, f) => Math.max(+(local[d] && local[d][f]) || 0, +(remote[d] && remote[d][f]) || 0);
+    for (const d of new Set([...Object.keys(local), ...Object.keys(remote)])) {
+      const c = counts[d] || { n: 0, r: 0 };
+      out[d] = { n: c.n || 0, r: c.r || 0, k: big(d, 'k'), p: big(d, 'p') };
+    }
+    return out;
+  }
+
+  const progDate = (day, opts = { weekday: 'short', day: 'numeric', month: 'short' }) => new Date(day * 86400000).toLocaleDateString('en-GB', { ...opts, timeZone: 'UTC' });
+  const progShort = d => progDate(d, { day: 'numeric', month: 'short' });
+  const progTip = s => escapeHTML(s).replace(/"/g, '&quot;');
+  const progTicks = n => (n <= 1 ? [0] : n <= 16 ? [0, Math.floor((n - 1) / 2), n - 1] : [0, Math.round((n - 1) / 3), Math.round(2 * (n - 1) / 3), n - 1]);
+  const PROG_W = 316;
+  // A chart: hit areas carry each point's tooltip; one dashed crosshair, moved on hover.
+  // kind 'lines': series of numbers (null = no data); 'acc': {pct, n} per bucket — % right as a line,
+  // the number of answers as faint bars behind; 'due': plain bars.
+  function progChartHTML(kind, points, opts) {
+    const H = opts.h, pad = { l: 28, r: 6, t: 8, b: 16 }, w = PROG_W - pad.l - pad.r, h = H - pad.t - pad.b;
+    const n = points.length, step = w / Math.max(1, n), x = i => pad.l + step * i + step / 2;
+    let max;
+    if (kind === 'acc') max = 100;
+    else {
+      const all = kind === 'lines' ? opts.series.flatMap(s => s.vals) : points.map(p => p.v);
+      max = Math.max(opts.min || 1, ...all.filter(v => typeof v === 'number'));
+      const unit = max <= 10 ? 5 : max <= 50 ? 10 : max <= 200 ? 50 : max <= 1000 ? 100 : 500;
+      max = Math.ceil(max / unit) * unit;
+    }
+    const y = v => pad.t + h - (v / max) * h;
+    let body = '';
+    for (const g of [0, max / 2, max]) body += `<line class="prog-grid" x1="${pad.l}" x2="${PROG_W - pad.r}" y1="${y(g)}" y2="${y(g)}"/><text class="prog-axis" x="${pad.l - 5}" y="${y(g) + 3}" text-anchor="end">${g}${kind === 'acc' ? '%' : ''}</text>`;
+    const bw = Math.max(1.5, Math.min(14, step * 0.66));
+    const path = (vals, cls, area) => {
+      const pts = vals.map((v, i) => (typeof v === 'number' ? [x(i), y(v)] : null));
+      let out = '', run = [];
+      const flush = () => {
+        if (!run.length) return;
+        if (area) out += `<path class="prog-area" d="M${run[0][0]},${pad.t + h} ${run.map(p => `L${p[0]},${p[1]}`).join(' ')} L${run[run.length - 1][0]},${pad.t + h} Z"/>`;
+        out += run.length > 1 ? `<path class="${cls}" d="${run.map((p, i) => `${i ? 'L' : 'M'}${p[0]},${p[1]}`).join(' ')}"/>` : `<circle class="${cls}-pt" cx="${run[0][0]}" cy="${run[0][1]}" r="2.6"/>`;
+        run = [];
+      };
+      for (const p of pts) { if (p) run.push(p); else if (!opts.bridge) flush(); }
+      flush();
+      return out;
+    };
+    if (kind === 'lines') for (const s of opts.series) body += path(s.vals, s.cls, s.area);
+    else if (kind === 'acc') {
+      const nmax = Math.max(1, ...points.map(p => p.n || 0));
+      points.forEach((p, i) => { if (p.n) body += `<rect class="prog-vol" x="${x(i) - bw / 2}" y="${pad.t + h - (p.n / nmax) * h * 0.55}" width="${bw}" height="${(p.n / nmax) * h * 0.55}" rx="1"/>`; });
+      body += path(points.map(p => (p.n ? p.pct : null)), 'prog-line', false);
+      points.forEach((p, i) => { if (p.n) body += `<circle class="prog-line-pt" cx="${x(i)}" cy="${y(p.pct)}" r="2"/>`; });
+    } else points.forEach((p, i) => { if (p.v) body += `<rect class="prog-bar-due${i === 0 ? ' now' : ''}" x="${x(i) - bw / 2}" y="${y(p.v)}" width="${bw}" height="${pad.t + h - y(p.v)}" rx="1"/>`; });
+    for (const i of opts.ticks(n)) body += `<text class="prog-axis" x="${x(i)}" y="${H - 3}" text-anchor="middle">${escapeHTML(points[i].label)}</text>`;
+    body += `<line class="prog-cross" x1="0" x2="0" y1="${pad.t}" y2="${pad.t + h}" visibility="hidden"/>`;
+    points.forEach((p, i) => { body += `<rect class="prog-hit" x="${pad.l + step * i}" y="${pad.t}" width="${step}" height="${h}" data-x="${x(i)}" data-tip="${progTip(p.tip)}"/>`; });
+    return `<div class="prog-chart"><svg viewBox="0 0 ${PROG_W} ${H}" role="img" aria-label="${progTip(opts.aria)}">${body}</svg><div class="prog-tip" hidden></div></div>`;
+  }
+
+  function mapProgressHTML() {
+    const cfg = SUBJECTS[subject], t = today(), word = cfg.itemWords;
+    const srs = seedSrs(subject, direction), st = readStats(subject, direction);
+    let known = 0, tried = 0, firm = 0;
+    for (const n of cfg.items) {
+      const s = st[n.noun];
+      if (s && s.seen > 0) tried++;
+      if (knowState(srs[n.noun], s).known) { known++; if (srs[n.noun] && srs[n.noun].b >= 4) firm++; }
+    }
+    const total = cfg.items.length, learning = tried - known, pctOf = v => (total ? Math.round(v / total * 100) : 0);
+    // Today's counts; a first visit starts the history
+    const hist = loadHist(subject, direction);
+    if (!Object.keys(hist).length || (hist[t] && (hist[t].k !== known || hist[t].p !== tried))) {
+      hist[t] = { n: 0, r: 0, ...(hist[t] || {}), k: known, p: tried };
+      saveHist(subject, direction, hist);
+    }
+    const dayKeys = Object.keys(hist).map(Number).sort((a, b) => a - b), start = dayKeys[0];
+    const range = mapPrefs().progRange || '90';
+    const span = range === 'all' ? Math.max(14, t - start + 1) : +range;
+    const days = Array.from({ length: span }, (_, i) => t - span + 1 + i);
+    let lastK = null, lastP = null;
+    const kAt = [], pAt = [];
+    for (const d of days) {
+      if (hist[d]) { lastK = hist[d].k; if (typeof hist[d].p === 'number') lastP = hist[d].p; }
+      kAt.push(d < start ? null : lastK);
+      pAt.push(d < start ? null : lastP);
+    }
+    const firstK = kAt.find(v => v !== null), gained = firstK === undefined ? 0 : known - firstK;
+    const weeksIn = Math.max(1, (t - Math.max(start, days[0])) / 7), perWeek = gained / weeksIn;
+    const rangeWords = { 14: 'in two weeks', 90: 'in three months', all: 'since you started' }[range];
+    // Getting it right: % right per day over two weeks, per week beyond
+    const bucket = range === '14' ? 1 : 7, nb = Math.ceil(span / bucket), acc = [];
+    for (let b = 0; b < nb; b++) {
+      const to = t - (nb - 1 - b) * bucket, from = to - bucket + 1;
+      let an = 0, ar = 0;
+      for (let d = from; d <= to; d++) if (hist[d]) { an += hist[d].n || 0; ar += hist[d].r || 0; }
+      const pct = an ? Math.round(ar / an * 100) : null;
+      acc.push({ n: an, pct, label: progShort(to), tip: an ? `${bucket === 1 ? progDate(to) : `Week to ${progShort(to)}`} · ${pct}% right · ${an} answers` : `${bucket === 1 ? progDate(to) : `Week to ${progShort(to)}`} · no practice` });
+    }
+    const withAns = acc.filter(a => a.n), nowAcc = withAns[withAns.length - 1], prevAcc = withAns[withAns.length - 2];
+    // Coming up in Ripasso: the next 14 days (anything overdue counts today)
+    const due = Array(14).fill(0);
+    for (const n of cfg.items) { const r = srs[n.noun]; if (r && typeof r.d === 'number' && r.d - t <= 13) due[Math.max(0, r.d - t)] += 1; }
+    const dueWeek = due.slice(0, 7).reduce((a, b) => a + b, 0);
+    const seg = (cls, v, label) => (v ? `<span class="prog-seg ${cls}" style="flex: ${v}" title="${progTip(`${label}: ${v} (${pctOf(v)}%)`)}"></span>` : '');
+    const ranges = [['14', '2 weeks'], ['90', '3 months'], ['all', 'all']].map(([k, l]) => `<button type="button" class="ghost${range === k ? ' active' : ''}" data-prog-range="${k}" aria-pressed="${range === k}">${l}</button>`).join('<span class="meta-sep">·</span>');
+    const early = dayKeys.length < 3;
+    const Word = word[0].toUpperCase() + word.slice(1);
     return `
-      <h3 class="endings-title">I temi</h3>
-      <div class="endings-sub">${weakest.length ? `Your ${weakest.length > 1 ? `${weakest.length} ` : ''}least known topics` : 'Every topic'} · ${DIR_LABELS[direction].short}</div>
-      ${weakest.length ? `<ol class="weak-list">${weakest.map((x, i) => `<li><button type="button" class="weak-row map-jump" data-map-open="${x.t.key}" style="--rate: ${100 - x.pct}%">
-          <span class="weak-rank">${i + 1}</span>
-          <span class="weak-verb"><span class="weak-it">${x.t.label}</span><span class="weak-en">${escapeHTML(x.t.en)}</span></span>
-          <span class="weak-stat">${x.known}/${x.cells.length} known<span class="weak-pct">${x.pct}%</span></span>
-        </button></li>`).join('')}</ol>` : ''}
-      <p class="weak-empty">Tap a topic${weakest.length ? ' — on the map, or here —' : ' on the map'} to see its ${SUBJECTS[subject].itemWords}, weakest first, and put any of them in your deck.</p>
-      ${SUBJECTS[subject].panel && SECTION_CHARTS[SUBJECTS[subject].panel] ? `<div class="map-chart">${SECTION_CHARTS[SUBJECTS[subject].panel]('setup')}</div>` : ''}`;
+      <h3 class="endings-title">I progressi</h3>
+      <div class="endings-sub">${escapeHTML(cfg.title)} · ${DIR_LABELS[direction].short}</div>
+      <div class="prog-tiles">
+        <div class="prog-tile"><span class="prog-big">${known}</span><span class="prog-what">known</span><span class="prog-sub">of ${total} · ${pctOf(known)}%</span></div>
+        <div class="prog-tile"><span class="prog-big">${learning}</span><span class="prog-what">learning</span><span class="prog-sub">practised, not yet known</span></div>
+        <div class="prog-tile"><span class="prog-big">${gained > 0 ? `+${gained}` : gained}</span><span class="prog-what">gained</span><span class="prog-sub">${early ? 'since today — it grows as you go' : `${rangeWords}${gained > 0 ? ` · ${perWeek >= 1 ? Math.round(perWeek) : perWeek.toFixed(1)} a week` : ''}`}</span></div>
+      </div>
+      <div class="prog-head"><span class="en-label">${Word} over time</span><span class="person-quick prog-range">${ranges}</span></div>
+      ${progChartHTML('lines', days.map((d, i) => ({ label: progShort(d), tip: kAt[i] === null ? `${progDate(d)} · before your history began` : `${progDate(d)} · ${kAt[i]} known${pAt[i] !== null ? ` · ${pAt[i]} practised` : ''}` })),
+          { h: 112, min: 10, bridge: true, ticks: progTicks, series: [{ cls: 'prog-line2', vals: pAt }, { cls: 'prog-line', area: true, vals: kAt }], aria: `${word} known over time: ${known} known, ${tried} practised` })}
+      <p class="prog-legend"><span><i class="s-k"></i>known</span><span><i class="s-p"></i>practised</span>${early ? '' : `<span class="prog-gap">the gap: still learning</span>`}</p>
+      ${early ? `<p class="prog-cap">Your daily history starts ${progDate(start, { day: 'numeric', month: 'long' })} — the lines grow as you practise.</p>` : ''}
+      <div class="prog-head"><span class="en-label">Getting it right</span><span class="prog-key">${bucket === 1 ? 'by day' : 'by week'}</span></div>
+      ${progChartHTML('acc', acc, { h: 86, ticks: progTicks, aria: `share of answers right${nowAcc ? `: ${nowAcc.pct}% lately` : ''}` })}
+      <p class="prog-cap">${nowAcc ? `<b>${nowAcc.pct}%</b> right ${bucket === 1 ? 'on your last day of practice' : 'in your latest week'}${prevAcc ? ` — ${nowAcc.pct > prevAcc.pct ? 'up' : nowAcc.pct < prevAcc.pct ? 'down' : 'the same as'} ${nowAcc.pct === prevAcc.pct ? 'the one before' : `from ${prevAcc.pct}%`}` : ''}. The faint bars: how many answers.` : 'No answers yet in this period.'}</p>
+      <div class="prog-head"><span class="en-label">How well, today</span></div>
+      <div class="prog-split" role="img" aria-label="${progTip(`${known} known, ${learning} learning, ${total - tried} not tried`)}">${seg('k', firm, 'Known, and spaced out a week or more')}${seg('k2', known - firm, 'Known')}${seg('l', learning, 'Still learning')}${seg('n', total - tried, 'Not tried yet')}</div>
+      <p class="prog-legend"><span><i class="s-k"></i>known ${known}</span><span><i class="s-l"></i>learning ${learning}</span><span><i class="s-n"></i>not tried ${total - tried}</span></p>
+      <div class="prog-head"><span class="en-label">Coming up in Ripasso</span></div>
+      ${progChartHTML('due', due.map((v, i) => ({ v, label: i === 0 ? 'today' : progShort(t + i), tip: `${i === 0 ? 'Today' : progDate(t + i)} · ${v} due${i === 0 && v ? ' (with anything overdue)' : ''}` })),
+          { h: 70, min: 5, ticks: () => [0, 7, 13], aria: `Ripasso: ${due[0]} due today, ${dueWeek} this week` })}
+      <p class="prog-cap"><b>${due[0]}</b> due today · ${dueWeek} in the next 7 days.</p>
+      <p class="weak-empty">Tap a topic on the map to see its ${word}, weakest first, and put any of them in your deck.</p>
+      ${cfg.panel && SECTION_CHARTS[cfg.panel] ? `<div class="map-chart">${SECTION_CHARTS[cfg.panel]('setup')}</div>` : ''}`;
+  }
+  // Hover or tap a day: the crosshair, and its numbers
+  function progShowTip(chart, hit) {
+    const tip = chart.querySelector('.prog-tip'), cross = chart.querySelector('.prog-cross'), svg = chart.querySelector('svg');
+    if (!tip || !svg) return;
+    const x = +hit.dataset.x;
+    cross.setAttribute('x1', x); cross.setAttribute('x2', x); cross.setAttribute('visibility', 'visible');
+    tip.textContent = hit.dataset.tip;
+    tip.hidden = false;
+    const scale = (svg.getBoundingClientRect().width || PROG_W) / PROG_W;
+    tip.style.left = `${Math.round(x * scale)}px`;
+    tip.classList.toggle('flip', x > PROG_W * 0.62);
+    tip.classList.toggle('flip-l', x < PROG_W * 0.3);
+  }
+  function progHideTip(chart) {
+    const tip = chart.querySelector('.prog-tip'), cross = chart.querySelector('.prog-cross');
+    if (tip) tip.hidden = true;
+    if (cross) cross.setAttribute('visibility', 'hidden');
   }
   function nounMapInner() {
     const p = mapPrefs(), dir = DIR_LABELS[direction].long;
@@ -12268,7 +12490,7 @@
       </div>
       <div class="map-layout">
         <div class="map-rows">${topics.map(row).join('')}</div>
-        <aside class="endings map-panel" id="map-panel" aria-label="${open ? escapeHTML(open.t.label) : 'The topic you open'}">${open ? mapDetailHTML(open, true) : mapWelcomeHTML(inOrder)}</aside>
+        <aside class="endings map-panel" id="map-panel" aria-label="${open ? escapeHTML(open.t.label) : 'The topic you open'}">${open ? mapDetailHTML(open, true) : mapProgressHTML()}</aside>
       </div>`;
   }
   // One scroll, not two: the panel has no scrollbar of its own. Taller than the window, it
@@ -12304,7 +12526,17 @@
       applyPick(keys);
       refresh();
     };
+    box.addEventListener('pointerover', e => {
+      const hit = e.target.closest && e.target.closest('.prog-hit');
+      if (hit) progShowTip(hit.closest('.prog-chart'), hit);
+    });
+    box.addEventListener('pointerout', e => {
+      const chart = e.target.closest && e.target.closest('.prog-chart');
+      if (chart && !chart.contains(e.relatedTarget)) progHideTip(chart);
+    });
     box.addEventListener('click', e => {
+      const pr = e.target.closest('[data-prog-range]');
+      if (pr) { saveMapPrefs({ progRange: pr.dataset.progRange }); refresh(); return; }
       const head = e.target.closest('.map-head'), sort = e.target.closest('[data-map-sort]'), pick = e.target.closest('[data-map-pick]');
       const noun = e.target.closest('[data-map-noun]'), jump = e.target.closest('[data-map-open]');
       if (e.target.closest('#map-hide')) { saveMapPrefs({ hidden: true }); refresh(); return; }
@@ -12767,7 +12999,7 @@
   function storageKeys() {
     const keys = new Set([SUBJECT_KEY, AUDIO_KEY, RIPASSO_DIR_KEY, STORY_PROGRESS_KEY, DIALOGUE_PROGRESS_KEY, VERB_PERSONS_KEY]);
     for (const s of Object.values(SUBJECTS)) {
-      Object.values(s.statsKeys).forEach(k => { keys.add(k); keys.add(`${k}:srs`); });
+      Object.values(s.statsKeys).forEach(k => { keys.add(k); keys.add(`${k}:srs`); if (s.map) keys.add(`${k}:hist`); });
       keys.add(s.assocKey);
     }
     return [...keys];
@@ -12831,7 +13063,7 @@
   function syncedKeys() {
     const keys = new Map();
     for (const cfg of Object.values(SUBJECTS)) {
-      for (const k of Object.values(cfg.statsKeys)) { keys.set(k, 'counters'); keys.set(`${k}:srs`, 'schedule'); }
+      for (const k of Object.values(cfg.statsKeys)) { keys.set(k, 'counters'); keys.set(`${k}:srs`, 'schedule'); if (cfg.map) keys.set(`${k}:hist`, 'history'); }
       keys.set(cfg.assocKey, 'assoc');
     }
     keys.set(STORY_PROGRESS_KEY, 'story');
@@ -12897,7 +13129,7 @@
     return { read, quiz };
   }
   const syncMergeLatest = (base, local, remote) => syncMergeItems(base, local, remote, (l, r) => ((syncObj(r).at || 0) > (syncObj(l).at || 0) ? r : l));
-  const SYNC_MERGERS = { counters: syncMergeCounters, schedule: syncMergeSchedule, assoc: syncMergeAssoc, story: syncMergeStory, latest: syncMergeLatest };
+  const SYNC_MERGERS = { counters: syncMergeCounters, schedule: syncMergeSchedule, assoc: syncMergeAssoc, story: syncMergeStory, latest: syncMergeLatest, history: (b, l, r) => syncMergeHistory(b, l, r) };
   // Each side is { storage key: { v: value, e: epoch } }; returns the merged copy
   function syncMergeAll(base, local, remote) {
     base = syncObj(base); local = syncObj(local); remote = syncObj(remote);
@@ -14125,6 +14357,7 @@
     roundMissed.delete(card.key);
     if (srsUndoLast(subject, direction, card.noun)) srsAnswer(subject, direction, card.noun, true);
     srsTwinsRight(subject, direction, card.noun);
+    histRight(subject, direction);
     const s = stats[card.noun];
     if (s && s.wrong > 0) { s.wrong -= 1; saveStats(); }
     score++;

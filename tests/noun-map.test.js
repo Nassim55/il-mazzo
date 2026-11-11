@@ -57,10 +57,9 @@ map().querySelector('[data-map-sort="known"]').click();
 ok(/dotted: known — right 5 times or more, and on 8 of your last 10 answers/.test(map().querySelector('.shade-key').textContent) && /the % is how much of the topic you know/.test(map().querySelector('.shade-key').textContent), 'the key says what the dots and the % mean');
 
 // ---- The panel ----
-ok(panel().classList.contains('endings') && panel().querySelector('.endings-title').textContent === 'I temi' && panel().querySelector(`.weak-row[data-map-open="${topicOf('cane')}"]`)
-   && /least known topics/.test(panel().textContent) && /\d+\/\d+ known/.test(panel().textContent),
-   'before a topic is opened, the panel — a side panel like the others — lists the topics you\'ve started that you know least');
-panel().querySelector(`[data-map-open="${topicOf('cane')}"]`).click();
+ok(panel().classList.contains('endings') && panel().querySelector('.endings-title').textContent === 'I progressi' && panel().querySelectorAll('.prog-tile').length === 3 && panel().querySelectorAll('.prog-chart').length === 3,
+   'before a topic is opened, the panel — a side panel like the others — shows I progressi');
+row(topicOf('cane')).querySelector('.map-head').click();
 ok(panel().querySelector('.endings-title').textContent === B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('cane'))}).label`)
    && row(topicOf('cane')).classList.contains('open') && /To work on/.test(panel().textContent), 'tap one (here, or its line on the map): its nouns open in the panel beside the map');
 B.ev(`mapOpen = ${JSON.stringify(topicOf('casa'))}`); redraw();
@@ -113,8 +112,8 @@ ok(!map().querySelector('.map-indeck') && !map().querySelector('.map-cell.in:not
 // ---- Practise just the weakest: picked, and off ----
 row(topicOf('cane')).querySelector('.map-head').click();
 row(topicOf('cane')).querySelector('.map-head').click();
-ok(!map().querySelector('.map-row.open') && panel().querySelector('.endings-title').textContent === 'I temi', 'tap an open topic\'s line again to close it');
-panel().querySelector(`[data-map-open="${topicOf('cane')}"]`).click();
+ok(!map().querySelector('.map-row.open') && panel().querySelector('.endings-title').textContent === 'I progressi', 'tap an open topic\'s line again to close it');
+row(topicOf('cane')).querySelector('.map-head').click();
 panel().querySelector('[data-map-pick="weak"]').click();
 const withSlips = Object.keys(stats).filter(k => stats[k].wrong > 0 && B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('cane'))}).nouns.includes(${JSON.stringify(k)})`));
 ok(B.d.querySelector('.container').dataset.view === 'game' && B.ev('deck.length') === withSlips.length && B.ev(`deck.every(c => ${JSON.stringify(withSlips)}.includes(c.noun))`),

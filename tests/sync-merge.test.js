@@ -9,7 +9,7 @@ ok(errors.length === 0 && warns.length === 0, 'loads cleanly');
 
 // ---- What syncs ----
 const keys = ev('[...syncedKeys().keys()]');
-ok(keys.length === 88, `88 stores sync (${keys.length}) — Avverbi e congiunzioni added 7: its three directions' stats and schedules, and its word associations`);
+ok(keys.length === 103, `103 stores sync (${keys.length}) — I progressi added 15: a day-by-day history for each word section's three directions`);
 ok(['sostantivi-stats-v1', 'verbi-regolari-stats:srs', 'frasi-stats-listen-v1', 'aggettivi-assoc-v1', 'mazzo-story-v1', 'mazzo-verb-persons-v1'].every(k => keys.includes(k)),
    'stats, review schedules, associations, story progress and the verb persons chosen, for every section and direction');
 ok(!['mazzo-audio-v1', 'mazzo-ripasso-dir', 'flipcards-subject', 'mazzo-sync-meta-v1', 'mazzo-sync-base-v1'].some(k => keys.includes(k)),
@@ -59,12 +59,12 @@ ok(r[K].v.casa.seen === 1 && Object.keys(r).length === 1, 'a store only one side
 // ---- Hooks: reset and restore raise epochs; backups leave sync bookkeeping out ----
 d.querySelector('#reset-stats').click();
 const ep = ev('syncMeta().epochs');
-ok(ep['sostantivi-stats-v1'] === 1 && ep['sostantivi-stats-v1:srs'] === 1 && Object.keys(ep).length === 2, 'reset progress raises the epoch of exactly the stores it cleared');
+ok(ep['sostantivi-stats-v1'] === 1 && ep['sostantivi-stats-v1:srs'] === 1 && ep['sostantivi-stats-v1:hist'] === 1 && Object.keys(ep).length === 3, 'reset progress raises the epoch of exactly the stores it cleared (stats, schedule and history)');
 const backup = JSON.stringify(ev('buildBackup()'));
 ok(!/mazzo-sync-/.test(backup), 'backups leave the sync bookkeeping out');
 ev(`restoreFromText(${JSON.stringify(backup)})`);
 const ep2 = ev('syncMeta().epochs');
-ok(Object.keys(ep2).length === 88 && ep2['sostantivi-stats-v1'] === 2 && ep2['frasi-stats-v1'] === 1, 'restoring a backup raises every store\'s epoch, so the restored copy wins');
+ok(Object.keys(ep2).length === 103 && ep2['sostantivi-stats-v1'] === 2 && ep2['frasi-stats-v1'] === 1, 'restoring a backup raises every store\'s epoch, so the restored copy wins');
 
 // ---- Two devices, one stand-in server ----
 const server = { items: {} };
