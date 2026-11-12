@@ -52,7 +52,7 @@ d.getElementById('change-btn').click();
 ok(/IT → EN/.test(d.querySelector('#weak-panel .endings-sub').textContent) && /in this direction/.test(d.getElementById('weak-panel').textContent), 'Da ripassare follows the direction (IT→EN: nothing missed yet)');
 d.getElementById('start-btn').click(); d.querySelector('.direction-toggle [data-dir="en-it"]').click(); d.getElementById('change-btn').click();
 ok([...d.querySelectorAll('#weak-panel .weak-it')].map(e => e.textContent).join() === 'In bocca al lupo!', 'EN→IT: Da ripassare lists the phrase you missed, as written');
-d.getElementById('clear-all').click();
+d.getElementById('select-all').click();   // a deck size picks from your hand
 setVal('deck-cap', '5'); setVal('deck-cap-mode', 'frequent', 'change');
 d.getElementById('start-btn').click();
 ok(JSON.stringify(ev('deck.map(c => c.noun).sort()')) === JSON.stringify(['ciao', 'grazie', 'mi-scusi', 'per-favore', 'prego']), '"the 5 most common": grazie, ciao, prego, mi scusi, per favore');

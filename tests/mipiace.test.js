@@ -18,7 +18,7 @@ const one = it => { const B0 = boot({ 'flipcards-subject': 'mipiace' }); const k
 let B = boot({ 'flipcards-subject': 'mipiace' });
 ok(B.warns.length === 0 && B.errors.length === 0, 'loads cleanly — every word of every accepted answer in the deck, nothing twice, none of Scrittura\'s sentences again');
 const tabs = [...B.d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(tabs[3] === 'Verbi al contrario' && tabs[2] === 'Verbi irregolari' && tabs[4] === 'Aggettivi' && B.ev('SUBJECTS.mipiace.subtitle') === 'Il Mazzo · Verbs that work backwards',
+ok(tabs[3] === 'Al contrario' && tabs[2] === 'Irregolari' && tabs[4] === 'Aggettivi' && B.ev('SUBJECTS.mipiace.subtitle') === 'Il Mazzo · Verbs that work backwards',
    'renamed Verbi al contrario — the verbs that work backwards — next to the other verb sections');
 ok(B.ev('MIPIACE_ITEMS.length') === 133 && B.ev('MP_BACKWARDS.length') === 20 && B.ev("MP_BACKWARDS.every(r => MIPIACE_ITEMS.some(n => n.it === r[3]) && MIPIACE_ITEMS.some(n => n.lemma === r[0]))"),
    '133 sentences across 20 backwards verbs — every verb has some, and its example is one of them');

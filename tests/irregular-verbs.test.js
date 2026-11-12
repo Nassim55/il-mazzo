@@ -1,15 +1,18 @@
 const { boot, ok, done } = require('./harness');
 const seeded = { venire: { attempts: 20, wrongs: 12 }, porre: { attempts: 9, wrongs: 6 }, essere: { attempts: 30, wrongs: 0 } };
 let { w, d, ev, key, setVal, errors, warns } = boot({ 'verbi-irregolari-stats': JSON.stringify(seeded) });
+const setAside = s => ev(`window.__aside = window.__aside || {}; window.__aside['${s}'] = [...subjectState['${s}'].selected]; subjectState['${s}'].selected.clear(); subjectState['${s}'].topics = []; updateReadout();`);   // the hand is shared: another section's words wait aside
+const putBack = s => ev(`(window.__aside['${s}'] || []).forEach(k => subjectState['${s}'].selected.add(k)); subjectState['${s}'].topics = null;`);
 ok(warns.length === 0 && errors.length === 0, 'loads with no validator warnings or errors');
 const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Verbi regolari', 'Verbi irregolari', 'Verbi al contrario', 'Aggettivi', 'Avverbi e congiunzioni', 'Possessivi', 'Preposizioni', 'Frasi', 'Scrittura', 'Dialoghi', 'Racconto']), `subject switch: ${labels.join(' | ')}`);
+ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Regolari', 'Irregolari', 'Al contrario', 'Aggettivi', 'Avverbi e congiunzioni', 'Possessivi', 'Preposizioni', 'Frasi', 'Scrittura', 'Dialoghi', 'Racconto']), `subject switch: ${labels.join(' | ')}`);
 // Regular section keeps its own panel
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
 ok(d.querySelector('.map-chart .endings-title')?.textContent === 'Le desinenze' && !d.querySelector('.irregular-panel') && d.querySelectorAll('.verb-chip').length === 150, 'regular section: Le desinenze in the map\'s panel, 150 verbs');
 ev("selectedNouns = new Set(['parlare']); updateReadout();");
 // Irregular section
 d.querySelector('#subject-toggle [data-subject="irregular"]').click();
+setAside('verbs');
 ok(ev('subject') === 'irregular' && d.getElementById('app-title').textContent === 'Verbi Irregolari' && d.title === 'Il Mazzo · Verbi Irregolari', 'irregular: title and tab');
 ok(!!d.querySelector('.irregular-panel') && d.querySelector('.irregular-panel .endings-title').textContent === 'Gli irregolari' && ![...d.querySelectorAll('.endings-title')].some(h => h.textContent === 'Le desinenze'), 'irregular: its own reference panel, not the regular one');
 ok(!!d.getElementById('mode-toggle') && !!d.getElementById('direction-toggle') && d.querySelectorAll('.verb-chip').length === 50, 'mode & direction toggles, 50 verb chips');
@@ -67,7 +70,9 @@ d.querySelector('#direction-toggle [data-direction="en-it"]').click();
 d.getElementById('clear-all').click();
 d.querySelector('#mode-toggle [data-mode="infinitives"]').click();
 setVal('deck-cap', '5'); setVal('deck-cap-mode', 'frequent', 'change');
-ok(d.querySelector('.deck-readout').textContent.includes('drawn from all 50 verbs'), 'nothing selected + 5 most common → from all 50');
+ok(d.getElementById('start-btn').disabled, 'nothing in the hand + a deck size: Start waits');
+d.getElementById('select-all').click();   // a deck size picks from your hand
+ok(/50 verbs/.test(d.querySelector('.deck-readout').textContent) && /5 most common/.test(d.getElementById('start-btn').textContent), 'All + 5 most common → 5 of all 50');
 d.getElementById('start-btn').click();
 ok(JSON.stringify(ev('deck.map(c => c.noun).sort()')) === JSON.stringify(['avere', 'essere', 'fare', 'potere', 'stare']), 'plays the 5 most common: essere, avere, fare, potere, stare');
 ev("index = deck.findIndex(c => c.noun === 'essere'); render();");
@@ -79,6 +84,7 @@ let notes = 0; for (let i = 0; i < ev('deck.length'); i++) { ev(`index = ${i}; r
 ok(notes === 50, `all 50 irregular notes render (${notes})`);
 // Back to the regular section: its selection survived
 d.getElementById('change-btn').click();
+putBack('verbs');
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
 ok(ev('subject') === 'verbs' && ev('selectedNouns.size') === 1 && ev("selectedNouns.has('parlare')"), 'regular section kept its own selection');
 ok(Object.keys(ev('buildBackup()').data).includes('verbi-irregolari-stats'), 'backups include the irregular section');

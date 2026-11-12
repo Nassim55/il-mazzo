@@ -46,7 +46,9 @@ ok(JSON.stringify(order) === JSON.stringify(['grotta', 'radura', 'tramonto', 'pi
 d.getElementById('change-btn').click();
 d.getElementById('clear-all').click();
 setVal('deck-cap', '100'); setVal('deck-cap-mode', 'frequent', 'change');
-ok(d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('drawn from all 1061 nouns') && !d.getElementById('start-btn').disabled, 'nothing selected + 100 → drawn from all 1061');
+ok(d.getElementById('start-btn').disabled, 'nothing in the hand + a deck size: Start waits (a number alone no longer draws from the whole deck)');
+d.getElementById('select-all').click();
+ok(/100 most common/.test(d.getElementById('start-btn').textContent) && !d.getElementById('start-btn').disabled, 'All + 100, most common → Start · 100 most common cards');
 d.getElementById('start-btn').click();
 deck = ev('deck.map(c => c.noun)');
 ok(deck.length === 100 && ev('FREQUENCY_ORDER.slice(0, 100)').every(x => deck.includes(x)) && ev('sessionPool.length') === 1061, 'plays the 100 most common, pool = whole deck');

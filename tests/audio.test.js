@@ -50,6 +50,7 @@ const vsel = d.getElementById('audio-voice'); vsel.value = 'alice'; vsel.dispatc
 ok(last().voice === 'Alice' && ev('chosenVoice().name') === 'Alice', 'choosing another Italian voice switches to it');
 // ---- Verbs: conjugations are spoken with their pronoun ----
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
+ev('clearHand()');   // the hand is shared: just these
 ev("selectedNouns = new Set(['capire']); updateReadout(); verbMode = 'conjugations';");
 d.getElementById('start-btn').click();
 ev("index = deck.findIndex(c => c.person === 'lui'); render();");
@@ -79,6 +80,7 @@ ok(/🔊 Listening/.test(d.getElementById('setup-meta').textContent) && /🔊 Li
 ok(d.querySelector('#direction-toggle [data-direction="listen"]').classList.contains('active'), 'the setup direction toggle has Listening too');
 // ---- Nouns & phrases in listening ----
 d.querySelector('#subject-toggle [data-subject="phrases"]').click();
+ev('clearHand()');
 ev("selectedNouns = new Set(['mi-chiamo']); updateReadout();");
 d.getElementById('start-btn').click();
 d.querySelector('.direction-toggle [data-dir="listen"]').click();

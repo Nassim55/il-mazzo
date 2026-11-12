@@ -2307,6 +2307,51 @@
   .deck-topic-list { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; color: var(--ink); }
   .deck-hint { font-size: 12.5px; color: var(--ink-faded); }
   .deck-clear { font-size: 11px; }
+  /* Il Mazzo's masthead; the sections in three families; the table (Nov 2026) */
+  .masthead { padding: 4px 0 16px; text-align: left; }
+  .mast-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 60px; line-height: 0.95; color: var(--ink); }
+  .mast-sub { margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #6f6152; }
+  .sections { margin: 0 0 20px; background: var(--paper); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.1); }
+  .family-row { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 10px 0; border-bottom: 1px solid rgba(28, 22, 17, 0.12); }
+  .family { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 60px; padding: 10px 20px 9px; border: 0; border-bottom: 2px solid transparent; background: transparent; cursor: pointer; text-align: left; margin-bottom: -1px; }
+  .family-name { display: inline-flex; align-items: center; gap: 9px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 27px; line-height: 1; color: var(--ink-soft); }
+  .family-name i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+  .family-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #6f6152; }
+  .family.active { border-bottom-color: var(--ink); }
+  .family.active .family-name, .family:hover .family-name { color: var(--ink); }
+  .family.active .family-name { font-weight: 600; }
+  .sections .subject-toggle { display: flex !important; flex-wrap: wrap; gap: 4px; padding: 10px 14px 12px; margin: 0; background: transparent; box-shadow: none; border: 0; grid-template-columns: none; overflow: visible; }
+  .sections .subject-toggle .mode-option { flex: none; width: auto; }
+  .sections .subject-toggle .mode-option[hidden] { display: none !important; }
+  .table { margin: 0 0 8px; }
+  .table-tabs { display: flex; flex-wrap: wrap; gap: 2px; padding: 0 12px; border-bottom: 1px solid rgba(28, 22, 17, 0.1); }
+  .table-tab { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 60px; padding: 11px 20px 9px; margin-bottom: -1px; border: 0; border-radius: 4px 4px 0 0; background: transparent; cursor: pointer; text-align: left; }
+  .table-tab.on { background: var(--paper); box-shadow: inset 0 1px 0 rgba(28, 22, 17, 0.1), inset 1px 0 0 rgba(28, 22, 17, 0.1), inset -1px 0 0 rgba(28, 22, 17, 0.1); }
+  .table-tab-name { display: inline-flex; align-items: center; gap: 8px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 23px; line-height: 1; color: var(--ink-soft); }
+  .table-tab.on .table-tab-name, .table-tab:hover .table-tab-name { color: var(--ink); }
+  .table-tab.on .table-tab-name { font-weight: 600; }
+  .table-tab-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #6f6152; }
+  .table-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--terracotta); }
+  .table-panel { background: var(--paper); border-radius: 0 0 3px 3px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.1); }
+  .table-panel > .hand { margin: 0; background: transparent; box-shadow: none; }
+  .table-panel > .ripasso { margin: 0 !important; padding: 24px 30px !important; border: 0 !important; box-shadow: none !important; background: transparent !important; }
+  .section-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; margin: 16px 0 8px; text-align: left; }
+  .section-tools .section-line { flex: 1 1 100%; margin: 0; font-size: 14px; color: var(--ink-soft); text-align: left; }
+  .section-tools .setup-options, .section-tools .sentence-types, .section-tools .prep-numbers { margin: 0; }
+  .section-tools .setup-more { margin: 0 0 0 auto; }
+  .section-tools .setup-more[open] { flex: 1 1 100%; margin: 0; }
+  .hand-sect { display: inline-flex; align-items: center; gap: 5px; max-width: 104px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+               font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+  .hand-sect i { display: inline-block; flex: none; width: 6px; height: 6px; border-radius: 50%; }
+  @media (max-width: 600px) {
+    .mast-title { font-size: 46px; }
+    .family { padding: 8px 12px 7px; min-height: 52px; } .family-name { font-size: 21px; } .family-sub { font-size: 8.5px; }
+    .table-tab { padding: 9px 12px 7px; min-height: 52px; } .table-tab-name { font-size: 18px; } .table-tab-sub { font-size: 8.5px; }
+    .hand-sect { font-size: 7px; max-width: 70px; }
+    .hand-side .setup-options .opt { flex-wrap: wrap; }
+    .hand-side .mode-toggle .mode-option { padding: 8px 9px; font-size: 10px; letter-spacing: 0.04em; }
+    .family-row { gap: 0; padding: 4px 6px 0; }
+  }
   /* Il mazzo in mano: the deck as a fanned hand of cards */
   .hand { display: flex; flex-wrap: wrap; align-items: center; gap: 22px 44px; margin: 22px 0 8px; padding: 26px 34px; background: var(--paper); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.1); }
   .hand-fan { flex: 1 1 520px; min-width: 0; display: flex; align-items: center; justify-content: center; min-height: 236px; padding: 16px 48px 30px; }
@@ -10919,8 +10964,8 @@
     verbs: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     irregular: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     mipiace: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
-    // As in the original game, every adjective starts selected
-    adjectives: { selected: new Set(ADJ_ITEMS.map(n => n.noun)), capValue: '', capMode: 'random', direction: 'en-it' },
+    // Adjectives start empty like the rest (Nov 2026): the hand is shared, so all 200 would sit in it from every section
+    adjectives: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     avverbi: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     possessives: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     prepositions: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
@@ -10935,6 +10980,17 @@
   let FREQUENCY_ORDER = NOUN_FREQUENCY_ORDER;
   let frequencyRank = {};
 
+  // ===== The sections, in three families (Nov 2026): the banner picks a family, then one of its sections =====
+  const FAMILIES = [
+    { key: 'parole', name: 'Parole', en: 'words', color: 'var(--olive)', sections: ['nouns', 'adjectives', 'avverbi', 'possessives', 'prepositions'] },
+    { key: 'verbi', name: 'Verbi', en: 'verbs', color: 'var(--terracotta)', sections: ['verbs', 'irregular', 'mipiace'] },
+    { key: 'frasi', name: 'Frasi e storie', en: 'sentences & stories', color: 'var(--gold)', sections: ['phrases', 'sentences', 'dialoghi', 'story'] },
+  ];
+  const NAV_LABEL = { verbs: 'Regolari', irregular: 'Irregolari', mipiace: 'Al contrario' };   // inside Verbi, the family says the rest
+  const SECTION_SHORT = { nouns: 'Sostantivi', verbs: 'Verbi regolari', irregular: 'Verbi irregolari', mipiace: 'Al contrario', adjectives: 'Aggettivi',
+                          avverbi: 'Avverbi', possessives: 'Possessivi', prepositions: 'Preposizioni', phrases: 'Frasi', sentences: 'Scrittura' };
+  const familyOf = s => FAMILIES.find(f => f.sections.includes(s));
+  const FAMILY_LAST_KEY = 'mazzo-family-last', TABLE_TAB_KEY = 'mazzo-table-tab';
   function applySubject(s) {
     if (subject) {
       const keep = subjectState[subject].hidden || [];   // selected, but of a kind switched off
@@ -10960,7 +11016,7 @@
     frequencyRank = Object.fromEntries(FREQUENCY_ORDER.map((n, i) => [n, i + 1]));
     capValue = st.capValue;
     capMode = st.capMode;
-    direction = st.direction;
+    st.direction = direction;   // one direction for the whole hand (Nov 2026): every section follows it
     stats = loadStats();
     associations = loadAssociations();
     container.dataset.subject = s;
@@ -10973,6 +11029,10 @@
     document.title = `Il Mazzo · ${cfg.title}`;
     totalEl.textContent = nounData.length;
     try { localStorage.setItem(SUBJECT_KEY, s); } catch (e) { /* storage unavailable */ }
+    try {   // the banner opens each family at the section you last used in it
+      const f = familyOf(s);
+      if (f) { const m = JSON.parse(localStorage.getItem(FAMILY_LAST_KEY) || '{}') || {}; m[f.key] = s; localStorage.setItem(FAMILY_LAST_KEY, JSON.stringify(m)); }
+    } catch (e) { /* storage unavailable */ }
   }
 
   // ===== Ripasso del giorno =====
@@ -11001,14 +11061,28 @@
   function startRipasso() {
     startMixedSession(dueList(ripassoDir), { title: 'Ripasso del giorno', subtitle: 'Il Mazzo · Ripasso Quotidiano', doc: 'Il Mazzo · Ripasso del giorno' });
   }
-  function startMixedSession(list, labels) {
-    if (!list.length) return;
-    // Remember the section we came from, with its setup, to return to afterwards
+  function enterMixed(dir) {   // remember the section we came from, with its setup, to return to afterwards
     Object.assign(subjectState[subject], { selected: selectedNouns, topics: deckTopics, capValue, capMode, direction });
     reviewReturn = subject;
     reviewMode = true;
     savedLive = false;
-    direction = ripassoDir;
+    direction = dir;
+  }
+  function beginMixedRound(cards, labels, inPlay) {
+    sessionPool = cards;
+    sessionMaxDeck = cards.slice(0, inPlay);
+    sessionPickMode = 'random';
+    sessionFocused = false;
+    sessionIsReview = false;
+    deck = sessionMaxDeck.slice();
+    document.getElementById('app-title').textContent = labels.title;
+    document.getElementById('app-subtitle').textContent = labels.subtitle;
+    document.title = labels.doc;
+    startGame();   // the session is set, so this shuffles these cards and starts
+  }
+  function startMixedSession(list, labels) {
+    if (!list.length) return;
+    enterMixed(ripassoDir);
     // One card per due item: a noun, a phrase, an adjective's dictionary form, or one
     // conjugation of a verb (a different person each time)
     const keepVerbMode = verbMode, keepAdjMode = adjMode;
@@ -11022,16 +11096,7 @@
     });
     verbMode = keepVerbMode;
     adjMode = keepAdjMode;
-    sessionPool = cards;                              // everything due
-    sessionMaxDeck = cards.slice(0, REVIEW_START);    // most overdue first
-    sessionPickMode = 'random';
-    sessionFocused = false;
-    sessionIsReview = false;
-    deck = sessionMaxDeck.slice();
-    document.getElementById('app-title').textContent = labels.title;
-    document.getElementById('app-subtitle').textContent = labels.subtitle;
-    document.title = labels.doc;
-    startGame();   // the session is set, so this shuffles these cards and starts
+    beginMixedRound(cards, labels, REVIEW_START);   // everything due; most overdue first in play
   }
 
   function renderRipasso() {
@@ -11065,6 +11130,8 @@
         ${list.length ? `<button type="button" class="submit ripasso-start" id="ripasso-start">▶ Start${list.length > REVIEW_START ? ` · ${REVIEW_START} of ${list.length}` : ''}</button>` : ''}
       </div>
     `;
+    ripassoDue = list.length;
+    renderTableTabs();
     el.querySelectorAll('[data-ripasso-dir]').forEach(b => b.addEventListener('click', () => {
       ripassoDir = b.dataset.ripassoDir;
       try { localStorage.setItem(RIPASSO_DIR_KEY, ripassoDir); } catch (e) { /* ignore */ }
@@ -11265,16 +11332,16 @@
   // ===== Each section's chart: on its setup screen, and on demand in a round =====
   // The setup's one line: what to do, and the one rule that matters (the longer story is in Settings & more)
   const SETUP_LINES = {
-    nouns: 'Add whole topics from the map, then start. Answer with the article: <em>la stazione</em>.',
-    verbs: 'Add whole topics from the map, then start — every person, or just the infinitive.',
-    irregular: 'Add whole topics from the map, then start — every person, or just the infinitive.',
-    mipiace: 'Tap a verb or a pattern below to choose its sentences, then start.',
-    adjectives: 'Add whole topics from the map, then start — the dictionary form, or all four forms.',
-    avverbi: 'Add whole topics from the map, then start. Accents don\'t count.',
-    possessives: 'Add whole groups below, then start.',
-    prepositions: 'Add whole groups below, then start.',
-    phrases: 'Add whole groups below, then start.',
-    sentences: 'Add whole groups of sentences below, then start.'
+    nouns: 'Add whole topics from the map to your hand. Answer with the article: <em>la stazione</em>.',
+    verbs: 'Add whole topics from the map to your hand — every person, or just the infinitive.',
+    irregular: 'Add whole topics from the map to your hand — every person, or just the infinitive.',
+    mipiace: 'Tap a verb or a pattern below to choose its sentences.',
+    adjectives: 'Add whole topics from the map to your hand — the dictionary form, or all four forms.',
+    avverbi: 'Add whole topics from the map to your hand. Accents don\'t count.',
+    possessives: 'Add whole groups below to your hand.',
+    prepositions: 'Add whole groups below to your hand.',
+    phrases: 'Add whole groups below to your hand.',
+    sentences: 'Add whole groups of sentences below to your hand.'
   };
   // ===== Il mazzo in mano (Nov 2026): the deck as a hand of cards, one per whole topic =====
   // Newest on top; words picked one by one share a card of their own (Parole scelte); past
@@ -11311,6 +11378,7 @@
       if (!th) continue;
       th.nouns.forEach(n => selectedNouns.add(n));
       deckTopics = deckTopics.filter(x => x !== k).concat(k);
+      handSeq = handSeq.filter(x => x !== `${subject}:${k}`).concat(`${subject}:${k}`);
     }
   }
   function topicsOut(keys) {
@@ -11325,29 +11393,182 @@
   function syncChipsToDeck() {
     gameArea.querySelectorAll('.verb-chip').forEach(c => c.classList.toggle('unselected', !selectedNouns.has(c.dataset.noun)));
   }
+  // ===== La tua mano across sections (Nov 2026) =====
+  // The hand gathers every section's deck (each keeps its own, in subjectState); inSection reads or
+  // changes another section's without opening it. Start and A spasso play one section as before, and
+  // several as one mixed round — each section's cards built as its own Start would build them.
+  let otherSection = false, handSeq = [], tableTab = 'hand', ripassoDue = null;
+  try { const tt = localStorage.getItem(TABLE_TAB_KEY); if (['hand', 'ripasso', 'saved'].includes(tt)) tableTab = tt; } catch (e) { /* default */ }
+  function inSection(s, fn) {
+    if (s === subject) return fn();
+    const keep = { subject, nounData, THEMES, FREQUENCY_ORDER, frequencyRank, stats, associations, selectedNouns, deckTopics, capValue, capMode, otherSection, kind: container.dataset.kind };
+    const st = subjectState[s], cfg = SUBJECTS[s];
+    subject = s;
+    nounData = cfg.items;
+    THEMES = cfg.themes;
+    FREQUENCY_ORDER = cfg.frequency;
+    if (cfg.typeFilter) {   // only the kinds of sentence switched on
+      const on = activeSentenceTypes();
+      nounData = cfg.items.filter(n => on.includes(n.type));
+      const pool = new Set(nounData.map(n => n.noun));
+      THEMES = cfg.themes.filter(th => on.includes(th.type));
+      FREQUENCY_ORDER = cfg.frequency.filter(k => pool.has(k));
+    }
+    frequencyRank = Object.fromEntries(FREQUENCY_ORDER.map((n, i) => [n, i + 1]));
+    stats = loadStats();
+    associations = loadAssociations();
+    selectedNouns = st.selected;
+    deckTopics = st.topics === undefined ? null : st.topics;
+    capValue = st.capValue;
+    capMode = st.capMode;
+    otherSection = true;
+    container.dataset.kind = cfg.kind;
+    try { return fn(); } finally {
+      st.topics = deckTopics;   // whatever changed there stays with that section
+      ({ subject, nounData, THEMES, FREQUENCY_ORDER, frequencyRank, stats, associations, selectedNouns, deckTopics, capValue, capMode, otherSection } = keep);
+      container.dataset.kind = keep.kind;
+    }
+  }
+  const handSkip = s => !!(SUBJECTS[s].story || SUBJECTS[s].dialogues);
+  function handSections() {   // the sections with something in the hand, in the banner's order
+    return FAMILIES.flatMap(f => f.sections).filter(s => SUBJECTS[s] && !handSkip(s)
+      && (s === subject ? selectedNouns.size > 0 : !!(subjectState[s] && subjectState[s].selected && subjectState[s].selected.size))
+      && inSection(s, () => nounData.some(n => selectedNouns.has(n.noun))));
+  }
+  function handTotals() {
+    const sections = handSections();
+    let words = 0, cards = 0, pool = 0, frequent = false;
+    for (const s of sections) inSection(s, () => {
+      words += nounData.filter(n => selectedNouns.has(n.noun)).length;
+      const p = poolCardCount(), c = effectiveDeckSize();
+      pool += p; cards += c;
+      frequent = frequent || (c < p && capMode === 'frequent');
+    });
+    return { sections, words, cards, pool, frequent };
+  }
+  function handCards() {   // every section's part, built as that section's own Start would build it
+    return handSections().flatMap(s => inSection(s, () => passiveDeck().map(c => ({ ...c, key: `${s}:${c.key}`, subject: s }))));
+  }
+  function handLabels(parts) {
+    return { title: 'La tua mano', subtitle: `Il Mazzo · ${parts.map(s => SECTION_SHORT[s] || SUBJECTS[s].title).join(' · ')}`, doc: 'Il Mazzo · La tua mano' };
+  }
+  function startHand() {
+    const parts = handSections();
+    if (!parts.length) return;
+    if (parts.length === 1 && parts[0] === subject) { startGame(); return; }   // just this section: a round as before
+    const cards = handCards();
+    if (!cards.length) return;
+    enterMixed(direction);
+    beginMixedRound(cards, handLabels(parts), cards.length);
+  }
+  function startPassiveHand() {
+    const parts = handSections();
+    if (!parts.length) return;
+    if (parts.length === 1 && parts[0] === subject) { startPassive(); return; }
+    startPassive(shuffleDeck(handCards()));
+  }
+  function clearHand() {   // the whole hand: every section's deck
+    for (const s of Object.keys(SUBJECTS)) {
+      const st = subjectState[s];
+      if (s === subject || !st || !st.selected) continue;
+      st.selected.clear();
+      st.topics = [];
+      st.hidden = [];
+    }
+    selectedNouns.clear();
+    deckTopics = [];
+    handSeq = [];
+    syncChipsToDeck();
+    updateReadout();
+  }
   function renderHand() {
     const fan = document.getElementById('hand-fan');
     if (!fan) return;
-    const cfg = SUBJECTS[subject], inHand = syncDeckTopics().map(themeByKey).filter(Boolean);
-    const shownTopics = inHand.filter(th => !inHand.some(o => o.nouns.length > th.nouns.length && topicWithin(th, o)));   // -iare is part of -are's card
-    const covered = new Set(inHand.flatMap(th => th.nouns)), loose = [...selectedNouns].filter(k => !covered.has(k)).length;
-    const byKey = new Map(cfg.items.map(n => [n.noun, n])), srs = loadSrs(subject, direction), st = readStats(subject, direction);
-    const cards = shownTopics.map(th => ({ key: th.key, label: th.label, en: th.en, n: th.nouns.length, have: th.nouns.filter(n => selectedNouns.has(n)).length, pct: mapTopic(th, byKey, srs, st).pct }));
-    const shown = cards.slice(-HAND_MAX), folded = cards.length - shown.length;
-    const items = [...(folded ? [{ more: folded }] : []), ...shown, ...(loose ? [{ loose }] : []), { slot: true }];
-    const count = items.length, spread = Math.min(26, 7 * (count - 1)), step = count > 1 ? spread / (count - 1) : 0;
+    const cfg = SUBJECTS[subject], items = [];
+    for (const s of handSections()) inSection(s, () => {
+      const scfg = SUBJECTS[s], inHand = syncDeckTopics().map(themeByKey).filter(Boolean);
+      const shown = inHand.filter(th => !inHand.some(o => o.nouns.length > th.nouns.length && topicWithin(th, o)));   // -iare is part of -are's card
+      const covered = new Set(inHand.flatMap(th => th.nouns));
+      const loose = nounData.filter(n => selectedNouns.has(n.noun) && !covered.has(n.noun)).length;
+      const byKey = new Map(scfg.items.map(n => [n.noun, n])), srs = loadSrs(s, direction), st = readStats(s, direction);
+      for (const th of shown) items.push({ s, key: th.key, label: th.label, en: th.en, n: th.nouns.length, have: th.nouns.filter(n => selectedNouns.has(n)).length, pct: mapTopic(th, byKey, srs, st).pct, at: handSeq.indexOf(`${s}:${th.key}`) });
+      if (loose) items.push({ s, loose, at: 1e9 });
+    });
+    items.sort((a, b) => a.at - b.at);   // in the order added; words picked one by one last
+    const tag = s => { const f = familyOf(s); return `<span class="hand-sect"><i style="background: ${f ? f.color : 'var(--ink-faded)'}"></i>${escapeHTML(SECTION_SHORT[s] || SUBJECTS[s].title)}</span>`; };
+    const topicsShown = items.filter(it => !it.loose), loosies = items.filter(it => it.loose);
+    const shownT = topicsShown.slice(-HAND_MAX), folded = topicsShown.length - shownT.length;
+    const all = [...(folded ? [{ more: folded }] : []), ...shownT, ...loosies, { slot: true }];
+    const count = all.length, spread = Math.min(26, 7 * (count - 1)), step = count > 1 ? spread / (count - 1) : 0;
     const overlap = count <= 4 ? 18 : Math.min(58, 18 + (count - 4) * 10);
-    fan.innerHTML = items.map((it, i) => {
+    const slotText = cfg.map ? (mapPrefs().hidden ? 'Show the map below to add a topic' : 'Tap ＋ Add on a topic below') : (cfg.themes && cfg.themes.length && !cfg.facets ? 'Tap a group below to add it' : 'Add topics in any section');
+    fan.innerHTML = all.map((it, i) => {
       const rot = count > 1 ? -spread / 2 + step * i : 0, lift = Math.round(Math.abs(rot) * 1.6);
       const pos = `style="--rot: ${rot.toFixed(1)}deg; --lift: ${lift}px; --ov: ${overlap}px; z-index: ${i + 1}"`;
-      if (it.slot) return `<div class="hand-card hand-slot" ${pos}><span class="hand-plus" aria-hidden="true">＋</span><span>${cfg.map ? (mapPrefs().hidden ? 'Show the map below to add a topic' : 'Tap ＋ Add on a topic below') : 'Tap a group below to add it'}</span></div>`;
+      if (it.slot) return `<div class="hand-card hand-slot" ${pos}><span class="hand-plus" aria-hidden="true">＋</span><span>${slotText}</span></div>`;
       if (it.more) return `<div class="hand-card hand-more" ${pos}><div class="hand-mid"><span class="hand-name">+${it.more}</span><span class="hand-en">more topic${it.more === 1 ? '' : 's'}</span></div></div>`;
-      if (it.loose) return `<div class="hand-card hand-loose" ${pos}><div class="hand-top"><span class="hand-n">${it.loose}</span><button type="button" class="hand-x" data-hand-remove="__loose" aria-label="Take the single ${cfg.itemWords} out">✕</button></div>`
-        + `<div class="hand-mid"><span class="hand-name">Parole scelte</span><span class="hand-en">picked one by one</span></div><div></div></div>`;
-      return `<div class="hand-card" ${pos} data-topic="${it.key}"><div class="hand-top"><span class="hand-n">${it.have < it.n ? `${it.have}/${it.n}` : it.n}</span><button type="button" class="hand-x" data-hand-remove="${it.key}" aria-label="Take ${escapeHTML(it.label)} out of your deck">✕</button></div>`
+      if (it.loose) return `<div class="hand-card hand-loose" ${pos} data-section="${it.s}"><div class="hand-top">${tag(it.s)}<button type="button" class="hand-x" data-hand-remove="__loose" data-section="${it.s}" aria-label="Take the single ${escapeHTML(SUBJECTS[it.s].itemWords)} out">✕</button></div>`
+        + `<div class="hand-mid"><span class="hand-name">Parole scelte</span><span class="hand-en">picked one by one</span></div><div class="hand-known"><span><span class="hand-n">${it.loose}</span> ${escapeHTML(SUBJECTS[it.s].itemWords)}</span></div></div>`;
+      return `<div class="hand-card" ${pos} data-topic="${it.key}" data-section="${it.s}"><div class="hand-top">${tag(it.s)}<button type="button" class="hand-x" data-hand-remove="${it.key}" data-section="${it.s}" aria-label="Take ${escapeHTML(it.label)} out of your hand">✕</button></div>`
         + `<div class="hand-mid"><span class="hand-name${it.label.length > 13 ? ' longer' : it.label.length > 9 ? ' long' : ''}">${escapeHTML(it.label)}</span><span class="hand-en">${escapeHTML(it.en)}</span></div>`
-        + `<div class="hand-known"><span class="hand-bar"><i style="width: ${it.pct}%"></i></span><span>${it.pct}% known</span></div></div>`;
+        + `<div class="hand-known"><span class="hand-bar"><i style="width: ${it.pct}%"></i></span><span><span class="hand-n">${it.have < it.n ? `${it.have}/${it.n}` : it.n}</span> · ${it.pct}% known</span></div></div>`;
     }).join('');
+  }
+  function renderTableTabs() {
+    const el = document.getElementById('table-tabs');
+    if (!el) return;
+    if (ripassoDue === null) ripassoDue = dueList(ripassoDir).length;
+    const saved = savedDeck();
+    if (tableTab === 'saved' && !saved) tableTab = 'hand';
+    const words = Number((document.getElementById('selected-count') || {}).textContent) || 0;
+    const secs = (document.getElementById('readout-scope') || {}).textContent || '';
+    const tab = (id, name, sub, flag) => `<button type="button" role="tab" class="table-tab${tableTab === id ? ' on' : ''}" data-table-tab="${id}" aria-selected="${tableTab === id}" aria-controls="table-${id}">`
+      + `<span class="table-tab-name">${name}${flag ? '<i class="table-dot" aria-hidden="true"></i>' : ''}</span><span class="table-tab-sub">${sub}</span></button>`;
+    const savedN = saved ? (saved.deck || saved.cards || []).length : 0;
+    el.innerHTML = tab('hand', 'La tua mano', words ? `${words} ${document.getElementById('hand-words').textContent}${secs.replace(' · ', ' · ')}` : 'empty — add some topics')
+      + tab('ripasso', 'Ripasso del giorno', ripassoDue ? `${ripassoDue} due today` : 'nothing due', ripassoDue > 0)
+      + (saved ? tab('saved', 'Il mazzo salvato', `${savedN} card${savedN === 1 ? '' : 's'}${saved.at ? ` · saved ${new Date(saved.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : ''}`) : '');
+    for (const id of ['hand', 'ripasso', 'saved']) { const panel = document.getElementById(`table-${id}`); if (panel) panel.hidden = tableTab !== id; }
+  }
+  function wireTable() {
+    const tabs = document.getElementById('table-tabs');
+    if (!tabs) return;
+    tabs.addEventListener('click', e => {
+      const b = e.target.closest('[data-table-tab]');
+      if (!b) return;
+      tableTab = b.dataset.tableTab;
+      try { localStorage.setItem(TABLE_TAB_KEY, tableTab); } catch (err) { /* ignore */ }
+      renderTableTabs();
+    });
+    document.getElementById('hand').addEventListener('click', e => {
+      if (e.target.closest('[data-deck-clear]')) { clearHand(); return; }
+      const rm = e.target.closest('[data-hand-remove]');
+      if (!rm) return;
+      const s = rm.dataset.section || subject, which = rm.dataset.handRemove;
+      inSection(s, () => {
+        if (which === '__loose') {   // the words picked one by one: out; the topics stay
+          const inTopics = new Set(syncDeckTopics().map(themeByKey).filter(Boolean).flatMap(th => th.nouns));
+          [...selectedNouns].forEach(k => { if (!inTopics.has(k)) selectedNouns.delete(k); });
+        } else topicsOut([which]);
+      });
+      if (s === subject) syncChipsToDeck();
+      updateReadout();
+    });
+    document.querySelectorAll('#direction-toggle .mode-option').forEach(btn => btn.addEventListener('click', () => {
+      if (btn.dataset.direction === direction) return;
+      direction = btn.dataset.direction;   // one direction for the whole hand: every section follows
+      Object.values(subjectState).forEach(st => { st.direction = direction; });
+      document.querySelectorAll('#direction-toggle .mode-option').forEach(b => b.classList.toggle('active', b.dataset.direction === direction));
+      stats = loadStats();   // each direction keeps its own progress
+      if (document.getElementById('setup-meta')) renderSetupMeta();
+      updateReadout();
+      const mapBox = document.getElementById('noun-map');
+      if (mapBox) mapBox.innerHTML = nounMapInner();   // at once, not on the next tick
+    }));
+    document.getElementById('start-btn').addEventListener('click', () => startHand());
+    const passiveBtn = document.getElementById('passive-btn');
+    if (passiveBtn) passiveBtn.addEventListener('click', () => startPassiveHand());
+    updateReadout();
   }
   const SECTION_CHARTS = {
     avverbi: () => `
@@ -11873,6 +12094,15 @@
 
   // ===== Section switch =====
   function wireSubjectToggle() {
+    document.querySelectorAll('.sections .family').forEach(btn => btn.addEventListener('click', () => {   // a family: its last-used section
+      const f = FAMILIES.find(x => x.key === btn.dataset.family);
+      if (!f || f.sections.includes(subject)) return;
+      let last = null;
+      try { last = (JSON.parse(localStorage.getItem(FAMILY_LAST_KEY) || '{}') || {})[f.key]; } catch (e) { /* first visit */ }
+      storyStopSpeaking();
+      applySubject(f.sections.includes(last) ? last : f.sections[0]);
+      showSetup();
+    }));
     document.querySelectorAll('#subject-toggle .mode-option').forEach(btn => {
       btn.addEventListener('click', () => {
         if (btn.dataset.subject === subject) return;
@@ -11892,6 +12122,7 @@
     if (reviewMode) {
       reviewMode = false;
       const back = reviewReturn;
+      if (subjectState[back] && subjectState[back].direction) direction = subjectState[back].direction;   // the hand's direction, not the round's
       subject = null;   // don't save review state into a section
       applySubject(back);
     }
@@ -11904,49 +12135,66 @@
     const modeOptions = isVerbs ? [['conjugations', 'Conjugations'], ['infinitives', 'Infinitives only']]
       : isAdjSubject() ? [['dictionary', 'Dictionary form'], ['forms', 'All forms']] : null;
     const currentMode = isVerbs ? verbMode : adjMode;
+    const fam = familyOf(subject) || FAMILIES[0];
     document.getElementById('setup-top').innerHTML = `
       <div class="setup-top-inner">
-        <div class="ripasso" id="ripasso"></div>
-        <div class="ripasso saved-deck" id="saved-deck" hidden></div>
-        <div class="mode-toggle subject-toggle" id="subject-toggle" role="group" aria-label="What to practise">
-          ${Object.entries(SUBJECTS).map(([key, s]) => `
-            <button type="button" class="mode-option${key === subject ? ' active' : ''}" data-subject="${key}" aria-pressed="${key === subject}">${s.switchLabel}</button>
-          `).join('')}
-        </div>
+        <header class="masthead"><div class="mast-title">Il Mazzo</div><div class="mast-sub">Italiano, una carta alla volta</div></header>
+        <nav class="sections" aria-label="Sections">
+          <div class="family-row" role="group" aria-label="Families">${FAMILIES.map(f => `<button type="button" class="family${f === fam ? ' active' : ''}" data-family="${f.key}" aria-pressed="${f === fam}">`
+            + `<span class="family-name"><i style="background: ${f.color}"></i>${f.name}</span><span class="family-sub">${f.en} · ${f.sections.length} sections</span></button>`).join('')}</div>
+          <div class="mode-toggle subject-toggle" id="subject-toggle" role="group" aria-label="What to practise">
+            ${Object.entries(SUBJECTS).map(([key, s]) => `
+              <button type="button" class="mode-option${key === subject ? ' active' : ''}" data-subject="${key}" aria-pressed="${key === subject}"${fam.sections.includes(key) ? '' : ' hidden'}>${NAV_LABEL[key] || s.switchLabel}</button>
+            `).join('')}
+          </div>
+        </nav>
+        <section class="table" id="table" aria-label="Il tavolo — your decks">
+          <div class="table-tabs" id="table-tabs" role="tablist" aria-label="Your decks"></div>
+          <div class="table-panel" id="table-hand" role="tabpanel">
+            <section class="hand" id="hand" aria-label="La tua mano — your hand">
+              <div class="hand-fan" id="hand-fan"></div>
+              <div class="hand-side">
+                <div class="hand-head"><h2 class="hand-title">La tua mano</h2><div class="hand-sub">Topics from any section — it goes with you</div></div>
+                <div class="deck-readout hand-count"><strong class="hand-big" id="selected-count">0</strong> <span class="hand-unit"><span id="hand-words">${cfg.itemWords || 'words'}</span> · <strong id="card-count">0</strong> cards<span id="readout-scope"></span></span> <button type="button" class="ghost deck-clear" data-deck-clear>clear</button></div>
+                <div class="setup-options">
+                  <div class="opt"><span class="opt-label">Direction</span><div class="mode-toggle" id="direction-toggle">
+                    <button type="button" class="mode-option${direction === 'en-it' ? ' active' : ''}" data-direction="en-it">EN → IT</button>
+                    <button type="button" class="mode-option${direction === 'it-en' ? ' active' : ''}" data-direction="it-en">IT → EN</button>
+                    <button type="button" class="mode-option${direction === 'listen' ? ' active' : ''}" data-direction="listen">🔊 Listen</button>
+                  </div></div>
+                </div>
+                <button type="button" class="submit start-btn" id="start-btn">▶ Start practising</button>
+                <button type="button" class="passive-btn" id="passive-btn" title="Out and about: hear each card, the Italian then the English, ${passivePrefs.reps} times over, on a loop — nothing to type"><span class="passive-btn-main">🎧 A spasso</span></button>
+                <p class="passive-msg passive-msg-setup" id="passive-msg" aria-live="polite"></p>
+              </div>
+            </section>
+          </div>
+          <div class="table-panel" id="table-ripasso" role="tabpanel" hidden><div class="ripasso" id="ripasso"></div></div>
+          <div class="table-panel" id="table-saved" role="tabpanel" hidden><div class="ripasso saved-deck" id="saved-deck" hidden></div></div>
+        </section>
       </div>
     `;
     syncOnSetup();
     if (cfg.story) {
       wireSubjectToggle();
+      wireTable();
       renderRipasso();
       renderStoryHome();
       return;
     }
     if (cfg.dialogues) {
       wireSubjectToggle();
+      wireTable();
       renderRipasso();
       renderDialogueHome();
       return;
     }
     gameArea.innerHTML = `
-      <section class="hand" id="hand" aria-label="Il mazzo — your hand">
-        <div class="hand-fan" id="hand-fan"></div>
-        <div class="hand-side">
-          <div class="hand-head"><h2 class="hand-title">Il mazzo</h2><div class="hand-sub">Your hand · ${cfg.title}</div></div>
-          <p class="setup-sub hand-line">${SETUP_LINES[subject] || (cfg.map ? 'Add whole topics from the map, then start.' : 'Add whole groups below, then start.')}</p>
-          <div class="deck-readout hand-count"><strong class="hand-big" id="selected-count">${selectedNouns.size}</strong> <span class="hand-unit">${cfg.itemWords} · <strong id="card-count">${selectedNouns.size}</strong> cards<span id="readout-scope"></span></span> <button type="button" class="ghost deck-clear" data-deck-clear>clear</button></div>
-          ${cfg.typeFilter ? sentenceTypesHTML() : ''}
-          ${cfg.numberToggle ? prepNumbersHTML() : ''}
-          <div class="setup-options">
-            ${modeOptions ? `<div class="opt"><span class="opt-label">Practise</span><div class="mode-toggle" id="mode-toggle">${modeOptions.map(([key, label]) => `<button type="button" class="mode-option${currentMode === key ? ' active' : ''}" data-mode="${key}">${label}</button>`).join('')}</div></div>` : ''}
-            <div class="opt"><span class="opt-label">Direction</span><div class="mode-toggle" id="direction-toggle">
-              <button type="button" class="mode-option${direction === 'en-it' ? ' active' : ''}" data-direction="en-it">EN → IT</button>
-              <button type="button" class="mode-option${direction === 'it-en' ? ' active' : ''}" data-direction="it-en">IT → EN</button>
-              <button type="button" class="mode-option${direction === 'listen' ? ' active' : ''}" data-direction="listen">🔊 Listen</button>
-            </div></div>
-          </div>
-          <button type="button" class="submit start-btn" id="start-btn">▶ Start practising</button>
-        <button type="button" class="passive-btn" id="passive-btn" title="Out and about: hear each card, the Italian then the English, ${passivePrefs.reps} times over, on a loop — nothing to type"${speechAvailable() ? '' : ' hidden'}><span class="passive-btn-main">🎧 A spasso</span></button>
+      <div class="section-tools">
+        <p class="setup-sub section-line">${SETUP_LINES[subject] || ''}</p>
+        ${cfg.typeFilter ? sentenceTypesHTML() : ''}
+        ${cfg.numberToggle ? prepNumbersHTML() : ''}
+        ${modeOptions ? `<div class="setup-options">${modeOptions ? `<div class="opt"><span class="opt-label">Practise</span><div class="mode-toggle" id="mode-toggle">${modeOptions.map(([key, label]) => `<button type="button" class="mode-option${currentMode === key ? ' active' : ''}" data-mode="${key}">${label}</button>`).join('')}</div></div>` : ''}</div>` : ''}
         <details class="setup-more" id="setup-more">
           <summary>⚙ Settings &amp; more</summary>
           <div class="more-block quick-picks"><div class="more-label">More ways to pick</div>
@@ -11976,9 +12224,7 @@
           <div class="more-block"><div class="more-label">Your progress</div><div class="setup-meta" id="setup-meta"></div></div>
           ${cfg.setupSub ? `<div class="more-block"><div class="more-label">How this section works</div><p class="more-about">${cfg.setupSub}</p></div>` : ''}
         </details>
-          <p class="passive-msg passive-msg-setup" id="passive-msg" aria-live="polite"></p>
-        </div>
-      </section>
+      </div>
       <div class="setup-body">
       <div class="setup-main">
 
@@ -12158,34 +12404,6 @@
       updateReadout();
     }
 
-    // The hand: ✕ takes a topic out (keeping any word another topic in the hand also has); clear empties it
-    const handEl = document.getElementById('hand');
-    if (handEl) handEl.addEventListener('click', e => {
-      if (e.target.closest('[data-deck-clear]')) { applyPick([]); return; }
-      const rm = e.target.closest('[data-hand-remove]');
-      if (!rm) return;
-      if (rm.dataset.handRemove === '__loose') {   // the words picked one by one: out; the topics stay
-        const inTopics = new Set(syncDeckTopics().map(themeByKey).filter(Boolean).flatMap(th => th.nouns));
-        [...selectedNouns].forEach(k => { if (!inTopics.has(k)) selectedNouns.delete(k); });
-      } else topicsOut([rm.dataset.handRemove]);
-      syncChipsToDeck();
-      updateReadout();
-    });
-    gameArea.querySelectorAll('#direction-toggle .mode-option').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (btn.dataset.direction === direction) return;
-        direction = btn.dataset.direction;
-        gameArea.querySelectorAll('#direction-toggle .mode-option').forEach(b => {
-          b.classList.toggle('active', b.dataset.direction === direction);
-        });
-        stats = loadStats();   // each direction keeps its own progress
-        renderSetupMeta();
-        updateReadout();       // the hand's known %, and the map, are per direction
-        const mapBox = document.getElementById('noun-map');
-        if (mapBox) mapBox.innerHTML = nounMapInner();   // at once, not on the next tick
-      });
-    });
-
     const capEl = document.getElementById('deck-cap');
     capEl.value = capValue;
     capEl.addEventListener('input', () => { capValue = capEl.value; updateReadout(); });
@@ -12196,33 +12414,29 @@
     // Hand-pick button opens the module-scope focus modal in 'setup' mode
     document.getElementById('hand-pick').addEventListener('click', () => openFocusModal('setup'));
 
-    document.getElementById('start-btn').addEventListener('click', startGame);
-    const passiveBtn = document.getElementById('passive-btn');
-    if (passiveBtn) passiveBtn.addEventListener('click', startPassive);
-    updateReadout();
+    wireTable();
     renderSetupMeta();
   }
 
   function updateReadout() {
     renderHand();
-    const countEl = document.getElementById('selected-count');
-    if (!countEl) return; // not in setup view — nothing to update
-    const cfg = SUBJECTS[subject];
-    countEl.textContent = selectedNouns.size;
-    const pool = poolCardCount();
-    const effective = effectiveDeckSize();
-    document.getElementById('card-count').textContent = effective;
-    document.getElementById('readout-scope').textContent =
-      usingWholeDeck() ? ` · drawn from all ${nounData.length} ${cfg.itemWords}` : '';
-    const start = document.getElementById('start-btn');
-    start.disabled = pool === 0;
-    const passiveBtn = document.getElementById('passive-btn');
-    if (passiveBtn) passiveBtn.disabled = pool === 0;
-    start.textContent = pool === 0
-      ? `Add some ${cfg.itemWords} to start`
-      : `▶ Start practising · ${effective}${effective < pool && capMode === 'frequent' ? ' most common' : ''} card${effective === 1 ? '' : 's'}`;
     updateThemeChips();
     scheduleMapRefresh();   // the map shows what's in the deck
+    const countEl = document.getElementById('selected-count');
+    if (!countEl) return; // not in setup view — nothing to update
+    const cfg = SUBJECTS[subject], h = handTotals(), one = h.sections.length === 1 ? SUBJECTS[h.sections[0]] : null;
+    countEl.textContent = h.words;
+    document.getElementById('card-count').textContent = h.cards;
+    document.getElementById('hand-words').textContent = one ? one.itemWords : h.sections.length ? 'words' : (cfg.itemWords || 'words');
+    document.getElementById('readout-scope').textContent = h.sections.length > 1 ? ` · ${h.sections.length} sections` : '';
+    const start = document.getElementById('start-btn');
+    start.disabled = h.cards === 0;
+    const passiveBtn = document.getElementById('passive-btn');
+    if (passiveBtn) passiveBtn.disabled = h.cards === 0;
+    start.textContent = h.cards === 0
+      ? `Add some ${cfg.itemWords || 'words'} to start`
+      : `▶ Start practising · ${h.cards}${one && h.cards < h.pool && one.key !== undefined ? '' : ''}${h.sections.length === 1 && h.frequent ? ' most common' : ''} card${h.cards === 1 ? '' : 's'}`;
+    renderTableTabs();
   }
 
   // Reads the cap input and returns the effective deck size (min of cap
@@ -12230,7 +12444,7 @@
   // The subset box's number, or 0 when it's empty, invalid or not on screen
   function capNumber() {
     const el = document.getElementById('deck-cap');
-    const v = el ? parseInt(el.value, 10) : NaN;
+    const v = parseInt(otherSection ? capValue : (el ? el.value : ''), 10);   // in inSection: that section's own number
     return Number.isFinite(v) && v > 0 ? v : 0;
   }
 
@@ -12932,11 +13146,16 @@
     } catch (e) { /* not allowed here, or not supported: the screen may sleep */ }
   }
 
-  function startPassive() {
+  function startPassive(mixed) {
     const msg = document.getElementById('passive-msg');
     if (!chosenVoice()) { if (msg) msg.textContent = 'There’s no Italian voice on this device yet — see the note on voices below.'; return; }
-    const cards = passiveDeck();
+    const cards = Array.isArray(mixed) ? mixed : passiveDeck();
     if (!cards.length) return;
+    if (Array.isArray(mixed)) {   // the whole hand: back to this section afterwards, as after a mixed round
+      Object.assign(subjectState[subject], { selected: selectedNouns, topics: deckTopics, capValue, capMode, direction });
+      reviewReturn = subject;
+      reviewMode = true;
+    }
     stopListening();
     passive = { cards, index: 0, rep: 0, phase: 'it', playing: true, run: 0, pass: 1, timer: null, watchdog: null, current: null, hidden: false };
     container.dataset.view = 'passive'; syncPinnedChart();
@@ -12962,6 +13181,7 @@
 
   // One line: the Italian or the English of the current card, in its own voice
   function passiveStep() {
+    if (passive && passive.cards[passive.index] && passive.cards[passive.index].subject) setCardContext(passive.cards[passive.index].subject);   // a mixed hand: this card's section
     if (!passive || !passive.playing) return;
     clearTimeout(passive.timer);
     clearTimeout(passive.watchdog);
@@ -13044,6 +13264,7 @@
   });
 
   function renderPassive() {
+    if (passive && passive.cards[passive.index] && passive.cards[passive.index].subject) setCardContext(passive.cards[passive.index].subject);
     const cfg = SUBJECTS[subject];
     gameArea.innerHTML = `
       <div class="passive">

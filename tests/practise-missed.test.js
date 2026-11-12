@@ -52,6 +52,7 @@ ok(missedShown().join() === 'la casa', `an "I was right" override is not counted
 d.querySelector('.direction-toggle') ; d.getElementById('back-to-setup').click();
 // ---- Verbs: just the forms missed ----
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
+ev('clearHand()');   // the hand is shared: this section's cards only
 ev("selectedNouns = new Set(['capire']); updateReadout(); verbMode = 'conjugations';");
 d.getElementById('start-btn').click();
 if (ev('direction') !== 'en-it') d.querySelector('.direction-toggle [data-dir="en-it"]').click();
@@ -72,6 +73,7 @@ ok(!ev('sessionIsReview') && slider('game-trim-focus').name === 'Focus' && !d.ge
 d.getElementById('change-btn').click();
 // ---- Adjectives (All forms) and phrases ----
 d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
+ev('clearHand()');   // the hand is shared: this section's cards only
 d.querySelector('#mode-toggle [data-mode="forms"]').click();
 ev("selectedNouns = new Set(['piccolo']); updateReadout();");
 d.getElementById('start-btn').click();
@@ -82,6 +84,7 @@ btn().click();
 ok(JSON.stringify(ev('deck.map(c => c.key)')) === JSON.stringify(['piccolo|fpl']), 'adjective review round: piccolo|fpl');
 d.getElementById('change-btn').click();
 d.querySelector('#subject-toggle [data-subject="phrases"]').click();
+ev('clearHand()');   // the hand is shared: this section's cards only
 ev("selectedNouns = new Set(['grazie', 'in-bocca-al-lupo']); updateReadout();");
 d.getElementById('start-btn').click();
 answer("c => c.noun === 'in-bocca-al-lupo'", 'buona fortuna');

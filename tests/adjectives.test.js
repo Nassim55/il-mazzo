@@ -3,10 +3,12 @@ const seeded = { simpatico: { seen: 4, wrong: 3 }, grigio: { seen: 10, wrong: 5 
 let { w, d, ev, key, setVal, errors, warns } = boot({ 'aggettivi-stats-v1': JSON.stringify(seeded) });
 ok(warns.length === 0 && errors.length === 0, 'loads with no validator warnings or errors');
 const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Verbi regolari', 'Verbi irregolari', 'Verbi al contrario', 'Aggettivi', 'Avverbi e congiunzioni', 'Possessivi', 'Preposizioni', 'Frasi', 'Scrittura', 'Dialoghi', 'Racconto']), `section switch: ${labels.join(' | ')}`);
+ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Regolari', 'Irregolari', 'Al contrario', 'Aggettivi', 'Avverbi e congiunzioni', 'Possessivi', 'Preposizioni', 'Frasi', 'Scrittura', 'Dialoghi', 'Racconto']), `section switch: ${labels.join(' | ')}`);
 d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 ok(ev('subject') === 'adjectives' && d.getElementById('app-title').textContent === 'Aggettivi' && d.title === 'Il Mazzo · Aggettivi', 'title and tab');
-ok(ev('selectedNouns.size') === 200 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('200 adjectives · 200 cards'), 'every adjective starts selected, as in the original (now 200 · 200 cards)');
+ok(ev('selectedNouns.size') === 0, 'adjectives start empty — the hand is shared by every section');
+d.getElementById('select-all').click();
+ok(ev('selectedNouns.size') === 200 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('200 adjectives · 200 cards'), 'All: every adjective (now 200 · 200 cards)');
 ok(d.querySelector('#map-panel .map-chart .agreement-panel .endings-title')?.textContent === 'Le concordanze' && !d.querySelector('.setup-side') && d.getElementById('noun-map').querySelectorAll('.map-row').length === ev('ADJ_THEMES.length'), 'La mappa, a line per topic — with Le concordanze in its panel');
 ok(/1\/200 practised|3\/200 practised/.test(d.getElementById('setup-meta').textContent), 'original history shows in the stats strip');
 const weakRows = ev('weakestNouns(10)').slice(0, 2);
@@ -76,7 +78,7 @@ ok(/← Change adjectives/.test(d.querySelector('.complete-actions').textContent
 d.getElementById('back-to-setup').click();
 d.querySelector('#direction-toggle [data-direction="en-it"]').click();
 d.querySelector('#mode-toggle [data-mode="dictionary"]').click();
-d.getElementById('clear-all').click();
+d.getElementById('select-all').click();   // a deck size picks from your hand (Nov 2026: no longer from the whole deck when the hand is empty)
 setVal('deck-cap', '5'); setVal('deck-cap-mode', 'frequent', 'change');
 d.getElementById('start-btn').click();
 ok(JSON.stringify(ev('deck.map(c => c.noun).sort()')) === JSON.stringify(['grande', 'italiano', 'nuovo', 'primo', 'vero']), 'the 5 most common: primo, nuovo, grande, italiano, vero');

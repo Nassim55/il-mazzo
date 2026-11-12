@@ -7,8 +7,8 @@ const { boot, ok, done } = require('./harness');
 for (const s of ['nouns', 'verbs', 'irregular', 'mipiace', 'adjectives', 'avverbi', 'possessives', 'prepositions', 'phrases', 'sentences']) {
   const B = boot({ 'flipcards-subject': s });
   const d = B.d, hand = d.getElementById('hand'), more = d.getElementById('setup-more');
-  ok(hand && d.getElementById('hand-fan') && hand.querySelector('.hand-title').textContent === 'Il mazzo' && hand.contains(d.getElementById('start-btn')) && hand.contains(d.getElementById('direction-toggle'))
-     && more && hand.contains(more) && !more.open && ['weakest-20', 'random-20', 'select-all', 'clear-all', 'hand-pick', 'deck-cap', 'audio-row', 'setup-meta'].every(id => more.contains(d.getElementById(id)))
+  ok(hand && d.getElementById('hand-fan') && hand.querySelector('.hand-title').textContent === 'La tua mano' && hand.contains(d.getElementById('start-btn')) && hand.contains(d.getElementById('direction-toggle'))
+     && more && d.querySelector('.section-tools').contains(more) && !more.open && d.getElementById('table').contains(hand) && ['weakest-20', 'random-20', 'select-all', 'clear-all', 'hand-pick', 'deck-cap', 'audio-row', 'setup-meta'].every(id => more.contains(d.getElementById(id)))
      && !/Step 01/.test(d.getElementById('game-area').textContent) && B.errors.length === 0,
      `${s}: the hand — Il mazzo, the count, the direction, Start; Settings & more closed with the rest`);
 }

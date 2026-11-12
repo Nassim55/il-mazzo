@@ -4,7 +4,7 @@
 const { boot, ok, done } = require('./harness');
 
 const startRound = (B, subj, keys) => {
-  B.ev(`applySubject('${subj}'); showSetup(); selectedNouns = new Set(${JSON.stringify(keys)}); updateReadout();`);
+  B.ev(`applySubject('${subj}'); showSetup(); clearHand(); selectedNouns = new Set(${JSON.stringify(keys)}); updateReadout();`);   // the hand is shared: just these
   B.d.getElementById('start-btn').click();
 };
 const key = (el, k) => el.dispatchEvent(new (el.ownerDocument || el).defaultView.KeyboardEvent('keydown', { key: k, bubbles: true }));
