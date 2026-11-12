@@ -33,7 +33,7 @@ B.ev("selectedNouns.add('pane'); updateReadout();");
 ok(fan().join().includes('loose 1'), 'a word picked on its own: a card of its own, Parole scelte');
 B.d.querySelector('#hand-fan [data-hand-remove="__loose"]').click();
 ok(!B.ev("selectedNouns.has('pane')") && !fan().join().includes('loose'), '…and its ✕ takes the single words out');
-B.ev("NOUN_THEMES.slice(0, 10).forEach(t => t.nouns.forEach(k => selectedNouns.add(k))); updateReadout();");
+B.ev("topicsIn(NOUN_THEMES.slice(0, 10).map(t => t.key)); updateReadout();");   // ten topics added, as the map's ＋ Add does
 ok(B.d.querySelectorAll('#hand-fan .hand-card:not(.hand-slot):not(.hand-more):not(.hand-loose)').length === 7 && B.d.querySelector('#hand-fan .hand-more'), 'past seven topics, the oldest fold into a +N card');
 B.d.querySelector('#hand [data-deck-clear]').click();
 ok(B.ev('selectedNouns.size') === 0 && fan().join() === 'slot', 'clear: an empty hand');
@@ -43,7 +43,7 @@ ok(B.d.querySelector('.container').dataset.view === 'game' && B.ev('deck.length'
 
 // ---- A topic inside a bigger one is part of its card; the direction is the hand's too ----
 B = boot({ 'flipcards-subject': 'verbs' });
-B.ev("selectedNouns.clear(); SUBJECTS.verbs.themes.find(t => t.key === 'are').nouns.forEach(k => selectedNouns.add(k)); updateReadout();");
+B.ev("selectedNouns.clear(); deckTopics = []; topicsIn(['are']); updateReadout();");   // -are added, as its ＋ Add does
 const vfan = [...B.d.querySelectorAll('#hand-fan .hand-card[data-topic]')].map(c => c.dataset.topic);
 ok(vfan.join() === 'are', `-are in the hand: one card — -care/-gare and -iare are inside it (${vfan.join(', ')})`);
 B.d.querySelector('#direction-toggle [data-direction="it-en"]').click();

@@ -10938,7 +10938,7 @@
   function applySubject(s) {
     if (subject) {
       const keep = subjectState[subject].hidden || [];   // selected, but of a kind switched off
-      Object.assign(subjectState[subject], { selected: keep.length ? new Set([...selectedNouns, ...keep]) : selectedNouns, capValue, capMode, direction });
+      Object.assign(subjectState[subject], { selected: keep.length ? new Set([...selectedNouns, ...keep]) : selectedNouns, topics: deckTopics, capValue, capMode, direction });
     }
     subject = s;
     const cfg = SUBJECTS[s], st = subjectState[s];
@@ -10946,6 +10946,7 @@
     THEMES = cfg.themes;
     FREQUENCY_ORDER = cfg.frequency;
     selectedNouns = st.selected;
+    deckTopics = st.topics === undefined ? null : st.topics;
     st.hidden = [];
     if (cfg.typeFilter) {   // only the kinds of sentence chosen at the top of the setup
       const on = activeSentenceTypes();
@@ -11003,7 +11004,7 @@
   function startMixedSession(list, labels) {
     if (!list.length) return;
     // Remember the section we came from, with its setup, to return to afterwards
-    Object.assign(subjectState[subject], { selected: selectedNouns, capValue, capMode, direction });
+    Object.assign(subjectState[subject], { selected: selectedNouns, topics: deckTopics, capValue, capMode, direction });
     reviewReturn = subject;
     reviewMode = true;
     savedLive = false;
@@ -11278,23 +11279,60 @@
   // ===== Il mazzo in mano (Nov 2026): the deck as a hand of cards, one per whole topic =====
   // Newest on top; words picked one by one share a card of their own (Parole scelte); past
   // seven topics the oldest fold into a +N card; an empty slot says what to do next.
-  let handOrder = [];   // whole topics, in the order they joined the hand
+  // ===== The topics in your deck (Nov 2026) =====
+  // The deck is a set of words, but the topics you add are remembered too, oldest first. Taking a
+  // topic out removes its words except those another topic still in the deck has — so taking one
+  // out never takes another with it — and a topic doesn't join your hand just because others
+  // happen to cover its words. A topic wholly inside one you've added (-iare inside -are) is part
+  // of it: it goes out with it, and taking it out on its own makes a hole in the bigger one. Picks
+  // that aren't topics (Weakest 20, All, Da ripassare) replace the words; whatever whole topics
+  // they cover then count as added. Each section keeps its own (subjectState).
+  let deckTopics = null;   // topic keys, oldest first; null = work them out from the words
   const HAND_MAX = 7;
-  function handTopics() {
-    const themes = SUBJECTS[subject].themes || [];
-    return themes.filter(th => th.nouns.length && th.nouns.every(k => selectedNouns.has(k)));
+  const themeByKey = k => (THEMES || []).find(th => th.key === k);
+  const topicWithin = (a, b) => a !== b && a.nouns.every(n => b.nouns.includes(n));   // a wholly inside b
+  const topicComplete = th => th.nouns.every(n => selectedNouns.has(n));
+  function coveredTopics() {   // whole topics among the words, minus those inside a bigger one
+    const all = (THEMES || []).filter(th => th.nouns.length && topicComplete(th));
+    return all.filter(th => !all.some(o => o.nouns.length > th.nouns.length && topicWithin(th, o)));
+  }
+  function syncDeckTopics() {   // worked out once from the words; a topic with none of its words left drops out
+    if (deckTopics === null) deckTopics = coveredTopics().map(th => th.key);
+    deckTopics = deckTopics.filter(k => { const th = themeByKey(k); return th && th.nouns.some(n => selectedNouns.has(n)); });
+    return deckTopics;
+  }
+  function topicInHand(th) {   // added — or wholly inside a topic that was
+    return syncDeckTopics().some(k => { const o = themeByKey(k); return o && (o === th || topicWithin(th, o)); });
+  }
+  function topicsIn(keys) {
+    syncDeckTopics();
+    for (const k of keys) {
+      const th = themeByKey(k);
+      if (!th) continue;
+      th.nouns.forEach(n => selectedNouns.add(n));
+      deckTopics = deckTopics.filter(x => x !== k).concat(k);
+    }
+  }
+  function topicsOut(keys) {
+    syncDeckTopics();
+    const out = keys.map(themeByKey).filter(Boolean), goes = o => out.some(x => x === o || topicWithin(o, x));   // these, and what's inside them
+    deckTopics = deckTopics.filter(k => { const th = themeByKey(k); return th && !goes(th); });
+    for (const th of out) {   // a word stays if a topic you added (still in) has it — unless that topic holds all of this one
+      const keep = new Set(deckTopics.map(themeByKey).filter(o => o && !topicWithin(th, o)).flatMap(o => o.nouns));
+      th.nouns.forEach(n => { if (!keep.has(n)) selectedNouns.delete(n); });
+    }
+  }
+  function syncChipsToDeck() {
+    gameArea.querySelectorAll('.verb-chip').forEach(c => c.classList.toggle('unselected', !selectedNouns.has(c.dataset.noun)));
   }
   function renderHand() {
     const fan = document.getElementById('hand-fan');
     if (!fan) return;
-    const cfg = SUBJECTS[subject], themes = cfg.themes || [], every = handTopics();
-    const full = every.filter(th => !every.some(o => o !== th && o.nouns.length > th.nouns.length && th.nouns.every(k => o.nouns.includes(k))));
-    const fullKeys = new Set(full.map(th => th.key));
-    handOrder = handOrder.filter(k => fullKeys.has(k));
-    for (const th of full) if (!handOrder.includes(th.key)) handOrder.push(th.key);
-    const covered = new Set(full.flatMap(th => th.nouns)), loose = [...selectedNouns].filter(k => !covered.has(k)).length;
+    const cfg = SUBJECTS[subject], inHand = syncDeckTopics().map(themeByKey).filter(Boolean);
+    const shownTopics = inHand.filter(th => !inHand.some(o => o.nouns.length > th.nouns.length && topicWithin(th, o)));   // -iare is part of -are's card
+    const covered = new Set(inHand.flatMap(th => th.nouns)), loose = [...selectedNouns].filter(k => !covered.has(k)).length;
     const byKey = new Map(cfg.items.map(n => [n.noun, n])), srs = loadSrs(subject, direction), st = readStats(subject, direction);
-    const cards = handOrder.map(k => { const th = themes.find(x => x.key === k); return { key: k, label: th.label, en: th.en, n: th.nouns.length, pct: mapTopic(th, byKey, srs, st).pct }; });
+    const cards = shownTopics.map(th => ({ key: th.key, label: th.label, en: th.en, n: th.nouns.length, have: th.nouns.filter(n => selectedNouns.has(n)).length, pct: mapTopic(th, byKey, srs, st).pct }));
     const shown = cards.slice(-HAND_MAX), folded = cards.length - shown.length;
     const items = [...(folded ? [{ more: folded }] : []), ...shown, ...(loose ? [{ loose }] : []), { slot: true }];
     const count = items.length, spread = Math.min(26, 7 * (count - 1)), step = count > 1 ? spread / (count - 1) : 0;
@@ -11302,11 +11340,11 @@
     fan.innerHTML = items.map((it, i) => {
       const rot = count > 1 ? -spread / 2 + step * i : 0, lift = Math.round(Math.abs(rot) * 1.6);
       const pos = `style="--rot: ${rot.toFixed(1)}deg; --lift: ${lift}px; --ov: ${overlap}px; z-index: ${i + 1}"`;
-      if (it.slot) return `<div class="hand-card hand-slot" ${pos}><span class="hand-plus" aria-hidden="true">＋</span><span>${cfg.map ? 'Tap ＋ Add on a topic below' : 'Tap a group below to add it'}</span></div>`;
+      if (it.slot) return `<div class="hand-card hand-slot" ${pos}><span class="hand-plus" aria-hidden="true">＋</span><span>${cfg.map ? (mapPrefs().hidden ? 'Show the map below to add a topic' : 'Tap ＋ Add on a topic below') : 'Tap a group below to add it'}</span></div>`;
       if (it.more) return `<div class="hand-card hand-more" ${pos}><div class="hand-mid"><span class="hand-name">+${it.more}</span><span class="hand-en">more topic${it.more === 1 ? '' : 's'}</span></div></div>`;
       if (it.loose) return `<div class="hand-card hand-loose" ${pos}><div class="hand-top"><span class="hand-n">${it.loose}</span><button type="button" class="hand-x" data-hand-remove="__loose" aria-label="Take the single ${cfg.itemWords} out">✕</button></div>`
         + `<div class="hand-mid"><span class="hand-name">Parole scelte</span><span class="hand-en">picked one by one</span></div><div></div></div>`;
-      return `<div class="hand-card" ${pos} data-topic="${it.key}"><div class="hand-top"><span class="hand-n">${it.n}</span><button type="button" class="hand-x" data-hand-remove="${it.key}" aria-label="Take ${escapeHTML(it.label)} out of your deck">✕</button></div>`
+      return `<div class="hand-card" ${pos} data-topic="${it.key}"><div class="hand-top"><span class="hand-n">${it.have < it.n ? `${it.have}/${it.n}` : it.n}</span><button type="button" class="hand-x" data-hand-remove="${it.key}" aria-label="Take ${escapeHTML(it.label)} out of your deck">✕</button></div>`
         + `<div class="hand-mid"><span class="hand-name${it.label.length > 13 ? ' longer' : it.label.length > 9 ? ' long' : ''}">${escapeHTML(it.label)}</span><span class="hand-en">${escapeHTML(it.en)}</span></div>`
         + `<div class="hand-known"><span class="hand-bar"><i style="width: ${it.pct}%"></i></span><span>${it.pct}% known</span></div></div>`;
     }).join('');
@@ -12004,11 +12042,10 @@
     // ===== Theme picker — clicking a theme fills or clears all its nouns =====
     document.getElementById('theme-chips').addEventListener('click', (e) => {
       const group = e.target.closest('.theme-group-btn');
-      if (group) {   // a group heading: all of its themes
-        const nouns = THEMES.filter(t => t.group === group.dataset.group).flatMap(t => t.nouns);
-        const fill = !nouns.every(n => selectedNouns.has(n));
-        for (const n of nouns) { if (fill) selectedNouns.add(n); else selectedNouns.delete(n); }
-        gameArea.querySelectorAll('.verb-chip').forEach(c => c.classList.toggle('unselected', !selectedNouns.has(c.dataset.noun)));
+      if (group) {   // a group heading: all of its themes, in or out together
+        const ths = THEMES.filter(t => t.group === group.dataset.group), done = th => topicInHand(th) && topicComplete(th);
+        if (ths.every(done)) topicsOut(ths.map(th => th.key)); else topicsIn(ths.filter(th => !done(th)).map(th => th.key));
+        syncChipsToDeck();
         updateReadout();
         return;
       }
@@ -12016,12 +12053,8 @@
       if (!btn) return;
       const theme = THEMES.find(t => t.key === btn.dataset.theme);
       if (!theme) return;
-      const state = themeState(theme);
-      const shouldFill = state !== 'full'; // empty or partial → fill; full → clear
-      for (const noun of theme.nouns) {
-        if (shouldFill) selectedNouns.add(noun);
-        else selectedNouns.delete(noun);
-      }
+      if (topicInHand(theme) && topicComplete(theme)) topicsOut([theme.key]);   // in your deck → out (its shared words stay with the topics that have them)
+      else topicsIn([theme.key]);                                               // not, or only partly → in, whole
       // Sync noun chip visuals
       gameArea.querySelectorAll('.verb-chip').forEach(c => {
         if (selectedNouns.has(c.dataset.noun)) c.classList.remove('unselected');
@@ -12087,12 +12120,14 @@
     wireNounMap(applyPick);   // La mappa's buttons pick the same way as the ones above the grid
     document.getElementById('select-all').addEventListener('click', () => {
       nounData.forEach(n => selectedNouns.add(n.noun));
+      deckTopics = null;   // every topic, then
       gameArea.querySelectorAll('.verb-chip').forEach(c => c.classList.remove('unselected'));
       updateReadout();
     });
 
     document.getElementById('clear-all').addEventListener('click', () => {
       selectedNouns.clear();
+      deckTopics = [];
       gameArea.querySelectorAll('.verb-chip').forEach(c => c.classList.add('unselected'));
       updateReadout();
     });
@@ -12112,7 +12147,8 @@
       applyPick(picks);
     }
 
-    function applyPick(nounKeys) {
+    function applyPick(nounKeys) {   // a whole new set of words; whole topics among them count as added
+      deckTopics = null;
       selectedNouns.clear();
       nounKeys.forEach(k => selectedNouns.add(k));
       gameArea.querySelectorAll('.verb-chip').forEach(c => {
@@ -12128,12 +12164,12 @@
       if (e.target.closest('[data-deck-clear]')) { applyPick([]); return; }
       const rm = e.target.closest('[data-hand-remove]');
       if (!rm) return;
-      const full = handTopics(), which = rm.dataset.handRemove;
-      if (which === '__loose') { const inTopics = new Set(full.flatMap(th => th.nouns)); applyPick([...selectedNouns].filter(k => inTopics.has(k))); return; }
-      const th = full.find(x => x.key === which);
-      if (!th) return;
-      const keep = new Set(full.filter(x => x.key !== which).flatMap(x => x.nouns));
-      applyPick([...selectedNouns].filter(k => !th.nouns.includes(k) || keep.has(k)));
+      if (rm.dataset.handRemove === '__loose') {   // the words picked one by one: out; the topics stay
+        const inTopics = new Set(syncDeckTopics().map(themeByKey).filter(Boolean).flatMap(th => th.nouns));
+        [...selectedNouns].forEach(k => { if (!inTopics.has(k)) selectedNouns.delete(k); });
+      } else topicsOut([rm.dataset.handRemove]);
+      syncChipsToDeck();
+      updateReadout();
     });
     gameArea.querySelectorAll('#direction-toggle .mode-option').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -12234,16 +12270,16 @@
     const chips = document.getElementById('theme-chips');
     if (!chips) return;
     chips.querySelectorAll('.theme-group-btn').forEach(btn => {
-      const nouns = THEMES.filter(t => t.group === btn.dataset.group).flatMap(t => t.nouns);
-      const on = nouns.filter(n => selectedNouns.has(n)).length;
-      btn.classList.toggle('full', on > 0 && on === nouns.length);
-      btn.classList.toggle('partial', on > 0 && on < nouns.length);
+      const ths = THEMES.filter(t => t.group === btn.dataset.group), on = ths.flatMap(t => t.nouns).filter(n => selectedNouns.has(n)).length;
+      const full = ths.length > 0 && ths.every(th => topicInHand(th) && topicComplete(th));
+      btn.classList.toggle('full', full);
+      btn.classList.toggle('partial', !full && on > 0);
     });
     chips.querySelectorAll('.theme-chip').forEach(btn => {
       const theme = THEMES.find(t => t.key === btn.dataset.theme);
       if (!theme) return;
       btn.classList.remove('partial', 'full');
-      const state = themeState(theme);
+      const state = topicInHand(theme) && topicComplete(theme) ? 'full' : theme.nouns.some(n => selectedNouns.has(n)) ? 'partial' : 'empty';
       if (state === 'partial') btn.classList.add('partial');
       else if (state === 'full') btn.classList.add('full');
     });
@@ -12370,7 +12406,7 @@
   // tiles (shaded by your record; dashed and faded when not in the deck, the gold mark when
   // they are), and the setup's text links for whole-topic picks
   function mapDetailHTML(x, inPanel) {
-    const inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length, allIn = inDeck === x.cells.length;
+    const inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length, allIn = inDeck === x.cells.length && topicInHand(x.t);
     const work = x.tried.filter(c => !c.known).sort((a, b) => b.rate - a.rate || b.seen - a.seen), good = x.tried.filter(c => c.known);
     const weak = mapWeakFirst(x);
     const tile = c => {
@@ -12595,7 +12631,7 @@
     const open = topics.find(x => x.t.key === mapOpen) || null;
     const sq = c => `<i class="map-cell${c.seen ? '' : ' new'}${c.known ? ' known' : ''}${selectedNouns.has(c.key) ? ' in' : ''}"${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}"` : ''} title="${escapeHTML(mapCellTitle(c))}"></i>`;
     const row = x => {
-      const isOpen = open === x, inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length;
+      const isOpen = open === x, inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length, added = inDeck === x.cells.length && topicInHand(x.t);
       return `
         <div class="map-row${isOpen ? ' open' : ''}" data-topic="${x.t.key}">
           <div class="map-line">
@@ -12604,7 +12640,7 @@
             <span class="map-strip" aria-hidden="true">${x.cells.map(sq).join('')}</span>
             <span class="map-score${x.tried.length ? '' : ' untried'}"${x.tried.length ? ` style="--c: ${mapPctColor(x)}"` : ''} title="${x.known} of ${x.cells.length} known">${mapTopicPct(x)}</span>
           </button>
-          <button type="button" class="map-add${inDeck === x.cells.length ? ' in' : ''}" data-map-toggle="${x.t.key}" aria-pressed="${inDeck === x.cells.length}" title="${inDeck === x.cells.length ? `Take ${escapeHTML(x.t.label)} out of your deck` : `Put all ${x.cells.length} of ${escapeHTML(x.t.label)} in your deck`}">${inDeck === x.cells.length ? '✓ In deck' : '＋ Add'}</button>
+          <button type="button" class="map-add${added ? ' in' : ''}" data-map-toggle="${x.t.key}" aria-pressed="${added}" title="${added ? `Take ${escapeHTML(x.t.label)} out of your deck` : `Put all ${x.cells.length} of ${escapeHTML(x.t.label)} in your deck`}">${added ? '✓ In deck' : '＋ Add'}</button>
           </div>
           ${isOpen ? `<div class="endings map-inline">${mapDetailHTML(x, false)}</div>` : ''}
         </div>`;
@@ -12661,10 +12697,14 @@
     const box = document.getElementById('noun-map');
     if (!box) return;
     const refresh = () => { box.innerHTML = nounMapInner(); mapPanelFollow(); };
-    const setDeck = keys => {   // the deck as a whole: the same route as the picks above
-      applyPick(keys);
+    const setWords = keys => {   // words in or out, one by one: the topics in the deck stay as they are
+      selectedNouns.clear();
+      keys.forEach(k => selectedNouns.add(k));
+      syncChipsToDeck();
+      updateReadout();
       refresh();
     };
+    const topicEdit = change => { change(); syncChipsToDeck(); updateReadout(); refresh(); };
     box.addEventListener('pointerover', e => {
       const hit = e.target.closest && e.target.closest('.prog-hit');
       if (hit) progShowTip(hit.closest('.prog-chart'), hit);
@@ -12676,19 +12716,17 @@
     box.addEventListener('click', e => {
       const tog = e.target.closest('[data-map-toggle]');
       if (tog) {   // a whole topic, in or out
-        const th = SUBJECTS[subject].themes.find(x => x.key === tog.dataset.mapToggle);
+        const th = themeByKey(tog.dataset.mapToggle);
         if (!th) return;
-        const keys = new Set(selectedNouns), allIn = th.nouns.every(k => keys.has(k));
-        th.nouns.forEach(k => (allIn ? keys.delete(k) : keys.add(k)));
-        setDeck([...keys]);
+        topicEdit(() => (topicInHand(th) && topicComplete(th) ? topicsOut([th.key]) : topicsIn([th.key])));
         return;
       }
       const pr = e.target.closest('[data-prog-range]');
       if (pr) { saveMapPrefs({ progRange: pr.dataset.progRange }); refresh(); return; }
       const head = e.target.closest('.map-head'), sort = e.target.closest('[data-map-sort]'), pick = e.target.closest('[data-map-pick]');
       const noun = e.target.closest('[data-map-noun]'), jump = e.target.closest('[data-map-open]');
-      if (e.target.closest('#map-hide')) { saveMapPrefs({ hidden: true }); refresh(); return; }
-      if (e.target.closest('#map-show')) { saveMapPrefs({ hidden: false }); refresh(); return; }
+      if (e.target.closest('#map-hide')) { saveMapPrefs({ hidden: true }); refresh(); renderHand(); return; }
+      if (e.target.closest('#map-show')) { saveMapPrefs({ hidden: false }); refresh(); renderHand(); return; }
       if (sort) { saveMapPrefs({ sortBy: sort.dataset.mapSort }); refresh(); return; }
       if (e.target.closest('[data-map-close]')) { mapOpen = null; refresh(); return; }
       if (head || jump) {
@@ -12704,7 +12742,7 @@
       if (noun) {   // one noun in or out of the deck
         const k = noun.dataset.mapNoun, keys = new Set(selectedNouns);
         if (keys.has(k)) keys.delete(k); else keys.add(k);
-        setDeck([...keys]);
+        setWords([...keys]);
         return;
       }
       if (pick) {
@@ -12712,17 +12750,21 @@
         if (!t) return;
         const x = mapTopic(t, new Map(SUBJECTS[subject].items.map(n => [n.noun, n])));
         const what = pick.dataset.mapPick;
-        if (what === 'weak') {   // just these, and off you go
+        if (what === 'weak') {   // just these, and off you go — your deck stays as it was for afterwards
+          const keepWords = [...selectedNouns], keepTopics = syncDeckTopics().slice();
           applyPick(mapWeakFirst(x).map(c => c.key));
           const start = document.getElementById('start-btn');
           if (start) start.click();
+          selectedNouns.clear();
+          keepWords.forEach(k => selectedNouns.add(k));
+          deckTopics = keepTopics;
+          syncChipsToDeck();
+          updateReadout();
           return;
         }
-        const keys = new Set(selectedNouns);
-        if (what === 'all') t.nouns.forEach(k => keys.add(k));
-        else if (what === 'none') t.nouns.forEach(k => keys.delete(k));
-        else if (what === 'new') x.fresh.forEach(c => keys.add(c.key));
-        setDeck([...keys]);
+        if (what === 'all') topicEdit(() => topicsIn([t.key]));
+        else if (what === 'none') topicEdit(() => topicsOut([t.key]));
+        else if (what === 'new') setWords([...selectedNouns, ...x.fresh.map(c => c.key)]);
       }
     });
   }
@@ -12767,6 +12809,7 @@
     const btn = document.getElementById('weak-select');
     if (btn) btn.addEventListener('click', () => {
       selectedNouns = new Set(list.map(x => x.n.noun));
+      deckTopics = null;
       gameArea.querySelectorAll('.verb-chip').forEach(c => c.classList.toggle('unselected', !selectedNouns.has(c.dataset.noun)));
       updateReadout();
     });
@@ -13853,7 +13896,7 @@
     const s = savedDeck();
     if (!s || !s.deck.length || (!s.review && !SUBJECTS[s.subject])) return;
     if (s.review) {   // a Ripasso round: as Ripasso starts one, remembering where we were
-      Object.assign(subjectState[subject], { selected: selectedNouns, capValue, capMode, direction });
+      Object.assign(subjectState[subject], { selected: selectedNouns, topics: deckTopics, capValue, capMode, direction });
       reviewReturn = subject;   // leaving goes back to where you are now
       reviewMode = true;
     } else if (subject !== s.subject) {
