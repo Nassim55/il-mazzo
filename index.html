@@ -1359,8 +1359,8 @@
   .container[data-kind="verb"] .prompt.long { font-size: 46px; line-height: 1.1; }
   /* Every section's setup page has the same width, so switching sections never
      moves the top bar; sections without a side panel keep their content centred */
-  .container[data-view="setup"] { max-width: 1080px; }
-  .container[data-side="0"][data-view="setup"] #game-area { max-width: 660px; margin: 0 auto; }
+  .container[data-view="setup"] { max-width: 1180px; }   /* every section, the map sections' width (Nov 2026) */
+  .container[data-side="0"][data-view="setup"] #game-area { max-width: none; }
   .container[data-view="setup"] .stats,
   .container[data-view="setup"] .progress-bar,
   .container[data-view="setup"] #controls { display: none; }
@@ -1611,7 +1611,7 @@
 
 
   @media (max-width: 1100px) {
-    .container[data-side="1"][data-view="setup"] { max-width: 660px; }
+    .container[data-side="1"][data-view="setup"] { max-width: none; }
     .container[data-side="1"] .setup-body { grid-template-columns: minmax(0, 1fr); gap: 28px; }
     .endings { position: static; margin-bottom: 8px; }
     .setup-side { position: static; }
@@ -2307,6 +2307,11 @@
   .deck-topic-list { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; color: var(--ink); }
   .deck-hint { font-size: 12.5px; color: var(--ink-faded); }
   .deck-clear { font-size: 11px; }
+  .hand[hidden] { display: none !important; }
+  .table .mode-toggle, .table .start-btn, .table .passive-btn, .table .passive-msg { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }   /* the table looks the same in every section */
+  .table-deck-line { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--ink-soft); text-align: left; }
+  .table-deck-line.ripasso-parts { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  .saved-more { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 16px; }
   /* Il Mazzo's masthead; the sections in three families; the table (Nov 2026) */
   .masthead { padding: 4px 0 16px; text-align: left; }
   .mast-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 60px; line-height: 0.95; color: var(--ink); }
@@ -2432,7 +2437,7 @@
      underneath), so the section switcher folds into a 3 + 2 grid of equal buttons.
      Kept last so it overrides the wide-screen rules above. */
   @media (max-width: 1100px) {
-    .container[data-view="setup"] { max-width: 660px; }
+    .container[data-view="setup"] { max-width: none; }   /* the full width, for every section alike */
     .mode-toggle.subject-toggle { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(6, minmax(0, 1fr)); }   /* twelve sections: two rows of six */
     .subject-toggle .mode-option { white-space: normal; }
   }
@@ -11119,17 +11124,20 @@
       text = `<span class="ripasso-parts">Practise some nouns, verbs or adjectives and they'll come back here just before you'd forget them.</span>`;
     }
     el.innerHTML = `
-      <div class="ripasso-main">
-        <span class="ripasso-title">Ripasso del giorno</span>
-        <span class="ripasso-text">${text}</span>
-      </div>
-      <div class="ripasso-actions">
-        <span class="ripasso-dirs" role="group" aria-label="Review direction">
-          ${Object.entries(DIR_LABELS).map(([d, l]) => `<button type="button" data-ripasso-dir="${d}" class="${d === ripassoDir ? 'active' : ''}" aria-pressed="${d === ripassoDir}">${d === 'listen' ? '🔊' : l.short}</button>`).join('')}
-        </span>
-        ${list.length ? `<button type="button" class="submit ripasso-start" id="ripasso-start">▶ Start${list.length > REVIEW_START ? ` · ${REVIEW_START} of ${list.length}` : ''}</button>` : ''}
+      <div class="hand-fan" id="ripasso-fan"></div>
+      <div class="hand-side">
+        <div class="hand-head"><h2 class="hand-title">Ripasso del giorno</h2><div class="hand-sub">Every section — just before you'd forget</div></div>
+        ${list.length ? `<div class="deck-readout hand-count"><strong class="hand-big">${list.length}</strong> <span class="hand-unit">due today</span></div><p class="table-deck-line ripasso-parts">${parts.join(' · ')}</p>`
+          : `<p class="table-deck-line ripasso-text">${text}</p>`}
+        <div class="setup-options"><div class="opt"><span class="opt-label">Direction</span><div class="mode-toggle" role="group" aria-label="Review direction">
+          ${Object.entries(DIR_LABELS).map(([d, l]) => `<button type="button" class="mode-option${d === ripassoDir ? ' active' : ''}" data-ripasso-dir="${d}" aria-pressed="${d === ripassoDir}">${d === 'listen' ? '🔊' : l.short}</button>`).join('')}
+        </div></div></div>
+        ${list.length ? `<button type="button" class="submit start-btn" id="ripasso-start">▶ Start${list.length > REVIEW_START ? ` · ${REVIEW_START} of ${list.length}` : ''}</button>` : ''}
       </div>
     `;
+    drawFan(document.getElementById('ripasso-fan'),
+      RIPASSO_SECTIONS.filter(sec => counts[sec]).map(sec => ({ s: sec, label: SECTION_SHORT[sec] || SUBJECTS[sec].title, en: `${REVIEW_LABEL[sec]}s`, n: counts[sec], foot: ' due', attrs: ` data-ripasso-section="${sec}"` })).sort((a, b) => a.n - b.n),
+      list.length ? null : (anyHistory ? 'All done for today ✓' : 'Nothing to review yet'));
     ripassoDue = list.length;
     renderTableTabs();
     el.querySelectorAll('[data-ripasso-dir]').forEach(b => b.addEventListener('click', () => {
@@ -11495,24 +11503,69 @@
       if (loose) items.push({ s, loose, at: 1e9 });
     });
     items.sort((a, b) => a.at - b.at);   // in the order added; words picked one by one last
-    const tag = s => { const f = familyOf(s); return `<span class="hand-sect"><i style="background: ${f ? f.color : 'var(--ink-faded)'}"></i>${escapeHTML(SECTION_SHORT[s] || SUBJECTS[s].title)}</span>`; };
-    const topicsShown = items.filter(it => !it.loose), loosies = items.filter(it => it.loose);
-    const shownT = topicsShown.slice(-HAND_MAX), folded = topicsShown.length - shownT.length;
-    const all = [...(folded ? [{ more: folded }] : []), ...shownT, ...loosies, { slot: true }];
+    const slotText = cfg.map ? (mapPrefs().hidden ? 'Show the map below to add a topic' : 'Tap ＋ Add on a topic below') : (cfg.themes && cfg.themes.length && !cfg.facets ? 'Tap a group below to add it' : 'Add topics in any section');
+    drawFan(fan, items.map(it => it.loose
+      ? { s: it.s, loose: true, label: 'Parole scelte', en: 'picked one by one', n: it.loose, foot: ` ${escapeHTML(SUBJECTS[it.s].itemWords)}`, remove: '__loose', removeLabel: `Take the single ${SUBJECTS[it.s].itemWords} out`, attrs: ` data-section="${it.s}"` }
+      : { s: it.s, label: it.label, en: it.en, n: it.have < it.n ? `${it.have}/${it.n}` : it.n, pct: it.pct, foot: ` · ${it.pct}% known`, remove: it.key, removeLabel: `Take ${it.label} out of your hand`, attrs: ` data-topic="${it.key}" data-section="${it.s}"` }), slotText);
+  }
+  // ===== The table's fans (Nov 2026): La tua mano, Ripasso del giorno and Il mazzo salvato, all as cards =====
+  // items: { s (section), label, en, n (the number on the card), foot, pct (a known bar) | loose | remove (✕) | attrs }
+  // Past seven the oldest fold into a +N card; single-word cards go last; a slot card, if given, after them.
+  function fanTag(s) {
+    const f = familyOf(s);
+    return `<span class="hand-sect"><i style="background: ${f ? f.color : 'var(--ink-faded)'}"></i>${escapeHTML(SECTION_SHORT[s] || (SUBJECTS[s] ? SUBJECTS[s].title : s))}</span>`;
+  }
+  function drawFan(fan, items, slotText) {
+    if (!fan) return;
+    const main = items.filter(it => !it.loose), loosies = items.filter(it => it.loose);
+    const shown = main.slice(-HAND_MAX), folded = main.length - shown.length;
+    const all = [...(folded ? [{ more: folded }] : []), ...shown, ...loosies, ...(slotText ? [{ slot: slotText }] : [])];
     const count = all.length, spread = Math.min(26, 7 * (count - 1)), step = count > 1 ? spread / (count - 1) : 0;
     const overlap = count <= 4 ? 18 : Math.min(58, 18 + (count - 4) * 10);
-    const slotText = cfg.map ? (mapPrefs().hidden ? 'Show the map below to add a topic' : 'Tap ＋ Add on a topic below') : (cfg.themes && cfg.themes.length && !cfg.facets ? 'Tap a group below to add it' : 'Add topics in any section');
     fan.innerHTML = all.map((it, i) => {
       const rot = count > 1 ? -spread / 2 + step * i : 0, lift = Math.round(Math.abs(rot) * 1.6);
       const pos = `style="--rot: ${rot.toFixed(1)}deg; --lift: ${lift}px; --ov: ${overlap}px; z-index: ${i + 1}"`;
-      if (it.slot) return `<div class="hand-card hand-slot" ${pos}><span class="hand-plus" aria-hidden="true">＋</span><span>${slotText}</span></div>`;
+      if (it.slot) return `<div class="hand-card hand-slot" ${pos}><span class="hand-plus" aria-hidden="true">＋</span><span>${it.slot}</span></div>`;
       if (it.more) return `<div class="hand-card hand-more" ${pos}><div class="hand-mid"><span class="hand-name">+${it.more}</span><span class="hand-en">more topic${it.more === 1 ? '' : 's'}</span></div></div>`;
-      if (it.loose) return `<div class="hand-card hand-loose" ${pos} data-section="${it.s}"><div class="hand-top">${tag(it.s)}<button type="button" class="hand-x" data-hand-remove="__loose" data-section="${it.s}" aria-label="Take the single ${escapeHTML(SUBJECTS[it.s].itemWords)} out">✕</button></div>`
-        + `<div class="hand-mid"><span class="hand-name">Parole scelte</span><span class="hand-en">picked one by one</span></div><div class="hand-known"><span><span class="hand-n">${it.loose}</span> ${escapeHTML(SUBJECTS[it.s].itemWords)}</span></div></div>`;
-      return `<div class="hand-card" ${pos} data-topic="${it.key}" data-section="${it.s}"><div class="hand-top">${tag(it.s)}<button type="button" class="hand-x" data-hand-remove="${it.key}" data-section="${it.s}" aria-label="Take ${escapeHTML(it.label)} out of your hand">✕</button></div>`
-        + `<div class="hand-mid"><span class="hand-name${it.label.length > 13 ? ' longer' : it.label.length > 9 ? ' long' : ''}">${escapeHTML(it.label)}</span><span class="hand-en">${escapeHTML(it.en)}</span></div>`
-        + `<div class="hand-known"><span class="hand-bar"><i style="width: ${it.pct}%"></i></span><span><span class="hand-n">${it.have < it.n ? `${it.have}/${it.n}` : it.n}</span> · ${it.pct}% known</span></div></div>`;
+      const x = it.remove ? `<button type="button" class="hand-x" data-hand-remove="${it.remove}" data-section="${it.s}" aria-label="${escapeHTML(it.removeLabel || 'Take it out')}">✕</button>` : '';
+      const size = it.label.length > 13 ? ' longer' : it.label.length > 9 ? ' long' : '';
+      return `<div class="hand-card${it.loose ? ' hand-loose' : ''}" ${pos}${it.attrs || ''}><div class="hand-top">${fanTag(it.s)}${x}</div>`
+        + `<div class="hand-mid"><span class="hand-name${size}">${escapeHTML(it.label)}</span><span class="hand-en">${escapeHTML(it.en || '')}</span></div>`
+        + `<div class="hand-known">${it.pct != null ? `<span class="hand-bar"><i style="width: ${it.pct}%"></i></span>` : ''}<span><span class="hand-n">${it.n}</span>${it.foot || ''}</span></div></div>`;
     }).join('');
+  }
+  // The saved deck, gathered back into the topics it came from: in each section, the topic holding most
+  // of what's left, then the next — words in no topic of two or more share a Parole scelte card
+  function savedDeckItems(sv) {
+    const byKey = new Map((sv.cards || []).map(c => [c.key, c])), per = new Map();
+    for (const k of sv.deck || []) {
+      const c = byKey.get(k);
+      const sec = c && (c.subject || sv.subject);
+      if (!c || !sec || !SUBJECTS[sec]) continue;
+      if (!per.has(sec)) per.set(sec, new Map());
+      const m = per.get(sec);
+      m.set(c.noun, (m.get(c.noun) || 0) + 1);
+    }
+    const items = [], cardsOf = (m, keys) => keys.reduce((a, x) => a + m.get(x), 0);
+    for (const [sec, m] of per) {
+      const left = new Set(m.keys()), themes = SUBJECTS[sec].themes || [];
+      for (;;) {
+        let best = null, bestN = 0;
+        for (const th of themes) {
+          const k = th.nouns.reduce((a, x) => a + (left.has(x) ? 1 : 0), 0);
+          if (k > bestN || (k === bestN && k > 0 && best && th.nouns.length < best.nouns.length)) { best = th; bestN = k; }
+        }
+        if (!best || bestN < 2) break;
+        const inIt = best.nouns.filter(x => left.has(x)), n = cardsOf(m, inIt);
+        inIt.forEach(x => left.delete(x));
+        items.push({ s: sec, label: best.label, en: best.en, n, foot: ` card${n === 1 ? '' : 's'}`, attrs: ` data-saved-topic="${best.key}" data-section="${sec}"` });
+      }
+      if (left.size) {
+        const n = cardsOf(m, [...left]);
+        items.push({ s: sec, loose: true, label: 'Parole scelte', en: 'picked one by one', n, foot: ` card${n === 1 ? '' : 's'}`, attrs: ` data-section="${sec}"` });
+      }
+    }
+    return items.sort((a, b) => a.n - b.n);   // the biggest on top
   }
   function renderTableTabs() {
     const el = document.getElementById('table-tabs');
@@ -12169,8 +12222,8 @@
               </div>
             </section>
           </div>
-          <div class="table-panel" id="table-ripasso" role="tabpanel" hidden><div class="ripasso" id="ripasso"></div></div>
-          <div class="table-panel" id="table-saved" role="tabpanel" hidden><div class="ripasso saved-deck" id="saved-deck" hidden></div></div>
+          <div class="table-panel" id="table-ripasso" role="tabpanel" hidden><section class="hand table-deck" id="ripasso" aria-label="Ripasso del giorno"></section></div>
+          <div class="table-panel" id="table-saved" role="tabpanel" hidden><section class="hand table-deck" id="saved-deck" aria-label="Il mazzo salvato" hidden></section></div>
         </section>
       </div>
     `;
@@ -14157,24 +14210,25 @@
     if (!el) return;
     const s = savedDeck();
     el.hidden = !s;
-    if (!s) { el.innerHTML = ''; return; }
-    const what = s.review ? 'Ripasso del giorno' : SUBJECTS[s.subject] ? SUBJECTS[s.subject].title : s.subject;
+    if (!s) { el.innerHTML = ''; renderTableTabs(); return; }
+    const what = s.review ? (s.labels && s.labels.title) || 'Ripasso del giorno' : SUBJECTS[s.subject] ? SUBJECTS[s.subject].title : s.subject;
     const n = s.deck.length;
     const where = s.done ? `finished · ${s.score} of ${n} right` : s.index ? `card ${s.index + 1} of ${n} · ${s.score} right so far` : `${n} cards, not started`;
     el.innerHTML = `
-      <div class="ripasso-main">
-        <span class="ripasso-title">Il mazzo salvato</span>
-        <span class="ripasso-text"><strong>${escapeHTML(what)}</strong> · ${where} <span class="ripasso-parts">${DIR_LABELS[s.direction] ? DIR_LABELS[s.direction].short : ''} · saved ${savedWhen(s.at)}</span></span>
-      </div>
-      <div class="ripasso-actions">
-        <button type="button" class="ghost" id="saved-forget" title="Forget the saved deck">forget it</button>
-        ${s.done || !s.index ? '' : '<button type="button" class="ghost" id="saved-restart">from the start</button>'}
-        <button type="button" class="submit ripasso-start" id="saved-resume">▶ ${s.done ? 'Play it again' : 'Riprendi'}</button>
+      <div class="hand-fan" id="saved-fan"></div>
+      <div class="hand-side">
+        <div class="hand-head"><h2 class="hand-title">Il mazzo salvato</h2><div class="hand-sub">${DIR_LABELS[s.direction] ? DIR_LABELS[s.direction].short : ''} · saved ${savedWhen(s.at)}</div></div>
+        <div class="deck-readout hand-count"><strong class="hand-big">${n}</strong> <span class="hand-unit">card${n === 1 ? '' : 's'}</span></div>
+        <p class="table-deck-line"><strong>${escapeHTML(what)}</strong> · ${where}</p>
+        <button type="button" class="submit start-btn" id="saved-resume">▶ ${s.done ? 'Play it again' : 'Riprendi'}</button>
+        <div class="saved-more">${s.done || !s.index ? '' : '<button type="button" class="ghost" id="saved-restart">from the start</button>'}<button type="button" class="ghost" id="saved-forget" title="Forget the saved deck">forget it</button></div>
       </div>`;
+    drawFan(document.getElementById('saved-fan'), savedDeckItems(s), null);
     document.getElementById('saved-resume').addEventListener('click', () => resumeSavedDeck(false));
     const restart = document.getElementById('saved-restart');
     if (restart) restart.addEventListener('click', () => resumeSavedDeck(true));
     document.getElementById('saved-forget').addEventListener('click', () => { forgetSavedDeck(); renderSavedDeck(); });
+    renderTableTabs();
   }
   // Leaving the page mid-round: the saved round keeps its place
   window.addEventListener('pagehide', () => { if (savedLive && container.dataset.view === 'game') saveDeckNow(); });

@@ -83,4 +83,29 @@ d.querySelector('.map-row[data-topic="tempo"] .map-add').click();
 d.querySelector('#hand [data-deck-clear]').click();
 ok(ev('handSections().length') === 0 && ev('subjectState.adjectives.selected.size') === 0 && d.getElementById('start-btn').disabled, 'clear: the whole hand, every section');
 ok(B.errors.length === 0, 'no errors along the way');
+
+// ---- Ripasso del giorno and the saved deck, as cards like the hand ----
+B = boot({ 'flipcards-subject': 'nouns' });
+d = B.d; ev = B.ev;
+ev("ripassoDir = 'en-it'; renderRipasso();");
+ok(/Nothing to review yet/.test(d.getElementById('ripasso-fan').textContent) && !d.getElementById('ripasso-start'), 'nothing practised yet: Ripasso\'s fan is an empty card saying so, and no Start');
+ev(`(() => { const due = (sec, keys) => { const s = loadSrs(sec, 'en-it'); keys.forEach(k => s[k] = { d: today() - 1, b: 1 }); localStorage.setItem(srsKey(sec, 'en-it'), JSON.stringify(s)); };
+  due('nouns', NOUN_THEMES.find(t => t.key === 'tempo').nouns.slice(0, 9)); due('verbs', ['parlare', 'capire']); renderRipasso(); })()`);
+const rfan = [...d.querySelectorAll('#ripasso-fan .hand-card[data-ripasso-section]')].map(c => `${c.dataset.ripassoSection} ${c.querySelector('.hand-n').textContent}`);
+ok(rfan.join() === 'verbs 2,nouns 9' && /Sostantivi/.test(d.querySelector('#ripasso-fan [data-ripasso-section="nouns"] .hand-sect').textContent) && !d.querySelector('#ripasso-fan .hand-x'),
+   `Ripasso: a card per section with words due, the biggest on top, tagged like the hand's (${rfan.join(' · ')})`);
+ok(/11 due today/.test(d.getElementById('ripasso').textContent.replace(/\s+/g, ' ')) && /9 nouns · 2 regular verbs/.test(d.getElementById('ripasso').textContent) && d.getElementById('ripasso-start'),
+   'beside them: 11 due today, the breakdown, its direction and Start');
+d.querySelector('.map-row[data-topic="tempo"] .map-add').click();
+d.querySelector('.map-row[data-topic="corpo"] .map-add').click();
+d.getElementById('start-btn').click();
+ev('saveDeckNow()');
+d.getElementById('change-btn').click();
+const sfan = [...d.querySelectorAll('#saved-fan .hand-card[data-saved-topic]')].map(c => `${c.dataset.savedTopic} ${c.querySelector('.hand-n').textContent}`).sort();
+const sizes = ['corpo', 'tempo'].map(k => `${k} ${ev(`NOUN_THEMES.find(t => t.key === '${k}').nouns.length`)}`);
+ok(d.querySelector('[data-table-tab="saved"]') && sfan.join() === sizes.join() && /103 cards, not started|cards, not started/.test(d.getElementById('saved-deck').textContent) && d.getElementById('saved-resume'),
+   `a saved round from Tempo and Corpo: its tab, and its cards gathered back into Tempo and Corpo (${sfan.join(' · ')}), with Riprendi beside them`);
+d.getElementById('saved-forget').click();
+ok(!d.querySelector('[data-table-tab="saved"]') && d.getElementById('saved-deck').hidden, 'forget it: the saved deck and its tab go');
+ok(B.errors.length === 0, 'no errors here either');
 done();
