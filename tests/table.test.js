@@ -32,11 +32,11 @@ d.querySelector('[data-table-tab="hand"]').click();
 // ---- One hand, every section ----
 d.querySelector('.map-row[data-topic="tempo"] .map-add').click();
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
-d.querySelector('.map-row[data-topic="are"] .map-add').click();
+d.querySelector('.map-row[data-topic="freq1"] .map-add').click();
 const cards = () => [...d.querySelectorAll('#hand-fan .hand-card[data-topic]')].map(c => `${c.dataset.section}:${c.dataset.topic}`);
-const words = ev("NOUN_THEMES.find(t => t.key === 'tempo').nouns.length") + ev("SUBJECTS.verbs.themes.find(t => t.key === 'are').nouns.length");
-ok(cards().join() === 'nouns:tempo,verbs:are' && /Sostantivi/.test(d.querySelector('#hand-fan [data-topic="tempo"] .hand-sect').textContent) && /Verbi regolari/.test(d.querySelector('#hand-fan [data-topic="are"] .hand-sect').textContent),
-   'on the verbs page, the hand holds Tempo (Sostantivi) and -are (Verbi regolari), each card tagged with its section');
+const words = ev("NOUN_THEMES.find(t => t.key === 'tempo').nouns.length") + ev("SUBJECTS.verbs.themes.find(t => t.key === 'freq1').nouns.length");
+ok(cards().join() === 'nouns:tempo,verbs:freq1' && /Sostantivi/.test(d.querySelector('#hand-fan [data-topic="tempo"] .hand-sect').textContent) && /Verbi regolari/.test(d.querySelector('#hand-fan [data-topic="freq1"] .hand-sect').textContent),
+   'on the verbs page, the hand holds Tempo (Sostantivi) and the 50 most common verbs (Verbi regolari), each card tagged with its section');
 ok(d.getElementById('selected-count').textContent === String(words) && d.getElementById('hand-words').textContent === 'words' && /2 sections/.test(d.getElementById('readout-scope').textContent)
    && new RegExp(`${words} words · 2 sections`).test(d.querySelector('[data-table-tab="hand"] .table-tab-sub').textContent), `the count is the whole hand: ${words} words, 2 sections — the tab says so too`);
 const total = +d.getElementById('card-count').textContent;
@@ -44,9 +44,9 @@ d.getElementById('start-btn').click();
 ok(ev('reviewMode') && ev('[...new Set(deck.map(c => c.subject))].sort().join()') === 'nouns,verbs' && ev('deck.length') === total && ev("deck.every(c => c.key.startsWith(c.subject + ':'))")
    && d.getElementById('app-title').textContent === 'La tua mano', `Start: one round of ${total} cards from both sections, each card in its own section`);
 d.getElementById('change-btn').click();
-ok(ev('subject') === 'verbs' && !ev('reviewMode') && cards().join() === 'nouns:tempo,verbs:are', 'afterwards, back on the verbs page, the hand as it was');
+ok(ev('subject') === 'verbs' && !ev('reviewMode') && cards().join() === 'nouns:tempo,verbs:freq1', 'afterwards, back on the verbs page, the hand as it was');
 d.querySelector('#hand-fan [data-hand-remove="tempo"][data-section="nouns"]').click();
-ok(cards().join() === 'verbs:are' && ev('subjectState.nouns.selected.size') === 0, '✕ on the nouns card, from the verbs page: Tempo leaves the hand');
+ok(cards().join() === 'verbs:freq1' && ev('subjectState.nouns.selected.size') === 0, '✕ on the nouns card, from the verbs page: Tempo leaves the hand');
 d.getElementById('start-btn').click();
 ok(!ev('reviewMode') && ev('deck.every(c => !c.subject)') && !d.querySelector('.direction-toggle').hidden, 'just this section: a round as before (its own direction toggle and all)');
 d.getElementById('change-btn').click();
@@ -58,7 +58,7 @@ ev("chosenVoice = () => ({ name: 'Alice', lang: 'it-IT' });");
 d.getElementById('passive-btn').click();
 ok(d.getElementById('container').dataset.view === 'passive' && ev('[...new Set(passive.cards.map(c => c.subject))].sort().join()') === 'nouns,verbs', 'A spasso: the whole hand, nouns and verbs');
 ev('stopPassive()');
-ok(ev('subject') === 'nouns' && d.getElementById('container').dataset.view === 'setup' && cards().join() === 'verbs:are,nouns:corpo', '…and back on the nouns page, the hand as it was');
+ok(ev('subject') === 'nouns' && d.getElementById('container').dataset.view === 'setup' && cards().join() === 'verbs:freq1,nouns:corpo', '…and back on the nouns page, the hand as it was');
 
 // ---- One direction for the whole hand ----
 d.querySelector('#direction-toggle [data-direction="it-en"]').click();

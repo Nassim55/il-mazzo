@@ -41,11 +41,11 @@ add('corpo');
 B.d.getElementById('start-btn').click();
 ok(B.d.querySelector('.container').dataset.view === 'game' && B.ev('deck.length') === nouns('corpo').length, 'Start plays the hand');
 
-// ---- A topic inside a bigger one is part of its card; the direction is the hand's too ----
+// ---- The verbs in bands by frequency; the direction is the hand's too ----
 B = boot({ 'flipcards-subject': 'verbs' });
-B.ev("selectedNouns.clear(); deckTopics = []; topicsIn(['are']); updateReadout();");   // -are added, as its ＋ Add does
+B.ev("selectedNouns.clear(); deckTopics = []; topicsIn(['freq1']); updateReadout();");   // the 50 most common, as their ＋ Add does
 const vfan = [...B.d.querySelectorAll('#hand-fan .hand-card[data-topic]')].map(c => c.dataset.topic);
-ok(vfan.join() === 'are', `-are in the hand: one card — -care/-gare and -iare are inside it (${vfan.join(', ')})`);
+ok(vfan.join() === 'freq1' && B.d.querySelector('#hand-fan [data-topic="freq1"] .hand-name').textContent === '1–50', `the 50 most common verbs in the hand: one card, 1–50 (${vfan.join(', ')})`);
 B.d.querySelector('#direction-toggle [data-direction="it-en"]').click();
 ok(B.ev('direction') === 'it-en' && /Italian → English/.test(B.d.querySelector('#noun-map .map-eyebrow').textContent), 'the direction, from the hand: the map follows at once');
 B = boot({ 'flipcards-subject': 'phrases' });

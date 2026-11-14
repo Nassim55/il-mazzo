@@ -18,8 +18,8 @@ ok(!!d.querySelector('.irregular-panel') && d.querySelector('.irregular-panel .e
 ok(!!d.getElementById('mode-toggle') && !!d.getElementById('direction-toggle') && d.querySelectorAll('.verb-chip').length === 50, 'mode & direction toggles, 50 verb chips');
 ok(ev('selectedNouns.size') === 0, 'irregular section has its own (empty) selection');
 const chips = [...d.querySelectorAll('.theme-chip')].map(c => c.textContent.replace(/\s+/g, ' ').trim());
-ok(chips.length === 11 && chips.some(c => /^-go ?24$/.test(c)), `11 theme chips (${chips.join(' | ')})`);
-d.querySelector('.theme-chip[data-theme="go"]').click();
+ok([...d.querySelectorAll('.theme-chip')].map(c => c.dataset.theme).join() === 'freq1,freq2' && chips[0].startsWith('1–25') && chips[1].startsWith('26–50'), `grouped by frequency, 25 at a time (${chips.join(' | ')})`);
+ev("IRREG_THEMES.find(t => t.key === 'go').nouns.forEach(k => selectedNouns.add(k)); updateReadout();");   // the -go verbs, picked from the data
 ok(d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('24 verbs · 144 cards'), '-go theme: 24 verbs · 144 cards');
 d.getElementById('clear-all').click();
 d.getElementById('weakest-10').click();

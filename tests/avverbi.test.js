@@ -10,8 +10,9 @@ const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.
 ok(tabs.length === 12 && tabs[5] === 'Avverbi e congiunzioni' && tabs[4] === 'Aggettivi' && d.getElementById('app-title').textContent === 'Avverbi e congiunzioni', 'a section of its own, after Aggettivi');
 ok(ev('AVV_ITEMS.length') === 112 && ev('AVV_ORDER.length') === 112 && ev('AVV_ORDER.slice(0, 4).join()') === 'e,non,che-cong,ma', `112 words, most common first (${ev('AVV_ORDER.slice(0, 6).map(k => AVV_ITEMS.find(n => n.noun === k).it).join(", ")')}…)`);
 const map = d.getElementById('noun-map');
-ok(map.querySelectorAll('.map-row').length === 9 && ['tempo', 'luogo', 'quantita', 'modo', 'certezza', 'discorso', 'domande', 'unire', 'collegare'].every(k => map.querySelector(`.map-row[data-topic="${k}"]`)),
-   'La mappa, a line per topic: time, place, amount, manner, yes/no/maybe, talking it through, questions, and/but/or, linking clauses');
+ok(map.querySelectorAll('.map-row').length === 3 && ['freq1', 'freq2', 'freq3'].every(k => map.querySelector(`.map-row[data-topic="${k}"]`))
+   && ev("SUBJECTS.avverbi.themes.map(t => t.label + ' ' + t.nouns.length).join()") === '1–50 50,51–100 50,101–112 12' && ev("SUBJECTS.avverbi.themes[0].nouns.slice(0, 4).join()") === 'e,non,che-cong,ma',
+   'La mappa, a line per 50 by frequency: the 50 most common (e, non, che, ma…), the next 50, the last 12');
 ok(d.querySelector('#map-panel .map-chart .endings-title').textContent === 'Le parole piccole' && /Non comes first/.test(d.getElementById('map-panel').textContent) && /An accent changes the word/.test(d.getElementById('map-panel').textContent),
    'its chart in the panel: where they go, and the traps');
 
@@ -42,7 +43,8 @@ ok(B.ev("loadSrs('story', 'en-it').spesso.l") === B.ev('today()'), 'spesso count
 // ---- Known, on the map ----
 B = boot({ 'flipcards-subject': 'avverbi' });
 B.ev("for (let i = 0; i < 5; i++) srsAnswer('avverbi', 'en-it', 'sempre', true); document.getElementById('noun-map').innerHTML = nounMapInner();");
-ok(B.d.querySelector('.map-row[data-topic="tempo"] .map-cell.known') && /^sempre — always: /.test(B.d.querySelector('.map-row[data-topic="tempo"] .map-cell.known').title), 'right 5 times: sempre is known, dotted on the map');
+const band = B.ev("SUBJECTS.avverbi.themes.find(t => t.nouns.includes('sempre')).key");
+ok(B.d.querySelector(`.map-row[data-topic="${band}"] .map-cell.known`) && /^sempre — always: /.test(B.d.querySelector(`.map-row[data-topic="${band}"] .map-cell.known`).title), `right 5 times: sempre is known, dotted on the map (in ${band})`);
 ok(['avverbi-stats-v1', 'avverbi-stats-iten-v1', 'avverbi-stats-listen-v1', 'avverbi-stats-v1:srs', 'avverbi-assoc-v1'].every(k => B.ev(`syncedKeys().has(${JSON.stringify(k)})`)), 'its progress syncs');
 ok(B.errors.length === 0, 'no errors along the way');
 done();

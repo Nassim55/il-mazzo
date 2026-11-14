@@ -10825,6 +10825,25 @@
   // Switching swaps the engine's data (items, themes, ranking) and its saved
   // progress and associations. Each subject keeps its own selection, subset
   // settings and direction while the page is open.
+  // ===== Frequency bands (Nov 2026) =====
+  // Adjectives, the small words and both verb sections are grouped by how common they are — the 50 most
+  // common, the next 50, and so on (the irregular verbs, only 50 in all, 25 at a time) — by the same
+  // frequency order the "most common" deck size uses. Their topic lists (ADJ_THEMES, AVV_THEMES,
+  // VERB_THEMES, IRREG_THEMES) stay as data. Any word without a rank goes in the last band.
+  function frequencyBands(items, order, size = 50) {
+    const keys = new Set(items.map(n => n.noun)), ranked = order.filter(k => keys.has(k)), seen = new Set(ranked);
+    const all = [...ranked, ...items.map(n => n.noun).filter(k => !seen.has(k))], bands = [];
+    for (let i = 0; i < all.length; i += size) {
+      const nouns = all.slice(i, i + size), last = i + size >= all.length;
+      bands.push({ key: `freq${bands.length + 1}`, label: `${i + 1}–${i + nouns.length}`, nouns,
+                   en: i === 0 ? `the ${nouns.length} most common` : last && nouns.length < size ? `the last ${nouns.length}` : `the next ${nouns.length}` });
+    }
+    return bands;
+  }
+  const ADJ_BANDS = frequencyBands(ADJ_ITEMS, ADJ_FREQUENCY_ORDER);
+  const AVV_BANDS = frequencyBands(AVV_ITEMS, AVV_ORDER);
+  const VERB_BANDS = frequencyBands(VERB_ITEMS, VERB_FREQUENCY_ORDER);
+  const IRREG_BANDS = frequencyBands(IRREG_ITEMS, IRREG_FREQUENCY_ORDER, 25);
   const SUBJECTS = {
     nouns: {
       kind: 'noun', panel: null, map: true,
@@ -10842,7 +10861,7 @@
       setupTitle: 'Choose your regular verbs',
       setupSub: 'Verbs that follow the -are, -ere and -ire patterns in the present tense (a few, like <em>vivere</em> and <em>correre</em>, turn irregular in other tenses). Pick a practice mode — full conjugations or just the infinitive — then tap verbs, choose a group, or use the quick picks.',
       itemWord: 'verb', itemWords: 'verbs',
-      items: VERB_ITEMS, themes: VERB_THEMES, frequency: VERB_FREQUENCY_ORDER,
+      items: VERB_ITEMS, themes: VERB_BANDS, frequency: VERB_FREQUENCY_ORDER,
       // 'verbi-regolari-stats' is the verb game's original key and format, so its
       // history carries over (the verb game stored both directions there)
       statsKeys: { 'en-it': 'verbi-regolari-stats', 'it-en': 'verbi-regolari-stats-iten', listen: 'verbi-regolari-stats-listen' }, statsFormat: 'verb',
@@ -10854,7 +10873,7 @@
       setupTitle: 'Choose your irregular verbs',
       setupSub: 'The 50 most common verbs whose present tense breaks the regular patterns. Pick a practice mode — full conjugations or just the infinitive — then tap verbs, choose a pattern or topic, or use the quick picks.',
       itemWord: 'verb', itemWords: 'verbs',
-      items: IRREG_ITEMS, themes: IRREG_THEMES, frequency: IRREG_FREQUENCY_ORDER,
+      items: IRREG_ITEMS, themes: IRREG_BANDS, frequency: IRREG_FREQUENCY_ORDER,
       statsKeys: { 'en-it': 'verbi-irregolari-stats', 'it-en': 'verbi-irregolari-stats-iten', listen: 'verbi-irregolari-stats-listen' }, statsFormat: 'verb',
       assocKey: 'verbi-irregolari-assoc-v1'
     },
@@ -10876,7 +10895,7 @@
       setupTitle: 'Choose your adjectives',
       setupSub: 'Tap any adjective to toggle it — or click and drag to paint a selection. In <em>Dictionary form</em>, type the masculine <em>or</em> feminine singular (<em>piccolo</em> and <em>piccola</em> both count); <em>All forms</em> asks for every gender and number.',
       itemWord: 'adjective', itemWords: 'adjectives',
-      items: ADJ_ITEMS, themes: ADJ_THEMES, frequency: ADJ_FREQUENCY_ORDER,
+      items: ADJ_ITEMS, themes: ADJ_BANDS, frequency: ADJ_FREQUENCY_ORDER,
       // 'aggettivi-stats-v1' is the original game's key and format, so its history carries over
       statsKeys: { 'en-it': 'aggettivi-stats-v1', 'it-en': 'aggettivi-stats-iten-v1', listen: 'aggettivi-stats-listen-v1' }, statsFormat: 'noun',
       assocKey: 'aggettivi-assoc-v1'
@@ -10887,7 +10906,7 @@
       setupTitle: 'Choose your little words',
       setupSub: 'The small words in every sentence — when, where, how much, yes and no, and the ones that join two thoughts together. Type the Italian: accents and punctuation don\'t count, and where two words mean the same (<em>adesso</em> or <em>ora</em>) either is right. After each answer, a note: where the word comes from, and an example.',
       itemWord: 'word', itemWords: 'words',
-      items: AVV_ITEMS, themes: AVV_THEMES, frequency: AVV_ORDER,
+      items: AVV_ITEMS, themes: AVV_BANDS, frequency: AVV_ORDER,
       statsKeys: { 'en-it': 'avverbi-stats-v1', 'it-en': 'avverbi-stats-iten-v1', listen: 'avverbi-stats-listen-v1' }, statsFormat: 'noun',
       assocKey: 'avverbi-assoc-v1'
     },
@@ -11341,11 +11360,11 @@
   // The setup's one line: what to do, and the one rule that matters (the longer story is in Settings & more)
   const SETUP_LINES = {
     nouns: 'Add whole topics from the map to your hand. Answer with the article: <em>la stazione</em>.',
-    verbs: 'Add whole topics from the map to your hand — every person, or just the infinitive.',
-    irregular: 'Add whole topics from the map to your hand — every person, or just the infinitive.',
+    verbs: 'Add the 50 most common from the map to your hand, then the next 50 — every person, or just the infinitive.',
+    irregular: 'Add the 25 most common from the map to your hand, then the next 25 — every person, or just the infinitive.',
     mipiace: 'Tap a verb or a pattern below to choose its sentences.',
-    adjectives: 'Add whole topics from the map to your hand — the dictionary form, or all four forms.',
-    avverbi: 'Add whole topics from the map to your hand. Accents don\'t count.',
+    adjectives: 'Add the 50 most common from the map to your hand, then the next 50 — the dictionary form, or all four forms.',
+    avverbi: 'Add the 50 most common from the map to your hand, then the next 50. Accents don\'t count.',
     possessives: 'Add whole groups below to your hand.',
     prepositions: 'Add whole groups below to your hand.',
     phrases: 'Add whole groups below to your hand.',

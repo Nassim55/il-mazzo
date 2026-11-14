@@ -39,23 +39,26 @@ ok(B.ev('syncDeckTopics().join()') === 'tempo,natura', 'the deck remembers the t
 B.ev("selectedNouns.add('pane'); updateReadout();");
 ok(/1/.test(B.d.querySelector('#hand-fan .hand-loose .hand-n').textContent) && B.ev('syncDeckTopics().join()') === 'tempo,natura', 'a word added on its own sits on the single-words card; the topics stay');
 
-// ---- Inside a bigger topic: -care/-gare and -iare inside -are ----
-B = setUp('verbs');
-B.pill('are');
-ok(B.card('are') && !B.card('cgare') && !B.card('iare') && B.isIn('cgare') && B.isIn('iare'), '-are in: one card; -care/-gare and -iare show as in, inside it');
-B.d.querySelector('#hand-fan [data-hand-remove="are"]').click(); B.redraw();
-ok(!B.nouns('are').some(B.has) && !B.card('cgare') && !B.card('iare') && B.ev('selectedNouns.size') === 0, '✕ on -are: all of it goes, -care/-gare and -iare too — no cards pop back');
-B.pill('are'); B.pill('iare');
-ok(!B.nouns('iare').some(B.has) && B.card('are') && new RegExp(`^${B.nouns('are').length - B.nouns('iare').length}/${B.nouns('are').length}$`).test(B.card('are').querySelector('.hand-n').textContent),
-   'taking -iare out on its own makes a hole in -are — its card says how many are left');
-B.pill('are');
-ok(B.nouns('are').every(B.has) && B.isIn('are') && B.isIn('iare'), '＋ Add on -are fills the hole');
+// ---- Inside a bigger topic (a made-up one holding all of Tempo and Natura) ----
+B = setUp('nouns');
+B.ev("NOUN_THEMES.push({ key: 'tn-big', label: 'Tempo e natura', en: 'test', nouns: [...new Set([...NOUN_THEMES.find(t => t.key === 'tempo').nouns, ...NOUN_THEMES.find(t => t.key === 'natura').nouns])] }); showSetup();");
+B.pill('tn-big');
+ok(B.card('tn-big') && !B.card('tempo') && !B.card('natura') && B.isIn('tempo') && B.isIn('natura'), 'a big topic in: one card; Tempo and Natura show as in, inside it');
+B.d.querySelector('#hand-fan [data-hand-remove="tn-big"]').click(); B.redraw();
+ok(!B.nouns('tn-big').some(B.has) && !B.card('tempo') && !B.card('natura') && B.ev('selectedNouns.size') === 0, '✕ on it: all of it goes, Tempo and Natura too — no cards pop back');
+B.pill('tn-big'); B.pill('tempo');
+ok(!B.nouns('tempo').some(B.has) && B.card('tn-big') && new RegExp(`^${B.nouns('tn-big').length - B.nouns('tempo').length}/${B.nouns('tn-big').length}$`).test(B.card('tn-big').querySelector('.hand-n').textContent),
+   'taking Tempo out on its own makes a hole in the big one — its card says how many are left');
+B.pill('tn-big');
+ok(B.nouns('tn-big').every(B.has) && B.isIn('tn-big') && B.isIn('tempo'), '＋ Add on the big one fills the hole');
+B.ev("NOUN_THEMES.pop(); showSetup();");
 
 // ---- A topic showing as in keeps its words, even when it's only in inside a bigger one ----
-B = setUp('adjectives');
-const big = B.ev("THEMES.filter(t => THEMES.some(a => a !== t && THEMES.some(b => b !== t && b !== a && a.nouns.every(n => t.nouns.includes(n)) && b.nouns.every(n => t.nouns.includes(n)) && a.nouns.some(n => b.nouns.includes(n)) && !a.nouns.every(n => b.nouns.includes(n)) && !b.nouns.every(n => a.nouns.includes(n))))).map(t => t.key)[0]");
-const pair = B.ev(`(() => { const T = themeByKey(${JSON.stringify(big)}), ins = THEMES.filter(t => t !== T && t.nouns.every(n => T.nouns.includes(n)));
-  for (const a of ins) for (const b of ins) if (a !== b && a.nouns.some(n => b.nouns.includes(n)) && !a.nouns.every(n => b.nouns.includes(n)) && !b.nouns.every(n => a.nouns.includes(n))) return [a.key, b.key]; })()`);
+// (A made-up bigger topic holding Tempo and Natura, which share the seasons — the shape the adjectives'
+// grammar topics used to give before they became frequency bands.)
+B = setUp('nouns');
+B.ev("NOUN_THEMES.push({ key: 'tn-test', label: 'Tempo e natura', en: 'test', nouns: [...new Set([...NOUN_THEMES.find(t => t.key === 'tempo').nouns, ...NOUN_THEMES.find(t => t.key === 'natura').nouns])] }); showSetup();");
+const big = 'tn-test', pair = ['tempo', 'natura'];
 B.pill(big);
 B.pill(pair[0]);
 ok(!B.nouns(pair[0]).some(B.has) && !B.isIn(pair[0]) && B.nouns(big).some(B.has),
@@ -63,6 +66,7 @@ ok(!B.nouns(pair[0]).some(B.has) && !B.isIn(pair[0]) && B.nouns(big).some(B.has)
 B.d.getElementById('clear-all').click();
 B.pill(pair[1]); B.pill(big); B.pill(pair[0]);
 ok(B.nouns(pair[1]).every(B.has) && B.isIn(pair[1]), `…but add ${pair[1]} yourself first, and taking ${pair[0]} out leaves ${pair[1]} whole (its card folds into ${big}'s, which shows the hole)`);
+B.ev("NOUN_THEMES.pop(); showSetup();");
 
 // ---- Theme chips and their groups, in the phrase sections ----
 B = setUp('phrases');

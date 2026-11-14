@@ -9,12 +9,13 @@ ok(ev('subject') === 'adjectives' && d.getElementById('app-title').textContent =
 ok(ev('selectedNouns.size') === 0, 'adjectives start empty — the hand is shared by every section');
 d.getElementById('select-all').click();
 ok(ev('selectedNouns.size') === 200 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('200 adjectives · 200 cards'), 'All: every adjective (now 200 · 200 cards)');
-ok(d.querySelector('#map-panel .map-chart .agreement-panel .endings-title')?.textContent === 'Le concordanze' && !d.querySelector('.setup-side') && d.getElementById('noun-map').querySelectorAll('.map-row').length === ev('ADJ_THEMES.length'), 'La mappa, a line per topic — with Le concordanze in its panel');
+ok(d.querySelector('#map-panel .map-chart .agreement-panel .endings-title')?.textContent === 'Le concordanze' && !d.querySelector('.setup-side') && d.getElementById('noun-map').querySelectorAll('.map-row').length === 4, 'La mappa, a line per 50 by frequency — with Le concordanze in its panel');
 ok(/1\/200 practised|3\/200 practised/.test(d.getElementById('setup-meta').textContent), 'original history shows in the stats strip');
 const weakRows = ev('weakestNouns(10)').slice(0, 2);
 ok(JSON.stringify(weakRows) === JSON.stringify(['simpatico', 'grigio']), `the Weakest picks rank by error rate like the original Weakest (${weakRows.join(', ')})`);
 const chips = [...d.querySelectorAll('.theme-chip')].map(c => c.textContent.replace(/\s+/g, ' ').trim());
-ok(chips.length === 19 && chips.some(c => /^-chi · -ghi ?9$/.test(c)) && chips.some(c => /^Quantità ?7$/.test(c)), `19 theme chips (11 original + 4 new + 4 patterns): …${chips.slice(11).join(' | ')}`);
+ok([...d.querySelectorAll('.theme-chip')].map(c => c.dataset.theme).join() === 'freq1,freq2,freq3,freq4' && ['1–50', '51–100', '101–150', '151–200'].every((l, i) => chips[i].startsWith(l)), `grouped by frequency: the 50 most common, the next 50… (${chips.join(' | ')})`);
+ok(ev("SUBJECTS.adjectives.themes[0].nouns.join()") === ev("ADJ_FREQUENCY_ORDER.slice(0, 50).join()") && ev("SUBJECTS.adjectives.themes.reduce((a, t) => a + t.nouns.length, 0)") === 200, 'the first band is the 50 most common; the four hold all 200');
 d.querySelector('#mode-toggle [data-mode="forms"]').click();
 ok(d.getElementById('card-count').textContent === '667', 'All forms: 667 cards for all 200');
 // Dictionary mode game

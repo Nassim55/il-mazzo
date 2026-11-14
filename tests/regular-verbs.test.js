@@ -20,7 +20,7 @@ const sel = ev('[...selectedNouns]');
 ok(sel.length === 10 && sel.slice(0, 3).join() === 'capire,finire,pulire', `Weakest 10 starts capire, finire, pulire (${sel.slice(0, 3).join(', ')})`);
 // Themes and card counts
 d.getElementById('clear-all').click();
-d.querySelector('.theme-chip[data-theme="isc"]').click();
+ev("VERB_THEMES.find(t => t.key === 'isc').nouns.forEach(k => selectedNouns.add(k)); updateReadout();");   // the -isc- verbs, picked from the data
 ok(d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('8 verbs · 48 cards'), '-isc- theme: 8 verbs · 48 cards');
 d.querySelector('#mode-toggle [data-mode="infinitives"]').click();
 ok(d.getElementById('card-count').textContent === '8', 'Infinitives only → 8 cards');
