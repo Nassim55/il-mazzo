@@ -6,7 +6,7 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 
 | Section | Items | What you practise |
 |---|---|---|
-| Sostantivi | 1061 nouns | the noun with its definite article (*il pane, lo zaino, l'acqua*), in 34 themes — among them *Ristrutturazione*, 73 nouns for renovating the house, and (Nov 2026) driving, measures, health, emergencies, technology, holidays, paperwork, money, school, the kitchen and the garden |
+| Sostantivi | 1095 nouns | the noun with its definite article (*il pane, lo zaino, l'acqua*), in 34 themes — among them *Ristrutturazione*, 73 nouns for renovating the house, and (Nov 2026) driving, measures, health, emergencies, technology, holidays, paperwork, money, school, the kitchen and the garden |
 | Verbi regolari | 150 verbs | present-tense conjugations, or just the infinitive |
 | Verbi irregolari | 50 verbs | the most common verbs that are irregular in the present |
 | Verbi al contrario | 133 sentences · 20 backwards verbs | verbs like *piacere*, drilled: natural English in, the Italian turned round out (*I like the beach* → *Mi piace la spiaggia*) |
@@ -25,7 +25,7 @@ Every card section works in three directions — English → Italian, Italian �
 
 **Il mazzo salvato.** In any round, *💾 Save deck* keeps that exact deck — its cards in their order, the pool and focus behind it (so *Deck size* and *Focus* still work), your place, score and missed cards, the section, direction and modes. From then on the round keeps its snapshot up to date as you play, so leaving at card 12 means card 12 next time. The home page shows it under *Ripasso del giorno* on every section — *▶ Riprendi*, *from the start*, or *forget it*; once finished, *Play it again*. One saved deck at a time (saving another replaces it); new rounds, Ripasso and *Practise the missed* leave it alone. It syncs between devices, the newer one winning.
 
-**Every noun's story (in progress).** After you answer, a noun card shows where the word comes from — above all the English words that share its origin (*il giorno*: 'diurnal', 'journal', 'journey'; *la testa*: a Latin pot, hence 'test') — and a tip where one helps: a false friend (*la domanda* is a question), a gender trap, an everyday phrase. Written in batches, the most common nouns first: 730 of the 1061 so far — every noun of the new topics, and all of the 560 most common.
+**Every noun's story (in progress).** After you answer, a noun card shows where the word comes from — above all the English words that share its origin (*il giorno*: 'diurnal', 'journal', 'journey'; *la testa*: a Latin pot, hence 'test') — and a tip where one helps: a false friend (*la domanda* is a question), a gender trap, an everyday phrase. Written in batches, the most common nouns first: 764 of the 1095 so far — every noun of the new topics, and all of the 560 most common.
 
 **The nouns page's top.** On a wide screen it's laid out across the page like the map below it: on the left the intro, the quick picks and count, progress and voice; on the right, in a card lined up with the map's panel, everything that starts a round — *Or play just…*, *Start practising*, *A spasso*. On a phone it's one column, as before.
 

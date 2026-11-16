@@ -51,7 +51,7 @@ d.getElementById('select-all').click();
 ok(/100 most common/.test(d.getElementById('start-btn').textContent) && !d.getElementById('start-btn').disabled, 'All + 100, most common → Start · 100 most common cards');
 d.getElementById('start-btn').click();
 deck = ev('deck.map(c => c.noun)');
-ok(deck.length === 100 && ev('FREQUENCY_ORDER.slice(0, 100)').every(x => deck.includes(x)) && ev('sessionPool.length') === 1061, 'plays the 100 most common, pool = whole deck');
+ok(deck.length === 100 && ev('FREQUENCY_ORDER.slice(0, 100)').every(x => deck.includes(x)) && ev('sessionPool.length') === 1095, 'plays the 100 most common, pool = whole deck');
 d.getElementById('reshuffle-btn').click();
 ok(ev('deck.length') === 100, 'Reshuffle works with nothing selected');
 d.getElementById('change-btn').click();
@@ -65,7 +65,7 @@ ok(d.getElementById('feedback').className.includes('correct') && /solidus/.test(
 // --- hand-pick with nothing selected ---
 d.getElementById('change-btn').click(); d.getElementById('clear-all').click();
 d.getElementById('hand-pick').click();
-ok(d.getElementById('focus-total').textContent === '1061', 'Hand-pick with nothing selected lists all 1061');
+ok(d.getElementById('focus-total').textContent === '1095', 'Hand-pick with nothing selected lists all 1095');
 d.getElementById('focus-top-input').value = '100'; d.getElementById('focus-top-btn').click(); d.getElementById('focus-apply').click();
 ok(d.querySelectorAll('.verb-chip:not(.unselected)').length === 100, 'Hand-pick Top 100 lights up 100 chips');
 ok(errors.length === 0, `no runtime errors (${errors.join('; ')})`);
