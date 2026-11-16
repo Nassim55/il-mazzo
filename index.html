@@ -2431,10 +2431,10 @@
   .accent-key:hover { box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.4); }
   .answer-extras .skip-btn { margin-left: auto; min-height: 40px; padding: 0 10px; font-size: 13.5px; }
   /* the setup's hand bar: Start, once the table has scrolled away */
-  .hand-bar { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 50; width: min(1100px, calc(100% - 32px)); box-sizing: border-box;
+  .start-bar { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 50; width: min(1100px, calc(100% - 32px)); box-sizing: border-box;
     display: flex; align-items: center; gap: 10px 16px; padding: 10px 12px 10px 6px; background: var(--paper); border-radius: 6px;
     box-shadow: 0 14px 36px rgba(28, 22, 17, 0.2), inset 0 0 0 1px rgba(28, 22, 17, 0.1); animation: bar-up 0.22s ease; }
-  .hand-bar[hidden], .container:not([data-view="setup"]) .hand-bar { display: none !important; }
+  .start-bar[hidden], .container:not([data-view="setup"]) .start-bar { display: none !important; }
   @keyframes bar-up { from { transform: translate(-50%, 24px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
   .hand-bar-fan { display: inline-flex; align-items: center; padding: 0 12px; }
   .hand-bar-fan i { display: inline-block; width: 24px; height: 33px; margin: 0 -7px; border-radius: 3px; background: #fffaf0; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.2), 0 2px 4px rgba(28, 22, 17, 0.12); }
@@ -2442,8 +2442,8 @@
   .hand-bar-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
   .hand-bar-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 20px; line-height: 1.1; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hand-bar-sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-soft); }
-  .hand-bar .hand-bar-spasso { width: auto; margin: 0; padding: 10px 16px; }
-  .hand-bar .hand-bar-start { width: auto; margin: 0; padding: 14px 22px; white-space: nowrap; }
+  .start-bar .hand-bar-spasso { width: auto; margin: 0; padding: 10px 16px; }
+  .start-bar .hand-bar-start { width: auto; margin: 0; padding: 14px 22px; white-space: nowrap; }
   @media (max-width: 600px) {
     /* the round: compact, so the card and the answer sit above the keyboard */
     body:has(> .container[data-view="game"]) { padding-top: calc(10px + env(safe-area-inset-top)); }
@@ -2473,8 +2473,8 @@
     .container[data-view="game"] #controls { top: auto; left: 0; right: 0; width: auto; max-height: 82vh; padding-top: 18px; border-radius: 18px 18px 0 0;
       box-shadow: 0 -16px 40px rgba(28, 22, 17, 0.2); transform: translateY(105%); }
     .container.menu-open[data-view="game"] #controls { transform: none; }
-    .hand-bar { left: 0; right: 0; bottom: 0; width: auto; transform: none; border-radius: 14px 14px 0 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); animation: none; }
-    .hand-bar .hand-bar-spasso, .hand-bar-n { display: none; }
+    .start-bar { left: 0; right: 0; bottom: 0; width: auto; transform: none; border-radius: 14px 14px 0 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); animation: none; }
+    .start-bar .hand-bar-spasso, .hand-bar-n { display: none; }
   }
   /* Gira: practise without typing */
   .answer-mode { display: flex; justify-content: center; gap: 2px; width: max-content; margin: 0 auto 14px; }
@@ -2680,7 +2680,7 @@
 
     <div id="controls"></div>
     <div class="round-menu-backdrop" id="round-menu-backdrop" hidden></div>
-    <div class="hand-bar" id="hand-bar" role="region" aria-label="La tua mano" hidden></div>
+    <div class="start-bar" id="hand-bar" role="region" aria-label="La tua mano" hidden></div>
   </div>
 
 <script>
