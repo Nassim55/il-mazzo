@@ -76,4 +76,31 @@ ok(d2.querySelector('#feedback.correct .fb-dash') && /✓ (Corretto|Bravo) — /
 d2.getElementById('submit').click();
 d2.getElementById('skip-btn').click();
 ok(d2.querySelector('#feedback.incorrect') && !d2.querySelector('#feedback .fb-wrote') && B2.errors.length === 0, 'a skip: no “you wrote”');
+// ---- Moving on: the answered card is swept off the table (a copy, over the real card) ----
+const B3 = boot({ 'flipcards-subject': 'nouns', 'mazzo-answer-mode': 'type' });
+const d3 = B3.d, ev3 = B3.ev;
+B3.w.Element.prototype.animate = () => ({ finished: new Promise(() => {}) });   // a stand-in that never ends, so the copy stays to be seen
+ev3("clearHand(); topicsIn(['tempo']); updateReadout();");
+d3.getElementById('start-btn').click();
+d3.getElementById('answer').value = ev3('deck[0].italian');
+d3.getElementById('submit').click();
+ok(!d3.querySelector('.card-ghost'), 'an answered card stays put while you read it');
+d3.getElementById('submit').click();
+const ghost = d3.querySelector('.card-ghost');
+ok(ghost && ghost.getAttribute('aria-hidden') === 'true' && !ghost.querySelector('[id]') && d3.querySelectorAll('#feedback').length === 1 && d3.getElementById('prompt').textContent === ev3('deck[1].english'),
+   'the next card: a copy of the answered one is swept off (hidden from screen readers, no doubled ids) over the real card, which already shows the next');
+ev3("setDirection('it-en')");
+ok(!d3.querySelector('.card-ghost'), 'the same card drawn again (a new direction): nothing swept');
+const B4 = boot({ 'flipcards-subject': 'nouns', 'mazzo-answer-mode': 'turn' });
+B4.w.Element.prototype.animate = () => ({ finished: new Promise(() => {}) });
+B4.w.matchMedia = q => ({ matches: /reduce/.test(q), addEventListener() {}, removeEventListener() {} });
+B4.ev("clearHand(); topicsIn(['tempo']); updateReadout();");
+B4.d.getElementById('start-btn').click();
+B4.d.getElementById('gira-turn').click();
+B4.d.getElementById('gira-yes').click();
+ok(!B4.d.querySelector('.card-ghost') && B4.ev('index') === 1, 'with “reduce motion” on, nothing sweeps — the next card is simply there');
+B4.w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+B4.d.getElementById('gira-turn').click();
+B4.d.getElementById('gira-yes').click();
+ok(B4.d.querySelector('.card-ghost') && B3.errors.length === 0 && B4.errors.length === 0, 'Gira’s Knew it sweeps the card off too');
 done();
