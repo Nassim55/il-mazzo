@@ -2,7 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#f3ead8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Il Mazzo">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Il Mazzo — Italian Flip Cards</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2312,6 +2320,144 @@
   .table-deck-line { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--ink-soft); text-align: left; }
   .table-deck-line.ripasso-parts { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
   .saved-more { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 16px; }
+  /* ===== On a phone (Nov 2026) ===== */
+  body { padding: calc(32px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left)); }   /* the page's own padding, clear of a notch and the home bar */
+  button, a, input, select, label, summary, .verb-chip, .map-row { touch-action: manipulation; }
+  /* the round's ⋯: its controls in a drawer — a sheet on a phone */
+  .round-menu-btn { display: none; }
+  .container[data-round="1"][data-view="game"] .round-menu-btn { display: inline-flex; align-items: center; gap: 8px; align-self: center; min-height: 44px; padding: 0 14px; margin-left: 12px;
+    border: 1.5px solid rgba(28, 22, 17, 0.3); border-radius: 3px; background: transparent; color: var(--ink); cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .container[data-round="1"][data-view="game"] .round-menu-btn:hover { background: rgba(28, 22, 17, 0.05); }
+  .round-menu-head { display: none; }
+  .container[data-view="game"] #controls { position: fixed; top: 0; right: 0; bottom: 0; z-index: 60; width: min(420px, 92vw); margin: 0; box-sizing: border-box;
+    padding: 24px 24px calc(24px + env(safe-area-inset-bottom)); background: var(--paper); box-shadow: -18px 0 40px rgba(28, 22, 17, 0.16);
+    display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; justify-content: flex-start; gap: 14px; overflow-y: auto;
+    font-size: 14px; color: var(--ink-soft); transform: translateX(105%); visibility: hidden; transition: transform 0.22s ease, visibility 0.22s; }
+  .container.menu-open[data-view="game"] #controls { transform: none; visibility: visible; }
+  .container[data-view="game"] .round-menu-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .round-menu-title { margin: 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 32px; line-height: 1; color: var(--ink); }
+  .round-menu-sub { margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #6f6152; }
+  .round-menu-close { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -8px -10px 0 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink-soft); font-size: 16px; cursor: pointer; }
+  .round-menu-close:hover { background: rgba(28, 22, 17, 0.06); color: var(--ink); }
+  .round-menu-backdrop { position: fixed; inset: 0; z-index: 55; background: rgba(28, 22, 17, 0.28); }
+  .container:not([data-view="game"]) .round-menu-backdrop { display: none; }
+  .container[data-view="game"] #controls .controls-left { flex-direction: column; align-items: stretch; gap: 4px; }
+  .container[data-view="game"] #controls .controls-left > .ghost { display: flex; align-items: center; min-height: 48px; padding: 0 12px; border-radius: 4px; text-align: left;
+    font-size: 15px; text-decoration: none; color: var(--ink); }
+  .container[data-view="game"] #controls .controls-left > .ghost:hover { background: rgba(28, 22, 17, 0.05); }
+  .container[data-view="game"] #controls .controls-left > .ghost[hidden] { display: none; }
+  .container[data-view="game"] #controls .direction-toggle { display: flex; order: -1; margin-bottom: 8px; }
+  .container[data-view="game"] #controls .direction-toggle[hidden] { display: none; }
+  .container[data-view="game"] #controls .direction-toggle button { flex: 1; min-height: 44px; }
+  .container[data-view="game"] #controls .game-trim { order: -1; padding: 4px 0 8px; }
+  .container[data-view="game"] #controls .kbd-hints { font-size: 12px; line-height: 1.8; }
+  @media (hover: none) and (pointer: coarse) { .kbd-hints, #mic-help { display: none !important; } }
+  /* the card turns over to show its feedback */
+  .card .feedback { width: 100%; box-sizing: border-box; margin: 14px 0 0; text-align: left; }
+  .card:has(> .feedback:not(.hidden)) { background: #f7eedd; animation: card-turn 0.3s ease; }
+  .card:has(> .feedback:not(.hidden)) .prompt { font-size: 22px; line-height: 1.2; }
+  .card:has(> .feedback:not(.hidden)) .pronoun-hint, .card:has(> .feedback:not(.hidden)) .natural-en { display: none; }
+  @keyframes card-turn { 0% { transform: perspective(1000px) rotateY(0deg); } 45% { transform: perspective(1000px) rotateY(88deg); } 55% { transform: perspective(1000px) rotateY(-88deg); } 100% { transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .card:has(> .feedback:not(.hidden)) { animation: none; } }
+  /* the answer row: accent keys, and Salta beside them */
+  .answer-extras { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .accent-keys { display: flex; flex-wrap: wrap; gap: 5px; }
+  .container[data-answer-lang="en"] .accent-keys { visibility: hidden; }
+  .accent-key { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 38px; padding: 0; border: 0; border-radius: 5px; cursor: pointer;
+    background: var(--paper); box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.16); font-family: 'DM Sans', sans-serif; font-size: 18px; color: var(--ink); }
+  .accent-key:hover { box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.4); }
+  .answer-extras .skip-btn { margin-left: auto; min-height: 40px; padding: 0 10px; font-size: 13.5px; }
+  /* the setup's hand bar: Start, once the table has scrolled away */
+  .hand-bar { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 50; width: min(1100px, calc(100% - 32px)); box-sizing: border-box;
+    display: flex; align-items: center; gap: 10px 16px; padding: 10px 12px 10px 6px; background: var(--paper); border-radius: 6px;
+    box-shadow: 0 14px 36px rgba(28, 22, 17, 0.2), inset 0 0 0 1px rgba(28, 22, 17, 0.1); animation: bar-up 0.22s ease; }
+  .hand-bar[hidden], .container:not([data-view="setup"]) .hand-bar { display: none !important; }
+  @keyframes bar-up { from { transform: translate(-50%, 24px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+  .hand-bar-fan { display: inline-flex; align-items: center; padding: 0 12px; }
+  .hand-bar-fan i { display: inline-block; width: 24px; height: 33px; margin: 0 -7px; border-radius: 3px; background: #fffaf0; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.2), 0 2px 4px rgba(28, 22, 17, 0.12); }
+  .hand-bar-fan i:nth-child(1) { transform: rotate(-11deg); } .hand-bar-fan i:nth-child(3) { transform: rotate(11deg); }
+  .hand-bar-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+  .hand-bar-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 20px; line-height: 1.1; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hand-bar-sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-soft); }
+  .hand-bar .hand-bar-spasso { width: auto; margin: 0; padding: 10px 16px; }
+  .hand-bar .hand-bar-start { width: auto; margin: 0; padding: 14px 22px; white-space: nowrap; }
+  @media (max-width: 600px) {
+    /* the round: compact, so the card and the answer sit above the keyboard */
+    body:has(> .container[data-view="game"]) { padding-top: calc(10px + env(safe-area-inset-top)); }
+    .container[data-view="game"] header { flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; padding-bottom: 10px; }
+    .container[data-view="game"] header > div:first-child { min-width: 0; }
+    .container[data-view="game"] .stats { margin-left: auto; width: auto; flex: none; }
+    .container[data-view="game"] .title { white-space: nowrap; }
+    .container[data-round="1"][data-view="game"] .round-menu-btn { flex: none; }
+    .container.kb-open[data-view="game"] .card .feedback-note, .container.kb-open[data-view="game"] .card .assoc { display: none; }
+    .container[data-view="game"] .title { font-size: 26px; }
+    .container[data-view="game"] .subtitle, .container[data-view="game"] .stat-label { display: none; }
+    .container[data-view="game"] .stats { gap: 12px; align-items: center; }
+    .container[data-view="game"] .stat-value { font-size: 18px; }
+    .container[data-round="1"][data-view="game"] .round-menu-btn { width: 44px; padding: 0; margin-left: 4px; justify-content: center; border: 0; border-radius: 50%; }
+    .round-menu-label { display: none; }
+    .container[data-view="game"] .card { min-height: 190px; padding: 38px 18px 24px; margin-bottom: 12px; }
+    .container.kb-open[data-view="game"] .card { min-height: 0; padding: 30px 16px 16px; }
+    .container.kb-open[data-view="game"] .progress-bar { margin-bottom: 8px; }
+    .container[data-view="game"] .input-row { flex-direction: row; flex-wrap: nowrap; gap: 8px; margin-bottom: 10px; }
+    .container[data-view="game"] #submit { flex: none; width: 52px; min-width: 52px; height: 52px; padding: 0; border-radius: 50%; font-size: 0; letter-spacing: 0; }
+    .container[data-view="game"] #submit::after { content: '→'; font-size: 22px; letter-spacing: 0; }
+    .accent-key { width: 36px; height: 38px; }
+    .accent-keys, .answer-extras { gap: 4px; }
+    .answer-extras { margin-top: -2px; flex-wrap: nowrap; }
+    .answer-extras .skip-btn { padding: 0 4px; }
+    /* the round's controls: a sheet from the bottom */
+    .container[data-view="game"] #controls { top: auto; left: 0; right: 0; width: auto; max-height: 82vh; padding-top: 18px; border-radius: 18px 18px 0 0;
+      box-shadow: 0 -16px 40px rgba(28, 22, 17, 0.2); transform: translateY(105%); }
+    .container.menu-open[data-view="game"] #controls { transform: none; }
+    .hand-bar { left: 0; right: 0; bottom: 0; width: auto; transform: none; border-radius: 14px 14px 0 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); animation: none; }
+    .hand-bar .hand-bar-spasso, .hand-bar-n { display: none; }
+  }
+  /* Gira: practise without typing */
+  .answer-mode { display: flex; justify-content: center; gap: 2px; width: max-content; margin: 0 auto 14px; }
+  .answer-mode .mode-option { min-height: 40px; padding: 0 16px; }
+  .am-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; letter-spacing: 0; text-transform: none; }
+  .am-en { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: lowercase; opacity: 0.8; }
+  .gira-row, .gira-hint { display: none; }
+  .container[data-answer-mode="turn"] .input-row, .container[data-answer-mode="turn"] .answer-extras, .container[data-answer-mode="turn"] .speak-hint { display: none; }
+  .container[data-answer-mode="turn"] .gira-row { display: flex; gap: 12px; margin: 2px 0 10px; }
+  .container[data-answer-mode="turn"] .gira-hint { display: block; margin: 4px 0 0; text-align: center; font-size: 13px; color: var(--ink-faded); }
+  .gira-row > button { flex: 1; min-height: 60px; margin: 0; }
+  .gira-row > [hidden] { display: none !important; }
+  .gira-no, .gira-yes { border-radius: 3px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; }
+  .gira-no { border: 1.5px solid var(--terracotta); background: transparent; color: var(--terracotta); }
+  .gira-yes { border: 0; background: var(--olive); color: var(--paper); }
+  .container[data-answer-mode="turn"] .card { touch-action: pan-y; cursor: pointer; user-select: none; -webkit-user-select: none; transition: transform 0.15s ease; }
+  .feedback.gira { background: transparent; border: 0; justify-content: center; text-align: center; }
+  .feedback.gira .gira-answer { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 38px; line-height: 1.1; color: var(--ink); }
+  @media (max-width: 600px) { .feedback.gira .gira-answer { font-size: 32px; } }
+  .hint-touch { display: none; }
+  @media (hover: none) and (pointer: coarse) { .hint-keys { display: none; } .hint-touch { display: inline; } }
+  /* Sideways on a phone: the card on the left, the answer on the right */
+  @media (orientation: landscape) and (max-height: 500px) {
+    body:has(> .container[data-view="game"]) { padding-top: calc(8px + env(safe-area-inset-top)); padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+    .container[data-view="game"] header { flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 6px; padding-bottom: 6px; }
+    .container[data-view="game"] .subtitle, .container[data-view="game"] .stat-label { display: none; }
+    .container[data-view="game"] .title { font-size: 22px; white-space: nowrap; }
+    .container[data-view="game"] .stats { width: auto; margin-left: auto; flex: none; gap: 12px; }
+    .container[data-view="game"] .stat-value { font-size: 16px; }
+    .container[data-view="game"] .progress-bar { margin-bottom: 10px; }
+    .container[data-round="1"][data-view="game"] #game-area { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 18px; align-items: start; }
+    .container[data-round="1"][data-view="game"] #game-area > .card { grid-column: 1; grid-row: 1 / span 8; min-height: 0; margin: 0; padding: 26px 18px 18px; }
+    .container[data-round="1"][data-view="game"] #game-area > :not(.card) { grid-column: 2; }
+    .container[data-round="1"][data-view="game"] .answer-mode { margin: 0 0 10px; }
+    .container[data-round="1"][data-view="game"] .round-menu-btn { width: 44px; padding: 0; margin-left: 4px; justify-content: center; border: 0; border-radius: 50%; flex: none; }
+    .container[data-view="game"] .round-menu-label { display: none; }
+    .container[data-view="game"] .input-row { flex-wrap: nowrap; gap: 8px; margin-bottom: 8px; }
+    .container[data-view="game"] #submit { flex: none; width: 48px; min-width: 48px; height: 48px; padding: 0; border-radius: 50%; font-size: 0; letter-spacing: 0; }
+    .container[data-view="game"] #submit::after { content: '→'; font-size: 21px; letter-spacing: 0; }
+    .accent-key { width: 34px; height: 36px; font-size: 17px; }
+    .accent-keys, .answer-extras { gap: 4px; }
+    .answer-extras { flex-wrap: nowrap; }
+    .answer-extras .skip-btn { padding: 0 4px; }
+    .gira-row > button { min-height: 52px; }
+  }
   /* Il Mazzo's masthead; the sections in three families; the table (Nov 2026) */
   .masthead { padding: 4px 0 16px; text-align: left; }
   .mast-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 60px; line-height: 0.95; color: var(--ink); }
@@ -2461,6 +2607,7 @@
           <div class="stat-value"><span id="current">1</span><span class="sub">/<span id="total">831</span></span></div>
         </div>
       </div>
+      <button type="button" class="round-menu-btn" id="round-menu-btn" aria-label="This round: direction, deck size, focus, save, back" aria-expanded="false" aria-controls="controls"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9"></circle><circle cx="12" cy="12" r="1.9"></circle><circle cx="19" cy="12" r="1.9"></circle></svg><span class="round-menu-label">This round</span></button>
     </header>
 
     <div class="progress-bar">
@@ -2470,6 +2617,8 @@
     <div id="game-area"></div>
 
     <div id="controls"></div>
+    <div class="round-menu-backdrop" id="round-menu-backdrop" hidden></div>
+    <div class="hand-bar" id="hand-bar" role="region" aria-label="La tua mano" hidden></div>
   </div>
 
 <script>
@@ -4820,7 +4969,7 @@
     return srs;
   }
   let lastSrsChange = null;   // so "I was right" can undo a demotion
-  function srsAnswer(subj, dir, key, correct) {
+  function srsAnswer(subj, dir, key, correct, logIt = true) {   // logIt false (Gira): the schedule moves, the record towards knowing it doesn't
     const srs = loadSrs(subj, dir), t = today();
     if (!srs[key]) {   // first time on the schedule: start from any earlier history
       const s = readStats(subj, dir)[key];
@@ -4835,7 +4984,7 @@
       r.d = t + 1;
     }
     r.l = t;
-    r.h = `${r.h || ''}${correct ? 1 : 0}`.slice(-KNOW_WINDOW);   // the last answers, for knowState
+    if (logIt) r.h = `${r.h || ''}${correct ? 1 : 0}`.slice(-KNOW_WINDOW);   // the last answers, for knowState
     srs[key] = r;
     saveSrs(subj, dir, srs);
     lastSrsChange = { subj, dir, key, prev };
@@ -4944,6 +5093,7 @@
   }
 
   function recordAnswer(nounKey, isCorrect) {
+    if (!isCorrect && typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') { try { navigator.vibrate(35); } catch (e) { /* not allowed */ } }
     srsAnswer(subject, direction, nounKey, isCorrect);
     srsAnswerTwins(subject, direction, nounKey, isCorrect);
     const s = stats[nounKey] || { seen: 0, wrong: 0 };
@@ -12186,6 +12336,8 @@
   }
 
   function showSetup() {
+    closeRoundMenu();
+    delete container.dataset.round;
     hideConjPop();
     if (passive) { passiveStopTimers(); passive = null; passiveWake(false); }
     dialogueStopSpeaking();
@@ -12488,6 +12640,7 @@
 
     wireTable();
     renderSetupMeta();
+    watchTable();
   }
 
   function updateReadout() {
@@ -12509,6 +12662,7 @@
       ? `Add some ${cfg.itemWords || 'words'} to start`
       : `▶ Start practising · ${h.cards}${one && h.cards < h.pool && one.key !== undefined ? '' : ''}${h.sections.length === 1 && h.frequent ? ' most common' : ''} card${h.cards === 1 ? '' : 's'}`;
     renderTableTabs();
+    renderHandBar();
   }
 
   // Reads the cap input and returns the effective deck size (min of cap
@@ -13926,6 +14080,10 @@
 
   // ===== Game view =====
   const cardHTML = `
+    <div class="mode-toggle answer-mode" role="group" aria-label="How to answer">
+      <button type="button" class="mode-option" data-answer-mode-btn="type" aria-pressed="false"><span class="am-it">Scrivi</span> <span class="am-en">type</span></button>
+      <button type="button" class="mode-option" data-answer-mode-btn="turn" aria-pressed="false"><span class="am-it">Gira</span> <span class="am-en">turn</span></button>
+    </div>
     <div class="card">
       <div class="card-corner streak-flag" id="streak-display"></div>
       <div class="card-corner right">№ <span id="cardnum">001</span></div>
@@ -13935,21 +14093,205 @@
       <div class="natural-en" id="natural-en" hidden></div>
       <div class="pronoun-hint" id="pronoun-hint">+ articolo</div>
       <button type="button" class="card-speak" id="card-speak" aria-label="Hear the Italian" title="Hear the Italian" hidden>🔊</button>
+      <div class="feedback hidden" id="feedback"></div>
     </div>
     <div class="input-row">
       <div class="answer-wrap" id="answer-wrap">
-        <input type="text" class="answer" id="answer" placeholder="type the italian with article…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <input type="text" class="answer" id="answer" placeholder="type the italian with article…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" lang="it">
         <button type="button" class="mic-btn" id="mic-btn" aria-pressed="false" aria-label="Parla — say the answer in Italian" title="Parla — say it in Italian (⇧ Enter)" hidden><svg class="mic-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span class="mic-label">Parla</span></button>
       </div>
       <button type="button" class="submit" id="submit">Controlla</button>
-      <button type="button" class="submit secondary skip-btn" id="skip-btn" title="Show the answer — it counts as wrong, then type it out">Salta</button>
     </div>
+    <div class="answer-extras">
+      <div class="accent-keys" role="group" aria-label="Accented letters"><button type="button" class="accent-key" data-ch="à" aria-label="Type à">à</button><button type="button" class="accent-key" data-ch="è" aria-label="Type è">è</button><button type="button" class="accent-key" data-ch="é" aria-label="Type é">é</button><button type="button" class="accent-key" data-ch="ì" aria-label="Type ì">ì</button><button type="button" class="accent-key" data-ch="ò" aria-label="Type ò">ò</button><button type="button" class="accent-key" data-ch="ù" aria-label="Type ù">ù</button><button type="button" class="accent-key" data-ch="'" aria-label="Type an apostrophe">’</button></div>
+      <button type="button" class="ghost skip-btn" id="skip-btn" title="Show the answer — it counts as wrong, then type it out">Salta</button>
+    </div>
+    <div class="gira-row">
+      <button type="button" class="submit gira-turn" id="gira-turn">↻ Gira la carta</button>
+      <button type="button" class="gira-no" id="gira-no" hidden>✗ Not yet</button>
+      <button type="button" class="gira-yes" id="gira-yes" hidden>✓ Knew it</button>
+    </div>
+    <p class="gira-hint"><span class="hint-keys">Space turns the card · ← not yet · → knew it</span><span class="hint-touch">Tap the card to turn it · swipe → if you knew it, ← if not</span></p>
     <div class="speak-hint" id="speak-hint" aria-live="polite"></div>
-    <div class="feedback hidden" id="feedback"></div>
   `;
 
+  // ===== On a phone (Nov 2026) =====
+  // The round's controls live behind ⋯ (a drawer; a sheet on a phone). Accent keys type into the
+  // answer; taps on them, on Controlla and on Salta keep the keyboard up. With the keyboard up the
+  // round gets compact (kb-open). The setup page's hand bar follows you once the table scrolls away.
+  function openRoundMenu() {
+    if (container.dataset.round !== '1' || container.dataset.view !== 'game') return;
+    container.classList.add('menu-open');
+    document.getElementById('round-menu-backdrop').hidden = false;
+    document.getElementById('round-menu-btn').setAttribute('aria-expanded', 'true');
+    const c = document.getElementById('round-menu-close');
+    if (c) c.focus();
+  }
+  function closeRoundMenu() {
+    if (!container.classList.contains('menu-open')) return;
+    container.classList.remove('menu-open');
+    const b = document.getElementById('round-menu-backdrop'), m = document.getElementById('round-menu-btn');
+    if (b) b.hidden = true;
+    if (m) { m.setAttribute('aria-expanded', 'false'); if (container.dataset.view === 'game') m.focus(); }
+  }
+  document.getElementById('round-menu-btn').addEventListener('click', () => (container.classList.contains('menu-open') ? closeRoundMenu() : openRoundMenu()));
+  document.getElementById('round-menu-backdrop').addEventListener('click', closeRoundMenu);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && container.classList.contains('menu-open')) { e.preventDefault(); closeRoundMenu(); } });
+  gameArea.addEventListener('pointerdown', e => {   // keep the keyboard up: these taps leave the answer box focused
+    if (e.target.closest('.accent-key, #submit, #skip-btn') && document.activeElement && document.activeElement.id === 'answer') e.preventDefault();
+  });
+  gameArea.addEventListener('click', e => {
+    const k = e.target.closest('.accent-key');
+    if (!k) return;
+    const a = document.getElementById('answer');
+    if (!a || a.disabled) return;
+    const s = a.selectionStart == null ? a.value.length : a.selectionStart, en = a.selectionEnd == null ? a.value.length : a.selectionEnd;
+    a.setRangeText(k.dataset.ch, s, en, 'end');
+    a.dispatchEvent(new Event('input', { bubbles: true }));
+    a.focus();
+  });
+  if (window.visualViewport) {   // the keyboard up: a compact round, the answer box in view
+    const vv = window.visualViewport;
+    vv.addEventListener('resize', () => {
+      const open = container.dataset.view === 'game' && vv.height < window.innerHeight * 0.78;
+      container.classList.toggle('kb-open', open);
+      const a = document.getElementById('answer');
+      if (open && a && document.activeElement === a && a.scrollIntoView) a.scrollIntoView({ block: 'nearest' });
+    });
+  }
+  // ===== Gira (Nov 2026): practise without typing =====
+  // Turn the card (Gira la carta, a tap on the card, or Space), then say whether you knew it:
+  // Knew it / Not yet (the buttons, a swipe, → / ←). It counts in the round and moves the card
+  // along Ripasso's schedule, but only typed answers count towards knowing a word — so the map's
+  // colours and dots, and I progressi, don't change with Gira. Each device remembers the choice.
+  const ANSWER_MODE_KEY = 'mazzo-answer-mode';
+  let answerMode = 'type', giraTurned = false, giraDrag = null;
+  try { if (localStorage.getItem(ANSWER_MODE_KEY) === 'turn') answerMode = 'turn'; } catch (e) { /* default */ }
+  function giraReset() {
+    giraTurned = false;
+    container.dataset.answerMode = answerMode;
+    document.querySelectorAll('[data-answer-mode-btn]').forEach(b => { const on = b.dataset.answerModeBtn === answerMode; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+    const turn = document.getElementById('gira-turn'), yes = document.getElementById('gira-yes'), no = document.getElementById('gira-no');
+    if (turn) turn.hidden = false;
+    if (yes) yes.hidden = true;
+    if (no) no.hidden = true;
+  }
+  function setAnswerMode(m) {
+    answerMode = m === 'turn' ? 'turn' : 'type';
+    try { localStorage.setItem(ANSWER_MODE_KEY, answerMode); } catch (e) { /* storage unavailable */ }
+    if (container.dataset.view === 'game' && index < deck.length && !answered) render();
+    else giraReset();
+  }
+  function giraTurn() {
+    if (answerMode !== 'turn' || giraTurned || answered || container.dataset.view !== 'game' || index >= deck.length) return;
+    const card = deck[index], itToEn = direction === 'it-en', fb = document.getElementById('feedback');
+    giraTurned = true;
+    const shown = itToEn ? card.english : card.italian;
+    const pron = isVerbSubject() && card.pron ? ` <span class="pron">${card.pron}</span>` : '';
+    const cue = isAdjSubject() && card.cue && !itToEn ? ` <span class="pron">(${escapeHTML(card.cue)})</span>` : '';
+    const meaning = direction === 'listen' ? `<span class="fb-meaning">${escapeHTML(card.english)}</span>` : '';
+    const note = card.note ? `<div class="feedback-note">${card.note}</div>` : '';
+    fb.className = 'feedback gira';
+    fb.innerHTML = `<div class="feedback-body"><strong class="gira-answer">${shown}</strong>${pron}${cue}${speakBtnHTML()}${meaning}${note}</div>`;
+    wireSpeakBtn(card);
+    if (audioPrefs.auto) speak(sayText(card));
+    document.getElementById('gira-turn').hidden = true;
+    document.getElementById('gira-no').hidden = false;
+    document.getElementById('gira-yes').hidden = false;
+  }
+  function giraJudge(knew) {
+    if (answerMode !== 'turn' || !giraTurned || container.dataset.view !== 'game' || index >= deck.length) return;
+    const card = deck[index];
+    srsAnswer(subject, direction, card.noun, knew, false);   // the schedule only
+    if (knew) {
+      score++; streak++; bestStreak = Math.max(bestStreak, streak);
+      scoreEl.textContent = score;
+      roundMissed.delete(card.key);
+    } else {
+      streak = 0;
+      roundMissed.set(card.key, card);
+    }
+    index++;
+    render();
+  }
+  gameArea.addEventListener('click', e => {
+    const m = e.target.closest('[data-answer-mode-btn]');
+    if (m) { setAnswerMode(m.dataset.answerModeBtn); return; }
+    if (e.target.closest('#gira-turn')) giraTurn();
+    else if (e.target.closest('#gira-yes')) giraJudge(true);
+    else if (e.target.closest('#gira-no')) giraJudge(false);
+  });
+  document.addEventListener('keydown', e => {   // Space turns; → knew it; ← not yet
+    if (answerMode !== 'turn' || container.dataset.view !== 'game' || index >= deck.length || container.classList.contains('menu-open')) return;
+    if (e.target && /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(e.target.tagName) && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const k = e.key;
+    if ((k === ' ' || k === 'Enter') && !giraTurned) { e.preventDefault(); e.stopImmediatePropagation(); giraTurn(); }
+    else if (k === 'ArrowRight' && giraTurned) { e.preventDefault(); e.stopImmediatePropagation(); giraJudge(true); }
+    else if (k === 'ArrowLeft' && giraTurned) { e.preventDefault(); e.stopImmediatePropagation(); giraJudge(false); }
+    else if (k === 'Enter' || k === ' ') { e.preventDefault(); e.stopImmediatePropagation(); }   // nothing to type in Gira
+  }, true);
+  gameArea.addEventListener('pointerdown', e => {   // a tap turns the card; once turned, a swipe judges it
+    const cardEl = e.target.closest('.card');
+    if (!cardEl || answerMode !== 'turn' || container.dataset.view !== 'game' || e.target.closest('button, a, input')) return;
+    giraDrag = { x: e.clientX, y: e.clientY, el: cardEl };
+  });
+  gameArea.addEventListener('pointermove', e => {
+    if (!giraDrag || !giraTurned) return;
+    const dx = e.clientX - giraDrag.x;
+    giraDrag.el.style.transform = `translateX(${dx}px) rotate(${dx / 24}deg)`;
+  });
+  gameArea.addEventListener('pointerup', e => {
+    if (!giraDrag) return;
+    const d = giraDrag, dx = e.clientX - d.x, dy = e.clientY - d.y;
+    giraDrag = null;
+    d.el.style.transform = '';
+    if (!giraTurned) { if (Math.abs(dx) < 12 && Math.abs(dy) < 12) giraTurn(); return; }
+    if (dx > 70) giraJudge(true); else if (dx < -70) giraJudge(false);
+  });
+  gameArea.addEventListener('pointercancel', () => { if (giraDrag) { giraDrag.el.style.transform = ''; giraDrag = null; } });
+  // The installable app (Nov 2026): on the hosted site, a service worker keeps Il Mazzo working
+  // offline (sw.js); opened from a file, there's none
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => { /* offline play unavailable */ }); });
+  }
+  let handBarWanted = false, handBarObserver = null;
+  function renderHandBar() {
+    const bar = document.getElementById('hand-bar');
+    if (!bar) return;
+    const words = Number((document.getElementById('selected-count') || {}).textContent) || 0;
+    if (!words || container.dataset.view !== 'setup') { bar.hidden = true; bar.innerHTML = ''; return; }
+    const names = [...document.querySelectorAll('#hand-fan .hand-card:not(.hand-slot):not(.hand-more) .hand-name')].map(e => e.textContent).reverse();
+    const label = names.slice(0, 3).join(' · ') + (names.length > 3 ? ` · +${names.length - 3}` : '');
+    const cards = (document.getElementById('card-count') || {}).textContent || '0';
+    const unit = (document.getElementById('hand-words') || {}).textContent || 'words', scope = (document.getElementById('readout-scope') || {}).textContent || '';
+    bar.innerHTML = `<span class="hand-bar-fan" aria-hidden="true"><i></i><i></i><i></i></span>`
+      + `<div class="hand-bar-text"><span class="hand-bar-title">La tua mano${label ? ` · ${escapeHTML(label)}` : ''}</span><span class="hand-bar-sub">${words} ${escapeHTML(unit)} · ${escapeHTML(cards)} cards${escapeHTML(scope)}</span></div>`
+      + `<button type="button" class="passive-btn hand-bar-spasso" data-bar="passive"><span class="passive-btn-main">🎧 A spasso</span></button>`
+      + `<button type="button" class="submit hand-bar-start" data-bar="start">▶ Start<span class="hand-bar-n"> · ${escapeHTML(cards)} cards</span></button>`;
+    bar.hidden = !handBarWanted;
+  }
+  document.getElementById('hand-bar').addEventListener('click', e => {
+    const b = e.target.closest('[data-bar]');
+    if (!b) return;
+    if (b.dataset.bar === 'start') startHand(); else startPassiveHand();
+  });
+  function watchTable() {   // the bar shows once the table has scrolled out of view
+    if (handBarObserver) { handBarObserver.disconnect(); handBarObserver = null; }
+    handBarWanted = false;
+    const table = document.getElementById('table');
+    if (!table || typeof IntersectionObserver !== 'function') return;
+    handBarObserver = new IntersectionObserver(entries => {
+      handBarWanted = !entries[0].isIntersecting && entries[0].boundingClientRect.top < 0;
+      const bar = document.getElementById('hand-bar');
+      if (bar && bar.innerHTML) bar.hidden = !handBarWanted;
+    });
+    handBarObserver.observe(table);
+  }
   function showGameControls() {
+    container.dataset.round = '1';
     controlsEl.innerHTML = `
+      <div class="round-menu-head"><div><h2 class="round-menu-title">Questo giro</h2><div class="round-menu-sub">This round</div></div>
+        <button type="button" class="round-menu-close" id="round-menu-close" aria-label="Close">✕</button></div>
       <div class="controls-left">
         <button type="button" class="ghost" id="reshuffle-btn">↻ Reshuffle</button>
         <button type="button" class="ghost" id="change-btn">${reviewMode ? '← Back to setup' : `← Change ${SUBJECTS[subject].itemWords}`}</button>
@@ -13963,8 +14305,9 @@
           <button type="button" data-dir="listen" class="${direction === 'listen' ? 'active' : ''}" aria-pressed="${direction === 'listen'}" title="Hear the Italian and type it">🔊 Listen</button>
         </span>
       </div>
-      <span><kbd>Enter</kbd> submits · then again for next<span id="mic-help" hidden> · <kbd>⇧ Enter</kbd> or the microphone to say it</span></span>
+      <span class="kbd-hints"><kbd>Enter</kbd> submits · then again for next<span id="mic-help" hidden> · <kbd>⇧ Enter</kbd> or the microphone to say it</span></span>
     `;
+    document.getElementById('round-menu-close').addEventListener('click', closeRoundMenu);
     document.getElementById('reshuffle-btn').addEventListener('click', () => startGame());
     document.getElementById('save-deck-btn').addEventListener('click', e => {
       if (!saveDeckNow()) { e.currentTarget.textContent = 'Couldn\'t save'; return; }
@@ -14254,6 +14597,7 @@
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && savedLive && container.dataset.view === 'game') saveDeckNow(); });
 
   function startGame(resume) {
+    closeRoundMenu();
     if (!(resume && resume.resumeRound)) resume = null;   // a click passes its event: only a saved round resumes
     hideConjPop();
     verbGate = null;
@@ -14310,6 +14654,8 @@
   }
 
   function render() {
+    const answerBox = document.getElementById('answer');
+    if (answerBox) { const english = direction === 'it-en'; answerBox.lang = english ? 'en' : 'it'; container.dataset.answerLang = english ? 'en' : 'it'; }
     if (savedLive) saveDeckNow(true);   // the saved round: its place, kept as you go (this card not yet answered)
     if (index >= deck.length) {
       stopListening();
@@ -14320,6 +14666,7 @@
     const natLine = document.getElementById('natural-en');
     if (natLine) { natLine.hidden = true; natLine.innerHTML = ''; }
     mustRetype = false;
+    giraReset();
     stopListening();
     speakHint('');
     const skipReset = document.getElementById('skip-btn');
@@ -14331,7 +14678,7 @@
     }
     let card = deck[index];
     if (card.subject) setCardContext(card.subject);   // mixed review: this card's section
-    verbGate = wantsInfinitive(card) ? infinitiveCard(card) : null;
+    verbGate = answerMode !== 'turn' && wantsInfinitive(card) ? infinitiveCard(card) : null;   // Gira has no infinitive step
     if (verbGate) card = verbGate;   // the verb's infinitive first
     const itToEn = direction === 'it-en';
     const promptEl = document.getElementById('prompt');
@@ -14664,7 +15011,7 @@
       ans.placeholder = 'now type the infinitive…';
       ans.classList.add('retype');
       sub.textContent = 'Riscrivi →';
-      fb.querySelector('.feedback-body').insertAdjacentHTML('afterbegin', `<div class="retype-hint" id="retype-hint">Type it above to start its forms.</div>`);
+      fb.querySelector('.feedback-body').insertAdjacentHTML('afterbegin', `<div class="retype-hint" id="retype-hint">Type it below to start its forms.</div>`);
       setTimeout(() => ans.focus(), 30);
     }
     speakHint('');
@@ -14777,7 +15124,7 @@
       ans.placeholder = 'now type the right answer…';
       ans.classList.add('retype');
       sub.textContent = 'Riscrivi →';
-      fb.querySelector('.feedback-body').insertAdjacentHTML('afterbegin', `<div class="retype-hint" id="retype-hint">Type it above to go on — it won't change your score.</div>`);
+      fb.querySelector('.feedback-body').insertAdjacentHTML('afterbegin', `<div class="retype-hint" id="retype-hint">Type it below to go on — it won't change your score.</div>`);
       setTimeout(() => ans.focus(), 30);
     }
     speakHint('');
@@ -14959,6 +15306,8 @@
       </div>
     `;
     controlsEl.innerHTML = '';
+    delete container.dataset.round;
+    closeRoundMenu();
     if (missed.length) document.getElementById('practise-missed').addEventListener('click', () => practiseMissed(missed));
     document.getElementById('play-again').addEventListener('click', startGame);
     document.getElementById('back-to-setup').addEventListener('click', showSetup);

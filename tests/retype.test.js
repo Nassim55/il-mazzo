@@ -20,7 +20,7 @@ d.getElementById('answer').value = 'qualcosa';
 d.getElementById('submit').click();
 const ans = () => d.getElementById('answer'), sub = () => d.getElementById('submit');
 ok(!ans().disabled && ans().value === '' && sub().textContent === 'Riscrivi →' && ans().classList.contains('retype') && ans().placeholder !== placeholder
-   && /Type it above to go on/.test(d.getElementById('feedback').textContent), 'a miss: the box clears for the right answer, and the button reads Riscrivi →');
+   && /Type it below to go on/.test(d.getElementById('feedback').textContent), 'a miss: the box clears for the right answer, and the button reads Riscrivi →');
 const after = { score: ev('score'), stats: ev(`JSON.stringify(stats[${JSON.stringify(first.noun)}])`), srs: ev(`JSON.stringify(loadSrs('nouns', 'en-it')[${JSON.stringify(first.noun)}])`) };
 key(d, 'Enter');
 ok(ev('index') === 0 && /Type the answer to go on/.test(d.getElementById('retype-hint').textContent), 'Enter alone does not move on');
@@ -53,7 +53,7 @@ ok(ev('index') === 1 && d.getElementById('answer').placeholder === ph, 'after a 
 ({ d, ev } = round('nouns', ['casa', 'pane']));
 const skipCard = ev('deck[0]'), skipBtn = () => d.getElementById('skip-btn');
 const skipStats0 = ev(`JSON.parse(JSON.stringify(stats[${JSON.stringify(skipCard.noun)}] || { seen: 0, wrong: 0 }))`);
-ok(skipBtn() && !skipBtn().hidden && skipBtn().textContent === 'Salta' && skipBtn().previousElementSibling.id === 'submit', 'Salta sits after Controlla, on every new card');
+ok(skipBtn() && !skipBtn().hidden && skipBtn().textContent === 'Salta' && skipBtn().closest('.answer-extras') && d.querySelector('.answer-extras').previousElementSibling.classList.contains('input-row'), 'Salta sits under the answer box, beside the accent keys, on every new card');
 skipBtn().click();
 const skipStats1 = ev(`stats[${JSON.stringify(skipCard.noun)}]`);
 ok(new RegExp('Skipped — the answer is ' + skipCard.italian).test(d.getElementById('feedback').textContent) && d.getElementById('feedback').classList.contains('incorrect')
