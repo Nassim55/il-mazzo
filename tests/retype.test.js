@@ -35,7 +35,7 @@ ok(ev('score') === after.score && ev(`JSON.stringify(stats[${JSON.stringify(firs
 ok(!ans().classList.contains('retype') && ans().placeholder === placeholder && sub().textContent === 'Controlla' && ans().value === '', 'the next card starts clean');
 ans().value = ev('deck[1].italian');
 sub().click();
-ok(sub().textContent === 'Avanti →' && ans().disabled, 'a right answer needs no retype: Avanti as before');
+ok(sub().textContent === 'Avanti →' && ans().dataset.locked === '1' && !ans().disabled, 'a right answer needs no retype: Avanti as before — the box locked, keeping its focus (and a phone its keyboard)');
 
 // ---- Nothing typed: asked for an answer, nothing counted ----
 ({ d, ev } = round('nouns', ['casa', 'pane']));
@@ -81,7 +81,7 @@ d.getElementById('answer').value = 'home sweet home';
 d.getElementById('submit').click();
 ok(d.getElementById('submit').textContent === 'Riscrivi →', 'Italian → English: a miss asks for the English');
 d.getElementById('override-btn').click();
-ok(d.getElementById('submit').textContent === 'Avanti →' && d.getElementById('answer').disabled && !d.getElementById('retype-hint'), '"I was right — count it" lifts the retype');
+ok(d.getElementById('submit').textContent === 'Avanti →' && d.getElementById('answer').dataset.locked === '1' && !d.getElementById('retype-hint'), '"I was right — count it" lifts the retype');
 key(d, 'Enter');
 ok(!!d.querySelector('.complete'), 'and Enter moves on');
 

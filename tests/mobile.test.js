@@ -103,4 +103,28 @@ B4.w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventLis
 B4.d.getElementById('gira-turn').click();
 B4.d.getElementById('gira-yes').click();
 ok(B4.d.querySelector('.card-ghost') && B3.errors.length === 0 && B4.errors.length === 0, 'Gira’s Knew it sweeps the card off too');
+// ---- The keyboard stays up: the answer box keeps its focus through the round ----
+const B5 = boot({ 'flipcards-subject': 'nouns', 'mazzo-answer-mode': 'type' });
+const d5 = B5.d, ev5 = B5.ev, box = () => d5.getElementById('answer'), enter = () => d5.dispatchEvent(new B5.w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+ev5("clearHand(); topicsIn(['tempo']); updateReadout();");
+d5.getElementById('start-btn').click();
+ok(d5.activeElement === box(), 'the first card: the answer box is focused');
+box().value = ev5('deck[0].italian');
+enter();
+const typed = new B5.w.Event('beforeinput', { bubbles: true, cancelable: true });
+box().dispatchEvent(typed);
+ok(box().dataset.locked === '1' && !box().disabled && d5.activeElement === box() && typed.defaultPrevented, 'answered: the box is locked, not disabled — it keeps the focus (a phone its keyboard) and refuses typing');
+const tap = new B5.w.Event('pointerdown', { bubbles: true, cancelable: true });
+d5.querySelector('#game-area > .card').dispatchEvent(tap);
+ok(tap.defaultPrevented, 'a tap on the card leaves the focus in the answer box');
+enter();
+ok(ev5('index') === 1 && !box().dataset.locked && d5.activeElement === box(), 'Enter: the next card, the box open and still focused');
+box().value = 'il qualcosa';
+enter();
+ev5('syncCardFoot()');   // the footer follows the hint a moment later (an observer); bring it up to date here
+ok(!box().dataset.locked && d5.activeElement === box() && /Type it below to go on/.test(d5.querySelector('#game-area > .card > .card-foot').textContent)
+   && d5.querySelector('#game-area > .card > .card-stamp'), 'wrong: open for retyping, focused; the card’s footer and stamp are the card’s own, outside its scrolling note');
+d5.getElementById('round-menu-btn').click();
+d5.getElementById('round-menu-close').click();
+ok(d5.activeElement === box() && B5.errors.length === 0, 'closing ⋯: straight back to typing');
 done();
