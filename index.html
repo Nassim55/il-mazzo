@@ -14225,20 +14225,30 @@
   // ===== The next card (Nov 2026, "Nuova carta") =====
   // Moving on from an answered card, a copy of it — over the real card, which already holds the next
   // one — is swept off the table to the left. Not with "reduce motion" on, nor where there's no animate().
-  let renderedIndex = -1;
-  function dealAway(cardEl) {
+  let renderedIndex = -1, sweepDir = -1;   // which way the answered card leaves: left, or as Gira's judging says
+  function dealAway(cardEl, dir = -1) {
     if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const ghost = cardEl.cloneNode(true);
     if (typeof ghost.animate !== 'function') return;
+    const from = cardEl.style.transform || 'translate(0px, 0px) rotate(0deg)';   // where a Gira drag left it, or in place
     ghost.removeAttribute('id');
-    ghost.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+    ghost.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
     ghost.classList.add('card-ghost');
     ghost.setAttribute('aria-hidden', 'true');
     Object.assign(ghost.style, { position: 'absolute', left: `${cardEl.offsetLeft}px`, top: `${cardEl.offsetTop}px`, width: `${cardEl.offsetWidth}px`,
-      height: `${cardEl.offsetHeight}px`, margin: '0', zIndex: '5', pointerEvents: 'none' });
+      height: `${cardEl.offsetHeight}px`, margin: '0', zIndex: '5', pointerEvents: 'none', transform: from, willChange: 'transform, opacity' });
     gameArea.appendChild(ghost);
-    ghost.animate([{ transform: 'translateX(0) rotate(0deg)' }, { transform: 'translateX(-118%) rotate(-7deg)' }],
-      { duration: 320, easing: 'cubic-bezier(0.55, 0, 0.75, 0.3)', fill: 'forwards' }).finished.then(() => ghost.remove(), () => ghost.remove());
+    const go = () => {   // a flick: moving at once, gliding out, fading as it goes
+      ghost.animate([
+        { transform: from, opacity: 1 },
+        { transform: `translate(${dir * 118}%, 22px) rotate(${dir * 8}deg)`, opacity: 1, offset: 0.62 },
+        { transform: `translate(${dir * 150}%, 34px) rotate(${dir * 11}deg)`, opacity: 0 },
+      ], { duration: 480, easing: 'cubic-bezier(0.3, 0.6, 0.35, 1)', fill: 'forwards' }).finished.then(() => ghost.remove(), () => ghost.remove());   // moving at once, a gentle top speed
+      if (typeof cardEl.animate === 'function') {   // the next card rises into place beneath it
+        cardEl.animate([{ transform: 'scale(0.975)', opacity: 0.6 }, { transform: 'none', opacity: 1 }], { duration: 380, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+      }
+    };
+    (window.requestAnimationFrame || (f => setTimeout(f, 16)))(go);   // after the next card is drawn: no dropped first frame
   }
   // ===== Gira (Nov 2026): practise without typing =====
   // Turn the card (Gira la carta, a tap on the card, or Space), then say whether you knew it:
@@ -14282,6 +14292,7 @@
   }
   function giraJudge(knew) {
     if (answerMode !== 'turn' || !giraTurned || container.dataset.view !== 'game' || index >= deck.length) return;
+    sweepDir = knew ? 1 : -1;   // Knew it leaves to the right, Not yet to the left
     const card = deck[index];
     srsAnswer(subject, direction, card.noun, knew, false);   // the schedule only
     if (knew) {
@@ -14325,9 +14336,10 @@
     if (!giraDrag) return;
     const d = giraDrag, dx = e.clientX - d.x, dy = e.clientY - d.y;
     giraDrag = null;
-    d.el.style.transform = '';
-    if (!giraTurned) { if (Math.abs(dx) < 12 && Math.abs(dy) < 12) giraTurn(); return; }
-    if (dx > 70) giraJudge(true); else if (dx < -70) giraJudge(false);
+    if (!giraTurned) { d.el.style.transform = ''; if (Math.abs(dx) < 12 && Math.abs(dy) < 12) giraTurn(); return; }
+    if (dx > 70) giraJudge(true);   // the card carries on from where the finger let it go
+    else if (dx < -70) giraJudge(false);
+    else d.el.style.transform = '';
   });
   gameArea.addEventListener('pointercancel', () => { if (giraDrag) { giraDrag.el.style.transform = ''; giraDrag = null; } });
   // The installable app (Nov 2026): on the hosted site, a service worker keeps Il Mazzo working
@@ -14736,7 +14748,9 @@
 
   function render() {
     const leaving = gameArea.querySelector('.card:not(.card-ghost)'), fbNow = leaving && leaving.querySelector('#feedback');
-    if (leaving && fbNow && !fbNow.classList.contains('hidden') && renderedIndex === index - 1 && index < deck.length && container.dataset.view === 'game') dealAway(leaving);
+    if (leaving && fbNow && !fbNow.classList.contains('hidden') && renderedIndex === index - 1 && index < deck.length && container.dataset.view === 'game') dealAway(leaving, sweepDir);
+    if (leaving) leaving.style.transform = '';   // a Gira drag's offset: the next card sits straight
+    sweepDir = -1;
     renderedIndex = index;
     const answerBox = document.getElementById('answer');
     if (answerBox) { const english = direction === 'it-en'; answerBox.lang = english ? 'en' : 'it'; container.dataset.answerLang = english ? 'en' : 'it'; }
