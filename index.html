@@ -2401,6 +2401,18 @@
     animation: fb-stamp 0.26s cubic-bezier(0.3, 1.4, 0.5, 1) 0.11s both; }
   .card .feedback.correct::after { content: '✓'; content: '✓' / ''; color: var(--olive); }   /* the status line already says it: hidden from screen readers */
   .card .feedback.incorrect::after { content: '✗'; content: '✗' / ''; color: var(--terracotta); }
+  /* constant-size cards (Nov 2026): the round's card keeps one height from front to back, so the answer box below never moves;
+     a long note scrolls inside the card. The height changes only with the screen — or with the keyboard (--vv-h, the height still visible) */
+  .container[data-view="game"] #game-area > .card { height: 370px; min-height: 0; }
+  .container[data-view="game"] #game-area > .card > .feedback:not(.hidden) { max-height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .card:has(> .feedback:not(.hidden)) .streak-flag { top: auto; bottom: 18px; }   /* the question has the top corner on the back; the streak moves to the foot */
+  @media (max-width: 600px) {
+    .container[data-view="game"] #game-area > .card { height: 330px; }
+    .container.kb-open[data-view="game"] #game-area > .card { height: clamp(140px, calc(var(--vv-h, 510px) - 270px), 260px); }
+  }
+  @media (orientation: landscape) and (max-height: 500px) {
+    .container[data-round="1"][data-view="game"] #game-area > .card { height: clamp(180px, calc(100dvh - 110px), 320px); }
+  }
   /* the next card ("Nuova carta"): the answered one is swept off the table to the left (a copy, over the real card) */
   .container[data-view="game"] #game-area { position: relative; }
   body { overflow-x: clip; }
@@ -14203,6 +14215,7 @@
   if (window.visualViewport) {   // the keyboard up: a compact round, the answer box in view
     const vv = window.visualViewport;
     vv.addEventListener('resize', () => {
+      document.documentElement.style.setProperty('--vv-h', `${Math.round(vv.height)}px`);   // what's visible above the keyboard, for the card's height
       const open = container.dataset.view === 'game' && vv.height < window.innerHeight * 0.78;
       container.classList.toggle('kb-open', open);
       const a = document.getElementById('answer');
