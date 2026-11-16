@@ -60,4 +60,20 @@ ok(buzz === 1, 'and the phone buzzes once');
 d.getElementById('change-btn').click();
 ok(c.dataset.view === 'setup' && c.dataset.round === undefined && !c.classList.contains('menu-open'), 'back at the setup: no ⋯, no open panel');
 ok(B.errors.length === 0, 'no errors along the way');
+// ---- The card's back: what you wrote; the right answer's dash set apart; a skip ----
+const B2 = boot({ 'flipcards-subject': 'nouns', 'mazzo-answer-mode': 'type' });
+const d2 = B2.d, ev2 = B2.ev;
+ev2("clearHand(); topicsIn(['tempo']); updateReadout();");
+d2.getElementById('start-btn').click();
+d2.getElementById('answer').value = 'il qualcosa';
+d2.getElementById('submit').click();
+ok(d2.querySelector('#feedback .fb-wrote') && /you wrote il qualcosa/.test(d2.querySelector('#feedback .fb-wrote').textContent) && d2.querySelector('#feedback .fb-wrote s'), 'the card’s back: what you wrote, crossed out');
+ev2('index = 1; render();');
+d2.getElementById('answer').value = ev2('deck[1].italian');
+d2.getElementById('submit').click();
+ok(d2.querySelector('#feedback.correct .fb-dash') && /✓ (Corretto|Bravo) — /.test(d2.getElementById('feedback').textContent) && !d2.querySelector('#feedback .fb-wrote'),
+   'a right answer: ✓ Corretto — its dash kept in the words, set apart for the card’s back; nothing crossed out');
+d2.getElementById('submit').click();
+d2.getElementById('skip-btn').click();
+ok(d2.querySelector('#feedback.incorrect') && !d2.querySelector('#feedback .fb-wrote') && B2.errors.length === 0, 'a skip: no “you wrote”');
 done();
