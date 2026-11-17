@@ -13758,6 +13758,14 @@
     } catch (e) { /* not allowed here, or not supported: the screen may sleep */ }
   }
 
+  function spassoFromRound() {   // the round menu's A spasso: this round's cards — your hand, the saved deck, a Focus round, Ripasso — from the card you're on
+    if (!deck || !deck.length) return;
+    const at = Math.min(index, deck.length - 1);
+    const cards = deck.slice(at).concat(deck.slice(0, at));
+    closeRoundMenu();
+    showSetup();   // leave the round as Change nouns does: your sections and the saved deck as they were
+    startPassive(cards);
+  }
   function startPassive(mixed) {
     const msg = document.getElementById('passive-msg');
     if (!chosenVoice()) { if (msg) msg.textContent = 'There’s no Italian voice on this device yet — see the note on voices below.'; return; }
@@ -14753,7 +14761,7 @@
         ${reviewMode ? '' : '<button type="button" class="ghost" id="game-focus-btn">→ Focus…</button>'}
         <button type="button" class="ghost chart-btn" id="chart-btn" hidden></button>
         <button type="button" class="ghost" id="save-deck-btn" title="Keep this exact deck — pick it up from the home page next time">${savedLive ? '✓ Deck saved' : '💾 Save deck'}</button>
-        ${reviewMode ? '' : `<button type="button" class="ghost" id="game-spasso-btn" title="Out and about: hear each card of your hand, the Italian then the English, ${passivePrefs.reps} times — no typing">🎧 A spasso</button>`}
+        <button type="button" class="ghost" id="game-spasso-btn" title="Out and about: hear this round’s cards, the Italian then the English — no typing">🎧 A spasso</button>
         <span class="direction-toggle" role="group" aria-label="Translation direction"${reviewMode ? ' hidden' : ''}>
           <button type="button" data-dir="en-it" class="${direction === 'en-it' ? 'active' : ''}" aria-pressed="${direction === 'en-it'}">EN → IT</button>
           <button type="button" data-dir="it-en" class="${direction === 'it-en' ? 'active' : ''}" aria-pressed="${direction === 'it-en'}">IT → EN</button>
@@ -14771,7 +14779,7 @@
     });
     document.getElementById('change-btn').addEventListener('click', showSetup);
     const spassoBtn = document.getElementById('game-spasso-btn');
-    if (spassoBtn) spassoBtn.addEventListener('click', () => { closeRoundMenu(); startPassiveHand(); });   // your hand, out and about — as on the setup page
+    if (spassoBtn) spassoBtn.addEventListener('click', spassoFromRound);
     document.getElementById('chart-btn').addEventListener('click', openChart);
     updateChartBtn();
     const focusBtn = document.getElementById('game-focus-btn');

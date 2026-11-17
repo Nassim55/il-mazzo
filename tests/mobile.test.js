@@ -135,8 +135,14 @@ B6.d.getElementById('round-menu-btn').click();
 const sheet = B6.d.getElementById('controls');
 ok(!sheet.querySelector('[data-dir="listen"]') && sheet.querySelectorAll('.direction-toggle [data-dir]').length === 2 && B6.d.getElementById('game-spasso-btn'),
    'the round menu: EN → IT and IT → EN, no Listen — and A spasso');
-B6.ev("window.__spasso = 0; startPassiveHand = () => { window.__spasso++; };");   // no voice in the test browser: check it's asked for
+// your case: a saved deck, resumed with an empty hand — A spasso plays the saved deck's cards
+B6.d.getElementById('save-deck-btn').click();
+const savedN = B6.ev('deck.length');
+B6.ev("showSetup(); clearHand(); updateReadout();");
+B6.d.getElementById('saved-resume').click();
+B6.d.getElementById('round-menu-btn').click();
+B6.ev("window.__spasso = null; startPassive = c => { window.__spasso = Array.isArray(c) ? c.length : 'hand'; };");   // no voice in the test browser: check what it's given
 B6.d.getElementById('game-spasso-btn').click();
-ok(B6.ev('window.__spasso') === 1 && B6.d.getElementById('round-menu-btn').getAttribute('aria-expanded') === 'false' && B6.errors.length === 0,
-   'A spasso from the round menu: the menu closes and A spasso starts on your hand');
+ok(B6.ev('window.__spasso') === savedN && B6.ev('container.dataset.view') === 'setup' && B6.d.getElementById('round-menu-btn').getAttribute('aria-expanded') === 'false' && B6.errors.length === 0,
+   `A spasso from the round menu plays this round's cards — the saved deck's ${savedN}, with an empty hand — leaving the round as Change nouns does`);
 done();

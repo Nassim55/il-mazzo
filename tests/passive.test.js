@@ -139,5 +139,15 @@ const txt = (B, id) => B.d.getElementById(id).textContent.trim();
   B = boot({ 'flipcards-subject': 'nouns' }, fakes([VOICES[1]]));
   start(B, ['casa']);
   ok(view(B) === 'setup' && /no Italian voice/.test(B.d.getElementById('passive-msg').textContent), 'no Italian voice on the device: it says so, and stays put');
+  // From a round's ⋯ menu: A spasso plays that round's cards, from the card you're on
+  B = boot({ 'flipcards-subject': 'nouns', 'mazzo-answer-mode': 'type' }, fakes());
+  B.ev("clearHand(); topicsIn(['tempo']); updateReadout();");
+  B.d.getElementById('start-btn').click();
+  B.ev('index = 3; render();');
+  const roundN = B.ev('deck.length'), here = B.ev('deck[index].italian');
+  B.d.getElementById('round-menu-btn').click();
+  B.d.getElementById('game-spasso-btn').click();
+  ok(view(B) === 'passive' && B.ev('passive.cards.length') === roundN && B.ev('passive.cards[0].italian') === here && B.errors.length === 0,
+     `from a round's ⋯ menu: A spasso plays that round's ${roundN} cards, starting with the one you were on (${here})`);
   done();
 })();
