@@ -2,14 +2,14 @@
 const { boot, ok, done } = require('./harness');
 let { w, d, ev, key, warns, errors } = boot();
 ok(warns.length === 0 && errors.length === 0, 'loads with no validator warnings or errors');
-ok(ev('subject') === 'nouns' && ev('nounData.length') === 1095, 'opens on nouns with 1095 nouns');
+ok(ev('subject') === 'nouns' && ev('nounData.length') === 1295, 'opens on nouns with 1295 nouns');
 const keys = ev('nounData.map(n => n.noun)');
-ok(new Set(keys).size === 1095 && new Set(ev('nounData.map(n => n.en)')).size === 1095 && new Set(ev('nounData.map(n => n.it)')).size === 1095, 'no duplicate keys, English prompts or Italian forms');
+ok(new Set(keys).size === 1295 && new Set(ev('nounData.map(n => n.en)')).size === 1295 && new Set(ev('nounData.map(n => n.it)')).size === 1295, 'no duplicate keys, English prompts or Italian forms');
 const themed = new Set(ev('THEMES.flatMap(t => t.nouns)'));
 ok(keys.every(k => themed.has(k)) && [...themed].every(k => keys.includes(k)), 'every noun themed, no unknown theme keys');
-ok(ev('FREQUENCY_ORDER.length') === 1095 && keys.every(k => ev(`Number.isFinite(rankOf(${JSON.stringify(k)}))`)), 'every noun ranked');
+ok(ev('FREQUENCY_ORDER.length') === 1295 && keys.every(k => ev(`Number.isFinite(rankOf(${JSON.stringify(k)}))`)), 'every noun ranked');
 const fails = ev('nounData.filter(n => !checkEnglish(n.en, { english: n.en }).correct || !checkEnglish(n.en.replace(/\\([^)]*\\)/g, "").replace(/^the /i, "").trim(), { english: n.en }).correct).map(n => n.en)');
-ok(fails.length === 0, `English checker accepts all 1095 prompts (${fails.slice(0, 3).join(', ')})`);
+ok(fails.length === 0, `English checker accepts all 1295 prompts (${fails.slice(0, 3).join(', ')})`);
 ok(ev("checkAnswer('l amico', { italian: \"l'amico\", noun: 'amico' }).correct") && ev("checkAnswer('la pane', { italian: 'il pane', noun: 'pane' }).reason") === 'wrong-article'
    && ev("checkAnswer('pane', { italian: 'il pane', noun: 'pane' }).reason") === 'missing-article', 'article checking: apostrophes, wrong article, missing article');
 
@@ -57,7 +57,7 @@ d.getElementById('answer').value = 'il pane'; d.getElementById('submit').click()
 ok(d.querySelector('.assoc-text')?.textContent === 'companion <shared bread>', 'association survives a reload');
 // ---- The shop (Oct 2026): 52 more nouns, and the food already in the deck filed there too ----
 const shop = ev("NOUN_THEMES.find(t => t.key === 'negozio').nouns");
-ok(['manzo', 'agnello', 'maiale', 'fagiolo', 'melone', 'arancia', 'cece'].every(k => shop.includes(k)) && shop.length === 142 && ev("NOUN_ITEMS.find(n => n.noun === 'maiale').en") === 'the pig (pork)',
+ok(['manzo', 'agnello', 'maiale', 'fagiolo', 'melone', 'arancia', 'cece'].every(k => shop.includes(k)) && shop.length === 149 && ev("NOUN_ITEMS.find(n => n.noun === 'maiale').en") === 'the pig (pork)',
    `Negozio has beef, lamb, pork (il maiale), beans, melon, oranges and chickpeas — ${shop.length} nouns in all`);
 const SHOP_NEW = ['manzo', 'agnello', 'vitello', 'salsiccia', 'salame', 'pancetta', 'tacchino', 'tonno', 'salmone', 'gambero', 'cozza', 'merluzzo', 'bistecca', 'fagiolo', 'cece', 'lenticchia',
   'pisello', 'carota', 'lattuga', 'spinaci', 'peperone', 'zucchina', 'melanzana', 'cetriolo', 'cavolo', 'broccolo', 'sedano', 'mais', 'verdura', 'oliva', 'basilico', 'prezzemolo', 'melone',
@@ -78,9 +78,9 @@ const RENO_NEW = ['trave', 'architrave', 'solaio', 'parete', 'tegola', 'coppo', 
   'caldaia', 'stufa', 'scarico', 'bolletta', 'subentro', 'umidità', 'muffa', 'crepa', 'perdita', 'muratore', 'idraulico', 'elettricista', 'falegname', 'geometra', 'impresa',
   'preventivo', 'permesso', 'pratica', 'catasto', 'planimetria', 'caparra', 'bonifico', 'sopralluogo', 'cantiere', 'ponteggio', 'imposta', 'dichiarazione'];
 const RENO_OLD = ['tetto', 'muro', 'finestra', 'porta', 'pietra', 'scala', 'pavimento', 'soffitto', 'cantina', 'sabbia', 'castagno', 'interruttore', 'rubinetto', 'fattura', 'comune'];
-ok(reno.label === 'Ristrutturazione' && reno.en === 'Renovation' && reno.nouns.length === 73 && RENO_NEW.length === 58
-   && [...RENO_NEW, ...RENO_OLD].every(k => reno.nouns.includes(k)) && new Set(reno.nouns).size === 73,
-   'Ristrutturazione (Renovation): 73 nouns — 58 new, and the 15 house words already in the deck (il tetto, la sabbia, il castagno…)');
+ok(reno.label === 'Ristrutturazione' && reno.en === 'Renovation' && reno.nouns.length === 83 && RENO_NEW.length === 58
+   && [...RENO_NEW, ...RENO_OLD].every(k => reno.nouns.includes(k)) && new Set(reno.nouns).size === 83,
+   'Ristrutturazione (Renovation): 83 nouns — 58 new, the 15 house words already in the deck (il tetto, la sabbia, il castagno…), and 10 everyday ones added since (il buco, la colla…)');
 const renoWrongArticle = ev(`${JSON.stringify(RENO_NEW)}.map(k => NOUN_ITEMS.find(n => n.noun === k)).filter(n => {
   const [art, word] = n.it.startsWith("l'") ? ["l'", n.it.slice(2)] : n.it.split(' ');
   const vowel = /^[aeiouàèéìòù]/.test(word), special = /^(s[^aeiou]|z|gn|ps|x|y)/.test(word);

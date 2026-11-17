@@ -63,8 +63,8 @@ ok(!d.getElementById('card-speak').hidden, 'IT→EN: 🔊 on the card');
 d.getElementById('card-speak').click();
 ok(last().text === 'noi capiamo', 'it plays the Italian prompt before you answer');
 // ---- Listening ----
-d.querySelector('.direction-toggle [data-dir="listen"]').click();
-ok(ev('direction') === 'listen' && d.querySelector('.direction-toggle [data-dir="listen"]').classList.contains('active'), 'in-game toggle: 🔊 Listen');
+ev("setDirection('listen')");   // Listen is set from the setup page now — the round menu has A spasso instead
+ok(ev('direction') === 'listen' && !d.querySelector('.direction-toggle [data-dir="listen"]'), 'Listen still works in a round (chosen on the setup page; no longer in the round menu)');
 const c0 = ev('deck[index]');
 ok(last().text === `${c0.pronounLabel.split(' / ')[0]} ${c0.italian}` && !!d.getElementById('listen-btn') && !d.getElementById('prompt').textContent.includes(c0.italian), 'listening: the card speaks the Italian and shows no text');
 ok(d.getElementById('pronoun-hint').textContent === 'type what you hear' && d.getElementById('verb-meta').style.display === 'none', 'no meaning or person shown — just "type what you hear"');
@@ -83,7 +83,7 @@ d.querySelector('#subject-toggle [data-subject="phrases"]').click();
 ev('clearHand()');
 ev("selectedNouns = new Set(['mi-chiamo']); updateReadout();");
 d.getElementById('start-btn').click();
-d.querySelector('.direction-toggle [data-dir="listen"]').click();
+ev("setDirection('listen')");
 ok(last().text === 'Mi chiamo', 'phrases: "Mi chiamo…" is spoken without the ellipsis');
 d.getElementById('answer').value = 'mi chiamo'; d.getElementById('submit').click();
 ok(d.getElementById('feedback').className.includes('correct'), 'and typing it is right');
@@ -93,7 +93,7 @@ ok(errors.length === 0, `no runtime errors ${errors.join('; ')}`);
 const r = boot({}, fakeSpeech([{ name: 'Samantha', lang: 'en-US', voiceURI: 'sam' }]));
 ok(/No Italian voice found/.test(r.d.getElementById('audio-row').textContent) && /ⓘ next to System voice/.test(r.d.getElementById('audio-row').textContent), 'no Italian voice: the settings row explains how to add one');
 r.ev("selectedNouns = new Set(['pane']); updateReadout();"); r.d.getElementById('start-btn').click();
-r.d.querySelector('.direction-toggle [data-dir="listen"]').click();
+r.ev("setDirection('listen')");
 ok(/no Italian voice found/.test(r.d.getElementById('pronoun-hint').textContent), 'listening without a voice says so on the card');
 r.d.getElementById('answer').value = 'il pane'; r.d.getElementById('submit').click();
 ok(!r.d.getElementById('speak-btn') && r.errors.length === 0, 'no 🔊 buttons and no errors without a voice');

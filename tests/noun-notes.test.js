@@ -8,9 +8,9 @@ const keys = Object.keys(notes);
 ok(B.warns.length === 0 && B.errors.length === 0, 'loads cleanly: every note is for a real noun, and none clashes with a note it already had');
 ok(keys.every(k => B.ev(`NOUN_ITEMS.find(n => n.noun === ${JSON.stringify(k)}).note`) === notes[k]), `each of the ${keys.length} notes reaches its noun`);
 const withNote = B.ev('NOUN_ITEMS.filter(n => n.note).length');
-ok(withNote >= 730, `${withNote} of 1095 nouns have a note`);
+ok(withNote >= 730, `${withNote} of 1295 nouns have a note`);
 const firstWithout = B.ev('NOUN_FREQUENCY_ORDER.findIndex(k => !NOUN_ITEMS.find(n => n.noun === k).note)');
-ok(firstWithout === -1 || firstWithout >= 471, `the most common nouns are covered first: the first ${firstWithout === -1 ? 1095 : firstWithout} by frequency all have one`);
+ok(firstWithout === -1 || firstWithout >= 471, `the most common nouns are covered first: the first ${firstWithout === -1 ? 1295 : firstWithout} by frequency all have one`);
 const bad = keys.filter(k => {
   const v = notes[k];
   return (v.match(/<em>/g) || []).length !== (v.match(/<\/em>/g) || []).length || /<(?!\/?em>)/.test(v) || v.length < 40 || v.length > 420 || /\s{2,}/.test(v);

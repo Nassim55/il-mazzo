@@ -18,7 +18,7 @@ const failed = [];
 const started = Date.now();
 for (const f of files) {
   const t0 = Date.now();
-  const r = spawnSync(process.execPath, [path.join(__dirname, f)], { encoding: 'utf8' });
+  const r = spawnSync(process.execPath, ['--max-old-space-size=4096', path.join(__dirname, f)], { encoding: 'utf8' })   // room for suites that boot the app many times;
   const lines = `${r.stdout || ''}${r.stderr || ''}`.trim().split('\n');
   const summary = lines.filter(l => /\d+ passed, \d+ failed|\d+ comparisons, \d+ differences/.test(l)).pop() || '(no summary — see below)';
   const passed = r.status === 0;

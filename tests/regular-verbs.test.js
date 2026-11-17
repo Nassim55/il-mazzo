@@ -88,8 +88,8 @@ ok(d.querySelector('.feedback .pron')?.textContent === 'pen·sà·re' && /weigh/
 d.getElementById('change-btn').click();
 putBack('nouns');
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
-ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === 73 && d.getElementById('deck-cap').value === '7' && d.getElementById('app-title').textContent === 'Sostantivi', 'nouns: Casa selection and subset "7" kept, title restored');
-ok(!d.querySelector('aside.endings:not(.map-panel)') && d.querySelectorAll('.verb-chip').length === 1095, 'noun setup restored (1095 chips, no endings panel)');
+ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === ev("NOUN_THEMES.find(t => t.key === 'casa').nouns.length") && d.getElementById('deck-cap').value === '7' && d.getElementById('app-title').textContent === 'Sostantivi', 'nouns: Casa selection and subset "7" kept, title restored');
+ok(!d.querySelector('aside.endings:not(.map-panel)') && d.querySelectorAll('.verb-chip').length === 1295, 'noun setup restored (1295 chips, no endings panel)');
 const store = {}; for (let i = 0; i < w.localStorage.length; i++) { const k = w.localStorage.key(i); store[k] = w.localStorage.getItem(k); }
 // Reload remembers the last subject
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();

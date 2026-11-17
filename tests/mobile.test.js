@@ -12,8 +12,8 @@ ev("clearHand(); topicsIn(['tempo']); updateReadout();");
 
 // ---- The hand bar, on the setup page ----
 const bar = d.getElementById('hand-bar');
-ok(bar.innerHTML && /La tua mano · Tempo/.test(bar.textContent) && /54 nouns · 54 cards/.test(bar.textContent) && bar.querySelector('[data-bar="start"]') && bar.querySelector('[data-bar="passive"]'),
-   'the hand bar: La tua mano · Tempo, 54 nouns · 54 cards, Start and A spasso');
+ok(bar.innerHTML && /La tua mano · Tempo/.test(bar.textContent) && new RegExp(`${B.ev("NOUN_THEMES.find(t => t.key === 'tempo').nouns.length")} nouns · ${B.ev("NOUN_THEMES.find(t => t.key === 'tempo').nouns.length")} cards`).test(bar.textContent) && bar.querySelector('[data-bar="start"]') && bar.querySelector('[data-bar="passive"]'),
+   'the hand bar: La tua mano · Tempo, all its nouns as cards, Start and A spasso');
 ok(bar.hidden, '…waiting out of sight until the table scrolls away');
 
 // ---- The round: ⋯ and its controls ----
@@ -127,4 +127,16 @@ ok(!box().dataset.locked && d5.activeElement === box() && /Type it below to go o
 d5.getElementById('round-menu-btn').click();
 d5.getElementById('round-menu-close').click();
 ok(d5.activeElement === box() && B5.errors.length === 0, 'closing ⋯: straight back to typing');
+// ---- The round menu: A spasso instead of Listen ----
+const B6 = boot({ 'flipcards-subject': 'nouns', 'mazzo-answer-mode': 'type' });
+B6.ev("clearHand(); topicsIn(['tempo']); updateReadout();");
+B6.d.getElementById('start-btn').click();
+B6.d.getElementById('round-menu-btn').click();
+const sheet = B6.d.getElementById('controls');
+ok(!sheet.querySelector('[data-dir="listen"]') && sheet.querySelectorAll('.direction-toggle [data-dir]').length === 2 && B6.d.getElementById('game-spasso-btn'),
+   'the round menu: EN → IT and IT → EN, no Listen — and A spasso');
+B6.ev("window.__spasso = 0; startPassiveHand = () => { window.__spasso++; };");   // no voice in the test browser: check it's asked for
+B6.d.getElementById('game-spasso-btn').click();
+ok(B6.ev('window.__spasso') === 1 && B6.d.getElementById('round-menu-btn').getAttribute('aria-expanded') === 'false' && B6.errors.length === 0,
+   'A spasso from the round menu: the menu closes and A spasso starts on your hand');
 done();

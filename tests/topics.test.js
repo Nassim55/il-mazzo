@@ -6,7 +6,9 @@
 const { boot, ok, done } = require('./harness');
 
 const setUp = (subj) => {
+  if (setUp.last && setUp.last.w && setUp.last.w.close) setUp.last.w.close();   // one app at a time: free the last one's memory
   const B = boot({ 'flipcards-subject': subj });
+  setUp.last = B;
   B.has = k => B.ev(`selectedNouns.has(${JSON.stringify(k)})`);
   B.nouns = k => B.ev(`themeByKey(${JSON.stringify(k)}).nouns`);
   B.redraw = () => B.ev("if (document.getElementById('noun-map')) document.getElementById('noun-map').innerHTML = nounMapInner();");

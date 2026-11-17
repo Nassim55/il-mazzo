@@ -20,7 +20,7 @@ ok(B.d.getElementById('hand').compareDocumentPosition(B.d.getElementById('noun-m
    && B.d.querySelector('#hand #start-btn') && B.d.querySelector('#hand #passive-btn') && B.d.querySelector('#setup-more .deck-cap') && B.d.querySelector('#setup-more #setup-meta') && B.d.querySelector('#setup-more #audio-row') && B.d.querySelector('#setup-more #weakest-20') && !B.d.querySelector('#setup-more').open,
    `the hand — Start, A spasso, and Settings & more (quick picks, deck size, voice, progress), closed — comes above the map (${parts.filter(x => x !== 'theme-row').join(' → ')})`);
 ok(B.d.getElementById('theme-row').hidden && B.d.getElementById('verb-grid').closest('details.grid-fold') && !B.d.getElementById('grid-fold').open
-   && /Every noun, one by one \(1095\)/.test(B.d.querySelector('.grid-fold summary').textContent), 'the theme chips give way to the map; the 1095 nouns fold away underneath');
+   && /Every noun, one by one \(1295\)/.test(B.d.querySelector('.grid-fold summary').textContent), 'the theme chips give way to the map; the 1295 nouns fold away underneath');
 ok(B.d.querySelector('.container').dataset.map === '1' && ['verbs', 'irregular', 'adjectives'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '1') && ['phrases', 'prepositions'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '0'), 'a wide page for the map — the word sections');
 
 // ---- A topic's line ----
