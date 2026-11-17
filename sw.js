@@ -2,7 +2,7 @@
 // the network when there is one — so a new version arrives at once — and from the cache when there
 // isn't; fonts and icons come from the cache first. Progress syncing (the workers.dev server) and
 // Google sign-in always go to the network and are never cached.
-const CACHE = 'il-mazzo-v1';
+const CACHE = 'il-mazzo-v2';   // v2: version.json is left to the network
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', event => {
@@ -22,6 +22,7 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.hostname.endsWith('workers.dev') || url.hostname === 'accounts.google.com') return;   // never cached
+  if (url.origin === self.location.origin && url.pathname.endsWith('/version.json')) return;   // the release stamp: always the network's
   const page = req.mode === 'navigate' || (url.origin === self.location.origin && /\/(index\.html)?$/.test(url.pathname));
   if (page) {   // the network first, so updates arrive; the cache when offline
     event.respondWith(

@@ -2540,6 +2540,18 @@
     body:has(> .container[data-view="game"]) { padding-top: max(calc(10px + env(safe-area-inset-top)), 54px); }
   }
   @media (max-width: 600px) { .container[data-view="game"] #score::before { content: '✓ '; color: var(--olive); font-size: 0.8em; } }   /* the score, told apart from the card count */
+  /* a newer version is ready (Nov 2026): a banner at the top offers to reload */
+  .update-banner { position: fixed; z-index: 60; top: calc(12px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px;
+    max-width: calc(100% - 24px); padding: 8px 8px 8px 18px; border-radius: 999px; background: var(--ink); color: var(--paper); font-family: 'DM Sans', sans-serif; font-size: 14px;
+    box-shadow: 0 12px 30px -12px rgba(28, 22, 17, 0.55); }
+  .update-banner[hidden] { display: none; }
+  .update-banner button { border: 0; border-radius: 999px; min-height: 36px; padding: 0 14px; background: var(--paper); color: var(--ink); font: 600 13px 'DM Sans', sans-serif; cursor: pointer; }
+  .update-banner .update-close { min-width: 36px; padding: 0; background: transparent; color: var(--paper); font-size: 15px; }
+  /* the end of a round: the next round's size, above Play again (Nov 2026) */
+  .card.complete .next-round { width: min(460px, 100%); margin: 22px auto 16px; }
+  .card.complete .next-round-head { margin-bottom: 8px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faded); }
+  .card.complete .game-trim { justify-content: center; flex-wrap: wrap; gap: 10px 24px; }
+  .card.complete .next-round:has(.game-trim:empty) { display: none; }
   /* Il Mazzo's masthead; the sections in three families; the table (Nov 2026) */
   .masthead { padding: 4px 0 16px; text-align: left; }
   .mast-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 60px; line-height: 0.95; color: var(--ink); }
@@ -2703,6 +2715,7 @@
     <div class="start-bar" id="hand-bar" role="region" aria-label="La tua mano" hidden></div>
   </div>
 
+<div class="update-banner" id="update-banner" role="status" hidden><span>A newer Il Mazzo is ready</span><button type="button" id="update-reload">Reload</button><button type="button" class="update-close" id="update-close" aria-label="Not now">✕</button></div>
 <script>
   // Top 100 most common Italian nouns by frequency. Each entry has the bare noun
   // (used as key & chip label), the full form with definite article (the answer
@@ -14591,6 +14604,36 @@
       if (open && a && document.activeElement === a && a.scrollIntoView) a.scrollIntoView({ block: 'nearest' });
     });
   }
+  // ===== A newer version (Nov 2026) =====
+  // A tab or a home-screen app can stay open for days, still running the version it loaded. Each release is
+  // stamped (tools/stamp.sh) with the same mark here and in version.json, which the service worker never
+  // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
+  // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
+  // browser; the tests call checkForUpdate themselves).
+  const BUILD = '2026-11-17T20:37Z';
+  let updateDismissed = false;
+  async function checkForUpdate() {
+    if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
+    if (document.visibilityState && document.visibilityState !== 'visible') return;
+    try {
+      const r = await fetch(new URL('version.json', location.href).href, { cache: 'no-store' });
+      if (!r.ok) return;
+      const v = await r.json();
+      const b = document.getElementById('update-banner');
+      if (b && v && v.build && v.build !== BUILD) b.hidden = false;
+    } catch (e) { /* offline, or no version file yet: nothing to say */ }
+  }
+  (() => {
+    const b = document.getElementById('update-banner');
+    if (b) {
+      document.getElementById('update-reload').addEventListener('click', () => location.reload());
+      document.getElementById('update-close').addEventListener('click', () => { updateDismissed = true; b.hidden = true; });
+    }
+    if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
+    setTimeout(checkForUpdate, 4000);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkForUpdate(); });
+    setInterval(checkForUpdate, 10 * 60 * 1000);
+  })();
   // ===== The next card (Nov 2026, "Nuova carta") =====
   // Moving on from an answered card, a copy of it — over the real card, which already holds the next
   // one — is swept off the table to the left. Not with "reduce motion" on, nor where there's no animate().
@@ -14822,8 +14865,9 @@
       const focusKeys = new Set(sessionMaxDeck.map(c => c.key));
       const F = sessionMaxDeck.length, R = P - F;
       const inFocus = deck.filter(c => focusKeys.has(c.key)).length;
-      const playedFocus = deck.slice(0, index).filter(c => focusKeys.has(c.key)).length;
-      const playedRest = Math.min(index, deck.length) - playedFocus;
+      const at = container.dataset.view === 'complete' ? 0 : index;   // at the end of a round: sizing the next one, none of it played
+      const playedFocus = deck.slice(0, at).filter(c => focusKeys.has(c.key)).length;
+      const playedRest = Math.min(at, deck.length) - playedFocus;
       box.innerHTML = trimSliderHTML('game-trim-focus', sessionIsReview ? 'Missed' : 'Focus', inFocus, playedFocus, F, ' is-focus')
         + (R > 0 ? trimSliderHTML('game-trim-rest', 'The rest', deck.length - inFocus, playedRest, R) : '');
     }
@@ -14838,6 +14882,12 @@
     });
   }
   function afterResize(currentKey) {
+    if (container.dataset.view === 'complete') {   // the end of a round: the result stays; only the next round changes
+      refreshDeckSliders();
+      const again = document.getElementById('play-again');
+      if (again) again.textContent = `↻ Play again · ${deck.length} card${deck.length === 1 ? '' : 's'}`;
+      return;
+    }
     totalEl.textContent = deck.length;
     progressEl.style.width = `${Math.min(index / deck.length, 1) * 100}%`;
     refreshDeckSliders();
@@ -14848,6 +14898,7 @@
   function handleGameResize() {
     const input = document.getElementById('game-trim-input');
     if (!input || !sessionPool) return;
+    if (container.dataset.view === 'complete') index = 0;   // the end of a round: sizing the next one, none of it played yet
     const newSize = parseInt(input.value, 10);
     if (!Number.isFinite(newSize) || newSize <= 0 || newSize === deck.length) return;
     const currentKey = deck[index] && deck[index].key;
@@ -14874,6 +14925,7 @@
   function handleGameResizeParts(changed) {
     const focusEl = document.getElementById('game-trim-focus'), restEl = document.getElementById('game-trim-rest');
     if (!focusEl || !sessionPool) return;
+    if (container.dataset.view === 'complete') index = 0;   // the end of a round: sizing the next one, none of it played yet
     let fWant = +focusEl.value, rWant = restEl ? +restEl.value : 0;
     if (fWant + rWant === 0) {   // never an empty deck: put back one card in the group just moved
       if (changed === restEl) rWant = 1; else fWant = 1;
@@ -15774,6 +15826,10 @@
         <div class="pct">${pct}% &nbsp;·&nbsp; best streak ${bestStreak}</div>
         <p class="msg">${msg}</p>
         ${missedHTML}
+        <div class="next-round">
+          <div class="next-round-head">Next round</div>
+          <div class="game-trim" id="game-trim"></div>
+        </div>
         <div class="complete-actions">
           <button type="button" class="submit" id="play-again">↻ Play ${missed.length ? `all ${deck.length} ` : ''}again</button>
           ${missed.length ? `<button type="button" class="submit secondary" id="practise-missed">↻ Practise ${practiseLabel}</button>` : ''}
@@ -15784,6 +15840,7 @@
     controlsEl.innerHTML = '';
     delete container.dataset.round;
     closeRoundMenu();
+    refreshDeckSliders();   // the next round's size, on the end card (the round menu is empty now)
     if (missed.length) document.getElementById('practise-missed').addEventListener('click', () => practiseMissed(missed));
     document.getElementById('play-again').addEventListener('click', startGame);
     document.getElementById('back-to-setup').addEventListener('click', showSetup);
