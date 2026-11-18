@@ -2800,19 +2800,20 @@
   /* ===== Il Mazzo's own keyboard (Nov 2026): a phone's typed round — the phone's keyboard and iOS's bar never open ===== */
   .mz-kb { display: none; }
   .container.own-kb[data-view="game"][data-answer-mode="type"] .mz-kb {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; flex-direction: column; gap: 7px;
-    padding: 8px 4px calc(10px + env(safe-area-inset-bottom, 0px)); background: #e9dfca; border-top: 1px solid rgba(28, 22, 17, 0.12);
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; flex-direction: column; gap: 6px;
+    padding: 8px 3px calc(10px + env(safe-area-inset-bottom, 0px)); background: #e9dfca; border-top: 1px solid rgba(28, 22, 17, 0.12);
   }
-  .mz-row { display: flex; justify-content: center; gap: 6px; }
+  .mz-row { display: flex; justify-content: center; gap: 4px; }   /* the keys: A++ on the canvas (Nov 2026), letters 35 × 58 */
   .mz-bottom { padding: 0 2px; }
-  .mz-key { flex: 0 0 calc((100% - 54px) / 10); height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(28, 22, 17, 0.14); border-radius: 8px;
-    background: var(--paper); box-shadow: 0 1px 0 rgba(28, 22, 17, 0.14); color: var(--ink); font: 400 21px/1 'DM Sans', sans-serif; touch-action: manipulation;
+  .mz-key { flex: 0 0 calc((100% - 36px) / 10); height: 58px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(28, 22, 17, 0.14); border-radius: 8px;
+    background: var(--paper); box-shadow: 0 1px 0 rgba(28, 22, 17, 0.14); color: var(--ink); font: 400 24px/1 'DM Sans', sans-serif; touch-action: manipulation;
     -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; cursor: pointer; }
   .mz-key:active { background: #efe4cc; transform: translateY(1px); }
-  .mz-accent { flex-basis: 44px; border-color: rgba(176, 133, 64, 0.55); font-size: 20px; }
-  .mz-del { flex-basis: 56px; background: #e2d6bd; }
+  .mz-accent { flex-basis: 50px; height: 44px; border-color: rgba(176, 133, 64, 0.55); font-size: 21px; }
+  .mz-del { flex-basis: 64px; background: #e2d6bd; }
+  .mz-bottom .mz-key { height: 54px; }
   .mz-space { flex: 1 1 auto; color: #6f6152; font: 11px 'JetBrains Mono', monospace; letter-spacing: 0.24em; text-transform: uppercase; }
-  .mz-go { flex: 0 0 118px; border: 0; background: var(--ink); color: var(--paper); }
+  .mz-go { flex: 0 0 120px; border: 0; background: var(--ink); color: var(--paper); }
   .container.own-kb[data-view="game"][data-answer-mode="type"] #submit { display: none; }
   .container.own-kb[data-view="game"] #answer { pointer-events: none; caret-color: transparent; }
   /* A phone's round fits the screen exactly (Nov 2026): one column — the slim header (no section name), the card
@@ -14918,7 +14919,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-18T20:03Z';
+  const BUILD = '2026-11-18T20:34Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
