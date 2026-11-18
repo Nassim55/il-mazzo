@@ -161,4 +161,27 @@ ok(!B7.d.getElementById('feedback').classList.contains('hidden') && /answer is/i
 const at = B7.ev('index');
 B7.d.getElementById('skip-top').click();
 ok(B7.ev('index') === at && B7.errors.length === 0, 'and pressed again while the answer shows, it does nothing (no skipping ahead)');
+// ---- Il Mazzo's own keyboard on a phone ----
+const B8 = boot({ 'flipcards-subject': 'nouns', 'mazzo-answer-mode': 'type' });
+B8.ev("clearHand(); topicsIn(['tempo']); updateReadout();");
+B8.d.getElementById('start-btn').click();
+B8.ev('setOwnKeyboard(true)');
+const kbAns = () => B8.d.getElementById('answer');
+ok(B8.d.querySelector('.container').classList.contains('own-kb') && kbAns().hasAttribute('readonly') && kbAns().getAttribute('inputmode') === 'none',
+   "on a phone: the answer box only shows what Il Mazzo's keys type — the phone's own keyboard (and iOS's bar) never opens");
+const press = k => B8.d.querySelector(`#mz-kb [data-k="${k}"]`).click();
+const word = B8.ev('deck[0].italian');
+for (const ch of word) press(ch === ' ' ? 'space' : ch);
+ok(kbAns().value === word, `the keys type the whole answer, accents and spaces too (${word})`);
+press('del');
+ok(kbAns().value === word.slice(0, -1), 'delete takes the last letter off');
+press(word.slice(-1));
+press('go');
+ok(!B8.d.getElementById('feedback').classList.contains('hidden') && B8.ev('score') === 1, 'the check key checks it: right');
+press('a');
+ok(kbAns().value === word, 'answered: the keys type nothing more until the next card');
+press('go');
+ok(B8.ev('index') === 1 && kbAns().value === '', 'the check key again: the next card');
+B8.ev('setOwnKeyboard(false)');
+ok(!kbAns().hasAttribute('readonly') && !B8.d.querySelector('.container').classList.contains('own-kb') && B8.errors.length === 0, 'off a phone: the answer box types as before');
 done();

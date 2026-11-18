@@ -2797,6 +2797,27 @@
     .container.kb-open[data-view="game"] #game-area > .card { height: clamp(160px, calc(var(--vv-h, 510px) - 160px), 360px); }
   }
 
+  /* ===== Il Mazzo's own keyboard (Nov 2026): a phone's typed round — the phone's keyboard and iOS's bar never open ===== */
+  .mz-kb { display: none; }
+  .container.own-kb[data-view="game"][data-answer-mode="type"] .mz-kb {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; flex-direction: column; gap: 7px;
+    padding: 8px 4px calc(10px + env(safe-area-inset-bottom, 0px)); background: #e9dfca; border-top: 1px solid rgba(28, 22, 17, 0.12);
+  }
+  .mz-row { display: flex; justify-content: center; gap: 6px; }
+  .mz-bottom { padding: 0 2px; }
+  .mz-key { flex: 0 0 calc((100% - 54px) / 10); height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(28, 22, 17, 0.14); border-radius: 8px;
+    background: var(--paper); box-shadow: 0 1px 0 rgba(28, 22, 17, 0.14); color: var(--ink); font: 400 21px/1 'DM Sans', sans-serif; touch-action: manipulation;
+    -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+  .mz-key:active { background: #efe4cc; transform: translateY(1px); }
+  .mz-accent { flex-basis: 44px; border-color: rgba(176, 133, 64, 0.55); font-size: 20px; }
+  .mz-del { flex-basis: 56px; background: #e2d6bd; }
+  .mz-space { flex: 1 1 auto; color: #6f6152; font: 11px 'JetBrains Mono', monospace; letter-spacing: 0.24em; text-transform: uppercase; }
+  .mz-go { flex: 0 0 118px; border: 0; background: var(--ink); color: var(--paper); }
+  .container.own-kb[data-view="game"][data-answer-mode="type"] #submit { display: none; }
+  .container.own-kb[data-view="game"] #answer { pointer-events: none; caret-color: transparent; }
+  .container.own-kb[data-view="game"][data-answer-mode="type"] #game-area { padding-bottom: calc(272px + env(safe-area-inset-bottom, 0px)); }
+  .container.own-kb[data-view="game"][data-answer-mode="type"] #game-area > .card { height: clamp(180px, calc(100dvh - 436px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)), 520px); }
+
 </style>
 </head>
 <body>
@@ -2826,6 +2847,13 @@
     </div>
 
     <div id="game-area"></div>
+    <div class="mz-kb" id="mz-kb" role="group" aria-label="Il Mazzo's keyboard">
+      <div class="mz-row"><button type="button" class="mz-key mz-accent" data-k="à">à</button><button type="button" class="mz-key mz-accent" data-k="è">è</button><button type="button" class="mz-key mz-accent" data-k="é">é</button><button type="button" class="mz-key mz-accent" data-k="ì">ì</button><button type="button" class="mz-key mz-accent" data-k="ò">ò</button><button type="button" class="mz-key mz-accent" data-k="ù">ù</button><button type="button" class="mz-key mz-accent" data-k="'" aria-label="apostrophe">’</button></div>
+      <div class="mz-row"><button type="button" class="mz-key" data-k="q">q</button><button type="button" class="mz-key" data-k="w">w</button><button type="button" class="mz-key" data-k="e">e</button><button type="button" class="mz-key" data-k="r">r</button><button type="button" class="mz-key" data-k="t">t</button><button type="button" class="mz-key" data-k="y">y</button><button type="button" class="mz-key" data-k="u">u</button><button type="button" class="mz-key" data-k="i">i</button><button type="button" class="mz-key" data-k="o">o</button><button type="button" class="mz-key" data-k="p">p</button></div>
+      <div class="mz-row"><button type="button" class="mz-key" data-k="a">a</button><button type="button" class="mz-key" data-k="s">s</button><button type="button" class="mz-key" data-k="d">d</button><button type="button" class="mz-key" data-k="f">f</button><button type="button" class="mz-key" data-k="g">g</button><button type="button" class="mz-key" data-k="h">h</button><button type="button" class="mz-key" data-k="j">j</button><button type="button" class="mz-key" data-k="k">k</button><button type="button" class="mz-key" data-k="l">l</button></div>
+      <div class="mz-row"><button type="button" class="mz-key" data-k="z">z</button><button type="button" class="mz-key" data-k="x">x</button><button type="button" class="mz-key" data-k="c">c</button><button type="button" class="mz-key" data-k="v">v</button><button type="button" class="mz-key" data-k="b">b</button><button type="button" class="mz-key" data-k="n">n</button><button type="button" class="mz-key" data-k="m">m</button><button type="button" class="mz-key mz-del" data-k="del" aria-label="Delete"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h11v14H9l-6-7z"/><path d="M13 9l5 6M18 9l-5 6"/></svg></button></div>
+      <div class="mz-row mz-bottom"><button type="button" class="mz-key mz-space" data-k="space" aria-label="Space">spazio</button><button type="button" class="mz-key mz-go" data-k="go" aria-label="Check"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+    </div>
 
     <div id="controls"></div>
     <div class="round-menu-backdrop" id="round-menu-backdrop" hidden></div>
@@ -14869,7 +14897,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-18T18:39Z';
+  const BUILD = '2026-11-18T19:49Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
@@ -14893,6 +14921,53 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkForUpdate(); });
     setInterval(checkForUpdate, 10 * 60 * 1000);
   })();
+  // ===== Il Mazzo's own keyboard on a phone (Nov 2026, canvas "its own keyboard", option A) =====
+  // On a phone (≤600px, a touch screen) a typed round uses these keys instead of the phone's keyboard, so the
+  // phone's keyboard — and iOS's ^ ˅ ✓ bar with it — never opens: the answer box only shows what's typed
+  // (readonly, inputmode none, never focused). The keys write into it as typing would, nothing once it's
+  // locked after an answer; the check key presses #submit (check, Avanti, Riscrivi).
+  const ownKbQuery = typeof window.matchMedia === 'function' ? window.matchMedia('(max-width: 600px) and (pointer: coarse)') : null;
+  let ownKbForced = null;   // the tests: setOwnKeyboard(true)
+  function ownKb() { return ownKbForced !== null ? ownKbForced : !!(ownKbQuery && ownKbQuery.matches); }
+  function syncOwnKeyboard() {
+    const on = ownKb();
+    container.classList.toggle('own-kb', on);
+    const a = document.getElementById('answer');
+    if (!a) return;
+    if (on) {
+      a.setAttribute('readonly', ''); a.setAttribute('inputmode', 'none'); a.setAttribute('tabindex', '-1');
+      if (!a.dataset.kbWired) { a.dataset.kbWired = '1'; a.addEventListener('focus', () => { if (ownKb()) a.blur(); }); }
+      if (document.activeElement === a) a.blur();
+    } else {
+      a.removeAttribute('readonly'); a.removeAttribute('inputmode'); a.removeAttribute('tabindex');
+    }
+  }
+  function setOwnKeyboard(on) { ownKbForced = on; syncOwnKeyboard(); }
+  if (ownKbQuery && ownKbQuery.addEventListener) ownKbQuery.addEventListener('change', syncOwnKeyboard);
+  function kbType(ch) {
+    const a = document.getElementById('answer');
+    if (!a || a.dataset.locked || a.disabled || container.dataset.view !== 'game') return;
+    a.value = ch === 'del' ? a.value.slice(0, -1) : a.value + ch;
+    a.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  (() => {
+    const kb = document.getElementById('mz-kb');
+    if (!kb) return;
+    kb.addEventListener('pointerdown', e => { if (e.target.closest('[data-k]')) e.preventDefault(); });   // no focus, no selection
+    kb.addEventListener('click', e => {
+      const b = e.target.closest('[data-k]');
+      if (!b) return;
+      const k = b.dataset.k;
+      if (k === 'go') { const s = document.getElementById('submit'); if (s) s.click(); return; }
+      kbType(k === 'space' ? ' ' : k);
+    });
+  })();
+  document.addEventListener('keydown', e => {   // a hardware keyboard on a phone still types into the answer box
+    if (!ownKb() || container.dataset.view !== 'game' || answerMode === 'turn' || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target && e.target.matches && e.target.matches('textarea, input:not(#answer), [contenteditable="true"]')) return;   // a word association, say
+    if (e.key === 'Backspace') { e.preventDefault(); kbType('del'); }
+    else if (e.key.length === 1 && /[\p{L}' ’]/u.test(e.key)) { e.preventDefault(); kbType(e.key === '’' ? "'" : e.key); }
+  });
   // ===== The next card (Nov 2026, "Nuova carta") =====
   // Moving on from an answered card, a copy of it — over the real card, which already holds the next
   // one — is swept off the table to the left. Not with "reduce motion" on, nor where there's no animate().
@@ -15450,6 +15525,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     sweepDir = -1;
     renderedIndex = index;
     watchCardFoot();
+    syncOwnKeyboard();
     const answerBox = document.getElementById('answer');
     if (answerBox) { const english = direction === 'it-en'; answerBox.lang = english ? 'en' : 'it'; container.dataset.answerLang = english ? 'en' : 'it'; }
     if (savedLive) saveDeckNow(true);   // the saved round: its place, kept as you go (this card not yet answered)
