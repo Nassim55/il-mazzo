@@ -2705,10 +2705,6 @@
   .family-list .mode-option.active { background: var(--ink); color: var(--paper); }
   .family-list .section-desc { font-size: 12.5px; font-weight: 400; color: #6f6152; }
   .family-list .mode-option.active .section-desc { color: rgba(251, 246, 234, 0.78); }
-  .section-head { margin: 16px 0 22px; text-align: left; }
-  .section-fam { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #6f6152; }
-  .section-title { margin: 6px 0 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 42px; line-height: 1; color: var(--ink); }
-  .section-sub { margin: 6px 0 0; font-family: 'DM Sans', sans-serif; font-size: 15px; color: #6f6152; }
   .bell-wrap { position: relative; flex: none; }
   .bell { position: relative; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(28, 22, 17, 0.14); border-radius: 50%; background: var(--paper); color: var(--ink); cursor: pointer; }
   .bell[aria-expanded="true"] { border-color: var(--ink); }
@@ -2745,7 +2741,6 @@
     .masthead .family-row { gap: 14px; }
     .masthead .family .family-name { font-size: 18px; }
     .family-list { width: min(300px, calc(100vw - 40px)); }
-    .section-title { font-size: 32px; }
     .todo { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto; max-width: none; max-height: 82vh; overflow-y: auto; border-radius: 22px 22px 0 0; padding: 14px 16px calc(22px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -18px 40px -16px rgba(50, 35, 20, 0.45); }
     .todo-more { padding-left: 0; }
   }
@@ -12929,7 +12924,6 @@
             </div>
           </div>
         </header>
-        <div class="section-head"><div class="section-fam">${fam.name}</div><h1 class="section-title">${cfg.title}</h1><p class="section-sub">${(cfg.subtitle || '').replace(/^Il Mazzo · /, '')}</p></div>
         <section class="table" id="table" aria-label="La tua mano — your hand">
           <div class="table-panel" id="table-hand">
             <section class="hand" id="hand" aria-label="La tua mano — your hand">
@@ -14766,7 +14760,7 @@
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-17T23:36Z';
+  const BUILD = '2026-11-18T01:25Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

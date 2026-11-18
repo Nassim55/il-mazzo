@@ -7,21 +7,21 @@ const { boot, ok, done } = require('./harness');
 let B = boot({ 'flipcards-subject': 'nouns' });
 let d = B.d, ev = B.ev;
 const order = [...d.querySelectorAll('.setup-top-inner > *')].map(e => e.className.split(' ')[0]);
-ok(order.join() === 'masthead,section-head,table' && /Il Mazzo/.test(d.querySelector('.masthead').textContent) && d.querySelector('.masthead .sections') && d.querySelector('.masthead #bell')
-   && d.getElementById('setup-top').compareDocumentPosition(d.getElementById('app-title')) & 4, `Il Mazzo on top, the families and the bell beside it; then the section's heading; then your hand (${order.join(' → ')})`);
+ok(order.join() === 'masthead,table' && /Il Mazzo/.test(d.querySelector('.masthead').textContent) && d.querySelector('.masthead .sections') && d.querySelector('.masthead #bell')
+   && d.getElementById('setup-top').compareDocumentPosition(d.getElementById('app-title')) & 4, `Il Mazzo on top, the families and the bell beside it; then your hand (${order.join(' → ')})`);
 const fams = [...d.querySelectorAll('.sections .family .family-name')].map(e => e.textContent);
 const names = key => [...d.querySelectorAll(`#family-list-${key} .mode-option`)].map(b => b.querySelector('.section-name').textContent);
 const open = () => [...d.querySelectorAll('.family-menu.open')].map(m => m.dataset.familyMenu);
 ok(fams.join('|') === 'Parole|Verbi|Frasi e storie' && d.querySelector('.family[data-family="parole"]').classList.contains('active') && open().length === 0
-   && names('parole').join('|') === 'Sostantivi|Aggettivi|Avverbi e congiunzioni|Possessivi|Preposizioni' && d.querySelector('.section-title').textContent === 'Sostantivi',
-   `three families, Parole current, every menu closed; Parole's holds its five sections (${names('parole').join(', ')}); the heading says Sostantivi`);
+   && names('parole').join('|') === 'Sostantivi|Aggettivi|Avverbi e congiunzioni|Possessivi|Preposizioni' && d.querySelector('#family-list-parole [data-subject="nouns"]').classList.contains('active'),
+   `three families, Parole current, every menu closed; Parole's holds its five sections (${names('parole').join(', ')}), Sostantivi marked`);
 d.querySelector('.family[data-family="verbi"]').click();
 ok(ev('subject') === 'nouns' && open().join() === 'verbi' && !d.getElementById('family-list-verbi').hidden && d.getElementById('family-list-parole').hidden
    && names('verbi').join('|') === 'Regolari|Irregolari|Al contrario' && d.querySelector('.family[data-family="verbi"]').getAttribute('aria-expanded') === 'true',
    "Verbi: just its menu opens — Regolari, Irregolari, Al contrario — and nothing switches yet");
 d.querySelector('#subject-toggle [data-subject="mipiace"]').click();
-ok(ev('subject') === 'mipiace' && open().length === 0 && d.querySelector('.family[data-family="verbi"]').classList.contains('active') && d.querySelector('.section-title').textContent === 'Verbi al contrario',
-   'a section from the menu: switched, the menu closed, Verbi current, and the heading follows');
+ok(ev('subject') === 'mipiace' && open().length === 0 && d.querySelector('.family[data-family="verbi"]').classList.contains('active') && d.querySelector('#family-list-verbi [data-subject="mipiace"]').classList.contains('active'),
+   'a section from the menu: switched, the menu closed, Verbi current, Al contrario marked in its menu');
 d.querySelector('.family[data-family="frasi"]').click();
 ok(open().join() === 'frasi' && names('frasi').join('|') === 'Frasi|Scrittura|Dialoghi|Racconto', 'Frasi e storie: Frasi, Scrittura, Dialoghi, Racconto');
 d.dispatchEvent(new B.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
