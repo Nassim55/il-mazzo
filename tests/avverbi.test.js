@@ -6,8 +6,8 @@ const { boot, ok, done } = require('./harness');
 let B = boot({ 'flipcards-subject': 'avverbi' });
 const { d, ev } = B;
 ok(B.errors.length === 0 && B.warns.length === 0, 'loads cleanly — every word ranked and in a topic, no English prompt or Italian word twice');
-const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(tabs.length === 12 && tabs[5] === 'Avverbi e congiunzioni' && tabs[4] === 'Aggettivi' && d.getElementById('app-title').textContent === 'Avverbi e congiunzioni', 'a section of its own, after Aggettivi');
+const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => (b.querySelector('.section-name') || b).textContent.trim());
+ok(tabs.length === 12 && tabs[2] === 'Avverbi e congiunzioni' && tabs[1] === 'Aggettivi' && d.getElementById('app-title').textContent === 'Avverbi e congiunzioni', 'a section of its own, after Aggettivi');
 ok(ev('AVV_ITEMS.length') === 112 && ev('AVV_ORDER.length') === 112 && ev('AVV_ORDER.slice(0, 4).join()') === 'e,non,che-cong,ma', `112 words, most common first (${ev('AVV_ORDER.slice(0, 6).map(k => AVV_ITEMS.find(n => n.noun === k).it).join(", ")')}…)`);
 const map = d.getElementById('noun-map');
 ok(map.querySelectorAll('.map-row').length === 3 && ['freq1', 'freq2', 'freq3'].every(k => map.querySelector(`.map-row[data-topic="${k}"]`))
@@ -31,7 +31,7 @@ ok(/aspetto finché non arrivi/.test(d.getElementById('feedback').textContent), 
 
 // ---- Ripasso: small words; the right twins ----
 B = boot({ 'flipcards-subject': 'avverbi', 'avverbi-stats-v1': JSON.stringify({ sempre: { seen: 4, wrong: 2 } }) });
-ok(/1 small word/.test(B.d.getElementById('ripasso').textContent) && B.ev("dueList('en-it').some(x => x.subj === 'avverbi' && x.n.noun === 'sempre')"), 'a due word comes back in Ripasso: "1 small word"');
+ok(/1 small word/.test(B.d.getElementById('todo-items').textContent) && B.ev("dueList('en-it').some(x => x.subj === 'avverbi' && x.n.noun === 'sempre')"), 'a due word comes back in Ripasso: "1 small word"');
 B = boot({ 'flipcards-subject': 'avverbi', 'sostantivi-stats-v1': JSON.stringify({ piano: { seen: 3, wrong: 0 } }), 'racconto-stats-v1': JSON.stringify({ spesso: { seen: 2, wrong: 1 } }) });
 const pianoBefore = JSON.stringify(B.ev("seedSrs('nouns', 'en-it').piano"));
 B.ev("selectedNouns = new Set(['piano-avv', 'spesso']); updateReadout();");

@@ -5,8 +5,8 @@ const { boot, ok, done } = require('./harness');
 const { w, d, ev, errors, warns } = boot({ 'flipcards-subject': 'sentences' });
 ok(errors.length === 0 && warns.length === 0, 'loads cleanly: every word of every sentence is in the deck');
 ok(ev('SENTENCE_ITEMS.length') === 170 && ev('SENTENCE_THEMES.length') === 11, '170 sentences, in eleven levels (six present tense, five Mi piace)');
-const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
-ok(tabs.join('|') === 'Sostantivi|Regolari|Irregolari|Al contrario|Aggettivi|Avverbi e congiunzioni|Possessivi|Preposizioni|Frasi|Scrittura|Dialoghi|Racconto' && d.querySelector('#subject-toggle [data-subject="sentences"]').classList.contains('active'), 'Scrittura is a section of its own, after Frasi');
+const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => (b.querySelector('.section-name') || b).textContent.trim());
+ok(tabs.join('|') === 'Sostantivi|Aggettivi|Avverbi e congiunzioni|Possessivi|Preposizioni|Regolari|Irregolari|Al contrario|Frasi|Scrittura|Dialoghi|Racconto' && d.querySelector('#subject-toggle [data-subject="sentences"]').classList.contains('active'), 'Scrittura is a section of its own, after Frasi');
 
 // ---- Built from the deck, in the present tense ----
 const words = ev(`SENTENCE_ITEMS.flatMap(n => sentenceSegments(n.it).filter(s => s.ref).map(s => s.ref))`);
@@ -181,7 +181,7 @@ ok(types().items === 170 && ev('selectedNouns.size') === 36, 'switched back on: 
 ok(ev('syncedKeys().get(VERB_PERSONS_KEY)') === 'assoc' && ev('storageKeys().includes(VERB_PERSONS_KEY)'), 'the choice syncs and is backed up, with the verb persons');
 const t0 = ev('today()');
 const R = boot({ 'flipcards-subject': 'nouns', 'scrittura-stats-v1:srs': JSON.stringify({ 'il-cane-beve-l-acqua': { b: 1, d: t0, l: null } }) });
-ok(!/sentence/.test(R.d.getElementById('ripasso').textContent), 'not counted in Ripasso del giorno either');
+ok(!/sentence/.test(R.d.getElementById('todo-items').textContent), 'not counted in Ripasso del giorno either');
 ok(ev("syncedKeys().has('scrittura-stats-v1') && syncedKeys().has('scrittura-stats-v1:srs')"), 'and their progress syncs like everything else');
 // ---- The end of a round (Avanti on the last card) ----
 // A round with misses ends on the summary, its missed list naming the sentences — sentence

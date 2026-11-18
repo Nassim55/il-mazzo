@@ -33,7 +33,7 @@ const camino = ev("STORY_ITEMS.find(n => n.noun === 'camino').phrase");
 ok(camino.itAlts.includes('camino') && camino.enAlts.includes('fireplace'), 'story words accept a noun without its article, and the plain English meaning');
 
 // ---- The map ----
-const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
+const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => (b.querySelector('.section-name') || b).textContent.trim());
 ok(tabs.length === 12 && tabs[11] === 'Racconto' && d.querySelector('#subject-toggle [data-subject="story"]').classList.contains('active'), 'Racconto is the last section, and reopens where you left off');
 ok(d.querySelectorAll('.map-pin').length === 3 && d.querySelectorAll('.story-card').length === 3 && d.querySelectorAll('.story-card svg').length === 3, 'a map pin, a card and a picture for each chapter');
 ok(d.querySelector('.map-pin[data-ch="c1"]').getAttribute('class').includes('is-next'), 'the first chapter is marked as next');
@@ -99,7 +99,7 @@ ok(d.getElementById('container').dataset.view === 'setup' && d.querySelector('.m
    && d.querySelector('.map-pin[data-ch="c2"]').getAttribute('class').includes('is-next') && d.querySelector('.story-card[data-ch="c1"] .story-stamp'), 'on the map: chapter 1 stamped, chapter 2 next');
 
 // ---- The story's words in Ripasso del giorno ----
-ok(/1 story word/.test(d.getElementById('ripasso').textContent), 'the added word is in Ripasso del giorno');
+ok(/1 story word/.test(d.getElementById('todo-items').textContent), 'the added word is in Ripasso del giorno');
 d.getElementById('ripasso-start').click();
 ok(ev('reviewMode') && ev('deck.length') === 1 && ev('deck[0].subject') === 'story', 'Start: it comes up in the review');
 d.getElementById('answer').value = 'buio';

@@ -7,7 +7,7 @@ const KEY = 'mazzo-saved-deck-v1';
 let B = boot({ 'flipcards-subject': 'nouns' });
 const snap = () => { const v = B.w.localStorage.getItem(KEY); return v ? JSON.parse(v).deck : null; };
 const play = (right = true) => { B.d.getElementById('answer').value = right ? B.ev('deck[index].italian') : 'boh'; B.d.getElementById('submit').click(); if (!right) { B.d.getElementById('answer').value = B.ev('deck[index].italian'); B.d.getElementById('submit').click(); } else B.d.getElementById('submit').click(); };
-const strip = () => B.d.getElementById('saved-deck');
+const strip = () => { const b = B.d.getElementById('saved-resume'); return b ? b.closest('.todo-item') : { hidden: true, textContent: '' }; };   // the bell's Da fare: the saved deck's row
 
 ok(strip() && strip().hidden && !snap(), 'nothing saved yet: no strip on the home page');
 B.ev("selectedNouns = new Set(['giorno','casa','tempo','anno','parte','mondo']); updateReadout();");

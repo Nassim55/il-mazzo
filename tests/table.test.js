@@ -1,33 +1,45 @@
-// The top of the page (Nov 2026): Il Mazzo's masthead; the sections in three families, then the open
-// family's sections; and the table — three tabs: La tua mano (one hand for every section), Ripasso del
-// giorno, Il mazzo salvato. Start and A spasso play one section as before, several as one mixed round.
+// The top of the page (Nov 2026): Il Mazzo's masthead with the three families beside it — each opening its own
+// menu of sections — and the bell, whose Da fare list holds Ripasso del giorno and Il mazzo salvato; then the
+// section's heading; then the table: your hand, one for every section. Start and A spasso play one section as
+// before, several as one mixed round.
 const { boot, ok, done } = require('./harness');
 
 let B = boot({ 'flipcards-subject': 'nouns' });
 let d = B.d, ev = B.ev;
 const order = [...d.querySelectorAll('.setup-top-inner > *')].map(e => e.className.split(' ')[0]);
-ok(order.join() === 'masthead,sections,table' && /Il Mazzo/.test(d.querySelector('.masthead').textContent)
-   && d.getElementById('setup-top').compareDocumentPosition(d.getElementById('app-title')) & 4, `Il Mazzo on top, then the sections, then the table — then the section's own title (${order.join(' → ')})`);
+ok(order.join() === 'masthead,section-head,table' && /Il Mazzo/.test(d.querySelector('.masthead').textContent) && d.querySelector('.masthead .sections') && d.querySelector('.masthead #bell')
+   && d.getElementById('setup-top').compareDocumentPosition(d.getElementById('app-title')) & 4, `Il Mazzo on top, the families and the bell beside it; then the section's heading; then your hand (${order.join(' → ')})`);
 const fams = [...d.querySelectorAll('.sections .family .family-name')].map(e => e.textContent);
-const shown = () => [...d.querySelectorAll('#subject-toggle .mode-option:not([hidden])')].map(b => b.textContent.trim());
-ok(fams.join('|') === 'Parole|Verbi|Frasi e storie' && d.querySelector('.family[data-family="parole"]').classList.contains('active')
-   && shown().join('|') === 'Sostantivi|Aggettivi|Avverbi e congiunzioni|Possessivi|Preposizioni', `three families; Parole open, with its five sections (${shown().join(', ')})`);
+const names = key => [...d.querySelectorAll(`#family-list-${key} .mode-option`)].map(b => b.querySelector('.section-name').textContent);
+const open = () => [...d.querySelectorAll('.family-menu.open')].map(m => m.dataset.familyMenu);
+ok(fams.join('|') === 'Parole|Verbi|Frasi e storie' && d.querySelector('.family[data-family="parole"]').classList.contains('active') && open().length === 0
+   && names('parole').join('|') === 'Sostantivi|Aggettivi|Avverbi e congiunzioni|Possessivi|Preposizioni' && d.querySelector('.section-title').textContent === 'Sostantivi',
+   `three families, Parole current, every menu closed; Parole's holds its five sections (${names('parole').join(', ')}); the heading says Sostantivi`);
 d.querySelector('.family[data-family="verbi"]').click();
-ok(ev('subject') === 'verbs' && shown().join('|') === 'Regolari|Irregolari|Al contrario', 'Verbi: its first section, and its three');
+ok(ev('subject') === 'nouns' && open().join() === 'verbi' && !d.getElementById('family-list-verbi').hidden && d.getElementById('family-list-parole').hidden
+   && names('verbi').join('|') === 'Regolari|Irregolari|Al contrario' && d.querySelector('.family[data-family="verbi"]').getAttribute('aria-expanded') === 'true',
+   "Verbi: just its menu opens — Regolari, Irregolari, Al contrario — and nothing switches yet");
 d.querySelector('#subject-toggle [data-subject="mipiace"]').click();
+ok(ev('subject') === 'mipiace' && open().length === 0 && d.querySelector('.family[data-family="verbi"]').classList.contains('active') && d.querySelector('.section-title').textContent === 'Verbi al contrario',
+   'a section from the menu: switched, the menu closed, Verbi current, and the heading follows');
 d.querySelector('.family[data-family="frasi"]').click();
-ok(ev('subject') === 'phrases' && shown().join('|') === 'Frasi|Scrittura|Dialoghi|Racconto', 'Frasi e storie: Frasi, Scrittura, Dialoghi, Racconto');
-d.querySelector('.family[data-family="verbi"]').click();
-ok(ev('subject') === 'mipiace', 'back to Verbi: the section you last used there (Al contrario)');
+ok(open().join() === 'frasi' && names('frasi').join('|') === 'Frasi|Scrittura|Dialoghi|Racconto', 'Frasi e storie: Frasi, Scrittura, Dialoghi, Racconto');
+d.dispatchEvent(new B.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+ok(open().length === 0, 'Esc closes a menu');
 d.querySelector('.family[data-family="parole"]').click();
+d.body.click();
+ok(open().length === 0, 'and so does a click anywhere else');
+d.querySelector('#subject-toggle [data-subject="nouns"]').click();
 
-// ---- The tabs ----
-const tabs = () => [...d.querySelectorAll('#table-tabs .table-tab')].map(t => t.dataset.tableTab);
-ok(tabs().join() === 'hand,ripasso' && !d.getElementById('table-hand').hidden && d.getElementById('table-ripasso').hidden, 'La tua mano and Ripasso del giorno — the hand open; no saved deck, no third tab');
-d.querySelector('[data-table-tab="ripasso"]').click();
-ok(d.getElementById('table-hand').hidden && !d.getElementById('table-ripasso').hidden && d.getElementById('table-ripasso').contains(d.getElementById('ripasso')), 'the Ripasso tab: Ripasso del giorno, as it was');
-ok(B.w.localStorage.getItem('mazzo-table-tab') === 'ripasso', '…and the tab is remembered');
-d.querySelector('[data-table-tab="hand"]').click();
+// ---- The bell: Da fare ----
+const badge = () => d.getElementById('bell-count');
+ok(!d.getElementById('table-tabs') && d.getElementById('table').contains(d.getElementById('hand')) && badge().hidden && d.getElementById('todo').hidden,
+   'no tabs: the table is your hand; the bell shows no count with nothing waiting, its list closed');
+d.getElementById('bell').click();
+ok(!d.getElementById('todo').hidden && /come back here/.test(d.getElementById('todo-items').textContent) && d.getElementById('bell').getAttribute('aria-expanded') === 'true',
+   'the bell opens Da fare: nothing waiting yet, and what will come');
+d.getElementById('bell').click();
+ok(d.getElementById('todo').hidden, '…and closes it');
 
 // ---- One hand, every section ----
 d.querySelector('.map-row[data-topic="tempo"] .map-add').click();
@@ -38,7 +50,7 @@ const words = ev("NOUN_THEMES.find(t => t.key === 'tempo').nouns.length") + ev("
 ok(cards().join() === 'nouns:tempo,verbs:freq1' && /Sostantivi/.test(d.querySelector('#hand-fan [data-topic="tempo"] .hand-sect').textContent) && /Verbi regolari/.test(d.querySelector('#hand-fan [data-topic="freq1"] .hand-sect').textContent),
    'on the verbs page, the hand holds Tempo (Sostantivi) and the 50 most common verbs (Verbi regolari), each card tagged with its section');
 ok(d.getElementById('selected-count').textContent === String(words) && d.getElementById('hand-words').textContent === 'words' && /2 sections/.test(d.getElementById('readout-scope').textContent)
-   && new RegExp(`${words} words · 2 sections`).test(d.querySelector('[data-table-tab="hand"] .table-tab-sub').textContent), `the count is the whole hand: ${words} words, 2 sections — the tab says so too`);
+, `the count is the whole hand: ${words} words, 2 sections`);
 const total = +d.getElementById('card-count').textContent;
 d.getElementById('start-btn').click();
 ok(ev('reviewMode') && ev('[...new Set(deck.map(c => c.subject))].sort().join()') === 'nouns,verbs' && ev('deck.length') === total && ev("deck.every(c => c.key.startsWith(c.subject + ':'))")
@@ -65,10 +77,8 @@ d.querySelector('#direction-toggle [data-direction="it-en"]').click();
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
 ok(ev('direction') === 'it-en' && d.querySelector('#direction-toggle [data-direction="it-en"]').classList.contains('active') && /Italian → English/.test(d.querySelector('#noun-map .map-eyebrow').textContent),
    'the direction is the hand\'s: IT → EN on the nouns page, IT → EN on the verbs page');
-ev("ripassoDir = 'en-it';");
-d.querySelector('[data-table-tab="ripasso"]').click();
-ev(`(() => { const s = loadSrs('nouns', 'en-it'); s.casa = { d: today() - 1, b: 1 }; localStorage.setItem(srsKey('nouns', 'en-it'), JSON.stringify(s)); renderRipasso(); })()`);
-ok(d.querySelector('[data-table-tab="ripasso"] .table-dot') && /\d+ due today/.test(d.querySelector('[data-table-tab="ripasso"] .table-tab-sub').textContent), 'cards due: a dot on the Ripasso tab');
+ev(`(() => { const s = loadSrs('nouns', 'it-en'); s.casa = { d: today() - 1, b: 1 }; localStorage.setItem(srsKey('nouns', 'it-en'), JSON.stringify(s)); renderRipasso(); })()`);
+ok(!badge().hidden && badge().textContent === '1' && /\d+ due today/.test(d.getElementById('todo-items').textContent), 'cards due: a count on the bell, and Ripasso del giorno in its list — in the hand\'s direction');
 const rs = d.getElementById('ripasso-start');
 if (rs) { rs.click(); d.getElementById('change-btn').click(); }
 ok(ev('direction') === 'it-en', 'a Ripasso round keeps its own direction: the hand\'s is still IT → EN afterwards');
@@ -84,28 +94,25 @@ d.querySelector('#hand [data-deck-clear]').click();
 ok(ev('handSections().length') === 0 && ev('subjectState.adjectives.selected.size') === 0 && d.getElementById('start-btn').disabled, 'clear: the whole hand, every section');
 ok(B.errors.length === 0, 'no errors along the way');
 
-// ---- Ripasso del giorno and the saved deck, as cards like the hand ----
+// ---- Ripasso del giorno and the saved deck, in the bell's list ----
 B = boot({ 'flipcards-subject': 'nouns' });
 d = B.d; ev = B.ev;
-ev("ripassoDir = 'en-it'; renderRipasso();");
-ok(/Nothing to review yet/.test(d.getElementById('ripasso-fan').textContent) && !d.getElementById('ripasso-start'), 'nothing practised yet: Ripasso\'s fan is an empty card saying so, and no Start');
+ev('renderRipasso();');
+ok(!d.getElementById('ripasso-start') && d.getElementById('bell-count').hidden, 'nothing practised yet: no Start, no count on the bell');
 ev(`(() => { const due = (sec, keys) => { const s = loadSrs(sec, 'en-it'); keys.forEach(k => s[k] = { d: today() - 1, b: 1 }); localStorage.setItem(srsKey(sec, 'en-it'), JSON.stringify(s)); };
   due('nouns', NOUN_THEMES.find(t => t.key === 'tempo').nouns.slice(0, 9)); due('verbs', ['parlare', 'capire']); renderRipasso(); })()`);
-const rfan = [...d.querySelectorAll('#ripasso-fan .hand-card[data-ripasso-section]')].map(c => `${c.dataset.ripassoSection} ${c.querySelector('.hand-n').textContent}`);
-ok(rfan.join() === 'verbs 2,nouns 9' && /Sostantivi/.test(d.querySelector('#ripasso-fan [data-ripasso-section="nouns"] .hand-sect').textContent) && !d.querySelector('#ripasso-fan .hand-x'),
-   `Ripasso: a card per section with words due, the biggest on top, tagged like the hand's (${rfan.join(' · ')})`);
-ok(/11 due today/.test(d.getElementById('ripasso').textContent.replace(/\s+/g, ' ')) && /9 nouns · 2 regular verbs/.test(d.getElementById('ripasso').textContent) && d.getElementById('ripasso-start'),
-   'beside them: 11 due today, the breakdown, its direction and Start');
+const list = () => d.getElementById('todo-items').textContent.replace(/\s+/g, ' ');
+ok(/11 due today/.test(list()) && /9 nouns · 2 regular verbs/.test(list()) && d.getElementById('ripasso-start') && d.getElementById('bell-count').textContent === '1',
+   'Ripasso del giorno: 11 due today, the breakdown and Start — the bell counts 1');
 d.querySelector('.map-row[data-topic="tempo"] .map-add').click();
 d.querySelector('.map-row[data-topic="corpo"] .map-add').click();
 d.getElementById('start-btn').click();
 ev('saveDeckNow()');
 d.getElementById('change-btn').click();
-const sfan = [...d.querySelectorAll('#saved-fan .hand-card[data-saved-topic]')].map(c => `${c.dataset.savedTopic} ${c.querySelector('.hand-n').textContent}`).sort();
-const sizes = ['corpo', 'tempo'].map(k => `${k} ${ev(`NOUN_THEMES.find(t => t.key === '${k}').nouns.length`)}`);
-ok(d.querySelector('[data-table-tab="saved"]') && sfan.join() === sizes.join() && /103 cards, not started|cards, not started/.test(d.getElementById('saved-deck').textContent) && d.getElementById('saved-resume'),
-   `a saved round from Tempo and Corpo: its tab, and its cards gathered back into Tempo and Corpo (${sfan.join(' · ')}), with Riprendi beside them`);
+const row = d.getElementById('saved-resume') && d.getElementById('saved-resume').closest('.todo-item');
+ok(row && /Il mazzo salvato/.test(row.textContent) && /cards, not started/.test(row.textContent) && d.getElementById('bell-count').textContent === '2',
+   'a saved round: Il mazzo salvato joins the list, with Riprendi — the bell counts 2');
 d.getElementById('saved-forget').click();
-ok(!d.querySelector('[data-table-tab="saved"]') && d.getElementById('saved-deck').hidden, 'forget it: the saved deck and its tab go');
+ok(!d.getElementById('saved-resume') && d.getElementById('bell-count').textContent === '1', 'forget it: the saved deck leaves the list');
 ok(B.errors.length === 0, 'no errors here either');
 done();

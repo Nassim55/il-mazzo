@@ -27,8 +27,8 @@ ok(!due().includes('verbs:parlare'), 'parlare, conjugated in an ordinary verbs d
 play('adjectives', ['piccolo'], "adjMode = 'forms';");
 ok(!due().includes('adjectives:piccolo'), 'piccolo, in its four forms: done');
 B.ev('showSetup()');
-ok(new RegExp(`${due().length} due today`).test(B.d.getElementById('ripasso').textContent.replace(/\s+/g, ' ')) && due().length === before.length - 3,
-   `and the strip counts down, ${before.length} to ${due().length}: ${B.d.getElementById('ripasso').textContent.replace(/\s+/g, ' ').trim().slice(0, 60)}`);
+ok(new RegExp(`${due().length} due today`).test(B.d.getElementById('todo-items').textContent.replace(/\s+/g, ' ')) && due().length === before.length - 3,
+   `and the strip counts down, ${before.length} to ${due().length}: ${B.d.getElementById('todo-items').textContent.replace(/\s+/g, ' ').trim().slice(0, 60)}`);
 
 // ---- A word held twice ----
 play('nouns', ['buio']);

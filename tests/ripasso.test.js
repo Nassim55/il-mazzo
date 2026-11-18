@@ -14,7 +14,7 @@ const history = {
 let { w, d, ev, key, errors, warns } = boot(history, timeHook);
 const t0 = ev('today()');
 const rec = (subj, k, dir = 'en-it') => ev(`loadSrs('${subj}', '${dir}')['${k}']`);
-const strip = () => d.getElementById('ripasso').textContent.replace(/\s+/g, ' ').trim();
+const strip = () => d.getElementById('todo-items').textContent.replace(/\s+/g, ' ').trim();
 ok(warns.length === 0 && errors.length === 0, 'loads cleanly');
 // ---- Seeding from earlier history ----
 ok(rec('nouns', 'pane').b === 1 && rec('nouns', 'pane').d === t0 && rec('nouns', 'casa').d === t0, 'weak words (≥ 25% wrong) come due straight away');
@@ -79,9 +79,9 @@ ok(ev('reviewMode') && ev('deck.length') === n0 && ev('sessionPool.length') >= n
 d.getElementById('change-btn').click();
 ok(ev('subject') === 'nouns' && !ev('reviewMode'), 'and "← Back to setup" returns to the section');
 // ---- Other directions ----
-d.querySelector('#ripasso [data-ripasso-dir="it-en"]').click();
+d.querySelector('#direction-toggle [data-direction="it-en"]').click();   // Ripasso follows the hand's direction
 ok(w.localStorage.getItem('mazzo-ripasso-dir') === 'it-en' && /come back here/.test(strip()), 'Italian → English has its own schedule (nothing yet)');
-d.querySelector('#ripasso [data-ripasso-dir="en-it"]').click();
+d.querySelector('#direction-toggle [data-direction="en-it"]').click();
 // ---- Backups and reset ----
 const keys = Object.keys(ev('buildBackup()').data);
 ok(keys.includes('sostantivi-stats-v1:srs') && keys.includes('verbi-regolari-stats:srs') && keys.includes('mazzo-ripasso-dir'), 'backups include the schedules');
@@ -97,7 +97,8 @@ const L = boot({ 'sostantivi-stats-listen-v1': JSON.stringify({ pane: { seen: 2,
   win.SpeechSynthesisUtterance = function (t) { this.text = t; };
   win.speechSynthesis = { getVoices: () => [{ name: 'Alice', lang: 'it-IT', voiceURI: 'alice', localService: true }], cancel() {}, speak(u) { spoken.push(u.text); }, addEventListener() {} };
 });
-ok(/1 due today/.test(L.d.getElementById('ripasso').textContent), 'a Listening review counts listening history');
+L.d.querySelector('#direction-toggle [data-direction="listen"]').click();   // Ripasso follows the hand's direction
+ok(/1 due today/.test(L.d.getElementById('todo-items').textContent), 'a Listening review counts listening history');
 L.d.getElementById('ripasso-start').click();
 ok(L.ev('direction') === 'listen' && spoken.includes('il pane') && !!L.d.getElementById('listen-btn'), 'it speaks the Italian, as Listening does');
 L.d.getElementById('answer').value = 'il pane'; L.d.getElementById('submit').click();

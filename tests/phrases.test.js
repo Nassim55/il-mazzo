@@ -1,7 +1,7 @@
 const { boot, ok, done } = require('./harness');
 let { w, d, ev, key, setVal, errors, warns } = boot();
 ok(warns.length === 0 && errors.length === 0, `loads with no validator warnings or errors ${warns.join(' ')}`);
-const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => b.textContent.trim());
+const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => (b.querySelector('.section-name') || b).textContent.trim());
 ok(labels.length === 12 && labels[8] === 'Frasi' && labels[9] === 'Scrittura' && labels[10] === 'Dialoghi' && labels[11] === 'Racconto', `section switch: ${labels.join(' | ')}`);
 d.querySelector('#subject-toggle [data-subject="phrases"]').click();
 ok(d.getElementById('app-title').textContent === 'Frasi' && d.title === 'Il Mazzo · Frasi' && ev('selectedNouns.size') === 0, 'title, tab, empty selection');
