@@ -2777,6 +2777,26 @@
   .setup-top .hand-fan { justify-content: flex-start; padding: 6px 10px 10px 24px; }   /* the tilted first card starts under Il Mazzo */
   @media (max-width: 600px) { .setup-top .hand-fan { padding-left: 28px; } }
 
+  /* ===== A phone's round, just the card and the answer (Nov 2026) =====
+     One slim header row (the section small, the score, the card count, Salta, ⋯); no rule beneath it but the
+     progress line; Scrivi / Gira lives in ⋯; no accent keys (a phone's keyboard gives accents on a long press);
+     the card takes the space. On a computer, nothing changes. */
+  .skip-top, .menu-answer-mode { display: none; }
+  @media (max-width: 600px) {
+    .container[data-view="game"] > header { align-items: center; gap: 10px; margin-bottom: 6px; padding-bottom: 0; border-bottom: 0; }
+    .container[data-view="game"] > header .title { font-size: 21px; }
+    .container[data-view="game"] > header .subtitle { display: none; }
+    .container[data-view="game"] > header .stats { gap: 12px; }
+    .container[data-view="game"] > header .stat-value { font-size: 17px; }
+    .container[data-view="game"][data-answer-mode="type"] .skip-top { display: inline-flex; align-items: center; min-height: 40px; padding: 0 6px; font-size: 14px; }
+    .container[data-view="game"] #game-area > .answer-mode { display: none; }
+    .container[data-view="game"] .answer-extras { display: none; }
+    #controls .menu-answer-mode { display: flex; width: 100%; margin: 4px 0 10px; }
+    #controls .menu-answer-mode .mode-option { flex: 1; min-height: 44px; }
+    .container[data-view="game"] #game-area > .card { margin-top: 6px; }
+    .container.kb-open[data-view="game"] #game-area > .card { height: clamp(160px, calc(var(--vv-h, 510px) - 160px), 360px); }
+  }
+
 </style>
 </head>
 <body>
@@ -2797,6 +2817,7 @@
           <div class="stat-value"><span id="current">1</span><span class="sub">/<span id="total">831</span></span></div>
         </div>
       </div>
+      <button type="button" class="ghost skip-top" id="skip-top" title="Show the answer — it counts as wrong, then type it out">Salta</button>
       <button type="button" class="round-menu-btn" id="round-menu-btn" aria-label="This round: direction, deck size, focus, save, back" aria-expanded="false" aria-controls="controls"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9"></circle><circle cx="12" cy="12" r="1.9"></circle><circle cx="19" cy="12" r="1.9"></circle></svg><span class="round-menu-label">This round</span></button>
     </header>
 
@@ -14848,7 +14869,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-18T15:59Z';
+  const BUILD = '2026-11-18T18:39Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
@@ -14956,6 +14977,17 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     index++;
     render();
   }
+  document.addEventListener('click', e => {   // the round menu's Scrivi / Gira (phones), and the header's Salta
+    const inMenu = e.target.closest && e.target.closest('#controls [data-answer-mode-btn]');
+    if (inMenu) { setAnswerMode(inMenu.dataset.answerModeBtn); return; }
+    if (e.target.closest && e.target.closest('#skip-top')) {
+      const s = document.getElementById('skip-btn');
+      if (s && !s.hidden && !s.disabled && container.dataset.view === 'game') s.click();   // only when Salta is there to press
+    }
+  });
+  document.addEventListener('pointerdown', e => {   // keep the answer box focused (and a phone's keyboard up) when Salta is tapped up top
+    if (e.target.closest && e.target.closest('#skip-top') && document.activeElement && document.activeElement.id === 'answer') e.preventDefault();
+  });
   gameArea.addEventListener('click', e => {
     const m = e.target.closest('[data-answer-mode-btn]');
     if (m) { setAnswerMode(m.dataset.answerModeBtn); return; }
@@ -15044,6 +15076,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         <div class="game-trim" id="game-trim"></div>
         ${reviewMode ? '' : '<button type="button" class="ghost" id="game-focus-btn">→ Focus…</button>'}
         <button type="button" class="ghost chart-btn" id="chart-btn" hidden></button>
+        <div class="mode-toggle menu-answer-mode" role="group" aria-label="How to answer"><button type="button" class="mode-option${answerMode === 'type' ? ' active' : ''}" data-answer-mode-btn="type" aria-pressed="${answerMode === 'type'}"><span class="am-it">Scrivi</span> <span class="am-en">type</span></button><button type="button" class="mode-option${answerMode === 'turn' ? ' active' : ''}" data-answer-mode-btn="turn" aria-pressed="${answerMode === 'turn'}"><span class="am-it">Gira</span> <span class="am-en">turn</span></button></div>
         <button type="button" class="ghost" id="save-deck-btn" title="Keep this exact deck — pick it up from the home page next time">${savedLive ? '✓ Deck saved' : '💾 Save deck'}</button>
         <button type="button" class="ghost" id="game-spasso-btn" title="Out and about: hear this round’s cards, the Italian then the English — no typing">🎧 A spasso</button>
         <span class="direction-toggle" role="group" aria-label="Translation direction"${reviewMode ? ' hidden' : ''}>

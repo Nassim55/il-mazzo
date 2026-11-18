@@ -145,4 +145,20 @@ B6.ev("window.__spasso = null; startPassive = c => { window.__spasso = Array.isA
 B6.d.getElementById('game-spasso-btn').click();
 ok(B6.ev('window.__spasso') === savedN && B6.ev('container.dataset.view') === 'setup' && B6.d.getElementById('round-menu-btn').getAttribute('aria-expanded') === 'false' && B6.errors.length === 0,
    `A spasso from the round menu plays this round's cards — the saved deck's ${savedN}, with an empty hand — leaving the round as Change nouns does`);
+// ---- A phone's round: Scrivi / Gira in the menu, Salta up top ----
+const B7 = boot({ 'flipcards-subject': 'nouns', 'mazzo-answer-mode': 'type' });
+B7.ev("clearHand(); topicsIn(['tempo']); updateReadout();");
+B7.d.getElementById('start-btn').click();
+B7.d.getElementById('round-menu-btn').click();
+const menuModes = [...B7.d.querySelectorAll('#controls .menu-answer-mode [data-answer-mode-btn]')];
+ok(menuModes.length === 2 && menuModes[0].classList.contains('active'), 'the round menu holds Scrivi / Gira (shown on phones), Scrivi chosen');
+menuModes[1].click();
+ok(B7.ev('answerMode') === 'turn', 'Gira from the menu: the round turns cards');
+B7.d.querySelector('#controls .menu-answer-mode [data-answer-mode-btn="type"]').click();
+B7.d.getElementById('round-menu-close').click();
+B7.d.getElementById('skip-top').click();
+ok(!B7.d.getElementById('feedback').classList.contains('hidden') && /answer is/i.test(B7.d.getElementById('feedback').textContent), 'Salta up top: the card shows its answer, as the old Salta did');
+const at = B7.ev('index');
+B7.d.getElementById('skip-top').click();
+ok(B7.ev('index') === at && B7.errors.length === 0, 'and pressed again while the answer shows, it does nothing (no skipping ahead)');
 done();
