@@ -2755,14 +2755,25 @@
      families' menus, the bell and your hand, with no box of its own. The section follows on the cream. */
   :root { --page-top: calc(32px + env(safe-area-inset-top)); }
   @media (display-mode: standalone) and (orientation: portrait) { :root { --page-top: max(calc(32px + env(safe-area-inset-top)), 62px); } }
-  .container[data-view="setup"] .setup-top {
-    margin: calc(-1 * var(--page-top)) calc(50% - 50vw) 34px; padding: var(--page-top) calc(50vw - 50%) 30px;
-    background: var(--paper); border-bottom: 1px solid rgba(28, 22, 17, 0.12); box-shadow: 0 14px 30px -26px rgba(60, 40, 20, 0.5);
+  :root { --band-top: calc(18px + env(safe-area-inset-top)); }
+  @media (display-mode: standalone) and (orientation: portrait) { :root { --band-top: max(calc(18px + env(safe-area-inset-top)), 58px); } }
+  .container[data-view="setup"] .setup-top {   /* as wide as the page's column, from the very top; snug around the cards */
+    margin: calc(-1 * var(--page-top)) 0 26px; padding: var(--band-top) 32px 14px;
+    background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.1); border-top: 0; border-radius: 0 0 4px 4px;
   }
-  .container[data-view="setup"] .setup-top-inner { gap: 24px; }
+  @media (max-width: 600px) {
+    .container[data-view="setup"] .setup-top { padding-left: 14px; padding-right: 14px; }
+    .masthead .family-row { gap: 10px; }
+    .masthead .family { gap: 5px; white-space: nowrap; }
+    .masthead .family .family-name { font-size: 16.5px; }
+    .masthead .family-chev { width: 13px; height: 13px; }
+    #setup-top #start-btn { font-size: 12.5px; letter-spacing: 0.08em; white-space: nowrap; padding-left: 10px; padding-right: 10px; }   /* one line on a phone */
+  }
+  .container[data-view="setup"] .setup-top-inner { gap: 4px; }
+  .setup-top .hand { margin: 0; padding-top: 4px; padding-bottom: 0; }
   .setup-top .table .table-panel { background: transparent; box-shadow: none; border-radius: 0; }
   .setup-top .hand { padding-left: 0; padding-right: 0; background: transparent; box-shadow: none; }   /* lined up with the masthead, not inset in a box */
-  .setup-top .hand-fan { justify-content: flex-start; padding-left: 24px; padding-right: 10px; }   /* the tilted first card starts under Il Mazzo */
+  .setup-top .hand-fan { justify-content: flex-start; padding: 6px 10px 10px 24px; }   /* the tilted first card starts under Il Mazzo */
   @media (max-width: 600px) { .setup-top .hand-fan { padding-left: 28px; } }
 
 </style>
@@ -14771,7 +14782,7 @@
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-18T12:32Z';
+  const BUILD = '2026-11-18T12:49Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
