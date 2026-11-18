@@ -48,7 +48,8 @@ ok(shown(topicOf('casa')) === `${pctOf(topicOf('casa'))}%` && shown(topicOf('cas
 ok(row('arabo').querySelector('.map-score').textContent === '0%' && row('arabo').querySelector('.map-score').classList.contains('untried'), 'a topic not started: 0%, faded');
 const scores = [...map().querySelectorAll('.map-rows .map-row')].map(r => parseInt(r.querySelector('.map-score').textContent, 10));
 const keysNow = [...map().querySelectorAll('.map-rows .map-row')].map(r => r.dataset.topic);
-ok(keysNow.join() === B.ev('NOUN_THEMES.map(t => t.key)').join() && !map().querySelector('[data-map-sort]') && !map().querySelector('#map-hide'), 'topics in their own order, always — no sort or hide links');
+ok(scores.every((x, i) => i === 0 || scores[i - 1] >= x) && keysNow[0] === [topicOf('casa'), topicOf('libro')].sort((a, b) => pctOf(b) - pctOf(a))[0] && !map().querySelector('[data-map-sort]') && !map().querySelector('#map-hide'),
+   'topics by how much you know, the highest at the top — always, with no sort or hide links');
 ok(/dotted: known — right 5 times or more, and on 8 of your last 10 answers/.test(map().querySelector('.shade-key').textContent) && /the % is how much of the topic you know/.test(map().querySelector('.shade-key').textContent), 'the key says what the dots and the % mean');
 
 // ---- The panel ----

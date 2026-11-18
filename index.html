@@ -13699,7 +13699,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     if (cross) cross.setAttribute('visibility', 'hidden');
   }
   function nounMapInner() {
-    { const mp = mapPrefs(); if (mp.hidden || mp.sortBy !== 'order') saveMapPrefs(Object.assign({}, mp, { hidden: false, sortBy: 'order' })); }   // topic order, always shown (Nov 2026)
+    { const mp = mapPrefs(); if (mp.hidden || mp.sortBy !== 'known') saveMapPrefs(Object.assign({}, mp, { hidden: false, sortBy: 'known' })); }   // most known first, always shown (Nov 2026)
     const p = mapPrefs(), dir = DIR_LABELS[direction].long;
     if (p.hidden) return `<div class="theme-eyebrow map-eyebrow">↳ La mappa · every topic at a glance <button type="button" class="ghost" id="map-show">show</button></div>`;
     const cfg = SUBJECTS[subject], byKey = new Map(cfg.items.map(n => [n.noun, n])), srs = loadSrs(subject, direction), st = readStats(subject, direction);
@@ -14848,7 +14848,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-18T15:49Z';
+  const BUILD = '2026-11-18T15:59Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
