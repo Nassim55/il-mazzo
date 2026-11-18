@@ -97,7 +97,7 @@ const L = boot({ 'sostantivi-stats-listen-v1': JSON.stringify({ pane: { seen: 2,
   win.SpeechSynthesisUtterance = function (t) { this.text = t; };
   win.speechSynthesis = { getVoices: () => [{ name: 'Alice', lang: 'it-IT', voiceURI: 'alice', localService: true }], cancel() {}, speak(u) { spoken.push(u.text); }, addEventListener() {} };
 });
-L.d.querySelector('#direction-toggle [data-direction="listen"]').click();   // Ripasso follows the hand's direction
+L.ev("direction = 'listen'; renderTableTabs();");   // the engine still knows Listen (Dialoghi uses it); the setup no longer offers it
 ok(/1 due today/.test(L.d.getElementById('todo-items').textContent), 'a Listening review counts listening history');
 L.d.getElementById('ripasso-start').click();
 ok(L.ev('direction') === 'listen' && spoken.includes('il pane') && !!L.d.getElementById('listen-btn'), 'it speaks the Italian, as Listening does');

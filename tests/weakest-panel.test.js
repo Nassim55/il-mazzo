@@ -31,7 +31,7 @@ ok(rows().length === 0 && /No mistakes logged yet in this direction/.test(d.getE
 ev("direction = 'en-it'; stats = loadStats(); renderWeakPanel();");
 ok(rows().length === 6, 'back to EN→IT: list returns');
 // play: get ci-vediamo wrong, then back to setup
-d.getElementById('clear-all').click();
+ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 ev("selectedNouns = new Set(['ci-vediamo']); updateReadout();");
 d.getElementById('start-btn').click();
 d.getElementById('answer').value = 'sbagliato'; d.getElementById('submit').click();

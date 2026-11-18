@@ -21,12 +21,12 @@ const chips = [...d.querySelectorAll('.theme-chip')].map(c => c.textContent.repl
 ok([...d.querySelectorAll('.theme-chip')].map(c => c.dataset.theme).join() === 'freq1,freq2' && chips[0].startsWith('1–25') && chips[1].startsWith('26–50'), `grouped by frequency, 25 at a time (${chips.join(' | ')})`);
 ev("IRREG_THEMES.find(t => t.key === 'go').nouns.forEach(k => selectedNouns.add(k)); updateReadout();");   // the -go verbs, picked from the data
 ok(d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('24 verbs · 144 cards'), '-go theme: 24 verbs · 144 cards');
-d.getElementById('clear-all').click();
-d.getElementById('weakest-10').click();
+ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
+ev("selectedNouns = new Set(weakestNouns(Math.min(10, nounData.length))); deckTopics = null; updateReadout();");
 const wk = ev('[...selectedNouns]');
 ok(wk.slice(0, 2).join() === 'venire,porre' && wk.length === 10, `Weakest 10 (smoothed): ${wk.slice(0, 2).join(', ')}…`);
 // Play
-d.getElementById('clear-all').click();
+ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 ev("selectedNouns = new Set(['essere', 'potere', 'venire']); updateReadout();");
 d.getElementById('start-btn').click();
 ok(ev('deck.length') === 18, '3 verbs → 18 cards');
@@ -67,11 +67,11 @@ ok(/irregulars|Change verbs/.test(d.querySelector('.card.complete').textContent)
 // Most common, infinitives, nothing selected
 d.getElementById('back-to-setup').click();
 d.querySelector('#direction-toggle [data-direction="en-it"]').click();
-d.getElementById('clear-all').click();
+ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 d.querySelector('#mode-toggle [data-mode="infinitives"]').click();
-setVal('deck-cap', '5'); setVal('deck-cap-mode', 'frequent', 'change');
+ev("capValue = '5'; updateReadout();"); ev("capMode = 'frequent'; updateReadout();");
 ok(d.getElementById('start-btn').disabled, 'nothing in the hand + a deck size: Start waits');
-d.getElementById('select-all').click();   // a deck size picks from your hand
+ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");   // a deck size picks from your hand
 ok(/50 verbs/.test(d.querySelector('.deck-readout').textContent) && /5 most common/.test(d.getElementById('start-btn').textContent), 'All + 5 most common → 5 of all 50');
 d.getElementById('start-btn').click();
 ok(JSON.stringify(ev('deck.map(c => c.noun).sort()')) === JSON.stringify(['avere', 'essere', 'fare', 'potere', 'stare']), 'plays the 5 most common: essere, avere, fare, potere, stare');
@@ -79,7 +79,7 @@ ev("index = deck.findIndex(c => c.noun === 'essere'); render();");
 d.getElementById('answer').value = 'essere'; d.getElementById('submit').click();
 ok(d.querySelector('.feedback .pron')?.textContent === 'ès·se·re', 'infinitive pronunciation ès·se·re');
 // Every irregular note renders
-ev("verbMode = 'infinitives'; selectedNouns = new Set(irregularVerbData.map(v => v.it)); sessionMaxDeck = null; sessionPool = null; startGame();");
+ev("capValue = ''; verbMode = 'infinitives'; selectedNouns = new Set(irregularVerbData.map(v => v.it)); sessionMaxDeck = null; sessionPool = null; startGame();");
 let notes = 0; for (let i = 0; i < ev('deck.length'); i++) { ev(`index = ${i}; render();`); d.getElementById('answer').value = 'x'; d.getElementById('submit').click(); if ((d.querySelector('.feedback-note')?.textContent || '').length > 100) notes++; }
 ok(notes === 50, `all 50 irregular notes render (${notes})`);
 // Back to the regular section: its selection survived

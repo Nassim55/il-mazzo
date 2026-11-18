@@ -14,7 +14,7 @@ d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 ok(JSON.stringify(chips()) === JSON.stringify(ev('adjData.map(a => a.it)')) && !/most common first/.test(head()), 'adjectives: grid keeps its own order');
 // Selection is unaffected: theme + click still toggle the right verbs
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
-d.getElementById('clear-all').click();
+ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 d.querySelector('.verb-chip[data-noun="vedere"]').dispatchEvent(new d.defaultView.MouseEvent('mousedown', { bubbles: true }));
 d.dispatchEvent(new d.defaultView.MouseEvent('mouseup', { bubbles: true }));
 ok(ev('[...selectedNouns]').join() === 'vedere' && !d.querySelector('.verb-chip[data-noun="vedere"]').classList.contains('unselected'), 'clicking a chip still selects that verb');

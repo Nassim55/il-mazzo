@@ -12,8 +12,8 @@ ev("clearHand(); topicsIn(['tempo']); updateReadout();");
 
 // ---- The hand bar, on the setup page ----
 const bar = d.getElementById('hand-bar');
-ok(bar.innerHTML && /La tua mano · Tempo/.test(bar.textContent) && new RegExp(`${B.ev("NOUN_THEMES.find(t => t.key === 'tempo').nouns.length")} nouns · ${B.ev("NOUN_THEMES.find(t => t.key === 'tempo').nouns.length")} cards`).test(bar.textContent) && bar.querySelector('[data-bar="start"]') && bar.querySelector('[data-bar="passive"]'),
-   'the hand bar: La tua mano · Tempo, all its nouns as cards, Start and A spasso');
+ok(bar.innerHTML && /La tua mano · Tempo/.test(bar.textContent) && new RegExp(`${B.ev("NOUN_THEMES.find(t => t.key === 'tempo').nouns.length")} nouns · ${B.ev("NOUN_THEMES.find(t => t.key === 'tempo').nouns.length")} cards`).test(bar.textContent) && bar.querySelector('[data-bar="start"]') && !bar.querySelector('[data-bar="passive"]'),
+   'the hand bar: La tua mano · Tempo, all its nouns as cards, one button — Start, or A spasso when chosen');
 ok(bar.hidden, '…waiting out of sight until the table scrolls away');
 
 // ---- The round: ⋯ and its controls ----

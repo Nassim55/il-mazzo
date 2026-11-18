@@ -16,7 +16,7 @@ const setUp = (subj) => {
   B.isIn = k => { B.redraw(); return !!B.d.querySelector(`.map-row[data-topic="${k}"] .map-add.in`); };
   B.card = k => B.d.querySelector(`#hand-fan .hand-card[data-topic="${k}"]`);
   B.panel = (k, what) => { B.ev(`mapOpen = ${JSON.stringify(k)}`); B.redraw(); B.d.querySelector(`[data-map-pick="${what}"]`).click(); B.redraw(); };
-  B.d.getElementById('clear-all').click();
+  B.ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
   return B;
 };
 
@@ -65,7 +65,7 @@ B.pill(big);
 B.pill(pair[0]);
 ok(!B.nouns(pair[0]).some(B.has) && !B.isIn(pair[0]) && B.nouns(big).some(B.has),
    `inside ${big}, ${pair[0]} out: always a hole in ${big}, even where its words are shared with ${pair[1]} — which was only in because ${big} was`);
-B.d.getElementById('clear-all').click();
+B.ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 B.pill(pair[1]); B.pill(big); B.pill(pair[0]);
 ok(B.nouns(pair[1]).every(B.has) && B.isIn(pair[1]), `…but add ${pair[1]} yourself first, and taking ${pair[0]} out leaves ${pair[1]} whole (its card folds into ${big}'s, which shows the hole)`);
 B.ev("NOUN_THEMES.pop(); showSetup();");
@@ -105,12 +105,9 @@ ok(B.ev('JSON.stringify([[...selectedNouns].sort(), syncDeckTopics()])') === was
 
 // ---- Picks that aren't topics ----
 B = setUp('nouns');
-B.d.getElementById('select-all').click();
+B.ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");
 ok(B.d.querySelectorAll('#hand-fan .hand-card[data-topic]').length === 7 && B.d.querySelector('#hand-fan .hand-more') && B.isIn('tempo'), 'All: every topic counts as added — seven cards and a +N');
-B.d.getElementById('clear-all').click();
+B.ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 ok(B.ev('selectedNouns.size') === 0 && B.ev('syncDeckTopics().length') === 0, 'None: an empty deck');
-B.ev("saveMapPrefs({ hidden: true }); showSetup();");
-ok(/Show the map below to add a topic/.test(B.d.getElementById('hand-fan').textContent), 'with the map hidden, the empty card says to show it');
-B.ev("saveMapPrefs({ hidden: false });");
 ok(B.errors.length === 0, 'no errors along the way');
 done();

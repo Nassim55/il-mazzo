@@ -76,8 +76,7 @@ ok(JSON.parse(w.localStorage.getItem('verbi-regolari-stats-listen')).capire.atte
 key(d.body, 'Enter');
 ok(w.__spoken.length >= k + 3, 'moving on speaks the next card');
 d.getElementById('change-btn').click();
-ok(/🔊 Listening/.test(d.getElementById('setup-meta').textContent) && /🔊 Listening/.test(d.querySelector('#map-panel .endings-sub').textContent), 'setup labels say Listening');
-ok(d.querySelector('#direction-toggle [data-direction="listen"]').classList.contains('active'), 'the setup direction toggle has Listening too');
+ok(ev('direction') === 'en-it' && !d.querySelector('#direction-toggle [data-direction="listen"]') && d.querySelector('#direction-toggle [data-direction="spasso"]'), 'back at the setup, the old Listen is gone: EN → IT, with A spasso beside it');
 // ---- Nouns & phrases in listening ----
 d.querySelector('#subject-toggle [data-subject="phrases"]').click();
 ev('clearHand()');

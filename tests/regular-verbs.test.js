@@ -6,20 +6,20 @@ const setAside = s => ev(`window.__aside = window.__aside || {}; window.__aside[
 const putBack = s => ev(`(window.__aside['${s}'] || []).forEach(k => subjectState['${s}'].selected.add(k)); subjectState['${s}'].topics = null;`);
 
 d.querySelector('.theme-chip[data-theme="casa"]').click();        // a noun selection to check it survives the switch
-setVal('deck-cap', '7');
+ev("capValue = '7'; updateReadout();");
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
 ok(ev('handSections().join()') === 'nouns', 'the Casa selection comes along in the hand');
 setAside('nouns');
 ok(ev('subject') === 'verbs' && d.getElementById('app-title').textContent === 'Verbi Regolari' && d.title === 'Il Mazzo · Verbi Regolari', 'switch → Verbi Regolari title and page title');
 ok(!!d.querySelector('.map-chart aside.endings .eg') && d.querySelector('.map-chart .endings-title').textContent === 'Le desinenze', 'Le desinenze, in the map\'s panel');
-ok(ev('selectedNouns.size') === 0 && d.getElementById('deck-cap').value === '', 'verbs start with their own empty selection and subset box');
+ok(ev('selectedNouns.size') === 0 && ev('capValue') === '', 'verbs start with their own empty selection and subset box');
 ok(/[134]\/150 practised/.test(d.getElementById('setup-meta').textContent), `old verb history shows in the stats strip ("${d.getElementById('setup-meta').textContent.replace(/\s+/g, ' ').trim()}")`);
 // Weakest 10 uses the verb game's smoothed formula: capire 15/22, finire 8/12, pulire 1/8
-d.getElementById('weakest-10').click();
+ev("selectedNouns = new Set(weakestNouns(Math.min(10, nounData.length))); deckTopics = null; updateReadout();");
 const sel = ev('[...selectedNouns]');
 ok(sel.length === 10 && sel.slice(0, 3).join() === 'capire,finire,pulire', `Weakest 10 starts capire, finire, pulire (${sel.slice(0, 3).join(', ')})`);
 // Themes and card counts
-d.getElementById('clear-all').click();
+ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 ev("VERB_THEMES.find(t => t.key === 'isc').nouns.forEach(k => selectedNouns.add(k)); updateReadout();");   // the -isc- verbs, picked from the data
 ok(d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('8 verbs · 48 cards'), '-isc- theme: 8 verbs · 48 cards');
 d.querySelector('#mode-toggle [data-mode="infinitives"]').click();
@@ -71,11 +71,11 @@ ok(/← Change verbs/.test(d.querySelector('.complete-actions').textContent), 'c
 // Infinitive mode + most common, nothing selected
 d.getElementById('back-to-setup').click();
 d.querySelector('#direction-toggle [data-direction="en-it"]').click();
-d.getElementById('clear-all').click();
+ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 d.querySelector('#mode-toggle [data-mode="infinitives"]').click();
-setVal('deck-cap', '10'); setVal('deck-cap-mode', 'frequent', 'change');
+ev("capValue = '10'; updateReadout();"); ev("capMode = 'frequent'; updateReadout();");
 ok(d.getElementById('start-btn').disabled, 'nothing in the hand + a deck size: Start waits');
-d.getElementById('select-all').click();   // a deck size picks from your hand
+ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");   // a deck size picks from your hand
 ok(d.getElementById('start-btn').textContent.includes('10 most common cards') && /150 verbs/.test(d.querySelector('.deck-readout').textContent), 'All + 10 most common → 10 of all 150 verbs');
 d.getElementById('start-btn').click();
 const top10 = ev('FREQUENCY_ORDER.slice(0, 10)'), deck10 = ev('deck.map(c => c.noun)');
@@ -88,7 +88,7 @@ ok(d.querySelector('.feedback .pron')?.textContent === 'pen·sà·re' && /weigh/
 d.getElementById('change-btn').click();
 putBack('nouns');
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
-ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === ev("NOUN_THEMES.find(t => t.key === 'casa').nouns.length") && d.getElementById('deck-cap').value === '7' && d.getElementById('app-title').textContent === 'Sostantivi', 'nouns: Casa selection and subset "7" kept, title restored');
+ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === ev("NOUN_THEMES.find(t => t.key === 'casa').nouns.length") && ev('capValue') === '7' && d.getElementById('app-title').textContent === 'Sostantivi', 'nouns: Casa selection and subset "7" kept, title restored');
 ok(!d.querySelector('aside.endings:not(.map-panel)') && d.querySelectorAll('.verb-chip').length === 1295, 'noun setup restored (1295 chips, no endings panel)');
 const store = {}; for (let i = 0; i < w.localStorage.length; i++) { const k = w.localStorage.key(i); store[k] = w.localStorage.getItem(k); }
 // Reload remembers the last subject

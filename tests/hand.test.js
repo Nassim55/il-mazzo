@@ -6,9 +6,9 @@ const { boot, ok, done } = require('./harness');
 
 for (const s of ['nouns', 'verbs', 'irregular', 'mipiace', 'adjectives', 'avverbi', 'possessives', 'prepositions', 'phrases', 'sentences']) {
   const B = boot({ 'flipcards-subject': s });
-  const d = B.d, hand = d.getElementById('hand'), more = d.getElementById('setup-more');
+  const d = B.d, hand = d.getElementById('hand'), foot = d.querySelector('.setup-foot');
   ok(hand && d.getElementById('hand-fan') && hand.querySelector('.hand-title').textContent === 'La tua mano' && hand.contains(d.getElementById('start-btn')) && hand.contains(d.getElementById('direction-toggle'))
-     && more && d.querySelector('.section-tools').contains(more) && !more.open && d.getElementById('table').contains(hand) && ['weakest-20', 'random-20', 'select-all', 'clear-all', 'hand-pick', 'deck-cap', 'audio-row', 'setup-meta'].every(id => more.contains(d.getElementById(id)))
+     && foot && !d.getElementById('setup-more') && d.getElementById('table').contains(hand) && ['audio-row', 'setup-meta'].every(id => foot.contains(d.getElementById(id)))
      && !/Step 01/.test(d.getElementById('game-area').textContent) && B.errors.length === 0,
      `${s}: the hand — Il mazzo, the count, the direction, Start; Settings & more closed with the rest`);
 }
@@ -17,7 +17,7 @@ let B = boot({ 'flipcards-subject': 'nouns' });
 const fan = () => [...B.d.querySelectorAll('#hand-fan .hand-card')].map(c => c.classList.contains('hand-slot') ? 'slot' : c.classList.contains('hand-loose') ? `loose ${c.querySelector('.hand-n').textContent}` : c.classList.contains('hand-more') ? c.querySelector('.hand-name').textContent : c.dataset.topic);
 const add = k => B.d.querySelector(`.map-row[data-topic="${k}"] .map-add`).click();
 const nouns = k => B.ev(`NOUN_THEMES.find(t => t.key === '${k}').nouns`);
-B.d.getElementById('clear-all').click();
+B.ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 ok(fan().join() === 'slot' && /Tap ＋ Add on a topic below/.test(B.d.getElementById('hand-fan').textContent) && B.d.getElementById('start-btn').disabled, 'an empty hand: just the slot, saying what to do; Start waits');
 add('tempo'); add('animali');
 ok(fan().join() === 'tempo,animali,slot' && B.d.getElementById('selected-count').textContent === String(B.ev('selectedNouns.size')), 'two topics from the map: two cards, newest on top, and the count');

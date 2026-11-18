@@ -2745,6 +2745,11 @@
     .todo-more { padding-left: 0; }
   }
 
+  /* the setup's foot (Nov 2026): your progress (back up, restore, reset) and the voice, out of the way */
+  .setup-foot { display: flex; flex-direction: column; gap: 10px; margin: 48px 0 8px; padding-top: 16px; border-top: 1px solid rgba(28, 22, 17, 0.12); text-align: left; }
+  .setup-foot .setup-meta, .setup-foot .audio-row { margin: 0; }
+  .section-tools .verbs-block { margin-top: 4px; }
+
 </style>
 </head>
 <body>
@@ -12267,8 +12272,14 @@
       updateReadout();
     });
     document.querySelectorAll('#direction-toggle .mode-option').forEach(btn => btn.addEventListener('click', () => {
-      if (btn.dataset.direction === direction) return;
-      direction = btn.dataset.direction;   // one direction for the whole hand: every section follows
+      const was = spassoOn(), dir = btn.dataset.direction;
+      setSpassoMode(dir === 'spasso');
+      if (dir === 'spasso' || dir === direction) {   // A spasso is a mode, not a direction: the direction (and its scores, and Ripasso's) stays
+        document.querySelectorAll('#direction-toggle .mode-option').forEach(b => b.classList.toggle('active', dir === 'spasso' ? b.dataset.direction === 'spasso' : b.dataset.direction === direction));
+        if (was !== spassoOn()) updateReadout();
+        return;
+      }
+      direction = dir;   // one direction for the whole hand: every section follows
       Object.values(subjectState).forEach(st => { st.direction = direction; });
       document.querySelectorAll('#direction-toggle .mode-option').forEach(b => b.classList.toggle('active', b.dataset.direction === direction));
       stats = loadStats();   // each direction keeps its own progress
@@ -12277,9 +12288,7 @@
       const mapBox = document.getElementById('noun-map');
       if (mapBox) mapBox.innerHTML = nounMapInner();   // at once, not on the next tick
     }));
-    document.getElementById('start-btn').addEventListener('click', () => startHand());
-    const passiveBtn = document.getElementById('passive-btn');
-    if (passiveBtn) passiveBtn.addEventListener('click', () => startPassiveHand());
+    document.getElementById('start-btn').addEventListener('click', () => { if (spassoOn()) startPassiveHand(); else startHand(); });
     updateReadout();
   }
   const SECTION_CHARTS = {
@@ -12933,13 +12942,12 @@
                 <div class="deck-readout hand-count"><strong class="hand-big" id="selected-count">0</strong> <span class="hand-unit"><span id="hand-words">${cfg.itemWords || 'words'}</span> · <strong id="card-count">0</strong> cards<span id="readout-scope"></span></span> <button type="button" class="ghost deck-clear" data-deck-clear>clear</button></div>
                 <div class="setup-options">
                   <div class="opt"><span class="opt-label">Direction</span><div class="mode-toggle" id="direction-toggle">
-                    <button type="button" class="mode-option${direction === 'en-it' ? ' active' : ''}" data-direction="en-it">EN → IT</button>
-                    <button type="button" class="mode-option${direction === 'it-en' ? ' active' : ''}" data-direction="it-en">IT → EN</button>
-                    <button type="button" class="mode-option${direction === 'listen' ? ' active' : ''}" data-direction="listen">🔊 Listen</button>
+                    <button type="button" class="mode-option${!spassoOn() && direction === 'en-it' ? ' active' : ''}" data-direction="en-it">EN → IT</button>
+                    <button type="button" class="mode-option${!spassoOn() && direction === 'it-en' ? ' active' : ''}" data-direction="it-en">IT → EN</button>
+                    <button type="button" class="mode-option${spassoOn() ? ' active' : ''}" data-direction="spasso" title="Out and about: hear each card, the Italian then the English, ${passivePrefs.reps} times over, on a loop — nothing to type">🎧 A spasso</button>
                   </div></div>
                 </div>
                 <button type="button" class="submit start-btn" id="start-btn">▶ Start practising</button>
-                <button type="button" class="passive-btn" id="passive-btn" title="Out and about: hear each card, the Italian then the English, ${passivePrefs.reps} times over, on a loop — nothing to type"><span class="passive-btn-main">🎧 A spasso</span></button>
                 <p class="passive-msg passive-msg-setup" id="passive-msg" aria-live="polite"></p>
               </div>
             </section>
@@ -12947,6 +12955,11 @@
         </section>
       </div>
     `;
+    if (direction === 'listen' && !cfg.dialogues && !cfg.story) {   // the old typed Listen has left the setup: back to EN → IT
+      direction = 'en-it';
+      Object.values(subjectState).forEach(st => { if (st.direction === 'listen') st.direction = 'en-it'; });
+      stats = loadStats();
+    }
     syncOnSetup();
     if (cfg.story) {
       wireSubjectToggle();
@@ -12964,24 +12977,10 @@
     }
     gameArea.innerHTML = `
       <div class="section-tools">
-        <p class="setup-sub section-line">${SETUP_LINES[subject] || ''}</p>
         ${cfg.typeFilter ? sentenceTypesHTML() : ''}
         ${cfg.numberToggle ? prepNumbersHTML() : ''}
         ${modeOptions ? `<div class="setup-options">${modeOptions ? `<div class="opt"><span class="opt-label">Practise</span><div class="mode-toggle" id="mode-toggle">${modeOptions.map(([key, label]) => `<button type="button" class="mode-option${currentMode === key ? ' active' : ''}" data-mode="${key}">${label}</button>`).join('')}</div></div>` : ''}</div>` : ''}
-        <details class="setup-more" id="setup-more">
-          <summary>⚙ Settings &amp; more</summary>
-          <div class="more-block quick-picks"><div class="more-label">More ways to pick</div>
-            <button type="button" class="ghost" id="weakest-20">Weakest 20</button><span class="divider">·</span><button type="button" class="ghost" id="weakest-10">Weakest 10</button><span class="divider">·</span><button type="button" class="ghost" id="random-20">Random 20</button><span class="divider">·</span><button type="button" class="ghost" id="random-50">Random 50</button><span class="divider">·</span><button type="button" class="ghost" id="select-all">All</button><span class="divider">·</span><button type="button" class="ghost" id="clear-all">None</button><span class="divider">·</span><button type="button" class="ghost hand-pick-btn" id="hand-pick">Search for a word…</button></div>
-          <div class="more-block"><div class="more-label">Deck size</div>
-      <div class="deck-cap">
-        Play just <input type="number" id="deck-cap" placeholder="all" min="1" inputmode="numeric" autocomplete="off" /> cards,
-        <select id="deck-cap-mode" aria-label="How to choose the subset">
-          <option value="random">picked at random</option>
-          <option value="frequent">the most common</option>
-        </select>
-      </div>
-          </div>
-      ${isVerbs ? `<div class="more-block"><div class="more-label">Verbs</div>
+      ${isVerbs ? `<div class="more-block verbs-block">
       <div class="person-picker" id="person-picker"${verbMode === 'conjugations' ? '' : ' hidden'}>
         <div class="mode-label person-label">Persons
           <span class="person-quick">${Object.entries({ all: 'all', sing: 'singular', plur: 'plural' }).map(([k, l]) => `<button type="button" class="ghost" data-set="${k}">${l}</button>`).join('<span class="meta-sep">·</span>')}</span>
@@ -12993,10 +12992,6 @@
         <label class="inf-first"><input type="checkbox" id="inf-first"${infinitiveFirst() ? ' checked' : ''}> <span class="inf-first-label">Prima l'infinito</span>
           <span class="inf-first-sub">each verb's infinitive first (not scored), then kept above its forms</span></label>
       </div></div>` : ''}
-          <div class="more-block"><div class="more-label">Voice</div><div class="audio-row" id="audio-row"></div></div>
-          <div class="more-block"><div class="more-label">Your progress</div><div class="setup-meta" id="setup-meta"></div></div>
-          ${cfg.setupSub ? `<div class="more-block"><div class="more-label">How this section works</div><p class="more-about">${cfg.setupSub}</p></div>` : ''}
-        </details>
       </div>
       <div class="setup-body">
       <div class="setup-main">
@@ -13034,6 +13029,10 @@
       ${cfg.panel && !cfg.map && SECTION_CHARTS[cfg.panel] ? SECTION_CHARTS[cfg.panel]('setup') : ''}
       ${cfg.panel && !cfg.map ? `<aside class="endings weak-panel" id="weak-panel" aria-label="Your weakest ${cfg.itemWords}"></aside></div>` : ''}
       </div>
+      <footer class="setup-foot" aria-label="Your progress and the voice">
+        <div class="setup-meta" id="setup-meta"></div>
+        <div class="audio-row" id="audio-row"></div>
+      </footer>
     `;
 
     wireSubjectToggle();
@@ -13137,24 +13136,24 @@
     });
 
     wireNounMap(applyPick);   // La mappa's buttons pick the same way as the ones above the grid
-    document.getElementById('select-all').addEventListener('click', () => {
+    document.getElementById('select-all')?.addEventListener('click', () => {
       nounData.forEach(n => selectedNouns.add(n.noun));
       deckTopics = null;   // every topic, then
       gameArea.querySelectorAll('.verb-chip').forEach(c => c.classList.remove('unselected'));
       updateReadout();
     });
 
-    document.getElementById('clear-all').addEventListener('click', () => {
+    document.getElementById('clear-all')?.addEventListener('click', () => {
       selectedNouns.clear();
       deckTopics = [];
       gameArea.querySelectorAll('.verb-chip').forEach(c => c.classList.add('unselected'));
       updateReadout();
     });
 
-    document.getElementById('random-20').addEventListener('click', () => randomPick(20));
-    document.getElementById('random-50').addEventListener('click', () => randomPick(50));
-    document.getElementById('weakest-10').addEventListener('click', () => weakestPick(10));
-    document.getElementById('weakest-20').addEventListener('click', () => weakestPick(20));
+    document.getElementById('random-20')?.addEventListener('click', () => randomPick(20));
+    document.getElementById('random-50')?.addEventListener('click', () => randomPick(50));
+    document.getElementById('weakest-10')?.addEventListener('click', () => weakestPick(10));
+    document.getElementById('weakest-20')?.addEventListener('click', () => weakestPick(20));
 
     function randomPick(count) {
       const picks = shuffle(nounData).slice(0, Math.min(count, nounData.length)).map(n => n.noun);
@@ -13177,15 +13176,13 @@
       updateReadout();
     }
 
-    const capEl = document.getElementById('deck-cap');
-    capEl.value = capValue;
-    capEl.addEventListener('input', () => { capValue = capEl.value; updateReadout(); });
+    const capEl = document.getElementById('deck-cap');   // gone from the page (Nov 2026): the round's own slider sizes a deck now
+    if (capEl) { capEl.value = capValue; capEl.addEventListener('input', () => { capValue = capEl.value; updateReadout(); }); }
     const capModeEl = document.getElementById('deck-cap-mode');
-    capModeEl.value = capMode;
-    capModeEl.addEventListener('change', () => { capMode = capModeEl.value; updateReadout(); });
+    if (capModeEl) { capModeEl.value = capMode; capModeEl.addEventListener('change', () => { capMode = capModeEl.value; updateReadout(); }); }
 
     // Hand-pick button opens the module-scope focus modal in 'setup' mode
-    document.getElementById('hand-pick').addEventListener('click', () => openFocusModal('setup'));
+    document.getElementById('hand-pick')?.addEventListener('click', () => openFocusModal('setup'));
 
     wireTable();
     renderSetupMeta();
@@ -13205,10 +13202,9 @@
     document.getElementById('readout-scope').textContent = h.sections.length > 1 ? ` · ${h.sections.length} sections` : '';
     const start = document.getElementById('start-btn');
     start.disabled = h.cards === 0;
-    const passiveBtn = document.getElementById('passive-btn');
-    if (passiveBtn) passiveBtn.disabled = h.cards === 0;
     start.textContent = h.cards === 0
       ? `Add some ${cfg.itemWords || 'words'} to start`
+      : spassoOn() ? `🎧 A spasso · ${h.cards} card${h.cards === 1 ? '' : 's'}`
       : `▶ Start practising · ${h.cards}${one && h.cards < h.pool && one.key !== undefined ? '' : ''}${h.sections.length === 1 && h.frequent ? ' most common' : ''} card${h.cards === 1 ? '' : 's'}`;
     renderTableTabs();
     renderHandBar();
@@ -13219,7 +13215,7 @@
   // The subset box's number, or 0 when it's empty, invalid or not on screen
   function capNumber() {
     const el = document.getElementById('deck-cap');
-    const v = parseInt(otherSection ? capValue : (el ? el.value : ''), 10);   // in inSection: that section's own number
+    const v = parseInt(otherSection || !el ? capValue : el.value, 10);   // in inSection: that section's own number
     return Number.isFinite(v) && v > 0 ? v : 0;
   }
 
@@ -13611,6 +13607,7 @@
     if (cross) cross.setAttribute('visibility', 'hidden');
   }
   function nounMapInner() {
+    { const mp = mapPrefs(); if (mp.hidden || mp.sortBy !== 'order') saveMapPrefs(Object.assign({}, mp, { hidden: false, sortBy: 'order' })); }   // topic order, always shown (Nov 2026)
     const p = mapPrefs(), dir = DIR_LABELS[direction].long;
     if (p.hidden) return `<div class="theme-eyebrow map-eyebrow">↳ La mappa · every topic at a glance <button type="button" class="ghost" id="map-show">show</button></div>`;
     const cfg = SUBJECTS[subject], byKey = new Map(cfg.items.map(n => [n.noun, n])), srs = loadSrs(subject, direction), st = readStats(subject, direction);
@@ -13634,11 +13631,10 @@
           ${isOpen ? `<div class="endings map-inline">${mapDetailHTML(x, false)}</div>` : ''}
         </div>`;
     };
-    const sortLinks = [['known', 'most known first'], ['order', 'topic order']].map(([k, l]) => `<button type="button" class="ghost${(p.sortBy === 'order') === (k === 'order') ? ' active' : ''}" data-map-sort="${k}" aria-pressed="${(p.sortBy === 'order') === (k === 'order')}">${l}</button>`).join('<span class="meta-sep">·</span>');
     return `
       <div class="map-eyebrow-row">
         <div class="theme-eyebrow map-eyebrow">La mappa · ${dir}</div>
-        <span class="person-quick map-sort">${sortLinks}<span class="meta-sep">·</span><button type="button" class="ghost" id="map-hide">hide</button></span>
+        
       </div>
       <div class="shade-key map-key">
         <span class="shade-key-end">rarely wrong</span>
@@ -14760,7 +14756,7 @@
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-18T01:25Z';
+  const BUILD = '2026-11-18T11:23Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
@@ -14910,6 +14906,10 @@
     window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => { /* offline play unavailable */ }); });
   }
   let handBarWanted = false, handBarObserver = null;
+  // A spasso as a mode (Nov 2026): the third option of the hand's switch, where Listen was; chosen, Start plays the
+  // hand out and about. The direction underneath is untouched. The old typed Listen is gone from the setup.
+  function spassoOn() { try { return localStorage.getItem('mazzo-spasso-mode') === '1'; } catch (e) { return false; } }
+  function setSpassoMode(on) { try { localStorage.setItem('mazzo-spasso-mode', on ? '1' : '0'); } catch (e) { /* ignore */ } }
   function renderHandBar() {
     const bar = document.getElementById('hand-bar');
     if (!bar) return;
@@ -14921,14 +14921,13 @@
     const unit = (document.getElementById('hand-words') || {}).textContent || 'words', scope = (document.getElementById('readout-scope') || {}).textContent || '';
     bar.innerHTML = `<span class="hand-bar-fan" aria-hidden="true"><i></i><i></i><i></i></span>`
       + `<div class="hand-bar-text"><span class="hand-bar-title">La tua mano${label ? ` · ${escapeHTML(label)}` : ''}</span><span class="hand-bar-sub">${words} ${escapeHTML(unit)} · ${escapeHTML(cards)} cards${escapeHTML(scope)}</span></div>`
-      + `<button type="button" class="passive-btn hand-bar-spasso" data-bar="passive"><span class="passive-btn-main">🎧 A spasso</span></button>`
-      + `<button type="button" class="submit hand-bar-start" data-bar="start">▶ Start<span class="hand-bar-n"> · ${escapeHTML(cards)} cards</span></button>`;
+      + `<button type="button" class="submit hand-bar-start" data-bar="start">${spassoOn() ? '🎧 A spasso' : '▶ Start'}<span class="hand-bar-n"> · ${escapeHTML(cards)} cards</span></button>`;
     bar.hidden = !handBarWanted;
   }
   document.getElementById('hand-bar').addEventListener('click', e => {
     const b = e.target.closest('[data-bar]');
     if (!b) return;
-    if (b.dataset.bar === 'start') startHand(); else startPassiveHand();
+    if (b.dataset.bar === 'start' && !spassoOn()) startHand(); else startPassiveHand();
   });
   function watchTable() {   // the bar shows once the table has scrolled out of view
     if (handBarObserver) { handBarObserver.disconnect(); handBarObserver = null; }

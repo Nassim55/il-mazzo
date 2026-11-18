@@ -67,7 +67,7 @@ d.getElementById('change-btn').click();
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
 d.querySelector('.map-row[data-topic="corpo"] .map-add').click();
 ev("chosenVoice = () => ({ name: 'Alice', lang: 'it-IT' });");
-d.getElementById('passive-btn').click();
+ev("startPassiveHand()");
 ok(d.getElementById('container').dataset.view === 'passive' && ev('[...new Set(passive.cards.map(c => c.subject))].sort().join()') === 'nouns,verbs', 'A spasso: the whole hand, nouns and verbs');
 ev('stopPassive()');
 ok(ev('subject') === 'nouns' && d.getElementById('container').dataset.view === 'setup' && cards().join() === 'verbs:freq1,nouns:corpo', '…and back on the nouns page, the hand as it was');
@@ -87,7 +87,7 @@ ok(ev('direction') === 'it-en', 'a Ripasso round keeps its own direction: the ha
 B = boot({ 'flipcards-subject': 'adjectives' });
 d = B.d; ev = B.ev;
 ok(ev('selectedNouns.size') === 0 && d.getElementById('start-btn').disabled, 'adjectives start empty — the hand is shared by every section');
-d.getElementById('select-all').click();
+ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
 d.querySelector('.map-row[data-topic="tempo"] .map-add').click();
 d.querySelector('#hand [data-deck-clear]').click();

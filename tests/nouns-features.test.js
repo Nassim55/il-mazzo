@@ -2,7 +2,7 @@ const { boot, ok, done } = require('./harness');
 const { w, d, ev, key, fire, setVal, errors } = boot();
 const before = (a, b) => !!(d.getElementById(a).compareDocumentPosition(d.getElementById(b)) & w.Node.DOCUMENT_POSITION_FOLLOWING);
 // --- layout ---
-ok(before('start-btn', 'theme-chips') && before('theme-chips', 'verb-grid') && d.getElementById('setup-more').contains(d.getElementById('select-all')) && d.getElementById('setup-more').contains(d.getElementById('deck-cap')), 'layout: the hand (Start, Settings & more: quick picks, deck size) → themes → grid');
+ok(before('start-btn', 'theme-chips') && before('theme-chips', 'verb-grid') && !d.getElementById('setup-more') && d.querySelector('.setup-foot #setup-meta'), 'layout: the hand → themes → grid; your progress and the voice at the foot');
 ok(!d.querySelector('aside.endings:not(.map-panel)') && !d.getElementById('mode-toggle'), 'noun setup has no verb panels (the map\'s panel only borrows their look)');
 d.querySelector('.theme-chip[data-theme="casa"]').click();
 const n = ev('selectedNouns.size');
@@ -12,11 +12,11 @@ const chips = d.querySelectorAll('.verb-chip.unselected');
 fire(chips[0], 'mousedown'); fire(chips[1], 'mouseover'); fire(chips[2], 'mouseover'); fire(d, 'mouseup');
 ok(ev('selectedNouns.size') === n + 3, 'click-and-drag selects chips');
 // --- frequency: 10 most common Natura ---
-d.getElementById('clear-all').click();
+ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 const natura = ev("THEMES.find(t => t.key === 'natura').nouns");
 const byRank = [...natura].sort((a, b) => ev('frequencyRank')[a] - ev('frequencyRank')[b]);
 ev(`selectedNouns = new Set(${JSON.stringify(natura)}); updateReadout();`);
-setVal('deck-cap', '10'); setVal('deck-cap-mode', 'frequent', 'change');
+ev("capValue = '10'; updateReadout();"); ev("capMode = 'frequent'; updateReadout();");
 ok(d.getElementById('start-btn').textContent.includes('10 most common cards'), 'Start: "10 most common cards"');
 d.getElementById('start-btn').click();
 let deck = ev('deck.map(c => c.noun)');
@@ -45,10 +45,10 @@ const order = ev("['pianeta','tramonto','grotta','sole','radura'].sort(compareWe
 ok(JSON.stringify(order) === JSON.stringify(['grotta', 'radura', 'tramonto', 'pianeta', 'sole']), `weakest-first by error rate, unseen as 100% (${order.join(', ')})`);
 // --- whole deck: nothing selected, 100 most common ---
 d.getElementById('change-btn').click();
-d.getElementById('clear-all').click();
-setVal('deck-cap', '100'); setVal('deck-cap-mode', 'frequent', 'change');
+ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
+ev("capValue = '100'; updateReadout();"); ev("capMode = 'frequent'; updateReadout();");
 ok(d.getElementById('start-btn').disabled, 'nothing in the hand + a deck size: Start waits (a number alone no longer draws from the whole deck)');
-d.getElementById('select-all').click();
+ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");
 ok(/100 most common/.test(d.getElementById('start-btn').textContent) && !d.getElementById('start-btn').disabled, 'All + 100, most common → Start · 100 most common cards');
 d.getElementById('start-btn').click();
 deck = ev('deck.map(c => c.noun)');
@@ -56,16 +56,16 @@ ok(deck.length === 100 && ev('FREQUENCY_ORDER.slice(0, 100)').every(x => deck.in
 d.getElementById('reshuffle-btn').click();
 ok(ev('deck.length') === 100, 'Reshuffle works with nothing selected');
 d.getElementById('change-btn').click();
-ok(d.getElementById('deck-cap').value === '100' && d.getElementById('deck-cap-mode').value === 'frequent', 'subset number and mode remembered');
+ok(ev('capValue') === '100' && ev('capMode') === 'frequent', 'subset number and mode remembered');
 // --- newest 100 nouns & themes ---
-d.getElementById('clear-all').click(); setVal('deck-cap', '');
+ev("selectedNouns.clear(); deckTopics = []; updateReadout();"); ev("capValue = ''; updateReadout();");
 ok(!!d.querySelector('.theme-chip[data-theme="idee"]') && !!d.querySelector('.theme-chip[data-theme="media"]'), 'Idee and Media themes present');
 ev("selectedNouns = new Set(['soldi']); updateReadout();"); d.getElementById('start-btn').click();
 d.getElementById('answer').value = 'i soldi'; d.getElementById('submit').click();
 ok(d.getElementById('feedback').className.includes('correct') && /solidus/.test(d.querySelector('.feedback-note')?.textContent || ''), 'plural card "i soldi" with its note');
 // --- hand-pick with nothing selected ---
-d.getElementById('change-btn').click(); d.getElementById('clear-all').click();
-d.getElementById('hand-pick').click();
+d.getElementById('change-btn').click(); ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
+ev("openFocusModal('setup')");
 ok(d.getElementById('focus-total').textContent === '1295', 'Hand-pick with nothing selected lists all 1295');
 d.getElementById('focus-top-input').value = '100'; d.getElementById('focus-top-btn').click(); d.getElementById('focus-apply').click();
 ok(d.querySelectorAll('.verb-chip:not(.unselected)').length === 100, 'Hand-pick Top 100 lights up 100 chips');

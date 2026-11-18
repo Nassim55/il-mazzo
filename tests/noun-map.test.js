@@ -17,8 +17,8 @@ ok(B.errors.length === 0 && map() && map().querySelectorAll('.map-row').length =
 // ---- The page: the picks and Start first, then the map; no theme chips; the grid folded ----
 const parts = [...B.d.querySelectorAll('.setup-main > *')].map(e => e.id || e.className.split(' ')[0]);
 ok(B.d.getElementById('hand').compareDocumentPosition(B.d.getElementById('noun-map')) & 4 && parts.indexOf('noun-map') < parts.indexOf('grid-fold')
-   && B.d.querySelector('#hand #start-btn') && B.d.querySelector('#hand #passive-btn') && B.d.querySelector('#setup-more .deck-cap') && B.d.querySelector('#setup-more #setup-meta') && B.d.querySelector('#setup-more #audio-row') && B.d.querySelector('#setup-more #weakest-20') && !B.d.querySelector('#setup-more').open,
-   `the hand — Start, A spasso, and Settings & more (quick picks, deck size, voice, progress), closed — comes above the map (${parts.filter(x => x !== 'theme-row').join(' → ')})`);
+   && B.d.querySelector('#hand #start-btn') && B.d.querySelector('#hand [data-direction="spasso"]') && B.d.querySelector('.setup-foot #setup-meta') && B.d.querySelector('.setup-foot #audio-row') && !B.d.querySelector('#setup-more'),
+    `the hand — Start, with A spasso in its switch — comes above the map; your progress and the voice at the foot (${parts.filter(x => x !== 'theme-row').join(' → ')})`);
 ok(B.d.getElementById('theme-row').hidden && B.d.getElementById('verb-grid').closest('details.grid-fold') && !B.d.getElementById('grid-fold').open
    && /Every noun, one by one \(1295\)/.test(B.d.querySelector('.grid-fold summary').textContent), 'the theme chips give way to the map; the 1295 nouns fold away underneath');
 ok(B.d.querySelector('.container').dataset.map === '1' && ['verbs', 'irregular', 'adjectives'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '1') && ['phrases', 'prepositions'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '0'), 'a wide page for the map — the word sections');
@@ -48,12 +48,7 @@ ok(shown(topicOf('casa')) === `${pctOf(topicOf('casa'))}%` && shown(topicOf('cas
 ok(row('arabo').querySelector('.map-score').textContent === '0%' && row('arabo').querySelector('.map-score').classList.contains('untried'), 'a topic not started: 0%, faded');
 const scores = [...map().querySelectorAll('.map-rows .map-row')].map(r => parseInt(r.querySelector('.map-score').textContent, 10));
 const keysNow = [...map().querySelectorAll('.map-rows .map-row')].map(r => r.dataset.topic);
-ok(scores.every((x, i) => i === 0 || scores[i - 1] >= x) && keysNow[0] === [topicOf('casa'), topicOf('libro')].sort((a, b) => pctOf(b) - pctOf(a))[0] && map().querySelector('[data-map-sort="known"].active'),
-   'topics in order of how much you know, the highest at the top');
-map().querySelector('[data-map-sort="order"]').click();
-ok([...map().querySelectorAll('.map-rows .map-row')].map(r => r.dataset.topic).join() === B.ev('NOUN_THEMES.map(t => t.key)').join(), '…or in the topics\' own order, if you\'d rather');
-ok(B.ev("mapPrefs().sortBy") === 'order', '(remembered)');
-map().querySelector('[data-map-sort="known"]').click();
+ok(keysNow.join() === B.ev('NOUN_THEMES.map(t => t.key)').join() && !map().querySelector('[data-map-sort]') && !map().querySelector('#map-hide'), 'topics in their own order, always — no sort or hide links');
 ok(/dotted: known — right 5 times or more, and on 8 of your last 10 answers/.test(map().querySelector('.shade-key').textContent) && /the % is how much of the topic you know/.test(map().querySelector('.shade-key').textContent), 'the key says what the dots and the % mean');
 
 // ---- The panel ----
@@ -102,10 +97,10 @@ ok(!B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('casa'))}).no
    'Take all out: just that topic leaves the deck');
 
 // ---- The picks above, and the map follows ----
-B.d.getElementById('select-all').click();
+B.ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");
 redraw();
 ok(B.ev('NOUN_THEMES').every(t => new RegExp(`● ${t.nouns.length} in your deck`).test(row(t.key).textContent)), 'Select all, above: every topic shows all its nouns in the deck');
-B.d.getElementById('clear-all').click();
+B.ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 redraw();
 ok(!map().querySelector('.map-indeck') && !map().querySelector('.map-cell.in:not(.new)') && B.ev('selectedNouns.size') === 0, 'Clear all: none');
 
@@ -121,9 +116,6 @@ ok(B.d.querySelector('.container').dataset.view === 'game' && B.ev('deck.length'
 
 // ---- Hide, direction ----
 B = boot({ 'flipcards-subject': 'nouns', 'sostantivi-stats-v1': JSON.stringify(stats) });
-map().querySelector('#map-hide').click();
-ok(map().querySelector('#map-show') && !map().querySelector('.map-row') && JSON.parse(B.w.localStorage.getItem('mazzo-noun-map-v1')).hidden === true, 'hide: folded to one line, remembered');
-map().querySelector('#map-show').click();
 B.ev("direction = 'it-en'; stats = loadStats(); showSetup();");
 ok(!B.d.querySelector('#noun-map .map-cell:not(.new)') && /Italian → English/.test(B.d.querySelector('#noun-map .map-eyebrow').textContent),
    'it follows the direction: Italian → English has its own record');

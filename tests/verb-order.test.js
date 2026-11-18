@@ -36,7 +36,7 @@ ok(together(r) && r.length === 3 && r.every(([, ps]) => ps.join() === ORDER.join
 B = deal('verbs', VERBS, "saveVerbPersons('verbs', ['io', 'tu', 'lui']);");
 r = runs(B.ev('deck'));
 ok(B.ev('deck.length') === 12 && together(r) && r.every(([, ps]) => ps.join() === 'io,tu,lui'), 'with the persons narrowed (io, tu, lui), those, in order');
-B = deal('verbs', VERBS, "document.getElementById('deck-cap').value = '8';");
+B = deal('verbs', VERBS, "capValue = '8';");
 r = runs(B.ev('deck'));
 ok(B.ev('deck.length') === 8 && together(r) && r.every(([, ps]) => inOrder(ps) && ps[0] === 'io'), 'play just 8: a verb is only ever cut at its end (io, tu, … as far as it goes)');
 
@@ -73,7 +73,7 @@ r = runs(B.ev('passiveDeck()'));
 ok(together(r) && r.every(([, ps]) => ps.join() === ORDER.join()), 'A spasso reads each verb\'s forms in order too');
 
 // ---- In a round: the deck-size slider, the verb on screen, played cards ----
-B = deal('verbs', VERBS, "document.getElementById('deck-cap').value = '8';");
+B = deal('verbs', VERBS, "capValue = '8';");
 ok(B.ev('deck.length') === 8, '(the round starts with 8 cards: one verb whole, the next cut short)');
 const firstRun = runs(B.ev('deck'))[1];   // the verb cut short
 B.ev('index = 3;'); B.ev('render();');

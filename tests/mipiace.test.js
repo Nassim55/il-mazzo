@@ -133,11 +133,5 @@ ok(chosen() === expect("['succedere', 'capitare'].includes(n.lemma)") && B.ev('s
 const tile = B.d.querySelector('#verb-grid .verb-chip:not(.unselected)');
 tile.dispatchEvent(new B.w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 ok(B.ev('selectedNouns.size') === 3 && B.d.querySelectorAll('#mp-choose .on').length === 2, 'a tile can still be dropped by hand — the taps stay');
-B.d.getElementById('select-all').click();
-ok(B.ev('selectedNouns.size') === 133 && B.d.querySelectorAll('#mp-choose .on').length === 0, 'Select all takes the lot, and the taps start again');
-press('frase', 'domande');
-ok(chosen() === expect("n.frase.includes('domande')"), '…and the next tap chooses afresh (just the questions)');
-B.d.getElementById('random-20').click();
-ok(B.ev('selectedNouns.size') === 20 && B.d.querySelectorAll('#mp-choose .on').length === 0, 'Random 20 too');
 ok(B.errors.length === 0, 'no errors along the way');
 done();

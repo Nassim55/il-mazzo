@@ -7,7 +7,7 @@ ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Aggettivi', 'Avverb
 d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 ok(ev('subject') === 'adjectives' && d.getElementById('app-title').textContent === 'Aggettivi' && d.title === 'Il Mazzo · Aggettivi', 'title and tab');
 ok(ev('selectedNouns.size') === 0, 'adjectives start empty — the hand is shared by every section');
-d.getElementById('select-all').click();
+ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");
 ok(ev('selectedNouns.size') === 200 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('200 adjectives · 200 cards'), 'All: every adjective (now 200 · 200 cards)');
 ok(d.querySelector('#map-panel .map-chart .agreement-panel .endings-title')?.textContent === 'Le concordanze' && !d.querySelector('.setup-side') && d.getElementById('noun-map').querySelectorAll('.map-row').length === 4, 'La mappa, a line per 50 by frequency — with Le concordanze in its panel');
 ok(/1\/200 practised|3\/200 practised/.test(d.getElementById('setup-meta').textContent), 'original history shows in the stats strip');
@@ -20,7 +20,7 @@ d.querySelector('#mode-toggle [data-mode="forms"]').click();
 ok(d.getElementById('card-count').textContent === '667', 'All forms: 667 cards for all 200');
 // Dictionary mode game
 d.querySelector('#mode-toggle [data-mode="dictionary"]').click();
-d.getElementById('clear-all').click();
+ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 ev("selectedNouns = new Set(['piccolo', 'grigio', 'marrone', 'alto', 'blu']); updateReadout();");
 d.getElementById('start-btn').click();
 ev("index = deck.findIndex(c => c.noun === 'piccolo'); render();");
@@ -79,12 +79,12 @@ ok(/← Change adjectives/.test(d.querySelector('.complete-actions').textContent
 d.getElementById('back-to-setup').click();
 d.querySelector('#direction-toggle [data-direction="en-it"]').click();
 d.querySelector('#mode-toggle [data-mode="dictionary"]').click();
-d.getElementById('select-all').click();   // a deck size picks from your hand (Nov 2026: no longer from the whole deck when the hand is empty)
-setVal('deck-cap', '5'); setVal('deck-cap-mode', 'frequent', 'change');
+ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");   // a deck size picks from your hand (Nov 2026: no longer from the whole deck when the hand is empty)
+ev("capValue = '5'; updateReadout();"); ev("capMode = 'frequent'; updateReadout();");
 d.getElementById('start-btn').click();
 ok(JSON.stringify(ev('deck.map(c => c.noun).sort()')) === JSON.stringify(['grande', 'italiano', 'nuovo', 'primo', 'vero']), 'the 5 most common: primo, nuovo, grande, italiano, vero');
 // All 100 notes render
-ev("adjMode = 'dictionary'; selectedNouns = new Set(adjData.map(a => a.it)); sessionMaxDeck = null; sessionPool = null; startGame();");
+ev("capValue = ''; adjMode = 'dictionary'; selectedNouns = new Set(adjData.map(a => a.it)); sessionMaxDeck = null; sessionPool = null; startGame();");
 let notes = 0; for (let i = 0; i < ev('deck.length'); i++) { ev(`index = ${i}; render();`); d.getElementById('answer').value = 'x'; d.getElementById('submit').click(); const expected = ev(`ADJ_ITEMS.find(x => x.noun === deck[${i}].noun).note`).replace(/<[^>]+>/g, ''); if (d.querySelector('.feedback-note')?.textContent === expected) notes++; }
 ok(notes === 200, `all 200 adjective notes render (${notes})`);
 // Other sections untouched; backups; reload

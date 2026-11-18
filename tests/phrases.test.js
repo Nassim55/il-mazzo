@@ -52,11 +52,11 @@ d.getElementById('change-btn').click();
 ok(/IT → EN/.test(d.querySelector('#weak-panel .endings-sub').textContent) && /in this direction/.test(d.getElementById('weak-panel').textContent), 'Da ripassare follows the direction (IT→EN: nothing missed yet)');
 d.getElementById('start-btn').click(); d.querySelector('.direction-toggle [data-dir="en-it"]').click(); d.getElementById('change-btn').click();
 ok([...d.querySelectorAll('#weak-panel .weak-it')].map(e => e.textContent).join() === 'In bocca al lupo!', 'EN→IT: Da ripassare lists the phrase you missed, as written');
-d.getElementById('select-all').click();   // a deck size picks from your hand
-setVal('deck-cap', '5'); setVal('deck-cap-mode', 'frequent', 'change');
+ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");   // a deck size picks from your hand
+ev("capValue = '5'; updateReadout();"); ev("capMode = 'frequent'; updateReadout();");
 d.getElementById('start-btn').click();
 ok(JSON.stringify(ev('deck.map(c => c.noun).sort()')) === JSON.stringify(['ciao', 'grazie', 'mi-scusi', 'per-favore', 'prego']), '"the 5 most common": grazie, ciao, prego, mi scusi, per favore');
-ev("selectedNouns = new Set(phraseData.map(p => p.key)); sessionMaxDeck = null; sessionPool = null; startGame();");
+ev("capValue = ''; selectedNouns = new Set(phraseData.map(p => p.key)); sessionMaxDeck = null; sessionPool = null; startGame();");
 let notes = 0; for (let i = 0; i < 50; i++) { ev(`index = ${i}; render();`); d.getElementById('answer').value = 'x'; d.getElementById('submit').click(); const exp = ev(`PHRASE_NOTES[deck[${i}].noun]`).replace(/<[^>]+>/g, ''); if (d.querySelector('.feedback-note')?.textContent === exp) notes++; }
 ok(notes === 50, `all 50 notes render (${notes})`);
 d.getElementById('change-btn').click();

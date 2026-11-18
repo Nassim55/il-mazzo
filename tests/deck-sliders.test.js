@@ -12,7 +12,7 @@ const nouns = ['pane', 'casa', 'libro', 'acqua', 'gatto', 'cane'];
 
 // ---- One slider ----
 ev(`selectedNouns = new Set(${JSON.stringify(nouns)}); capValue = '4'; updateReadout();`);
-el('deck-cap') && (el('deck-cap').value = '4', el('deck-cap').dispatchEvent(new w.Event('input')));
+ev("capValue = '4'; updateReadout();");
 el('start-btn').click();
 const n0 = ev('deck.length');
 ok(el('game-trim-input').type === 'range' && +el('game-trim-input').min === 1 && +el('game-trim-input').max === 6 && +el('game-trim-input').value === n0 && label('game-trim-input') === `${n0} / 6`,

@@ -22,18 +22,23 @@ const wait = (B, ms = 15) => new Promise(r => B.w.setTimeout(r, ms));
 const last = B => B.w.__said[B.w.__said.length - 1];
 const finish = async B => { const u = last(B); if (u.onstart) u.onstart(); if (u.onend) u.onend(); await wait(B); };
 const fast = B => B.ev('Object.assign(PASSIVE_GAPS, { itEn: 1, again: 1, next: 1, watchdogBase: 100000, watchdogPerChar: 0, unlock: 40 })');
-const start = (B, keys) => { B.ev(`selectedNouns = new Set(${JSON.stringify(keys)}); updateReadout();`); fast(B); B.d.getElementById('passive-btn').click(); };
+const start = (B, keys) => { B.ev(`selectedNouns = new Set(${JSON.stringify(keys)}); updateReadout();`); fast(B); B.ev("startPassiveHand()"); };
 const view = B => B.d.querySelector('.container').dataset.view;
 const txt = (B, id) => B.d.getElementById(id).textContent.trim();
 
 (async () => {
   // ---- On the setup screen ----
   let B = boot({ 'flipcards-subject': 'nouns' }, fakes());
-  const btn = B.d.getElementById('passive-btn');
-    ok(btn && /A spasso/.test(btn.textContent) && /the Italian then the English, 5 times over, on a loop/.test(btn.title) && btn.previousElementSibling.id === 'start-btn',
-     'A spasso sits under Start practising: hear each card, Italian then English, 5 times over, on a loop');
+  const btn = B.d.querySelector('#direction-toggle [data-direction="spasso"]');
+  ok(btn && /A spasso/.test(btn.textContent) && /the Italian then the English, 5 times over, on a loop/.test(btn.title) && !B.d.getElementById('passive-btn') && !B.d.querySelector('#direction-toggle [data-direction="listen"]'),
+     'A spasso is the switch\'s third option, where Listen was: hear each card, Italian then English, 5 times over, on a loop');
+  B.ev("clearHand(); topicsIn(['tempo']); updateReadout();");
+  btn.click();
+  ok(btn.classList.contains('active') && /A spasso · \d+ card/.test(B.d.getElementById('start-btn').textContent), 'chosen: the big button says A spasso');
+  B.d.querySelector('#direction-toggle [data-direction="en-it"]').click();
+  ok(/Start practising/.test(B.d.getElementById('start-btn').textContent) && !btn.classList.contains('active'), 'EN → IT again: Start practising');
   B.ev("selectedNouns = new Set(); capValue = ''; updateReadout();");
-  ok(btn.disabled, 'with nothing to play, it waits like Start does');
+  ok(B.d.getElementById('start-btn').disabled, 'with nothing to play, it waits');
 
   // ---- Italian, then English, five times; then the next card ----
   start(B, ['casa', 'pane']);
@@ -113,7 +118,7 @@ const txt = (B, id) => B.d.getElementById(id).textContent.trim();
   B.d.getElementById('passive-end').click();
   if (endLine.onend) endLine.onend(); await wait(B);
   ok(view(B) === 'setup' && B.w.__said.length === n2 && B.w.__wakes.every(l => l.released) && B.ev('passive') === null, 'Fine: back to the setup screen, the voice stopped, the screen free to sleep');
-  B.d.getElementById('passive-btn').click(); await wait(B);
+  B.ev("startPassiveHand()"); await wait(B);
   B.d.dispatchEvent(new B.w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
   ok(view(B) === 'passive', 'Enter does nothing behind the player');
   ok(B.errors.length === 0 && B.warns.length === 0, 'no errors along the way');
