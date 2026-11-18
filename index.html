@@ -2840,6 +2840,22 @@
   .container.own-kb[data-view="game"] #game-area > .gira-row { margin-top: 10px; padding-bottom: env(safe-area-inset-bottom, 0px); }
   .container.own-kb[data-view="game"][data-answer-mode="type"] .mz-kb { position: static; margin: 0 -14px; }
 
+  /* A tap you can see (Nov 2026): the key sinks; a letter pops up above the finger, as on a phone's own keyboard */
+  .mz-key { position: relative; }
+  .mz-key.down { background: #e6d8bb; box-shadow: none; transform: translateY(1px); }
+  .mz-go.down { background: #3b3027; }
+  .mz-del.down { background: #d6c7a8; }
+  .mz-key:not(.mz-del):not(.mz-space):not(.mz-go).down::after {
+    content: attr(data-k); position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%); z-index: 2;
+    min-width: 48px; height: 58px; box-sizing: border-box; padding: 0 8px; display: grid; place-items: center; pointer-events: none;
+    background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.16); border-radius: 10px; box-shadow: 0 10px 22px -8px rgba(40, 25, 10, 0.45);
+    font: 400 34px/1 'DM Sans', sans-serif; color: var(--ink);
+  }
+  #mz-kb .mz-row > .mz-key:first-child.down::after { left: 0; transform: none; }   /* q, a, z, à: kept on the screen (the id outranks the rule above) */
+  #mz-kb .mz-row > .mz-key:last-child.down::after { left: auto; right: 0; transform: none; }   /* p, l, ’ */
+  #mz-kb .mz-key[data-k="'"].down::after { content: '’'; }
+  .haptic-switch { position: fixed; left: -200px; top: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+
 </style>
 </head>
 <body>
@@ -14919,7 +14935,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-18T20:34Z';
+  const BUILD = '2026-11-18T21:27Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
@@ -14966,6 +14982,38 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   }
   function setOwnKeyboard(on) { ownKbForced = on; syncOwnKeyboard(); }
   if (ownKbQuery && ownKbQuery.addEventListener) ownKbQuery.addEventListener('change', syncOwnKeyboard);
+  // A tap you can see and feel (Nov 2026). The key sinks and, for a letter, pops up above the finger
+  // (the finger hides it), held at least 80 ms so a quick tap still shows. And a light tick:
+  // navigator.vibrate where there is one (Android); an iPhone's Safari ticks when a switch-style
+  // checkbox flips (recent iOS), so a hidden one is flipped — not promised by Apple, so the look matters
+  // most. A phone only buzzes for a real tap: on the first tap after a pause the tick waits for the lift.
+  const hapticSwitch = (() => {
+    const label = document.createElement('label');
+    label.setAttribute('aria-hidden', 'true');
+    label.className = 'haptic-switch';
+    const input = document.createElement('input');
+    input.type = 'checkbox'; input.setAttribute('switch', ''); input.tabIndex = -1;
+    label.appendChild(input);
+    document.body.appendChild(label);
+    return label;
+  })();
+  let tickPending = false;
+  function keyTick() {
+    try {
+      if (typeof navigator.vibrate === 'function' && navigator.vibrate(8)) return;
+      hapticSwitch.click();
+    } catch (e) { /* no tick: the look is enough */ }
+  }
+  function pressKey(b) {
+    b.classList.add('down');
+    b.dataset.downAt = String(Date.now());
+    if (navigator.userActivation && !navigator.userActivation.isActive) tickPending = true;   // no tap yet to buzz for: tick on the lift
+    else keyTick();
+  }
+  function releaseKey(b) {
+    const held = Date.now() - Number(b.dataset.downAt || 0);
+    setTimeout(() => b.classList.remove('down'), Math.max(0, 80 - held));
+  }
   function kbType(ch) {
     const a = document.getElementById('answer');
     if (!a || a.dataset.locked || a.disabled || container.dataset.view !== 'game') return;
@@ -14975,10 +15023,17 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   (() => {
     const kb = document.getElementById('mz-kb');
     if (!kb) return;
-    kb.addEventListener('pointerdown', e => { if (e.target.closest('[data-k]')) e.preventDefault(); });   // no focus, no selection
+    kb.addEventListener('pointerdown', e => {   // a tap you can see and feel, the moment the finger lands
+      const b = e.target.closest('[data-k]');
+      if (!b) return;
+      e.preventDefault();   // no focus, no selection
+      pressKey(b);
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => kb.addEventListener(type, e => { const b = e.target.closest && e.target.closest('[data-k]'); if (b) releaseKey(b); }));
     kb.addEventListener('click', e => {
       const b = e.target.closest('[data-k]');
       if (!b) return;
+      if (tickPending) { tickPending = false; keyTick(); }
       const k = b.dataset.k;
       if (k === 'go') { const s = document.getElementById('submit'); if (s) s.click(); return; }
       kbType(k === 'space' ? ' ' : k);

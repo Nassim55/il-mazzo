@@ -240,4 +240,8 @@ Frequency rankings combine written Italian (wordfreq), spoken Italian (OpenSubti
 
 **Il Mazzo's own keyboard (Nov 2026).** On a phone, a typed round uses Il Mazzo's keys instead of the phone's keyboard: a row of accents (à è é ì ò ù ’), the letters, delete, *spazio* and a check key. The phone's keyboard — and iOS's ^ ˅ ✓ bar with it — never opens, so the card gets that space. Once you've answered, the letters wait for the next card; the check key checks, moves on, or asks you to retype, like the round arrow it replaces. Gira, sideways phones and computers keep their usual keyboards.
 
+Each tap shows and, where the phone allows, is felt: the key sinks and its letter pops up above your finger, with a light tick (Android's vibration; on an iPhone, a tick Safari gives when a switch flips — not promised by Apple, so it may not come on every iOS version).
+
 A phone's round fits the screen exactly and never scrolls: one column of the slim header (your score, the card count, *Salta*, *⋯* — no section name), the card, the answer box and the keyboard, with the card taking whatever height is left. In *Gira*, the card runs down to its buttons.
+
+**Tests (Nov 2026).** `npm test` runs every suite side by side, one per CPU core (4 on GitHub), slowest first; `TEST_JOBS=1 npm test` runs them one at a time, and `npm test -- audio` only the suites whose names contain *audio*. On GitHub a newer push cancels tests still running for an older one, and a branch fast-forwarded into main after passing is published without being tested twice.

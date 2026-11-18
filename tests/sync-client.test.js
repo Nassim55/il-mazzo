@@ -31,9 +31,9 @@ const { makeGoogle, CLIENT_ID, ME } = require('./google-fixture');
       return res;
     };
   });
-  const settle = async dev => {
-    for (let i = 0; i < 8; i++) await new Promise(r => setTimeout(r, 2));
-    for (let i = 0; i < 300 && dev.ev('syncState.busy'); i++) await new Promise(r => setTimeout(r, 5));
+  const settle = async dev => {   // let the sync start, then wait until it's been idle for four looks in a row (robust on a busy CPU, with suites running side by side)
+    for (let i = 0; i < 8; i++) await new Promise(r => setTimeout(r, 5));
+    for (let i = 0, idle = 0; i < 400 && idle < 4; i++) { await new Promise(r => setTimeout(r, 5)); idle = dev.ev('syncState.busy') ? 0 : idle + 1; }
     dev.ev('clearTimeout(syncState.timer)');
   };
   const signIn = async (dev, claims = {}, opts = {}) => { const r = await dev.ev(`__gis.callback({ credential: ${JSON.stringify(await google.token(claims, opts))} })`); await settle(dev); return r; };

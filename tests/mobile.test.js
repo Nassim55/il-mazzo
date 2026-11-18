@@ -184,4 +184,20 @@ press('go');
 ok(B8.ev('index') === 1 && kbAns().value === '', 'the check key again: the next card');
 B8.ev('setOwnKeyboard(false)');
 ok(!kbAns().hasAttribute('readonly') && !B8.d.querySelector('.container').classList.contains('own-kb') && B8.errors.length === 0, 'off a phone: the answer box types as before');
-done();
+// ---- A tap you can see and feel ----
+const B9 = boot({ 'flipcards-subject': 'nouns', 'mazzo-answer-mode': 'type' });
+B9.ev("clearHand(); topicsIn(['tempo']); updateReadout();");
+B9.d.getElementById('start-btn').click();
+B9.ev('setOwnKeyboard(true)');
+const keyE = B9.d.querySelector('#mz-kb [data-k="e"]'), sw = B9.d.querySelector('.haptic-switch input[switch]');
+const flipped0 = sw && sw.checked;
+keyE.dispatchEvent(new B9.w.Event('pointerdown', { bubbles: true, cancelable: true }));
+ok(keyE.classList.contains('down') && sw && sw.checked !== flipped0, 'a key touched: it sinks (and pops its letter up), and the hidden switch flips — an iPhone ticks');
+keyE.dispatchEvent(new B9.w.Event('pointerup', { bubbles: true }));
+ok(keyE.classList.contains('down'), 'a quick tap still shows: the key stays down a moment after the lift');
+keyE.click();
+ok(B9.d.getElementById('answer').value === 'e', 'and the letter types as before');
+setTimeout(() => {
+  ok(!keyE.classList.contains('down') && B9.errors.length === 0, '…then comes back up');
+  done();
+}, 120);

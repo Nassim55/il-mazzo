@@ -27,5 +27,12 @@ function boot(storage = {}, setup = null) {
 }
 let pass = 0, fail = 0;
 const ok = (c, m) => { c ? pass++ : fail++; console.log(`${c ? '✓' : '✗ FAIL'}  ${m}`); };
-const done = () => { console.log(`\n${pass} passed, ${fail} failed`); process.exitCode = fail ? 1 : 0; };
+// done(): print the summary, then end the process once its output is written. A simulated page can
+// leave timers pending (a watchdog set far off, a check every few minutes), and Node would otherwise
+// wait for each one to fire: the passive suite sat idle for 96 s after its last check.
+const done = () => {
+  console.log(`\n${pass} passed, ${fail} failed`);
+  process.exitCode = fail ? 1 : 0;
+  process.stdout.write('', () => process.exit(process.exitCode));
+};
 module.exports = { boot, ok, done, quietConsole, FILE };

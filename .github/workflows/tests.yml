@@ -12,6 +12,11 @@ on:
   push:
     branches: ['**']
   workflow_dispatch:
+    inputs:
+      tested:
+        description: 'A commit that already passed its tests on its branch (set by promote after a fast-forward): publish it without testing again'
+        required: false
+        default: ''
 
 permissions:
   contents: write   # promote: push the merge to main
@@ -20,16 +25,29 @@ permissions:
   id-token: write   # deploy
 
 jobs:
+  # The suites run side by side, one per core (tests/run-all.js). A newer push to the same branch
+  # cancels tests still running for an older one; publishing that has started always finishes.
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: test-${{ github.ref }}
+      cancel-in-progress: true
     steps:
+      - name: Already tested
+        if: inputs.tested != '' && inputs.tested == github.sha
+        run: echo "::notice::${{ github.sha }} passed its tests on its branch and main fast-forwarded to it — publishing without testing it again."
       - uses: actions/checkout@v4
+        if: inputs.tested != github.sha
       - uses: actions/setup-node@v4
+        if: inputs.tested != github.sha
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+        if: inputs.tested != github.sha
       - run: npm test
+        if: inputs.tested != github.sha
 
   promote:
     needs: test
@@ -43,18 +61,24 @@ jobs:
         with:
           fetch-depth: 0
       - name: Merge the tested branch into main
+        id: merge
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B main origin/main
           git merge --no-edit -m "Merge ${GITHUB_REF_NAME} (tests passed)" "${GITHUB_SHA}"
           git push origin main
-      # A push made by this workflow doesn't start a new run on its own, so start
-      # one on main explicitly: it re-tests the merged result, then publishes it
+          # main simply moved up to the tested commit: nothing new to test on main
+          if [ "$(git rev-parse HEAD)" = "${GITHUB_SHA}" ]; then echo "tested=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"; fi
+      # A push made by this workflow doesn't start a new run on its own, so start one on
+      # main explicitly. After a fast-forward, main is exactly the commit that just passed:
+      # that run publishes it straight away. After a real merge, it tests the merge first.
       - name: Test and publish main
-        run: gh workflow run tests.yml --ref main
+        run: |
+          if [ -n "$TESTED" ]; then gh workflow run tests.yml --ref main -f tested="$TESTED"; else gh workflow run tests.yml --ref main; fi
         env:
           GH_TOKEN: ${{ github.token }}
+          TESTED: ${{ steps.merge.outputs.tested }}
 
   deploy:
     needs: test
