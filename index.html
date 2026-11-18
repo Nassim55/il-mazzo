@@ -2746,6 +2746,7 @@
   }
 
   /* the setup's foot (Nov 2026): your progress (back up, restore, reset) and the voice, out of the way */
+  .setup-foot[hidden] { display: none; }   /* hidden (Nov 2026): never used; its code still refreshes the bell and the weakest panel */
   .setup-foot { display: flex; flex-direction: column; gap: 10px; margin: 48px 0 8px; padding-top: 16px; border-top: 1px solid rgba(28, 22, 17, 0.12); text-align: left; }
   .setup-foot .setup-meta, .setup-foot .audio-row { margin: 0; }
   .section-tools .verbs-block { margin-top: 4px; }
@@ -13035,7 +13036,7 @@
       </div>`}
 
       ${cfg.map ? `<section class="noun-map" id="noun-map" aria-label="La mappa: your ${cfg.itemWords} by topic">${nounMapInner()}</section>
-      <details class="grid-fold" id="grid-fold"><summary>Every ${cfg.itemWord}, one by one <span>(${gridItems().length})</span></summary>` : ''}
+      <details class="grid-fold" id="grid-fold" hidden><summary>Every ${cfg.itemWord}, one by one <span>(${gridItems().length})</span></summary>` : ''}
 
       <div class="noun-grid-head">
         <div class="theme-eyebrow">↳ Or pick individual ${cfg.itemWords} — tap, or click and drag${cfg.chipOrder === 'frequency' ? ' · most common first' : ''}</div>
@@ -13055,7 +13056,7 @@
       ${cfg.panel && !cfg.map && SECTION_CHARTS[cfg.panel] ? SECTION_CHARTS[cfg.panel]('setup') : ''}
       ${cfg.panel && !cfg.map ? `<aside class="endings weak-panel" id="weak-panel" aria-label="Your weakest ${cfg.itemWords}"></aside></div>` : ''}
       </div>
-      <footer class="setup-foot" aria-label="Your progress and the voice">
+      <footer class="setup-foot" aria-label="Your progress and the voice" hidden>
         <div class="setup-meta" id="setup-meta"></div>
         <div class="audio-row" id="audio-row"></div>
       </footer>
@@ -14782,7 +14783,7 @@
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-18T12:49Z';
+  const BUILD = '2026-11-18T13:22Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
