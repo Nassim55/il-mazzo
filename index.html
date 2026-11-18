@@ -2815,8 +2815,29 @@
   .mz-go { flex: 0 0 118px; border: 0; background: var(--ink); color: var(--paper); }
   .container.own-kb[data-view="game"][data-answer-mode="type"] #submit { display: none; }
   .container.own-kb[data-view="game"] #answer { pointer-events: none; caret-color: transparent; }
-  .container.own-kb[data-view="game"][data-answer-mode="type"] #game-area { padding-bottom: calc(272px + env(safe-area-inset-bottom, 0px)); }
-  .container.own-kb[data-view="game"][data-answer-mode="type"] #game-area > .card { height: clamp(180px, calc(100dvh - 436px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)), 520px); }
+  /* A phone's round fits the screen exactly (Nov 2026): one column — the slim header (no section name), the card
+     taking whatever height is left, the answer box, the keyboard — so nothing overlaps and nothing scrolls.
+     The top clears the status bar: a home-screen iPhone draws it over the page without always saying how tall. */
+  :root { --phone-top: max(env(safe-area-inset-top, 0px), 8px); }
+  @media (display-mode: standalone) { :root { --phone-top: max(env(safe-area-inset-top, 0px), 50px); } }
+  html:has(.container.own-kb[data-view="game"]), body:has(> .container.own-kb[data-view="game"]) { height: 100%; overflow: hidden; }
+  body:has(> .container.own-kb[data-view="game"]) { padding: 0; }
+  .container.own-kb[data-view="game"] {
+    position: fixed; inset: 0; z-index: 1; display: flex; flex-direction: column; width: auto; max-width: none; height: 100dvh; margin: 0;
+    padding: var(--phone-top) 14px 0; box-sizing: border-box; overflow: hidden;
+  }
+  .container.own-kb[data-view="game"] > * { flex: none; }
+  .container.own-kb[data-view="game"] > header { min-height: 40px; margin: 0; }
+  .container.own-kb[data-view="game"] > header { justify-content: flex-start; }
+  .container.own-kb[data-view="game"] > header .stats { margin-left: 0; margin-right: auto; }   /* the score and count on the left; Salta and ⋯ on the right */
+  .container.own-kb[data-view="game"] > .progress-bar { margin-bottom: 0; }
+  .container.own-kb[data-view="game"] > header > div:first-child { display: none; }   /* the section's name: not needed mid-round */
+  .container.own-kb[data-view="game"] #game-area { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding-bottom: 10px; }
+  .container.own-kb[data-view="game"] #game-area > * { flex: none; }
+  .container.own-kb[data-view="game"] #game-area > .card { flex: 1 1 auto; height: auto; min-height: 0; margin-top: 8px; }
+  .container.own-kb[data-view="game"] #game-area > .input-row { margin: 10px 0 0; }
+  .container.own-kb[data-view="game"] #game-area > .gira-row { margin-top: 10px; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .container.own-kb[data-view="game"][data-answer-mode="type"] .mz-kb { position: static; margin: 0 -14px; }
 
 </style>
 </head>
@@ -14897,7 +14918,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-18T19:49Z';
+  const BUILD = '2026-11-18T20:03Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
