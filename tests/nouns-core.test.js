@@ -105,4 +105,12 @@ ok(d.getElementById('prompt').textContent.trim() === 'the lintel', 'a card asks 
 d.getElementById('answer').value = "la architrave"; d.getElementById('submit').click();
 ok(d.getElementById('feedback').classList.contains('incorrect') && /l'architrave/.test(d.getElementById('feedback').textContent)
    && /false friend/i.test(d.getElementById('feedback').textContent), "…the article matters (l'architrave), and the note flags the false friend");
+// The weekend asks for the Italian (Nov 2026): il fine settimana, or il finesettimana — not the loan il weekend
+const wk = q => ev(`(() => { const c = cardsForItem(NOUN_ITEMS.find(n => n.noun === 'weekend'))[0]; return checkAnswer(${JSON.stringify(q)}, c); })()`);
+ok(wk('il fine settimana').correct && wk('il finesettimana').correct && wk('Il  fine settimana').correct && !wk('il weekend').correct
+   && wk('fine settimana').reason === 'missing-article' && wk('la fine settimana').reason === 'wrong-article'
+   && wk('la casa').correct === false && ev("checkAnswer('casa', cardsForItem(NOUN_ITEMS.find(n => n.noun === 'casa'))[0]).reason") === 'missing-article'
+   && ev("checkAnswer('il casa', cardsForItem(NOUN_ITEMS.find(n => n.noun === 'casa'))[0]).reason") === 'wrong-article'
+   && ev("checkAnswer('la casa', cardsForItem(NOUN_ITEMS.find(n => n.noun === 'casa'))[0]).correct"),
+   'the weekend: il fine settimana (or il finesettimana), not il weekend; the article hints work across two words, and one-word nouns as before');
 done();

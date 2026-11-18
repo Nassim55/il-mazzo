@@ -4206,7 +4206,7 @@
     { en: "the smoke", it: "il fumo", noun: "fumo", g: "m", note: "From Latin <em>fumus</em> — English 'fume', 'fumigate'. <em>Vietato fumare</em>: no smoking; <em>il fumo fa male</em>: smoking is harmful." },
     { en: "the crisis", it: "la crisi", noun: "crisi", g: "f", note: "From Greek <em>krisis</em>, a decision, a turning point — English 'crisis', 'critical'. Plural unchanged: <em>le crisi</em>." },
     { en: "the dust/powder", it: "la polvere", noun: "polvere", g: "f", note: "From Latin <em>pulvis</em> — English 'pulverise', 'powder'. <em>Togliere la polvere</em>: to dust." },
-    { en: "the weekend", it: "il weekend", noun: "weekend", g: "m", note: "Borrowed from English; plural unchanged, <em>i weekend</em>. Italians also say <em>il fine settimana</em>." },
+    { en: "the weekend", it: "il fine settimana", noun: "weekend", g: "m", alts: ["il finesettimana"], note: "Literally the end (<em>fine</em>) of the week (<em>settimana</em>) — mostly two words, sometimes one: <em>il finesettimana</em>. You'll hear the English loan <em>il weekend</em> just as often." },
     { en: "the trick/make-up", it: "il trucco", noun: "trucco", g: "m", note: "From French <em>truc</em>, a trick. Also make-up: <em>truccarsi</em>, to put it on. <em>Qual è il trucco?</em>: what's the catch?" },
     { en: "the owner", it: "il proprietario", noun: "proprietario", g: "m", note: "From Latin <em>proprius</em>, one's own — English 'proprietor', 'property'. Your landlord is <em>il proprietario di casa</em>." },
     { en: "the guest/host", it: "l'ospite", noun: "ospite", g: "m", note: "From Latin <em>hospes</em>, which meant both host and guest — English 'host', 'hospital'. Italian still uses it both ways, mostly for the guest." },
@@ -4884,16 +4884,17 @@
 
   // Returns { correct, reason? } where reason is 'missing-article' or 'wrong-article'
   function checkAnswer(rawGuess, card) {
-    const guess = normalize(rawGuess);
-    const correct = normalize(card.italian);
-    const noun = normalize(card.noun);
+    const tidy = s => normalize(s).replace(/\s+/g, ' ');
+    const guess = tidy(rawGuess);
+    const correct = tidy(card.italian);
+    const bare = correct.replace(/^(il|lo|la|i|gli|le|l)\s+/, '');   // the noun without its article: one word, or a few (il fine settimana)
 
     if (guess === '') return { correct: false };
-    if (guess === correct) return { correct: true };
-    if (guess === noun) return { correct: false, reason: 'missing-article' };
+    if (guess === correct || (card.alts || []).some(a => tidy(a) === guess)) return { correct: true };
+    if (guess === bare) return { correct: false, reason: 'missing-article' };
 
-    const parts = guess.split(' ');
-    if (parts.length === 2 && ARTICLES.includes(parts[0]) && parts[1] === noun) {
+    const m = guess.match(/^(\S+)\s+(.+)$/);
+    if (m && ARTICLES.includes(m[1]) && m[2] === bare) {
       return { correct: false, reason: 'wrong-article' };
     }
     return { correct: false };
@@ -5255,7 +5256,7 @@
       }));
     }
     if (!isVerbSubject()) {
-      return [{ key: n.noun, english: n.en, italian: n.it, noun: n.noun, gender: n.g, note: n.note || null }];
+      return [{ key: n.noun, english: n.en, italian: n.it, alts: n.alts || null, noun: n.noun, gender: n.g, note: n.note || null }];
     }
     const v = n.verb;
     if (verbMode === 'infinitives') {
@@ -5373,6 +5374,8 @@
   // it out 1, 2, 4, 8, 16, 32 or 64 days; a wrong answer drops it to box 1, due tomorrow.
   const SRS_INTERVALS = [0, 1, 2, 4, 8, 16, 32, 64];
   const SRS_MAX_BOX = 7;
+const SRS_KNOWN_BOX = 4;   // a known word, right again, comes back in 8 days at the soonest
+const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog waits its turn over the coming days
   function today() {
     const now = Date.now();
     return Math.floor((now - new Date(now).getTimezoneOffset() * 60000) / 86400000);
@@ -5427,14 +5430,19 @@
     }
     const prev = srs[key] ? { ...srs[key] } : null;
     const r = srs[key] ? { ...srs[key] } : { b: 0, d: t, l: null };
+    const firstToday = r.l !== t;
     if (correct) {
-      if (r.l !== t) { r.b = Math.min(r.b + 1, SRS_MAX_BOX); r.d = t + SRS_INTERVALS[r.b]; }
+      if (firstToday) { r.b = Math.min(r.b + 1, SRS_MAX_BOX); r.d = t + SRS_INTERVALS[r.b]; }
     } else {
       r.b = 1;
       r.d = t + 1;
     }
     r.l = t;
     if (logIt) r.h = `${r.h || ''}${correct ? 1 : 0}`.slice(-KNOW_WINDOW);   // the last answers, for knowState
+    if (correct && firstToday && r.b < SRS_KNOWN_BOX && knowState(r, readStats(subj, dir)[key]).known) {   // a word you know skips the short gaps (Nov 2026)
+      r.b = SRS_KNOWN_BOX;
+      r.d = t + SRS_INTERVALS[r.b];
+    }
     srs[key] = r;
     saveSrs(subj, dir, srs);
     lastSrsChange = { subj, dir, key, prev };
@@ -5482,7 +5490,59 @@
   // still keep their progress) — most overdue first, then the shakiest
   const RIPASSO_SECTIONS = ['nouns', 'verbs', 'irregular', 'adjectives', 'avverbi', 'story'];
   const sentenceTypeOff = (subj, key, on) => SUBJECTS[subj].typeFilter && !on.includes(SENTENCE_TYPE_OF[key]);
+  // Ripasso as a daily dose (Nov 2026). Today's order: words you're getting wrong (the last answer wrong,
+  // or back at the start of the schedule), then the most overdue, then the most common. Once a day, a
+  // backlog beyond the dose is spread over the coming days, weakest first, never more than a dose a day.
+  const ripassoRank = {};
+  const ripassoStruggling = r => r.b <= 1 || /0$/.test(r.h || '');
+  function ripassoOrder(a, b) {
+    const sa = ripassoStruggling(a.r), sb = ripassoStruggling(b.r);
+    if (sa !== sb) return sa ? -1 : 1;
+    if (a.r.d !== b.r.d) return a.r.d - b.r.d;
+    const rank = x => (ripassoRank[x.subj] || (ripassoRank[x.subj] = Object.fromEntries((SUBJECTS[x.subj].frequency || SUBJECTS[x.subj].items.map(i => i.noun)).map((k, i) => [k, i]))))[x.n.noun] ?? 1e9;
+    return (rank(a) - rank(b)) || a.n.noun.localeCompare(b.n.noun);
+  }
+  function spreadRipasso(dir) {
+    const t = today(), mark = `mazzo-ripasso-spread-${dir}`;
+    try { if (Number(localStorage.getItem(mark)) === t) return; } catch (e) { return; }
+    const on = activeSentenceTypes(), maps = {}, due = [], load = {};
+    for (const subj of RIPASSO_SECTIONS) {
+      const srs = maps[subj] = seedSrs(subj, dir);
+      for (const n of SUBJECTS[subj].items) {
+        if (sentenceTypeOff(subj, n.noun, on)) continue;
+        const r = srs[n.noun];
+        if (!r) continue;
+        if (r.d <= t) due.push({ subj, n, r }); else load[r.d] = (load[r.d] || 0) + 1;
+      }
+    }
+    if (due.length > RIPASSO_DOSE) {
+      due.sort(ripassoOrder);
+      const touched = new Set();
+      let day = t + 1;
+      for (const x of due.slice(RIPASSO_DOSE)) {
+        while ((load[day] || 0) >= RIPASSO_DOSE) day++;
+        x.r.d = day;
+        load[day] = (load[day] || 0) + 1;
+        touched.add(x.subj);
+      }
+      touched.forEach(subj => saveSrs(subj, dir, maps[subj]));
+    }
+    try { localStorage.setItem(mark, String(t)); } catch (e) { /* ignore */ }
+  }
+  function nextOnSchedule(dir, count) {   // done for today: the next ones due, for a dose more
+    const t = today(), on = activeSentenceTypes(), out = [];
+    for (const subj of RIPASSO_SECTIONS) {
+      const srs = seedSrs(subj, dir);
+      for (const n of SUBJECTS[subj].items) {
+        if (sentenceTypeOff(subj, n.noun, on)) continue;
+        const r = srs[n.noun];
+        if (r && r.d > t) out.push({ subj, n, r });
+      }
+    }
+    return out.sort((a, b) => (a.r.d - b.r.d) || ripassoOrder(a, b)).slice(0, count);
+  }
   function dueList(dir) {
+    spreadRipasso(dir);
     const t = today(), out = [], on = activeSentenceTypes();
     for (const subj of RIPASSO_SECTIONS) {
       const srs = seedSrs(subj, dir);
@@ -5492,7 +5552,7 @@
         if (r && r.d <= t) out.push({ subj, n, r });
       }
     }
-    return out.sort((a, b) => (a.r.d - b.r.d) || (a.r.b - b.r.b) || a.n.noun.localeCompare(b.n.noun));
+    return out.sort(ripassoOrder);
   }
   function dueOnDay(dir, day) {
     let n = 0;
@@ -11732,6 +11792,9 @@
     updateChartBtn();   // Ripasso: this card's own chart, if its section has one
   }
 
+  function startRipassoMore() {   // today's dose done: the next ones on the schedule, one dose more
+    startMixedSession(nextOnSchedule(ripassoDir, RIPASSO_DOSE), { title: 'Ripasso del giorno', subtitle: 'Il Mazzo · A few more', doc: 'Il Mazzo · Ripasso del giorno' });
+  }
   function startRipasso() {
     startMixedSession(dueList(ripassoDir), { title: 'Ripasso del giorno', subtitle: 'Il Mazzo · Ripasso Quotidiano', doc: 'Il Mazzo · Ripasso del giorno' });
   }
@@ -12269,7 +12332,8 @@
     if (!list.length) {   // nothing due: all done for today, or nothing to review yet
       const anyHistory = RIPASSO_SECTIONS.some(x => Object.keys(loadSrs(x, ripassoDir)).length);
       const tomorrow = anyHistory ? dueOnDay(ripassoDir, today() + 1) : 0;
-      note = anyHistory ? `<p class="todo-empty">Ripasso del giorno. All done for today ✓${tomorrow ? ` — ${tomorrow} due tomorrow` : ''}</p>`
+      const more = anyHistory && nextOnSchedule(ripassoDir, 1).length;
+      note = anyHistory ? `<p class="todo-empty">Ripasso del giorno. All done for today ✓${tomorrow ? ` — ${tomorrow} due tomorrow` : ''}${more ? ` <button type="button" class="ghost" id="ripasso-more">${RIPASSO_DOSE} more</button>` : ''}</p>`
         : `<p class="todo-empty">Nothing waiting yet. Practise some words and they'll come back here just before you'd forget them${sv ? '' : '; a deck you save mid-round waits here too'}.</p>`;
     }
     items.innerHTML = rows.join('') + note;
@@ -12278,6 +12342,7 @@
     if (bell) bell.setAttribute('aria-label', rows.length ? `Da fare: ${rows.length} waiting` : 'Da fare: nothing waiting');
     const on = (id, fn) => { const b = document.getElementById(id); if (b) b.addEventListener('click', fn); };
     on('ripasso-start', () => { closeTodo(); startRipasso(); });
+    on('ripasso-more', () => { closeTodo(); startRipassoMore(); });
     on('saved-resume', () => { closeTodo(); resumeSavedDeck(false); });
     on('saved-restart', () => { closeTodo(); resumeSavedDeck(true); });
     on('saved-forget', () => { forgetSavedDeck(); renderTableTabs(); });
@@ -14783,7 +14848,7 @@
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-18T13:22Z';
+  const BUILD = '2026-11-18T15:49Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
@@ -15797,7 +15862,7 @@
         main = `✗ Don't forget the article — <strong>${card.italian}</strong>`;
       } else if (result.reason === 'wrong-article') {
         const genderWord = card.gender === 'f' ? 'feminine' : 'masculine';
-        main = `✗ Wrong article — <strong>${card.noun}</strong> is ${genderWord}: <strong>${card.italian}</strong>`;
+        main = `✗ Wrong article — <strong>${card.italian.replace(/^(?:(?:il|lo|la|i|gli|le)\s+|l['’])/, '')}</strong> is ${genderWord}: <strong>${card.italian}</strong>`;
       } else {
         main = `✗ Not quite — the answer is <strong>${card.italian}</strong>`;
       }
