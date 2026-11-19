@@ -13741,9 +13741,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       const pct = an ? Math.round(ar / an * 100) : null;
       acc.push({ n: an, pct, label: progShort(to), tip: an ? `${bucket === 1 ? progDate(to) : `Week to ${progShort(to)}`} · ${pct}% right · ${an} answers` : `${bucket === 1 ? progDate(to) : `Week to ${progShort(to)}`} · no practice` });
     }
-    const withAns = acc.filter(a => a.n), nowAcc = withAns[withAns.length - 1], prevAcc = withAns[withAns.length - 2];
-    const firstAns = acc.findIndex(a => a.n), lastAns = acc.length - 1 - [...acc].reverse().findIndex(a => a.n);
-    const skipped = firstAns >= 0 && acc.slice(firstAns, lastAns + 1).some(a => !a.n);   // a day (or week) without practice between two with
+    const withAns = acc.filter(a => a.n), nowAcc = withAns[withAns.length - 1];   // the latest figure: in the chart's label, and its tooltips
     const seg = (cls, v, label) => (v ? `<span class="prog-seg ${cls}" style="flex: ${v}" title="${progTip(`${label}: ${v} (${pctOf(v)}%)`)}"></span>` : '');
     const ranges = [['14', '2 weeks'], ['90', '3 months'], ['all', 'all']].map(([k, l]) => `<button type="button" class="ghost${range === k ? ' active' : ''}" data-prog-range="${k}" aria-pressed="${range === k}">${l}</button>`).join('<span class="meta-sep">·</span>');
     const early = dayKeys.length < 3;
@@ -13765,7 +13763,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       ${early ? `<p class="prog-cap">Your daily history starts ${progDate(start, { day: 'numeric', month: 'long' })} — the lines grow as you practise.</p>` : ''}
       <div class="prog-head"><span class="en-label">Getting it right</span><span class="prog-key">${bucket === 1 ? 'by day' : 'by week'}</span></div>
       ${progChartHTML('acc', acc, { h: 86, ticks: progTicks, aria: `share of answers right${nowAcc ? `: ${nowAcc.pct}% lately` : ''}` })}
-      <p class="prog-cap">${nowAcc ? `<b>${nowAcc.pct}%</b> right ${bucket === 1 ? 'on your last day of practice' : 'in your latest week'}${prevAcc ? ` — ${nowAcc.pct > prevAcc.pct ? 'up' : nowAcc.pct < prevAcc.pct ? 'down' : 'the same as'} ${nowAcc.pct === prevAcc.pct ? 'the one before' : `from ${prevAcc.pct}%`}` : ''}. The faint bars: how many answers.${skipped ? ` Dashed: ${bucket === 1 ? 'days' : 'weeks'} you didn't practise.` : ''}` : 'No answers yet in this period.'}</p>
+      ${nowAcc ? '' : `<p class="prog-cap">No answers yet in this period.</p>`}
       ${cfg.panel && SECTION_CHARTS[cfg.panel] ? `<div class="map-chart">${SECTION_CHARTS[cfg.panel]('setup')}</div>` : ''}`;
   }
   // Hover or tap a day: the crosshair, and its numbers
@@ -14936,7 +14934,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-19T17:04Z';
+  const BUILD = '2026-11-19T17:16Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

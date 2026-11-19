@@ -60,7 +60,7 @@ panel().querySelector('[data-prog-range="all"]').click();
 ok(charts()[0].querySelectorAll('.prog-hit').length === 41, 'all: from the first day of the history');
 const wk = B.ev(`(() => { const h = loadHist('nouns', 'en-it'); let n = 0, r = 0; for (let d = ${t} - 6; d <= ${t}; d++) if (h[d]) { n += h[d].n; r += h[d].r; } return Math.round(r / n * 100); })()`);
 panel().querySelector('[data-prog-range="90"]').click();
-ok(new RegExp(`${wk}% right in your latest week`).test(panel().textContent), `getting it right: ${wk}% in the latest week`);
+ok(charts()[1].querySelector('svg').getAttribute('aria-label').includes(`${wk}% lately`), `getting it right: ${wk}% in the latest week (in the chart's label; no caption)`);
 ok(!/Ripasso|due today/.test(panel().textContent), 'no Ripasso chart: the bell says what\'s due');
 
 // ---- Sync, reset, the other sections ----
@@ -79,8 +79,8 @@ B.ev(`(() => { const t = today(), h = loadHist('nouns', 'en-it'); for (const d o
   h[t - 3] = { k: 1, p: 3, n: 10, r: 6 }; h[t - 1] = { k: 2, p: 4, n: 10, r: 8 }; h[t] = { k: 3, p: 5, n: 10, r: 9 }; saveHist('nouns', 'en-it', h); showSetup(); })()`);
 const r14 = panel().querySelector('[data-prog-range="14"]'); if (r14) r14.click();
 const accChart = [...panel().querySelectorAll('.prog-chart')][1];
-ok(accChart && accChart.querySelector('line.prog-line-skip') && accChart.querySelectorAll('line.prog-line').length >= 1 && /Dashed: days you didn't practise/.test(panel().textContent),
-   'getting it right: one line — solid between days practised, dashed across a day without practice, and the caption says so');
+ok(accChart && accChart.querySelector('line.prog-line-skip') && accChart.querySelectorAll('line.prog-line').length >= 1 && !/right on your last day|faint bars|Dashed:/.test(panel().textContent),
+   'getting it right: one line — solid between days practised, dashed across a day without practice; no caption under it');
 ok(accChart && accChart.querySelectorAll('.prog-line-pt').length === B.ev(`(() => { const t = today(), h = loadHist('nouns', 'en-it'); let c = 0; for (let d = t - 13; d <= t; d++) if (h[d] && h[d].n) c++; return c; })()`),
    'a dot only on the days practised — none on the day missed');
 ok(!/Tap a topic on the map/.test(panel().textContent), 'no sentence at the foot of the panel');
