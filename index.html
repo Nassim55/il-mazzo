@@ -13565,14 +13565,14 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   const mapCellTitle = c => `${c.it} — ${c.en}: ${c.seen ? `right ${c.seen - c.wrong} of ${c.seen} · ${c.known ? 'known' : c.why}` : 'not tried yet'}`;
   const mapTopicPct = x => `${x.pct}%`;
   const mapPctColor = x => mapColor((100 - x.pct) / 200, 5);   // 100% known: olive · none: terracotta
-  const mapWeakFirst = x => x.tried.filter(c => c.wrong > 0).sort((a, b) => b.rate - a.rate || b.wrong - a.wrong).slice(0, 10);
+  const mapNotKnown = x => x.cells.filter(c => !c.known);   // the topic's words not yet known — tried or not (Nov 2026: in place of the 10 weakest)
   // A topic's nouns, in the site's own pieces: the side panel's title and labels, the grid's
   // tiles (shaded by your record; dashed and faded when not in the deck, the gold mark when
   // they are), and the setup's text links for whole-topic picks
   function mapDetailHTML(x, inPanel) {
     const inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length, allIn = inDeck === x.cells.length && topicInHand(x.t);
     const work = x.tried.filter(c => !c.known).sort((a, b) => b.rate - a.rate || b.seen - a.seen), good = x.tried.filter(c => c.known);
-    const weak = mapWeakFirst(x);
+    const unknown = mapNotKnown(x);
     const tile = c => {
       const on = selectedNouns.has(c.key), sh = c.seen ? errorShade(c) : null;
       return `<button type="button" class="map-tile${on ? '' : ' unselected'}${sh ? ' shaded' : ''}" data-map-noun="${c.key}" aria-pressed="${on}"${sh ? ` style="--shade: ${sh.color}"` : ''}`
@@ -13591,7 +13591,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       <p class="map-sum"><strong>${x.known}</strong> of ${x.cells.length} known · ${x.tried.length} practised${x.often ? ` · ${x.often} often wrong` : ''} · <strong>${inDeck}</strong> in your deck</p>
       <div class="map-actions">
         <button type="button" class="submit map-addall${allIn ? ' in' : ''}" data-map-pick="${allIn ? 'none' : 'all'}">${allIn ? `✓ All ${x.cells.length} in your deck — take them out` : `＋ Add all ${x.cells.length} to your deck`}</button>
-        <div class="map-actions-more">${weak.length ? `<button type="button" class="submit secondary map-practise" data-map-pick="weak">▶ Practise the ${weak.length} weakest</button>` : ''}${more.join('')}</div>
+        <div class="map-actions-more">${unknown.length ? `<button type="button" class="submit secondary map-practise" data-map-pick="unknown">▶ Practise the ${unknown.length} not yet known</button>` : ''}${more.join('')}</div>
       </div>
       <p class="map-hint">Or tap ${SUBJECTS[subject].itemWords} one by one to put them in your deck — or take them out.</p>
       ${group('To work on', work)}${group('Known', good)}${group('Not tried yet', x.fresh)}`;
@@ -13914,9 +13914,9 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         if (!t) return;
         const x = mapTopic(t, new Map(SUBJECTS[subject].items.map(n => [n.noun, n])));
         const what = pick.dataset.mapPick;
-        if (what === 'weak') {   // just these, and off you go — your deck stays as it was for afterwards
+        if (what === 'unknown') {   // the ones not yet known, and off you go — your deck stays as it was for afterwards
           const keepWords = [...selectedNouns], keepTopics = syncDeckTopics().slice();
-          applyPick(mapWeakFirst(x).map(c => c.key));
+          applyPick(mapNotKnown(x).map(c => c.key));
           const start = document.getElementById('start-btn');
           if (start) start.click();
           selectedNouns.clear();
@@ -14935,7 +14935,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-18T21:27Z';
+  const BUILD = '2026-11-19T16:00Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

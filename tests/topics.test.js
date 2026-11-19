@@ -1,7 +1,7 @@
 // The topics in your deck (Nov 2026). The deck is a set of words, and the topics you add are
 // remembered too — so taking one topic out never takes another with it, wherever you do it
 // (the map's ✓ In deck, the topic's panel, the hand's ✕, a theme chip or its group), a topic
-// doesn't join the hand just because others cover its words, and Practise the weakest, a round
+// doesn't join the hand just because others cover its words, and Practise the ones not yet known, a round
 // or a trip to another section leave your deck as it was.
 const { boot, ok, done } = require('./harness');
 
@@ -87,14 +87,14 @@ if (gbtn) {
   ok(B.ev('selectedNouns.size') === 0 && !gbtn.classList.contains('full'), '…and out again');
 }
 
-// ---- Practise the weakest, a round, another section: the deck stays as it was ----
+// ---- Practise the ones not yet known, a round, another section: the deck stays as it was ----
 B = setUp('nouns');
 B.ev(`(() => { const data = {}; SUBJECTS.nouns.items.forEach((n, i) => { if (i % 2) data[n.noun] = { seen: 5, wrong: 2 }; }); localStorage.setItem(SUBJECTS.nouns.statsKeys['en-it'], JSON.stringify(data)); stats = loadStats(); })()`);
 B.pill('tempo'); B.pill('corpo');
 const was = B.ev('JSON.stringify([[...selectedNouns].sort(), syncDeckTopics()])');
 B.ev("mapOpen = 'animali'"); B.redraw();
-B.d.querySelector('[data-map-pick="weak"]').click();
-ok(B.d.querySelector('.container').dataset.view === 'game' && B.ev('deck.length') > 0, 'Practise the weakest (Animali) starts a round of just those');
+B.d.querySelector('[data-map-pick="unknown"]').click();
+ok(B.d.querySelector('.container').dataset.view === 'game' && B.ev('deck.length') > 0, 'Practise the ones not yet known (Animali) starts a round of just those');
 B.d.getElementById('change-btn').click();
 ok(B.ev('JSON.stringify([[...selectedNouns].sort(), syncDeckTopics()])') === was && B.card('tempo') && B.card('corpo'), '…and back at the setup, your hand is as it was: Tempo and Corpo');
 B.d.getElementById('start-btn').click(); B.d.getElementById('change-btn').click();

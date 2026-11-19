@@ -37,8 +37,10 @@ ok(scores.every((x, i) => i === 0 || scores[i - 1] >= x), 'topics ranked by how 
 B.d.querySelector(`.map-row[data-topic="${topicOf('cantare')}"] .map-head`).click();
 const panel = B.d.getElementById('map-panel');
 ok(new RegExp(`\\d+ verbs · EN → IT`).test(panel.querySelector('.endings-sub').textContent) && /Or tap verbs one by one/.test(panel.textContent) && /To work on/.test(panel.textContent), 'the topic opens beside the map, in verbs');
-panel.querySelector('[data-map-pick="weak"]').click();
-ok(B.d.querySelector('.container').dataset.view === 'game' && B.ev('deck.every(c => c.noun === "cantare")'), 'Practise the weakest: a round of exactly those — cantare, conjugated');
+const verbsNotKnown = B.ev('mapNotKnown(mapTopic(SUBJECTS[subject].themes.find(t => t.key === mapOpen), new Map(SUBJECTS[subject].items.map(n => [n.noun, n])))).map(c => c.key)');
+panel.querySelector('[data-map-pick="unknown"]').click();
+ok(B.d.querySelector('.container').dataset.view === 'game' && verbsNotKnown.includes('cantare') && B.ev(`deck.length > 0 && deck.every(c => ${JSON.stringify(verbsNotKnown)}.includes(c.noun))`),
+   `Practise the ones not yet known: a round of just those verbs (${verbsNotKnown.length}, cantare among them), conjugated`);
 B.ev('showSetup()');
 B.d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 ok(!B.d.querySelector('#noun-map .map-row.open') && B.d.querySelector('#map-panel .endings-title').textContent === 'I progressi', 'another section: no topic left open');

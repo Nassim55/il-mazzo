@@ -70,8 +70,8 @@ ok(firstChip.textContent.includes(B.ev("NOUN_ITEMS.find(n => n.noun === 'cane').
 // ---- The panel's actions are buttons; the panel scrolls with the page ----
 const acts = panel().querySelector('.map-actions');
 ok(acts.querySelector('button.submit.map-addall[data-map-pick="all"]') && /＋ Add all \d+ to your deck/.test(acts.textContent)
-     && acts.querySelector('button.submit.secondary.map-practise[data-map-pick="weak"]') && /▶ Practise the \d+ weakest/.test(acts.textContent),
-     'the actions are the game\'s buttons: dark to add the whole topic, outlined to practise just the weakest');
+     && acts.querySelector('button.submit.secondary.map-practise[data-map-pick="unknown"]') && /▶ Practise the \d+ not yet known/.test(acts.textContent),
+     'the actions are the game\'s buttons: dark to add the whole topic, outlined to practise the ones not yet known');
 const st = (prev, dy, h, win) => B.ev(`mapStickTop(${prev}, ${dy}, ${h}, ${win})`);
 ok(st(12, 500, 600, 800) === 12 && st(12, 300, 2000, 800) === -288 && st(-288, 5000, 2000, 800) === -1212 && st(-1212, -400, 2000, 800) === -812 && st(-812, -5000, 2000, 800) === 12,
    'one scroll, not two: a short panel stays put; a tall one moves with the page until its foot shows, holds, and comes back on the way up');
@@ -105,15 +105,19 @@ B.ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 redraw();
 ok(!map().querySelector('.map-indeck') && !map().querySelector('.map-cell.in:not(.new)') && B.ev('selectedNouns.size') === 0, 'Clear all: none');
 
-// ---- Practise just the weakest: picked, and off ----
+// ---- Practise the ones not yet known: picked, and off ----
 row(topicOf('cane')).querySelector('.map-head').click();
 row(topicOf('cane')).querySelector('.map-head').click();
 ok(!map().querySelector('.map-row.open') && panel().querySelector('.endings-title').textContent === 'I progressi', 'tap an open topic\'s line again to close it');
 row(topicOf('cane')).querySelector('.map-head').click();
-panel().querySelector('[data-map-pick="weak"]').click();
-const withSlips = Object.keys(stats).filter(k => stats[k].wrong > 0 && B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('cane'))}).nouns.includes(${JSON.stringify(k)})`));
-ok(B.d.querySelector('.container').dataset.view === 'game' && B.ev('deck.length') === withSlips.length && B.ev(`deck.every(c => ${JSON.stringify(withSlips)}.includes(c.noun))`),
-   `Practise just the weakest: a round of exactly those starts (${withSlips.join(', ')})`);
+const notKnown = B.ev(`mapNotKnown(mapTopic(NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('cane'))}), new Map(NOUN_ITEMS.map(n => [n.noun, n])))).map(c => c.key)`);
+const openSize = B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('cane'))}).nouns.length`);
+const deckBefore = B.ev('[...selectedNouns].sort().join()');
+panel().querySelector('[data-map-pick="unknown"]').click();
+ok(B.d.querySelector('.container').dataset.view === 'game' && notKnown.length > 0 && notKnown.length <= openSize && B.ev('deck.length') > 0 && (B.ev('capValue') ? true : B.ev('deck.length') === notKnown.length)
+   && B.ev(`deck.every(c => ${JSON.stringify(notKnown)}.includes(c.noun))`),
+   `Practise the ones not yet known: a round of exactly those starts — tried or not (${notKnown.length} of ${openSize})`);
+ok(B.ev('[...selectedNouns].sort().join()') === deckBefore, '…and your deck is as it was, for afterwards');
 
 // ---- Hide, direction ----
 B = boot({ 'flipcards-subject': 'nouns', 'sostantivi-stats-v1': JSON.stringify(stats) });
