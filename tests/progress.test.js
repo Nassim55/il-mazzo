@@ -1,6 +1,6 @@
 // I progressi — analytics in the map's panel, in place of I temi: known, learning and gained;
 // words over time (practised and known); getting it right, week by week; how well, today; and
-// what's coming up in Ripasso. A day-by-day history behind it, written on every answer and synced.
+// how many are known, learning and not tried. A day-by-day history behind it, written on every answer and synced.
 const { boot, ok, done } = require('./harness');
 
 let B = boot({ 'flipcards-subject': 'nouns' });
@@ -9,8 +9,10 @@ const hist = (s = 'nouns', d = 'en-it') => B.ev(`loadHist('${s}', '${d}')`);
 const t = B.ev('today()');
 ok(panel().querySelector('.endings-title').textContent === 'I progressi' && [...panel().querySelectorAll('.prog-what')].map(x => x.textContent).join() === 'known,learning,gained',
    'the panel: I progressi — known, learning, gained');
-ok(['Nouns over time', 'Getting it right', 'How well, today', 'Coming up in Ripasso'].every(h => [...panel().querySelectorAll('.prog-head .en-label')].some(x => x.textContent === h)) && !/streak|in a row/i.test(panel().textContent),
-   'four views: words over time, getting it right, how well today, coming up in Ripasso — and no streak');
+ok([...panel().querySelectorAll('.prog-head .en-label')].map(x => x.textContent).join() === 'Nouns over time,Getting it right' && !/streak|in a row/i.test(panel().textContent),
+   'two charts: words over time, getting it right — and no streak');
+ok(panel().querySelector('.prog-tiles + .prog-split') && panel().querySelector('.prog-tiles + .prog-split + .prog-legend') && !/How well, today/.test(panel().textContent),
+   'the known / learning / not tried bar sits right under the numbers it pictures, with its key');
 ok(Object.keys(hist()).length === 1 && hist()[t].k === 0 && /Your daily history starts/.test(panel().textContent), 'a first visit starts the history, today');
 
 // ---- Every answer goes into the day ----
@@ -59,8 +61,7 @@ ok(charts()[0].querySelectorAll('.prog-hit').length === 41, 'all: from the first
 const wk = B.ev(`(() => { const h = loadHist('nouns', 'en-it'); let n = 0, r = 0; for (let d = ${t} - 6; d <= ${t}; d++) if (h[d]) { n += h[d].n; r += h[d].r; } return Math.round(r / n * 100); })()`);
 panel().querySelector('[data-prog-range="90"]').click();
 ok(new RegExp(`${wk}% right in your latest week`).test(panel().textContent), `getting it right: ${wk}% in the latest week`);
-const due = B.ev(`(() => { const s = loadSrs('nouns', 'en-it'); return Object.values(s).filter(r => r.d - ${t} <= 0).length; })()`);
-ok(new RegExp(`^${due} due today`).test([...panel().querySelectorAll('.prog-cap')].pop().textContent), `coming up in Ripasso: ${due} due today`);
+ok(!/Ripasso|due today/.test(panel().textContent), 'no Ripasso chart: the bell says what\'s due');
 
 // ---- Sync, reset, the other sections ----
 const m = B.ev(`syncMergeHistory({ 5: { n: 10, r: 8, k: 3, p: 5 } }, { 5: { n: 14, r: 11, k: 4, p: 6 } }, { 5: { n: 13, r: 9, k: 5, p: 5 } })`);

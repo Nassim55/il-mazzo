@@ -53,7 +53,7 @@ ok(scores.every((x, i) => i === 0 || scores[i - 1] >= x) && keysNow[0] === [topi
 ok(/dotted: known — right 5 times or more, and on 8 of your last 10 answers/.test(map().querySelector('.shade-key').textContent) && /the % is how much of the topic you know/.test(map().querySelector('.shade-key').textContent), 'the key says what the dots and the % mean');
 
 // ---- The panel ----
-ok(panel().classList.contains('endings') && panel().querySelector('.endings-title').textContent === 'I progressi' && panel().querySelectorAll('.prog-tile').length === 3 && panel().querySelectorAll('.prog-chart').length === 3,
+ok(panel().classList.contains('endings') && panel().querySelector('.endings-title').textContent === 'I progressi' && panel().querySelectorAll('.prog-tile').length === 3 && panel().querySelectorAll('.prog-chart').length === 2 && panel().querySelector('.prog-tiles + .prog-split'),
    'before a topic is opened, the panel — a side panel like the others — shows I progressi');
 row(topicOf('cane')).querySelector('.map-head').click();
 ok(panel().querySelector('.endings-title').textContent === B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('cane'))}).label`)

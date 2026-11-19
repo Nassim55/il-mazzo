@@ -2856,6 +2856,8 @@
   #mz-kb .mz-key[data-k="'"].down::after { content: '’'; }
   .haptic-switch { position: fixed; left: -200px; top: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
 
+  .prog-tiles + .prog-split { margin-top: 14px; }   /* I progressi (Nov 2026): the known / learning / not tried bar sits under the numbers it pictures */
+
 </style>
 </head>
 <body>
@@ -13733,10 +13735,6 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       acc.push({ n: an, pct, label: progShort(to), tip: an ? `${bucket === 1 ? progDate(to) : `Week to ${progShort(to)}`} · ${pct}% right · ${an} answers` : `${bucket === 1 ? progDate(to) : `Week to ${progShort(to)}`} · no practice` });
     }
     const withAns = acc.filter(a => a.n), nowAcc = withAns[withAns.length - 1], prevAcc = withAns[withAns.length - 2];
-    // Coming up in Ripasso: the next 14 days (anything overdue counts today)
-    const due = Array(14).fill(0);
-    for (const n of cfg.items) { const r = srs[n.noun]; if (r && typeof r.d === 'number' && r.d - t <= 13) due[Math.max(0, r.d - t)] += 1; }
-    const dueWeek = due.slice(0, 7).reduce((a, b) => a + b, 0);
     const seg = (cls, v, label) => (v ? `<span class="prog-seg ${cls}" style="flex: ${v}" title="${progTip(`${label}: ${v} (${pctOf(v)}%)`)}"></span>` : '');
     const ranges = [['14', '2 weeks'], ['90', '3 months'], ['all', 'all']].map(([k, l]) => `<button type="button" class="ghost${range === k ? ' active' : ''}" data-prog-range="${k}" aria-pressed="${range === k}">${l}</button>`).join('<span class="meta-sep">·</span>');
     const early = dayKeys.length < 3;
@@ -13749,6 +13747,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         <div class="prog-tile"><span class="prog-big">${learning}</span><span class="prog-what">learning</span><span class="prog-sub">practised, not yet known</span></div>
         <div class="prog-tile"><span class="prog-big">${gained > 0 ? `+${gained}` : gained}</span><span class="prog-what">gained</span><span class="prog-sub">${early ? 'since today — it grows as you go' : `${rangeWords}${gained > 0 ? ` · ${perWeek >= 1 ? Math.round(perWeek) : perWeek.toFixed(1)} a week` : ''}`}</span></div>
       </div>
+      <div class="prog-split" role="img" aria-label="${progTip(`${known} known, ${learning} learning, ${total - tried} not tried`)}">${seg('k', firm, 'Known, and spaced out a week or more')}${seg('k2', known - firm, 'Known')}${seg('l', learning, 'Still learning')}${seg('n', total - tried, 'Not tried yet')}</div>
+      <p class="prog-legend"><span><i class="s-k"></i>known ${known}</span><span><i class="s-l"></i>learning ${learning}</span><span><i class="s-n"></i>not tried ${total - tried}</span></p>
       <div class="prog-head"><span class="en-label">${Word} over time</span><span class="person-quick prog-range">${ranges}</span></div>
       ${progChartHTML('lines', days.map((d, i) => ({ label: progShort(d), tip: kAt[i] === null ? `${progDate(d)} · before your history began` : `${progDate(d)} · ${kAt[i]} known${pAt[i] !== null ? ` · ${pAt[i]} practised` : ''}` })),
           { h: 112, min: 10, bridge: true, ticks: progTicks, series: [{ cls: 'prog-line2', vals: pAt }, { cls: 'prog-line', area: true, vals: kAt }], aria: `${word} known over time: ${known} known, ${tried} practised` })}
@@ -13757,13 +13757,6 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       <div class="prog-head"><span class="en-label">Getting it right</span><span class="prog-key">${bucket === 1 ? 'by day' : 'by week'}</span></div>
       ${progChartHTML('acc', acc, { h: 86, ticks: progTicks, aria: `share of answers right${nowAcc ? `: ${nowAcc.pct}% lately` : ''}` })}
       <p class="prog-cap">${nowAcc ? `<b>${nowAcc.pct}%</b> right ${bucket === 1 ? 'on your last day of practice' : 'in your latest week'}${prevAcc ? ` — ${nowAcc.pct > prevAcc.pct ? 'up' : nowAcc.pct < prevAcc.pct ? 'down' : 'the same as'} ${nowAcc.pct === prevAcc.pct ? 'the one before' : `from ${prevAcc.pct}%`}` : ''}. The faint bars: how many answers.` : 'No answers yet in this period.'}</p>
-      <div class="prog-head"><span class="en-label">How well, today</span></div>
-      <div class="prog-split" role="img" aria-label="${progTip(`${known} known, ${learning} learning, ${total - tried} not tried`)}">${seg('k', firm, 'Known, and spaced out a week or more')}${seg('k2', known - firm, 'Known')}${seg('l', learning, 'Still learning')}${seg('n', total - tried, 'Not tried yet')}</div>
-      <p class="prog-legend"><span><i class="s-k"></i>known ${known}</span><span><i class="s-l"></i>learning ${learning}</span><span><i class="s-n"></i>not tried ${total - tried}</span></p>
-      <div class="prog-head"><span class="en-label">Coming up in Ripasso</span></div>
-      ${progChartHTML('due', due.map((v, i) => ({ v, label: i === 0 ? 'today' : progShort(t + i), tip: `${i === 0 ? 'Today' : progDate(t + i)} · ${v} due${i === 0 && v ? ' (with anything overdue)' : ''}` })),
-          { h: 70, min: 5, ticks: () => [0, 7, 13], aria: `Ripasso: ${due[0]} due today, ${dueWeek} this week` })}
-      <p class="prog-cap"><b>${due[0]}</b> due today · ${dueWeek} in the next 7 days.</p>
       <p class="weak-empty">Tap a topic on the map to see its ${word}, weakest first, and put any of them in your deck.</p>
       ${cfg.panel && SECTION_CHARTS[cfg.panel] ? `<div class="map-chart">${SECTION_CHARTS[cfg.panel]('setup')}</div>` : ''}`;
   }
@@ -14935,7 +14928,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-19T16:00Z';
+  const BUILD = '2026-11-19T16:31Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
