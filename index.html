@@ -2194,7 +2194,7 @@
   .prog-what { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); margin-top: 5px; }
   .prog-sub { font-size: 11.5px; color: var(--ink-faded); margin-top: 3px; line-height: 1.3; }
   .prog-sub b, .prog-cap b { color: var(--olive); font-weight: 600; }
-  .prog-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 18px 0 4px; }
+  .prog-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 24px 0 4px; }   /* a touch more room between the sections (Nov 2026) */
   .prog-head .en-label { margin: 0; }
   .prog-range { font-size: 10.5px; }
   .prog-range .meta-sep { margin: 0 4px; color: var(--ink-faded); }
@@ -2216,6 +2216,7 @@
   .prog-line2 { fill: none; stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 3 2; stroke-linejoin: round; }
   .prog-line2-pt { fill: var(--gold); }
   .prog-line-pt { fill: var(--olive); }
+  .prog-line-skip { fill: none; stroke: var(--olive); stroke-width: 1.3; stroke-dasharray: 2 4; stroke-linecap: round; opacity: 0.55; }   /* across days without practice */
   .prog-vol { fill: rgba(28, 22, 17, 0.07); }
   .prog-legend .s-p { background: var(--gold); }
   .prog-gap { color: var(--ink-faded); }
@@ -13686,7 +13687,13 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     else if (kind === 'acc') {
       const nmax = Math.max(1, ...points.map(p => p.n || 0));
       points.forEach((p, i) => { if (p.n) body += `<rect class="prog-vol" x="${x(i) - bw / 2}" y="${pad.t + h - (p.n / nmax) * h * 0.55}" width="${bw}" height="${(p.n / nmax) * h * 0.55}" rx="1"/>`; });
-      body += path(points.map(p => (p.n ? p.pct : null)), 'prog-line', false);
+      // One line, no breaks (Nov 2026): solid from one day of practice to the next, dashed and fainter across
+      // days without any — no dot there, so a missing day still reads as missing
+      const practised = points.map((p, i) => (p.n ? i : -1)).filter(i => i >= 0);
+      for (let k = 1; k < practised.length; k++) {
+        const a = practised[k - 1], b = practised[k];
+        body += `<line class="${b - a > 1 ? 'prog-line-skip' : 'prog-line'}" x1="${x(a)}" y1="${y(points[a].pct)}" x2="${x(b)}" y2="${y(points[b].pct)}"/>`;
+      }
       points.forEach((p, i) => { if (p.n) body += `<circle class="prog-line-pt" cx="${x(i)}" cy="${y(p.pct)}" r="2"/>`; });
     } else points.forEach((p, i) => { if (p.v) body += `<rect class="prog-bar-due${i === 0 ? ' now' : ''}" x="${x(i) - bw / 2}" y="${y(p.v)}" width="${bw}" height="${pad.t + h - y(p.v)}" rx="1"/>`; });
     for (const i of opts.ticks(n)) body += `<text class="prog-axis" x="${x(i)}" y="${H - 3}" text-anchor="middle">${escapeHTML(points[i].label)}</text>`;
@@ -13735,6 +13742,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       acc.push({ n: an, pct, label: progShort(to), tip: an ? `${bucket === 1 ? progDate(to) : `Week to ${progShort(to)}`} · ${pct}% right · ${an} answers` : `${bucket === 1 ? progDate(to) : `Week to ${progShort(to)}`} · no practice` });
     }
     const withAns = acc.filter(a => a.n), nowAcc = withAns[withAns.length - 1], prevAcc = withAns[withAns.length - 2];
+    const firstAns = acc.findIndex(a => a.n), lastAns = acc.length - 1 - [...acc].reverse().findIndex(a => a.n);
+    const skipped = firstAns >= 0 && acc.slice(firstAns, lastAns + 1).some(a => !a.n);   // a day (or week) without practice between two with
     const seg = (cls, v, label) => (v ? `<span class="prog-seg ${cls}" style="flex: ${v}" title="${progTip(`${label}: ${v} (${pctOf(v)}%)`)}"></span>` : '');
     const ranges = [['14', '2 weeks'], ['90', '3 months'], ['all', 'all']].map(([k, l]) => `<button type="button" class="ghost${range === k ? ' active' : ''}" data-prog-range="${k}" aria-pressed="${range === k}">${l}</button>`).join('<span class="meta-sep">·</span>');
     const early = dayKeys.length < 3;
@@ -13756,8 +13765,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       ${early ? `<p class="prog-cap">Your daily history starts ${progDate(start, { day: 'numeric', month: 'long' })} — the lines grow as you practise.</p>` : ''}
       <div class="prog-head"><span class="en-label">Getting it right</span><span class="prog-key">${bucket === 1 ? 'by day' : 'by week'}</span></div>
       ${progChartHTML('acc', acc, { h: 86, ticks: progTicks, aria: `share of answers right${nowAcc ? `: ${nowAcc.pct}% lately` : ''}` })}
-      <p class="prog-cap">${nowAcc ? `<b>${nowAcc.pct}%</b> right ${bucket === 1 ? 'on your last day of practice' : 'in your latest week'}${prevAcc ? ` — ${nowAcc.pct > prevAcc.pct ? 'up' : nowAcc.pct < prevAcc.pct ? 'down' : 'the same as'} ${nowAcc.pct === prevAcc.pct ? 'the one before' : `from ${prevAcc.pct}%`}` : ''}. The faint bars: how many answers.` : 'No answers yet in this period.'}</p>
-      <p class="weak-empty">Tap a topic on the map to see its ${word}, weakest first, and put any of them in your deck.</p>
+      <p class="prog-cap">${nowAcc ? `<b>${nowAcc.pct}%</b> right ${bucket === 1 ? 'on your last day of practice' : 'in your latest week'}${prevAcc ? ` — ${nowAcc.pct > prevAcc.pct ? 'up' : nowAcc.pct < prevAcc.pct ? 'down' : 'the same as'} ${nowAcc.pct === prevAcc.pct ? 'the one before' : `from ${prevAcc.pct}%`}` : ''}. The faint bars: how many answers.${skipped ? ` Dashed: ${bucket === 1 ? 'days' : 'weeks'} you didn't practise.` : ''}` : 'No answers yet in this period.'}</p>
       ${cfg.panel && SECTION_CHARTS[cfg.panel] ? `<div class="map-chart">${SECTION_CHARTS[cfg.panel]('setup')}</div>` : ''}`;
   }
   // Hover or tap a day: the crosshair, and its numbers
@@ -14928,7 +14936,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-19T16:31Z';
+  const BUILD = '2026-11-19T17:04Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

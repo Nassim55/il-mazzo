@@ -13,7 +13,7 @@ for (const [subj, chart, word] of [['verbs', 'Le desinenze', 'verb'], ['irregula
   ok(B.d.querySelector('#map-panel .endings-title').textContent === 'I progressi' && B.d.querySelector('#map-panel .map-chart .endings-title').textContent === chart, `${subj}: the panel — I progressi, and ${chart} under it`);
   ok(B.d.querySelector('.section-tools #mode-toggle') && B.d.querySelector('#hand .setup-options #direction-toggle') && (subj === 'adjectives' || B.d.querySelector('.section-tools #person-picker')) && B.d.querySelector('#hand #start-btn'),
      `${subj}: practice mode and direction in the hand${subj === 'adjectives' ? '' : ', the persons above the map'} — Start on the right`);
-  ok(new RegExp(`to see its ${word}s`).test(map.textContent) && B.errors.length === 0, `${subj}: in its own words, without errors`);
+  ok(new RegExp(`${word}s over time`, 'i').test(map.textContent) && B.errors.length === 0, `${subj}: in its own words (${word}s over time), without errors`);
 }
 
 // ---- Verb history in the verbs' own format counts; conjugating a verb right through makes it known ----

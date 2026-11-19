@@ -74,4 +74,14 @@ for (const s of ['verbs', 'irregular', 'adjectives', 'avverbi']) {
   ok(V.d.getElementById('map-panel').querySelector('.endings-title').textContent === 'I progressi' && V.ev(`syncedKeys().get(SUBJECTS.${s}.statsKeys['en-it'] + ':hist')`) === 'history' && V.errors.length === 0, `${s}: I progressi too, its history synced`);
 }
 ok(B.errors.length === 0, 'no errors along the way');
+// ---- Getting it right: one line, dashed across days without practice; no sentence at the foot ----
+B.ev(`(() => { const t = today(), h = loadHist('nouns', 'en-it'); for (const d of [t - 3, t - 2, t - 1, t]) delete h[d];
+  h[t - 3] = { k: 1, p: 3, n: 10, r: 6 }; h[t - 1] = { k: 2, p: 4, n: 10, r: 8 }; h[t] = { k: 3, p: 5, n: 10, r: 9 }; saveHist('nouns', 'en-it', h); showSetup(); })()`);
+const r14 = panel().querySelector('[data-prog-range="14"]'); if (r14) r14.click();
+const accChart = [...panel().querySelectorAll('.prog-chart')][1];
+ok(accChart && accChart.querySelector('line.prog-line-skip') && accChart.querySelectorAll('line.prog-line').length >= 1 && /Dashed: days you didn't practise/.test(panel().textContent),
+   'getting it right: one line — solid between days practised, dashed across a day without practice, and the caption says so');
+ok(accChart && accChart.querySelectorAll('.prog-line-pt').length === B.ev(`(() => { const t = today(), h = loadHist('nouns', 'en-it'); let c = 0; for (let d = t - 13; d <= t; d++) if (h[d] && h[d].n) c++; return c; })()`),
+   'a dot only on the days practised — none on the day missed');
+ok(!/Tap a topic on the map/.test(panel().textContent), 'no sentence at the foot of the panel');
 done();
