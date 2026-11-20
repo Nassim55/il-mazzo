@@ -13573,8 +13573,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       const ks = knowState(srs[k], s);
       return { key: k, it: n ? n.it : k, en: n ? n.en : '', seen, wrong, rate: seen ? wrong / seen : null, kpct: ks.pct, known: ks.known, why: ks.why };
     });
-    const tried = cells.filter(c => c.seen || c.known)
-      .sort((a, b) => (b.known - a.known) || (a.known && b.known ? b.kpct - a.kpct : 0) || (a.rate || 0) - (b.rate || 0) || b.seen - a.seen || a.key.localeCompare(b.key));
+    const tried = cells.filter(c => c.seen || c.known)   // by colour, green to red (Nov 2026: a known square can be any colour now); a tie: known first
+      .sort((a, b) => ((a.rate || 0) - (b.rate || 0)) || (b.known - a.known) || b.seen - a.seen || a.key.localeCompare(b.key));
     const fresh = cells.filter(c => !c.seen && !c.known);
     const seen = tried.reduce((x, c) => x + c.seen, 0), wrong = tried.reduce((x, c) => x + c.wrong, 0);
     const known = cells.filter(c => c.known).length;
@@ -14951,7 +14951,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-20T00:08Z';
+  const BUILD = '2026-11-20T00:25Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

@@ -125,4 +125,16 @@ B.ev("direction = 'it-en'; stats = loadStats(); showSetup();");
 ok(!B.d.querySelector('#noun-map .map-cell:not(.new)') && /Italian → English/.test(B.d.querySelector('#noun-map .map-eyebrow').textContent),
    'it follows the direction: Italian → English has its own record');
 ok(B.errors.length === 0, 'no errors along the way');
+// ---- Each row by colour, green to red — known or not (Nov 2026) ----
+const [redKnown, greenNot] = B.ev('NOUN_THEMES[0].nouns.slice(0, 2)');
+B.ev(`(() => { const st = readStats('nouns', 'en-it'); st[${JSON.stringify(redKnown)}] = { seen: 10, wrong: 4 }; st[${JSON.stringify(greenNot)}] = { seen: 10, wrong: 1 };
+  localStorage.setItem(SUBJECTS.nouns.statsKeys['en-it'], JSON.stringify(st)); stats = loadStats();
+  const s = loadSrs('nouns', 'en-it'); s[${JSON.stringify(redKnown)}] = { b: 4, d: today() + 8, l: today(), h: '1111111111', rd: 3 }; s[${JSON.stringify(greenNot)}] = { b: 1, d: today() + 1, l: today(), h: '1111111100', rd: 3 };
+  saveSrs('nouns', 'en-it', s); })()`);
+const row0 = B.ev(`(() => { const x = mapTopic(NOUN_THEMES[0], new Map(NOUN_ITEMS.map(n => [n.noun, n])), loadSrs('nouns', 'en-it'), readStats('nouns', 'en-it')); return x.cells.map(c => ({ key: c.key, known: c.known })); })()`);
+const iRed = row0.findIndex(c => c.key === redKnown), iGreen = row0.findIndex(c => c.key === greenNot);
+ok(row0[iRed].known && !row0[iGreen].known && iGreen < iRed, 'a known word with a red history sits after a greener one not yet known — the row goes by colour');
+ok(B.ev(`(() => { const byKey = new Map(NOUN_ITEMS.map(n => [n.noun, n])); return NOUN_THEMES.every(t => { const x = mapTopic(t, byKey); const r = x.tried.map(c => c.rate || 0);
+  return r.every((v, i) => i === 0 || r[i - 1] <= v) && x.cells.slice(x.tried.length).every(c => !c.seen && !c.known); }); })()`),
+   "every topic's squares run green to red, and the ones not tried yet come last");
 done();
