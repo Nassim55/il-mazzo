@@ -8,16 +8,16 @@ d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 ok(ev('subject') === 'adjectives' && d.getElementById('app-title').textContent === 'Aggettivi' && d.title === 'Il Mazzo · Aggettivi', 'title and tab');
 ok(ev('selectedNouns.size') === 0, 'adjectives start empty — the hand is shared by every section');
 ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");
-ok(ev('selectedNouns.size') === 200 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('200 adjectives · 200 cards'), 'All: every adjective (now 200 · 200 cards)');
-ok(d.querySelector('#map-panel .map-chart .agreement-panel .endings-title')?.textContent === 'Le concordanze' && !d.querySelector('.setup-side') && d.getElementById('noun-map').querySelectorAll('.map-row').length === 4, 'La mappa, a line per 50 by frequency — with Le concordanze in its panel');
-ok(/1\/200 practised|3\/200 practised/.test(d.getElementById('setup-meta').textContent), 'original history shows in the stats strip');
+ok(ev('selectedNouns.size') === 300 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('300 adjectives · 300 cards'), 'All: every adjective (now 300 · 300 cards)');
+ok(d.querySelector('#map-panel .map-chart .agreement-panel .endings-title')?.textContent === 'Le concordanze' && !d.querySelector('.setup-side') && d.getElementById('noun-map').querySelectorAll('.map-row').length === 6, 'La mappa, a line per 50 by frequency (six of them) — with Le concordanze in its panel');
+ok(/1\/300 practised|3\/300 practised/.test(d.getElementById('setup-meta').textContent), 'original history shows in the stats strip');
 const weakRows = ev('weakestNouns(10)').slice(0, 2);
 ok(JSON.stringify(weakRows) === JSON.stringify(['simpatico', 'grigio']), `the Weakest picks rank by error rate like the original Weakest (${weakRows.join(', ')})`);
 const chips = [...d.querySelectorAll('.theme-chip')].map(c => c.textContent.replace(/\s+/g, ' ').trim());
-ok([...d.querySelectorAll('.theme-chip')].map(c => c.dataset.theme).join() === 'freq1,freq2,freq3,freq4' && ['1–50', '51–100', '101–150', '151–200'].every((l, i) => chips[i].startsWith(l)), `grouped by frequency: the 50 most common, the next 50… (${chips.join(' | ')})`);
-ok(ev("SUBJECTS.adjectives.themes[0].nouns.join()") === ev("ADJ_FREQUENCY_ORDER.slice(0, 50).join()") && ev("SUBJECTS.adjectives.themes.reduce((a, t) => a + t.nouns.length, 0)") === 200, 'the first band is the 50 most common; the four hold all 200');
+ok([...d.querySelectorAll('.theme-chip')].map(c => c.dataset.theme).join() === 'freq1,freq2,freq3,freq4,freq5,freq6' && ['1–50', '51–100', '101–150', '151–200', '201–250', '251–300'].every((l, i) => chips[i].startsWith(l)), `grouped by frequency: the 50 most common, the next 50… (${chips.join(' | ')})`);
+ok(ev("SUBJECTS.adjectives.themes[0].nouns.join()") === ev("ADJ_FREQUENCY_ORDER.slice(0, 50).join()") && ev("SUBJECTS.adjectives.themes.reduce((a, t) => a + t.nouns.length, 0)") === 300, 'the first band is the 50 most common; the six hold all 300');
 d.querySelector('#mode-toggle [data-mode="forms"]').click();
-ok(d.getElementById('card-count').textContent === '667', 'All forms: 667 cards for all 200');
+ok(d.getElementById('card-count').textContent === '992', 'All forms: 992 cards for all 300');
 // Dictionary mode game
 d.querySelector('#mode-toggle [data-mode="dictionary"]').click();
 ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
@@ -86,7 +86,7 @@ ok(JSON.stringify(ev('deck.map(c => c.noun).sort()')) === JSON.stringify(['grand
 // All 100 notes render
 ev("capValue = ''; adjMode = 'dictionary'; selectedNouns = new Set(adjData.map(a => a.it)); sessionMaxDeck = null; sessionPool = null; startGame();");
 let notes = 0; for (let i = 0; i < ev('deck.length'); i++) { ev(`index = ${i}; render();`); d.getElementById('answer').value = 'x'; d.getElementById('submit').click(); const expected = ev(`ADJ_ITEMS.find(x => x.noun === deck[${i}].noun).note`).replace(/<[^>]+>/g, ''); if (d.querySelector('.feedback-note')?.textContent === expected) notes++; }
-ok(notes === 200, `all 200 adjective notes render (${notes})`);
+ok(notes === 300, `all 300 adjective notes render (${notes})`);
 // Other sections untouched; backups; reload
 d.getElementById('change-btn').click();
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
@@ -100,7 +100,7 @@ ok(errors.length === 0 && r.errors.length === 0, `no runtime errors (${errors.jo
 // ---- 151–200 (Nov 2026): the next 50, chosen and ranked as 101–150 were ----
 ({ w, d, ev } = boot({ 'flipcards-subject': 'adjectives' }));
 const NEXT50 = ['comune', 'grave', 'famoso', 'continuo', 'impossibile', 'pericoloso', 'solito', 'incredibile', 'naturale', 'mezzo'];
-ok(ev('ADJ_FREQUENCY_ORDER.length') === 200 && ev('ADJ_FREQUENCY_ORDER.slice(150, 160).join()') === NEXT50.join() && ev('ADJ_FREQUENCY_ORDER[199]') === 'scientifico'
+ok(ev('ADJ_FREQUENCY_ORDER.length') === 300 && ev('ADJ_FREQUENCY_ORDER.slice(150, 160).join()') === NEXT50.join() && ev('ADJ_FREQUENCY_ORDER[199]') === 'scientifico'
    && ev("ADJ_FREQUENCY_ORDER.slice(0, 150).join()").startsWith('primo,nuovo,grande') && ev("ADJ_FREQUENCY_ORDER[149]") === 'breve',
    '151–200 follow on from 150 (comune, grave, famoso… scientifico); the first 150 keep their order');
 ok(!ev("['proprio', 'ii', 'aereo'].some(k => adjData.some(a => a.it === k))"), 'left out, as the rules say: a possessive (proprio), a Roman numeral (II), a word that is nearly always a noun (aereo)');
@@ -108,11 +108,25 @@ const F = k => ev(`ADJ_FORMS[${JSON.stringify(k)}].join(' ')`);
 ok(F('economico') === 'economico economica economici economiche' && F('tecnico') === 'tecnico tecnica tecnici tecniche' && F('vario') === 'vario varia vari varie'
    && F('medio') === 'medio media medi medie' && F('doppio') === 'doppio doppia doppi doppie' && F('europeo') === 'europeo europea europei europee'
    && F('peggiore') === 'peggiore peggiori', 'the tricky plurals written out: economici but economiche, vari, medi, doppi, europei and europee');
-ok(ev("ADJ_THEMES.find(t => t.key === 'quantita').nouns.join()") === 'mezzo,vario,completo,medio,singolo,massimo,doppio' && ev("ADJ_THEMES.find(t => t.key === 'ordine').nouns.includes('quarto')")
+ok(ev("ADJ_THEMES.find(t => t.key === 'quantita').nouns.join()").startsWith('mezzo,vario,completo,medio,singolo,massimo,doppio') && ev("ADJ_THEMES.find(t => t.key === 'ordine').nouns.includes('quarto')")
    && ev("ADJ_THEMES.find(t => t.key === 'qualita').nouns.includes('peggiore') && ADJ_THEMES.find(t => t.key === 'confronto').nouns.includes('peggiore')"),
    'a new theme, Quantità (mezzo, doppio, singolo…); quarto with the ordinals; peggiore beside migliore');
 ok(ev("adjData.find(a => a.it === 'grave').en") === 'grave · serious (illness, problem)' && ev("adjData.find(a => a.it === 'zitto').en") === 'silent (not talking)',
    'prompts that could be mistaken for serio or tranquillo say which is meant');
 ok(/cheap/.test(ev("ADJ_ITEMS.find(n => n.noun === 'economico').note")) && /decreto ministeriale/.test(ev("ADJ_ITEMS.find(n => n.noun === 'ministeriale').note")),
    'each has its note: economico is usually "cheap"; the DM in DM 37/08 is a decreto ministeriale');
+// ---- 201–300 (Nov 2026): the next 100, chosen and ranked as 101–200 were ----
+({ w, d, ev } = boot({ 'flipcards-subject': 'adjectives' }));
+ok(ev('ADJ_FREQUENCY_ORDER.slice(199, 205).join()') === 'scientifico,carino,fortunato,uguale,disponibile,particolare' && ev('ADJ_FREQUENCY_ORDER[249]') === 'religioso' && ev('ADJ_FREQUENCY_ORDER[299]') === 'familiare',
+   '201–300 follow on from scientifico: carino, fortunato, uguale… religioso at 250, familiare at 300');
+ok(!ev("['ultima', 'neo', 'ex', 'mio', 'tutto', 'detto', 'mancato', 'passato', 'ii', 'aereo', 'medico', 'santo', 'porco', 'fottuto', 'maledetto', 'figo', 'online', 'sexy'].some(k => adjData.some(a => a.it === k))"),
+   'left out, as the rules say: forms of deck words, prefixes and loanwords, a possessive, verb forms, mostly nouns, profanity — and figo');
+ok(F('storico') === 'storico storica storici storiche' && F('ubriaco') === 'ubriaco ubriaca ubriachi ubriache' && F('straordinario') === 'straordinario straordinaria straordinari straordinarie'
+   && F('pari') === 'pari' && F('uguale') === 'uguale uguali' && F('chimico') === 'chimico chimica chimici chimiche',
+   'their forms written out: storici but storiche, ubriachi (stressed on the a), straordinari with one i, pari never changes');
+ok(ev("SUBJECTS.adjectives.themes[4].label") === '201–250' && ev("SUBJECTS.adjectives.themes[4].en") === 'the next 50' && ev("SUBJECTS.adjectives.themes[5].label") === '251–300'
+   && ev("ADJ_THEMES.find(t => t.key === 'confronto').nouns.includes('pari') && ADJ_THEMES.find(t => t.key === 'nazionalita').nouns.includes('giapponese')"),
+   'two new bands on the map, 201–250 and 251–300; each word in its theme too (pari: comparing; giapponese: nationality)');
+ok(/false friend/.test(ev("ADJ_ITEMS.find(n => n.noun === 'attuale').note")) && /al sangue/.test(ev("ADJ_ITEMS.find(n => n.noun === 'raro').note")) && ev("ADJ_ITEMS.find(n => n.noun === 'attuale').en") === "current · present-day (not 'actual')",
+   "each has its note: attuale is a false friend (current, not actual); a rare steak is al sangue");
 done();

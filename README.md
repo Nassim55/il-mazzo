@@ -10,7 +10,7 @@ Italian flashcards in a single HTML file: nouns, regular and irregular verbs, ad
 | Verbi regolari | 150 verbs | present-tense conjugations, or just the infinitive |
 | Verbi irregolari | 50 verbs | the most common verbs that are irregular in the present |
 | Verbi al contrario | 133 sentences · 20 backwards verbs | verbs like *piacere*, drilled: natural English in, the Italian turned round out (*I like the beach* → *Mi piace la spiaggia*) |
-| Aggettivi | 200 adjectives | the dictionary form, or every gender and number |
+| Aggettivi | 300 adjectives | the dictionary form, or every gender and number |
 | Avverbi e congiunzioni | 112 words | the little words: when, where, how much, how; yes, no and maybe; *infatti, invece, comunque*; question words; *e, ma, o*; the words that link two clauses (*se, mentre, finché*) — each with its origin and an example |
 | Possessivi | 71 phrases · 117 cards | *my, your, his, her…*: the article, agreement with the thing owned, family, *loro* (*il mio libro*, *mia sorella*, *la loro casa*) |
 | Preposizioni | 226 phrases · 305 cards | fusion drills (*di + il libro* → *del libro*) and usage cards in 27 themes, six groups; a rule for every slip; the fusion table |
