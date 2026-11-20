@@ -5,7 +5,10 @@ const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => 
 ok(labels.length === 13 && labels[9] === 'Frasi' && labels[10] === 'Scrittura' && labels[11] === 'Dialoghi' && labels[12] === 'Racconto', `section switch: ${labels.join(' | ')}`);
 d.querySelector('#subject-toggle [data-subject="phrases"]').click();
 ok(d.getElementById('app-title').textContent === 'Frasi' && d.title === 'Il Mazzo · Frasi' && ev('selectedNouns.size') === 0, 'title, tab, empty selection');
-ok(d.querySelector('.phrases-panel .endings-title')?.textContent === 'In pratica' && d.querySelector('.setup-side').children[1].id === 'weak-panel', 'In pratica panel with Da ripassare under it');
+ok(!d.querySelector('.container .phrases-panel') && d.querySelector('.setup-side').children[0].id === 'weak-panel', 'the side column: Da ripassare — In pratica opens from Le regole');
+d.getElementById('rules-btn').click();
+ok(d.querySelector('#chart-overlay .phrases-panel .endings-title')?.textContent === 'In pratica', 'Le regole, by the title, opens In pratica');
+d.getElementById('chart-close').click();
 const chips = [...d.querySelectorAll('.verb-chip')];
 ok(chips.length === 50 && JSON.stringify(chips.map(c => c.dataset.noun)) === JSON.stringify(ev('PHRASE_ORDER')) && chips[0].querySelector('.verb-chip-italian').textContent === 'Grazie!', '50 chips, most common first, showing "Grazie!" not the key');
 const themes = Object.fromEntries([...d.querySelectorAll('.theme-chip')].map(c => [c.dataset.theme, +c.textContent.trim().match(/(\d+)$/)[1]]));

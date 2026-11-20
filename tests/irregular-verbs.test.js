@@ -8,13 +8,17 @@ const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => 
 ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Aggettivi', 'Numeri', 'Avverbi e congiunzioni', 'Possessivi', 'Preposizioni', 'Regolari', 'Irregolari', 'Al contrario', 'Frasi', 'Scrittura', 'Dialoghi', 'Racconto']   /* the header's menus, family by family */), `subject switch: ${labels.join(' | ')}`);
 // Regular section keeps its own panel
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
-ok(d.querySelector('.map-chart .endings-title')?.textContent === 'Le desinenze' && !d.querySelector('.irregular-panel') && d.querySelectorAll('.verb-chip').length === 150, 'regular section: Le desinenze in the map\'s panel, 150 verbs');
+d.getElementById('rules-btn').click();
+ok(d.querySelector('#chart-overlay .endings-title')?.textContent === 'Le desinenze' && !d.querySelector('.irregular-panel') && d.querySelectorAll('.verb-chip').length === 150, 'regular section: Le regole opens Le desinenze; 150 verbs');
+d.getElementById('chart-close').click();
 ev("selectedNouns = new Set(['parlare']); updateReadout();");
 // Irregular section
 d.querySelector('#subject-toggle [data-subject="irregular"]').click();
 setAside('verbs');
 ok(ev('subject') === 'irregular' && d.getElementById('app-title').textContent === 'Verbi Irregolari' && d.title === 'Il Mazzo · Verbi Irregolari', 'irregular: title and tab');
-ok(!!d.querySelector('.irregular-panel') && d.querySelector('.irregular-panel .endings-title').textContent === 'Gli irregolari' && ![...d.querySelectorAll('.endings-title')].some(h => h.textContent === 'Le desinenze'), 'irregular: its own reference panel, not the regular one');
+d.getElementById('rules-btn').click();
+ok(!!d.querySelector('#chart-overlay .irregular-panel') && d.querySelector('#chart-overlay .irregular-panel .endings-title').textContent === 'Gli irregolari' && ![...d.querySelectorAll('#chart-overlay .endings-title')].some(h => h.textContent === 'Le desinenze'), 'irregular: Le regole opens its own reference panel, not the regular one');
+d.getElementById('chart-close').click();
 ok(!!d.getElementById('mode-toggle') && !!d.getElementById('direction-toggle') && d.querySelectorAll('.verb-chip').length === 50, 'mode & direction toggles, 50 verb chips');
 ok(ev('selectedNouns.size') === 0, 'irregular section has its own (empty) selection');
 const chips = [...d.querySelectorAll('.theme-chip')].map(c => c.textContent.replace(/\s+/g, ' ').trim());

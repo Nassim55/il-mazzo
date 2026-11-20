@@ -2898,14 +2898,23 @@
   .map-group-name { font: italic 600 18px 'Cormorant Garamond', serif; color: var(--terracotta, #a23e2c); }
   .map-group-en { font: 11px 'JetBrains Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--soft, #5a4d3f); }
 
+  /* Le regole (Nov 2026): the section's chart, from a button by its title */
+  .title-block .title { display: inline-block; vertical-align: middle; }
+  .rules-btn { display: inline-flex; align-items: center; gap: 8px; vertical-align: middle; height: 38px; margin-left: 16px; padding: 0 16px; border: 1px solid var(--line); border-radius: 19px;
+    background: transparent; color: var(--ink); font: 12px 'JetBrains Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
+  .rules-btn:hover { border-color: var(--ink); }
+  .rules-btn[hidden], .container:not([data-view="setup"]) .rules-btn { display: none; }
+  .chart-overlay.from-setup .chart-pin { display: none; }
+  @media (max-width: 600px) { .rules-btn { height: 36px; margin-left: 10px; padding: 0 12px; font-size: 11px; } }
+
 </style>
 </head>
 <body>
   <div class="container" id="container" data-view="setup">
     <div class="setup-top" id="setup-top"></div>
     <header>
-      <div>
-        <h1 class="title" id="app-title">Sostantivi</h1>
+      <div class="title-block">
+        <h1 class="title" id="app-title">Sostantivi</h1><button type="button" class="rules-btn" id="rules-btn" aria-haspopup="dialog" hidden><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg><span>Le regole</span></button>
         <div class="subtitle" id="app-subtitle">Il Mazzo · Articolo Determinativo</div>
       </div>
       <div class="stats">
@@ -13397,8 +13406,9 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       </aside>
       `
   };
-  const CHART_TITLES = { endings: 'Le desinenze', irregular: 'Gli irregolari', agreement: 'Le concordanze', avverbi: 'Le parole piccole', possessives: 'I possessivi', prepositions: 'Le articolate', phrases: 'In pratica', mipiace: 'Come piacere' };
+  const CHART_TITLES = { numeri: 'Come si costruiscono', endings: 'Le desinenze', irregular: 'Gli irregolari', agreement: 'Le concordanze', avverbi: 'Le parole piccole', possessives: 'I possessivi', prepositions: 'Le articolate', phrases: 'In pratica', mipiace: 'Come piacere' };
   // The chart for the card on screen (in Ripasso, the card's own section)
+  document.getElementById('rules-btn').addEventListener('click', openRules);
   function chartKey() {
     const k = SUBJECTS[subject] && SUBJECTS[subject].panel;
     return k && own(SECTION_CHARTS, k) ? k : null;
@@ -13436,10 +13446,11 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     }
     return ov;
   }
-  function fillChart(ov, k) {
-    if (ov.dataset.chart !== k) {   // only when the section changes (Ripasso), so a pinned chart doesn't jump
-      document.getElementById('chart-body').innerHTML = SECTION_CHARTS[k]();
-      ov.dataset.chart = k;
+  function fillChart(ov, k, variant) {   // variant 'setup': the chart as a section's page wants it (Al contrario's leaves out the verbs the page lists)
+    const id = variant ? `${k}|${variant}` : k;
+    if (ov.dataset.chart !== id) {   // only when the section changes (Ripasso), so a pinned chart doesn't jump
+      document.getElementById('chart-body').innerHTML = SECTION_CHARTS[k](variant);
+      ov.dataset.chart = id;
     }
     ov.querySelector('.chart-sheet').setAttribute('aria-label', CHART_TITLES[k]);
   }
@@ -13453,12 +13464,30 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     pin.title = chartPinned ? 'Unpin: the chart opens over the round again' : 'Keep the chart open beside the round';
     document.body.classList.toggle('chart-docked', chartPinned && !ov.hidden);
   }
+  // Le regole (Nov 2026): a section's reference panel opens from the button by its title, in the round's
+  // chart sheet — from the right on a computer, a sheet from the bottom on a phone. No pin here (that's for
+  // rounds), and closing it goes back to the button, leaving the round's pin setting alone.
+  function openRules() {
+    const k = chartKey();
+    if (!k) return;
+    const ov = chartOverlay();
+    fillChart(ov, k, 'setup');
+    ov.classList.add('from-setup');
+    ov.classList.remove('pinned');
+    document.body.classList.remove('chart-docked');
+    const sheet = ov.querySelector('.chart-sheet');
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'true');
+    ov.hidden = false;
+    document.getElementById('chart-close').focus();
+  }
   function openChart() {
     const k = chartKey();
     if (!k) return;
     stopListening();
     const ov = chartOverlay();
     fillChart(ov, k);
+    ov.classList.remove('from-setup');
     ov.hidden = false;
     showPinnedState(ov);
     if (chartPinned) backToCard();
@@ -13494,6 +13523,13 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   function closeChart(opts) {
     const ov = document.getElementById('chart-overlay');
     if (!ov || ov.hidden) return;
+    if (ov.classList.contains('from-setup')) {   // Le regole, from a section's page: just closed, back to its button
+      ov.hidden = true;
+      ov.classList.remove('from-setup');
+      const rb = document.getElementById('rules-btn');
+      if (rb && !rb.hidden) rb.focus();
+      return;
+    }
     ov.hidden = true;
     if (chartPinned && !(opts && opts.keepPin)) setChartPinned(false);   // × on a pinned chart: closed, and unpinned
     showPinnedState(ov);
@@ -13623,6 +13659,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     sessionIsReview = false;
     const cfg = SUBJECTS[subject];
     const isVerbs = isVerbSubject();
+    document.getElementById('rules-btn').hidden = !chartKey();   // Le regole, by the title: sections with a chart
     const modeOptions = isVerbs ? [['conjugations', 'Conjugations'], ['infinitives', 'Infinitives only']]
       : isAdjSubject() ? [['dictionary', 'Dictionary form'], ['forms', 'All forms']]
       : cfg.numeri ? [['en-it', 'In lettere'], ['it-en', 'In cifre'], ['listen', 'A orecchio']]
@@ -13744,7 +13781,6 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       </div>${cfg.map ? '</details>' : ''}
       </div>
       ${cfg.panel && !cfg.map ? '<div class="setup-side">' : ''}
-      ${cfg.panel && !cfg.map && SECTION_CHARTS[cfg.panel] ? SECTION_CHARTS[cfg.panel]('setup') : ''}
       ${cfg.panel && !cfg.map ? `<aside class="endings weak-panel" id="weak-panel" aria-label="Your weakest ${cfg.itemWords}"></aside></div>` : ''}
       </div>
       <footer class="setup-foot" aria-label="Your progress and the voice" hidden>
@@ -14307,7 +14343,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       <div class="prog-head"><span class="en-label">Getting it right</span><span class="prog-key">${bucket === 1 ? 'by day' : 'by week'}</span></div>
       ${progChartHTML('acc', acc, { h: 86, ticks: progTicks, aria: `share of answers right${nowAcc ? `: ${nowAcc.pct}% lately` : ''}` })}
       ${nowAcc ? '' : `<p class="prog-cap">No answers yet in this period.</p>`}
-      ${cfg.panel && SECTION_CHARTS[cfg.panel] ? `<div class="map-chart">${SECTION_CHARTS[cfg.panel]('setup')}</div>` : ''}`;
+`;   // the section's chart opens from Le regole, by its title (Nov 2026)
   }
   // Hover or tap a day: the crosshair, and its numbers
   function progShowTip(chart, hit) {
@@ -15480,7 +15516,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-20T14:52Z';
+  const BUILD = '2026-11-20T15:18Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

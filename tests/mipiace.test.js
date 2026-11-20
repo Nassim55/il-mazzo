@@ -46,9 +46,11 @@ ok(cards.length === 20 && cards.slice(0, 5).map(c => c.querySelector('.mpv-it').
    && cards.some(c => c.querySelector('.mpv-it').textContent === 'stare bene') && /roughly the most common first/.test(B.d.getElementById('mp-choose').textContent)
    && /^piacere 55 to like literally, to be pleasing to Mi piace la spiaggia\.$/.test(firstCard),
    `the setup lists the twenty backwards verbs you\'ll meet most — what each means, what it literally says, a sentence (${firstCard})`);
-const panel = B.d.querySelector('.phrases-panel[aria-label="Verbs like piacere"]');
+B.d.getElementById('rules-btn').click();   // the chart opens from Le regole, by the title (Nov 2026)
+const panel = B.d.querySelector('#chart-overlay .phrases-panel[aria-label="Verbs like piacere"]');
 ok(panel && panel.querySelectorAll('.mpv-row').length === 0 && panel.querySelectorAll('.eg-cell').length === 16 && /The thing is the subject/.test(panel.textContent),
-   'the chart beside them keeps the pronouns and the rules, without listing the verbs twice');
+   'Le regole opens the chart: the pronouns and the rules, without listing the verbs twice');
+B.d.getElementById('chart-close').click();
 ok(B.d.querySelectorAll('#theme-chips .theme-chip').length === 0 && !B.d.querySelector('.mp-toggle'), 'no second set of chips, no filter rows: one way to choose');
 const noteOf = it => B.ev(`MIPIACE_ITEMS.find(n => n.it === ${JSON.stringify(it)}).note`).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 ok(/^The backwards verb mancare , to miss — literally, to be missing to Word for word To me lacks the Italy\.$/.test(noteOf("Mi manca l'Italia."))

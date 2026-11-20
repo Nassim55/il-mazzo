@@ -24,12 +24,14 @@ ok([...d.querySelectorAll('#mode-toggle .mode-option')].map(b => b.textContent).
    'one Practise switch: Singolare · Singolare e plurale — both, to start with');
 
 // ---- The chart ----
-const chart = d.querySelector('.poss-panel');
+d.getElementById('rules-btn').click();   // the chart opens from Le regole, by the title (Nov 2026)
+const chart = d.querySelector('#chart-overlay .poss-panel');
 const cells = [...chart.querySelectorAll('.eg-poss .eg-cell')].map(c => c.textContent.trim());
 ok(cells.length === 24 && cells.slice(0, 4).join(',') === 'il mio,la mia,i miei,le mie' && cells.slice(20).join(',') === 'il loro,la loro,i loro,le loro'
    && ['It agrees with the thing', 'With the article', 'Family', 'Loro never changes', 'Your, formally', 'Mine, yours'].every(h => chart.textContent.includes(h)),
    'the chart: every form with its article, io to loro, and the rules beside it');
 ok(ev("CHART_TITLES.possessives") === 'I possessivi', 'and in a round, ▦ I possessivi opens it');
+d.getElementById('chart-close').click();
 
 // ---- Singular, or with the plural: its own setting ----
 d.querySelector('#mode-toggle [data-mode="sg"]').click();

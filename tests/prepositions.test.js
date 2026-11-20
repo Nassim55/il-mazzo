@@ -145,8 +145,10 @@ d.querySelector('[data-group="art"]').click();
 ok(ev('selectedNouns.size') === 79 && d.querySelector('[data-group="art"]').classList.contains('full'), 'a group heading picks its whole group (all 79 fusion pairs)');
 d.querySelector('[data-group="art"]').click();
 ok(ev('selectedNouns.size') === 0, 'and clicking it again clears it');
-const cells = [...d.querySelectorAll('.prep-panel .eg-cell')].map(c => c.textContent.trim());
-ok(cells.length === 35 && cells.includes('dello') && cells.includes("nell'") && cells.includes('sugli') && /Stay apart/.test(d.querySelector('.prep-panel').textContent), 'the side panel: the 35 joined forms, and what stays apart (con, per, tra)');
+d.getElementById('rules-btn').click();   // the chart opens from Le regole, by the title (Nov 2026)
+const cells = [...d.querySelectorAll('#chart-overlay .prep-panel .eg-cell')].map(c => c.textContent.trim());
+ok(cells.length === 35 && cells.includes('dello') && cells.includes("nell'") && cells.includes('sugli') && /Stay apart/.test(d.querySelector('#chart-overlay .prep-panel').textContent), 'Le regole: the 35 joined forms, and what stays apart (con, per, tra)');
+d.getElementById('chart-close').click();
 
 // ---- In Ripasso, synced, and a round ends properly ----
 ev(`(() => { const s = loadSrs('prepositions', 'en-it'); s['parlo-del-libro'] = { b: 1, d: today(), l: today() - 1 }; saveSrs('prepositions', 'en-it', s); })()`);

@@ -70,12 +70,14 @@ ok(d.querySelector('.container').classList.contains('kb-digits'), "on a phone, I
 d.getElementById('submit').click();
 ev('showSetup(); setOwnKeyboard(false)');
 
-// ---- The builder ----
+// ---- The builder: from Le regole, by the title ----
+d.getElementById('rules-btn').click();
 const inp = d.getElementById('numeri-build');
 inp.value = '21000'; inp.dispatchEvent(new B.w.Event('input', { bubbles: true }));
 ok(/ventunomila/.test(d.getElementById('numeri-out').textContent) && d.querySelectorAll('#numeri-out .nb-part').length === 1, 'the builder: type 21000, see ventunomila');
 inp.value = '1.987'; inp.dispatchEvent(new B.w.Event('input', { bubbles: true }));
 ok(/millenovecentottantasette/.test(d.getElementById('numeri-out').textContent) && d.querySelectorAll('#numeri-out .nb-part').length === 4, '1.987 (with its dot) → millenovecentottantasette, in four parts');
+d.getElementById('chart-close').click();
 
 // ---- Elsewhere, Listen goes back to EN → IT ----
 ev("subject = 'nouns'; showSetup();");

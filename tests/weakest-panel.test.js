@@ -13,7 +13,7 @@ for (const s of ['nouns', 'verbs', 'irregular', 'adjectives']) {
 }
 d.querySelector('#subject-toggle [data-subject="phrases"]').click();
 const side = d.querySelector('.setup-side');
-ok(side && side.children[0].classList.contains('endings') && side.children[1].id === 'weak-panel', 'Frasi: Da ripassare sits directly under its chart');
+ok(side && side.children[0].id === 'weak-panel' && !side.querySelector('.phrases-panel'), 'Frasi: Da ripassare has the side column — the chart opens from Le regole');
 const rows = () => [...d.querySelectorAll('#weak-panel .weak-row')].map(r => r.querySelector('.weak-it').textContent);
 const keys = () => [...d.querySelectorAll('#weak-panel .weak-row')].map(r => r.dataset.noun || r.getAttribute('data-noun'));
 ok(d.querySelector('#weak-panel .endings-title').textContent === 'Da ripassare' && /Your 6 weakest · EN → IT/.test(d.querySelector('#weak-panel .endings-sub').textContent), 'title and "Your 6 weakest · EN → IT"');

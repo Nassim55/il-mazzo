@@ -13,8 +13,10 @@ const map = d.getElementById('noun-map');
 ok(map.querySelectorAll('.map-row').length === 3 && ['freq1', 'freq2', 'freq3'].every(k => map.querySelector(`.map-row[data-topic="${k}"]`))
    && ev("SUBJECTS.avverbi.themes.map(t => t.label + ' ' + t.nouns.length).join()") === '1–50 50,51–100 50,101–112 12' && ev("SUBJECTS.avverbi.themes[0].nouns.slice(0, 4).join()") === 'e,non,che-cong,ma',
    'La mappa, a line per 50 by frequency: the 50 most common (e, non, che, ma…), the next 50, the last 12');
-ok(d.querySelector('#map-panel .map-chart .endings-title').textContent === 'Le parole piccole' && /Non comes first/.test(d.getElementById('map-panel').textContent) && /An accent changes the word/.test(d.getElementById('map-panel').textContent),
-   'its chart in the panel: where they go, and the traps');
+d.getElementById('rules-btn').click();
+ok(d.querySelector('#chart-overlay .endings-title').textContent === 'Le parole piccole' && /Non comes first/.test(d.getElementById('chart-overlay').textContent) && /An accent changes the word/.test(d.getElementById('chart-overlay').textContent),
+   'its chart, from Le regole by the title: where they go, and the traps');
+d.getElementById('chart-close').click();
 
 // ---- Answers ----
 const chk = (k, guess, itToEn = false) => B.w.eval(`checkPhraseAnswer(${JSON.stringify(guess)}, cardsForItem(AVV_ITEMS.find(n => n.noun === ${JSON.stringify(k)}))[0], ${itToEn}).correct`);

@@ -11,7 +11,9 @@ d.querySelector('#subject-toggle [data-subject="verbs"]').click();
 ok(ev('handSections().join()') === 'nouns', 'the Casa selection comes along in the hand');
 setAside('nouns');
 ok(ev('subject') === 'verbs' && d.getElementById('app-title').textContent === 'Verbi Regolari' && d.title === 'Il Mazzo · Verbi Regolari', 'switch → Verbi Regolari title and page title');
-ok(!!d.querySelector('.map-chart aside.endings .eg') && d.querySelector('.map-chart .endings-title').textContent === 'Le desinenze', 'Le desinenze, in the map\'s panel');
+d.getElementById('rules-btn').click();
+ok(!!d.querySelector('#chart-overlay aside.endings .eg') && d.querySelector('#chart-overlay .endings-title').textContent === 'Le desinenze', 'Le desinenze, from Le regole by the title');
+d.getElementById('chart-close').click();
 ok(ev('selectedNouns.size') === 0 && ev('capValue') === '', 'verbs start with their own empty selection and subset box');
 ok(/[134]\/150 practised/.test(d.getElementById('setup-meta').textContent), `old verb history shows in the stats strip ("${d.getElementById('setup-meta').textContent.replace(/\s+/g, ' ').trim()}")`);
 // Weakest 10 uses the verb game's smoothed formula: capire 15/22, finire 8/12, pulire 1/8
@@ -89,7 +91,7 @@ d.getElementById('change-btn').click();
 putBack('nouns');
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
 ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === ev("NOUN_THEMES.find(t => t.key === 'casa').nouns.length") && ev('capValue') === '7' && d.getElementById('app-title').textContent === 'Sostantivi', 'nouns: Casa selection and subset "7" kept, title restored');
-ok(!d.querySelector('aside.endings:not(.map-panel)') && d.querySelectorAll('.verb-chip').length === 1295, 'noun setup restored (1295 chips, no endings panel)');
+ok(!d.querySelector('.container aside.endings:not(.map-panel)') && d.querySelectorAll('.verb-chip').length === 1295, 'noun setup restored (1295 chips, no endings panel on the page)');
 const store = {}; for (let i = 0; i < w.localStorage.length; i++) { const k = w.localStorage.key(i); store[k] = w.localStorage.getItem(k); }
 // Reload remembers the last subject
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();

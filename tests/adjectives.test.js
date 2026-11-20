@@ -9,7 +9,9 @@ ok(ev('subject') === 'adjectives' && d.getElementById('app-title').textContent =
 ok(ev('selectedNouns.size') === 0, 'adjectives start empty — the hand is shared by every section');
 ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");
 ok(ev('selectedNouns.size') === 300 && d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('300 adjectives · 300 cards'), 'All: every adjective (now 300 · 300 cards)');
-ok(d.querySelector('#map-panel .map-chart .agreement-panel .endings-title')?.textContent === 'Le concordanze' && !d.querySelector('.setup-side') && d.getElementById('noun-map').querySelectorAll('.map-row').length === 6, 'La mappa, a line per 50 by frequency (six of them) — with Le concordanze in its panel');
+d.getElementById('rules-btn').click();
+ok(d.querySelector('#chart-overlay .agreement-panel .endings-title')?.textContent === 'Le concordanze' && !d.querySelector('.container .map-chart') && !d.querySelector('.setup-side') && d.getElementById('noun-map').querySelectorAll('.map-row').length === 6, 'La mappa, a line per 50 by frequency (six of them) — Le regole, by the title, opens Le concordanze; its panel');
+d.getElementById('chart-close').click();
 ok(/1\/300 practised|3\/300 practised/.test(d.getElementById('setup-meta').textContent), 'original history shows in the stats strip');
 const weakRows = ev('weakestNouns(10)').slice(0, 2);
 ok(JSON.stringify(weakRows) === JSON.stringify(['simpatico', 'grigio']), `the Weakest picks rank by error rate like the original Weakest (${weakRows.join(', ')})`);

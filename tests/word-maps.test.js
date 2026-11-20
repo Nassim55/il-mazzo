@@ -10,7 +10,10 @@ for (const [subj, chart, word] of [['verbs', 'Le desinenze', 'verb'], ['irregula
   ok(map && map.querySelectorAll('.map-row').length === B.ev(`SUBJECTS.${subj}.themes.length`) && B.ev(`SUBJECTS.${subj}.themes`).every(t => map.querySelector(`.map-row[data-topic="${t.key}"]`).querySelectorAll('.map-cell').length === t.nouns.length),
      `${subj}: La mappa — a line per topic, a square per ${word}`);
   ok(B.d.getElementById('theme-row').hidden && !B.d.querySelector('.setup-side') && B.d.querySelector('details.grid-fold summary').textContent.startsWith(`Every ${word}, one by one`), `${subj}: the theme chips and side column give way to it; the ${word}s fold away underneath`);
-  ok(B.d.querySelector('#map-panel .endings-title').textContent === 'I progressi' && B.d.querySelector('#map-panel .map-chart .endings-title').textContent === chart, `${subj}: the panel — I progressi, and ${chart} under it`);
+  ok(B.d.querySelector('#map-panel .endings-title').textContent === 'I progressi' && !B.d.querySelector('#map-panel .map-chart'), `${subj}: the panel — I progressi`);
+  B.d.getElementById('rules-btn').click();
+  ok(B.d.querySelector('#chart-overlay .endings-title').textContent === chart, `${subj}: Le regole, by the title, opens ${chart}`);
+  B.d.getElementById('chart-close').click();
   ok(B.d.querySelector('.section-tools #mode-toggle') && B.d.querySelector('#hand .setup-options #direction-toggle') && (subj === 'adjectives' || B.d.querySelector('.section-tools #person-picker')) && B.d.querySelector('#hand #start-btn'),
      `${subj}: practice mode and direction in the hand${subj === 'adjectives' ? '' : ', the persons above the map'} — Start on the right`);
   ok(new RegExp(`${word}s over time`, 'i').test(map.textContent) && B.errors.length === 0, `${subj}: in its own words (${word}s over time), without errors`);
