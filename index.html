@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-keo7VANoYS379fZDxaQ5zMOGe/WH/pOKLd7lRyOUkSE=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -2914,6 +2916,13 @@
   @media (hover: hover) { .hand-card:not(.hand-slot):hover { z-index: 60; } }
   .hand-fan > .hand-card:first-child { margin-left: 0; }                         /* no pull past the fan's own edge */
   .hand-fan > .hand-card:has(+ .hand-slot) { margin-right: 0; }
+
+  /* Your account (Nov 2026): one line at the foot of Da fare */
+  .todo-account { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; margin-top: 8px; padding: 10px 6px 2px; border-top: 1px solid var(--line);
+    font: 13px 'DM Sans', sans-serif; color: #6f6152; }
+  .todo-account b { color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
+  .todo-account-acts { display: inline-flex; gap: 8px; }
+  .todo-account .ghost { min-height: 36px; padding: 0 10px; font-size: 12px; }
 
 </style>
 </head>
@@ -12992,7 +13001,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       note = anyHistory ? `<p class="todo-empty">Ripasso del giorno. All done for today ✓${tomorrow ? ` — ${tomorrow} due tomorrow` : ''}${more ? ` <button type="button" class="ghost" id="ripasso-more">${RIPASSO_DOSE} more</button>` : ''}</p>`
         : `<p class="todo-empty">Nothing waiting yet. Practise some words and they'll come back here just before you'd forget them${sv ? '' : '; a deck you save mid-round waits here too'}.</p>`;
     }
-    items.innerHTML = rows.join('') + note;
+    items.innerHTML = rows.join('') + note + accountLineHTML();
     const badge = document.getElementById('bell-count'), bell = document.getElementById('bell');
     if (badge) { badge.hidden = !rows.length; badge.textContent = String(rows.length); }
     if (bell) bell.setAttribute('aria-label', rows.length ? `Da fare: ${rows.length} waiting` : 'Da fare: nothing waiting');
@@ -13002,6 +13011,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     on('saved-resume', () => { closeTodo(); resumeSavedDeck(false); });
     on('saved-restart', () => { closeTodo(); resumeSavedDeck(true); });
     on('saved-forget', () => { forgetSavedDeck(); renderTableTabs(); });
+    on('signout-here', () => syncSignOut(false));
+    on('signout-everywhere', () => syncSignOut(true));
   }
   function wireTable() {
     if (!document.getElementById('hand')) return;
@@ -15327,6 +15338,27 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     syncSetStatus('signed-out');
     signinOffer('Please sign in again.');
   }
+  // Your account (Nov 2026): one line at the foot of Da fare, once signed in — who, and signing out.
+  function accountLineHTML() {
+    const meta = syncMeta();
+    if (!meta.session || !meta.email) return '';
+    return `<div class="todo-account"><span>Signed in as <b>${escapeHTML(meta.email)}</b></span>
+      <span class="todo-account-acts"><button type="button" class="ghost" id="signout-here">Sign out</button><button type="button" class="ghost" id="signout-everywhere">Sign out everywhere</button></span></div>`;
+  }
+  // Signing out: anything not yet in your account goes first (if it can't, you're asked), then the session
+  // ends — on this device, or on every device — and this device's copy is cleared: it's safe in your account
+  // and comes back when you sign in again, and the next person on this browser starts clean.
+  function appReload() { try { location.reload(); } catch (e) { /* not in a browser */ } }
+  async function syncSignOut(everywhere) {
+    const token = syncMeta().session;
+    if (!token) return;
+    if (syncDirty || syncState.pending) { try { await syncNow(); } catch (e) { /* tried */ } }
+    if ((syncDirty || syncState.pending) && !confirm("Some of your latest progress hasn't reached your account yet — there may be no connection. Sign out anyway? It will be lost on this device.")) return;
+    try { await syncRequest('DELETE', everywhere ? '/v1/sessions' : '/v1/session', token); } catch (e) { /* no connection: the session lapses on its own; this device forgets it now */ }
+    for (const k of syncedKeys().keys()) { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } }   // a Map: store → its kind
+    [SYNC_META_KEY, SYNC_BASE_KEY].forEach(k => { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } });
+    appReload();
+  }
   function loadGoogleSignIn() {
     if (window.google && google.accounts && google.accounts.id) return Promise.resolve();
     return new Promise((resolve, reject) => {
@@ -15371,7 +15403,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   async function signinWithGoogle(response) {
     signinMessage('Signing in…');
     let r = null;
-    try { r = await syncRequest('POST', '/v1/session', null, { credential: response && response.credential, legacyKey: SYNC_LEGACY_KEY }); } catch (e) { /* offline */ }
+    try { r = await syncRequest('POST', '/v1/session', null, { credential: response && response.credential, legacyKey: SYNC_LEGACY_KEY }); } catch (e) { /* offline */ }   // the old key, only for the one-time move: once moved, the server deletes that copy and the key opens nothing
     if (!r) { signinMessage("Couldn't reach the server — check your connection and try again."); return false; }
     if (r.status === 403) { signinMessage('This Il Mazzo is private.'); return false; }
     if (r.status !== 200 || !r.data || !r.data.token) { signinMessage("Sign-in didn't work — please try again."); return false; }
@@ -15383,6 +15415,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     try { localStorage.removeItem(SYNC_BASE_KEY); } catch (e) { /* ignore */ }
     syncDirty = true;
     closeSigninGate();
+    renderTableTabs();   // the account line, at the foot of Da fare
     await syncNow();
     return true;
   }
@@ -15550,7 +15583,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-20T16:26Z';
+  const BUILD = '2026-11-20T18:59Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

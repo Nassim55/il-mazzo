@@ -254,3 +254,16 @@ A phone's round fits the screen exactly and never scrolls: one column of the sli
 **Possessivi, chosen like the other sections (Nov 2026).** The page is *La mappa*: a row per owner under *Di chi?* — *Mio*, *Tuo*, *Suo*, *Suo* formal, *Nostro*, *Vostro*, *Loro* — then the special cases under *Casi speciali*, in teaching order; tap a row for its phrases. One *Practise* switch, *Singolare · Singolare e plurale*, decides whether each phrase brings its plural straight after. The table of forms sits beside the map, under *I progressi*.
 
 **Le regole (Nov 2026).** A section's reference chart — *Le desinenze*, *Gli irregolari*, *Come piacere*, *Le concordanze*, *Come si costruiscono*, *Le parole piccole*, *I possessivi*, *Le articolate*, *In pratica* — no longer sits on its page: a *Le regole* button beside the section's title opens it, sliding in from the right on a computer and rising as a sheet on a phone, the same panel a round opens from its menu. ×, Escape or a tap outside closes it. The side column keeps your progress.
+
+## Switching on sign-in (Nov 2026)
+
+Sign-in is built (Google, one profile per Google account, only the addresses you allow) and switches on once the deploy has its settings. Until then the app syncs as before. About fifteen minutes, all in web consoles:
+
+1. **Google Cloud** (console.cloud.google.com): create a project called *Il Mazzo* (or use one you have). Under *Google Auth Platform*, set the app name and your email, audience *External*, and add your Gmail as a test user (testing mode is fine for just you). Then *Clients → Create client*, type *Web application*, with `https://nassim55.github.io` as an authorised JavaScript origin (no path, no slash at the end). Copy the client ID (it ends in `.apps.googleusercontent.com`). No client secret is needed.
+2. **Cloudflare** (dash.cloudflare.com): copy your **account ID** (on the account's home page). Under *Storage & Databases → D1*, open the database `il-mazzo` and copy its **ID**. Then *My Profile → API Tokens → Create Token*, template *Edit Cloudflare Workers*, add *Account · D1 · Edit*, and copy the **token** (it's shown once).
+3. **GitHub** (this repo → *Settings → Secrets and variables → Actions*): under *Secrets* add `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and `ALLOWED_EMAILS` (your Gmail address; several separated by commas). Under *Variables* add `GOOGLE_CLIENT_ID` and `D1_DATABASE_ID`.
+4. **Deploy:** push anything, or *Actions → Tests → Run workflow* on `main`. The *deploy-sync* job should now run its steps rather than skip them.
+5. **Check:** `https://il-mazzo-sync.il-mazzo.workers.dev/v1/config` shows your client ID. Open Il Mazzo: *Bentornato* asks you to sign in once — your progress moves into your account — and then each other device signs in once too.
+
+Once signed in, the foot of *Da fare* (the bell) reads *Signed in as …* with *Sign out* and *Sign out everywhere*. Signing out clears that device's copy (it's safe in your account); sessions last 90 days and renew while you use the app.
+

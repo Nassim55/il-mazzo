@@ -145,5 +145,33 @@ const { makeGoogle, CLIENT_ID, ME } = require('./google-fixture');
   await signIn(L);
   ok(!gate(L) && seenIn(envOld.DB, 'luna') === 3 && seen(L, 'luna') === 3 && envOld.DB.raw.prepare('SELECT COUNT(*) AS n FROM spaces').get().n === 1,
      'signing in brings that progress across to your account, and the old copy is gone');
-  done();
+  // ---- Your account, and signing out (Nov 2026) ----
+{
+  net.online = true; net.target = null;
+  const P = device({ 'sostantivi-stats-v1': JSON.stringify({ pane: { seen: 3, wrong: 0 } }), 'flipcards-subject': 'nouns' });
+  const Q = device({ 'flipcards-subject': 'nouns' });
+  await settle(P); await settle(Q);
+  await signIn(P); await signIn(Q);
+  const line = (P.d.querySelector('#todo-items .todo-account') || {}).textContent || '';
+  ok(new RegExp(`Signed in as ${ME.replace('.', '\\.')}`).test(line) && P.d.getElementById('signout-here') && P.d.getElementById('signout-everywhere') && invisible(P),
+     'Da fare ends with one line: Signed in as you — Sign out, Sign out everywhere (and still no word of syncing)');
+  P.ev('appReload = () => { window.__reloaded = true; }');
+  net.paths.length = 0;
+  P.d.getElementById('signout-here').click();
+  await settle(P);
+  ok(net.paths.includes('DELETE /v1/session') && P.ev('window.__reloaded === true'), "Sign out: the session ends on the server, and the page starts afresh");
+  ok(P.ev("localStorage.getItem('sostantivi-stats-v1')") === null, "…this device's progress is cleared");
+  ok(P.ev("localStorage.getItem('mazzo-sync-meta-v1')") === null, '…and its sign-in with it');
+  ok(serverSeen('pane') >= 3, `…while your progress is safe in your account (the server has pane seen ${serverSeen('pane')})`);
+  const R = device({ 'flipcards-subject': 'nouns' });
+  await settle(R); await signIn(R);
+  R.ev('appReload = () => { window.__reloaded = true; }');
+  net.paths.length = 0;
+  R.d.getElementById('signout-everywhere').click();
+  await settle(R);
+  ok(net.paths.includes('DELETE /v1/sessions'), 'Sign out everywhere: every session for your account ends');
+  practise(Q, 'gatto', 1); await Q.ev('syncNow()'); await settle(Q);
+  ok(gate(Q) && !Q.ev('syncKey()'), 'and your other device is asked to sign in again');
+}
+done();
 })().catch(e => { console.error(e); process.exit(1); });

@@ -55,7 +55,7 @@ const { makeGoogle, CLIENT_ID, ME } = require('./google-fixture');
   // ---- Signing in ----
   r = await signIn();
   const T1 = r.data && r.data.token;
-  ok(r.status === 200 && /^[A-Za-z0-9_-]{43}$/.test(T1) && r.data.email === ME && Math.round((r.data.expiresAt - Date.now()) / 86400000) === 365, 'your Google account gets a session, good for a year');
+  ok(r.status === 200 && /^[A-Za-z0-9_-]{43}$/.test(T1) && r.data.email === ME && Math.round((r.data.expiresAt - Date.now()) / 86400000) === 90, 'your Google account gets a session, good for 90 days (renewed while in use)');
   ok(!JSON.stringify(raw.prepare('SELECT * FROM sessions').all()).includes(T1), 'only the session\'s hash is stored, never the token');
   r = await call('GET', '/v1/progress', { auth: T1 });
   ok(r.status === 200 && r.data.version === 0 && JSON.stringify(r.data.items) === '{}', 'a first sign-in opens an empty space for the account');
@@ -98,5 +98,19 @@ const { makeGoogle, CLIENT_ID, ME } = require('./google-fixture');
   r = await call('GET', '/v1/progress', { auth: T5 });
   ok(r.data.items['sostantivi-stats-v1'].v.sole.seen === 5 && !raw.prepare('SELECT 1 FROM spaces WHERE id = ?').get(legacyId), "the first sign-in brings the old built-in key's progress across, then deletes that copy");
   ok((await signIn({}, {}, { legacyKey: LEGACY })).status === 200, 'later sign-ins with the old key are harmless');
-  done();
+  // ---- Sessions: 90 days, renewed while in use; sign out everywhere (Nov 2026) ----
+{
+  const DAY = 86400000;
+  const s1 = (await signIn({})).data, s2 = (await signIn({})).data;
+  ok(s1 && s1.token && Math.abs(s1.expiresAt - Date.now() - 90 * DAY) < 60000, 'a session lasts 90 days');
+  const h1 = require('crypto').createHash('sha256').update(s1.token).digest('hex');
+  raw.prepare('UPDATE sessions SET expires_at = ? WHERE token_hash = ?').run(Date.now() + 10 * DAY, h1);
+  const used = await call('GET', '/v1/progress', { auth: s1.token });
+  const renewed = raw.prepare('SELECT expires_at FROM sessions WHERE token_hash = ?').get(h1).expires_at;
+  ok(used.status === 200 && Math.abs(renewed - Date.now() - 90 * DAY) < 60000, 'used with 10 days left, it runs another 90 days from today');
+  const out = await call('DELETE', '/v1/sessions', { auth: s1.token });
+  ok(out.status === 200 && (await call('GET', '/v1/progress', { auth: s1.token })).status === 401 && (await call('GET', '/v1/progress', { auth: s2.token })).status === 401,
+     "sign out everywhere: every device's session for the account ends");
+}
+done();
 })().catch(e => { console.error(e); process.exit(1); });

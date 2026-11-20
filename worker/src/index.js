@@ -19,6 +19,7 @@
 //   DELETE /v1/session    → sign this device out
 //   GET    /v1/progress   → { version, items: { key: { v, e } } }
 //   PUT    /v1/progress   ← { baseVersion, items: { key: { v, e } } } → { version }
+//   DELETE /v1/sessions   → sign out everywhere: every device's session for this account
 //   DELETE /v1/space      → delete everything stored for this account
 
 const ALLOWED_ORIGINS = ['https://nassim55.github.io'];
@@ -27,7 +28,8 @@ const TOKEN_RE = /^[A-Za-z0-9_-]{24,128}$/;
 const STORE_RE = /^[a-z0-9:_-]{1,80}$/;
 const MAX_BODY = 1_500_000;   // bytes; all of a heavy user's progress is far smaller
 const MAX_STORES = 200;
-const SESSION_DAYS = 365;
+const SESSION_DAYS = 90;   // and renewed while in use (Nov 2026): a device you stop using lets itself go
+const DAY = 86400000;
 const GOOGLE_JWKS_URL = 'https://www.googleapis.com/oauth2/v3/certs';
 const GOOGLE_ISSUERS = new Set(['accounts.google.com', 'https://accounts.google.com']);
 
@@ -106,7 +108,11 @@ async function session(request, env) {
   if (!m || !TOKEN_RE.test(m[1])) return null;
   const hash = await sha256(m[1]);
   const row = await env.DB.prepare('SELECT space_id, expires_at FROM sessions WHERE token_hash = ?').bind(hash).first();
-  if (!row || row.expires_at < Date.now()) return null;
+  const now = Date.now();
+  if (!row || row.expires_at < now) return null;
+  if (row.expires_at - now < (SESSION_DAYS - 1) * DAY) {   // in use: another SESSION_DAYS from today — at most one write a day
+    await env.DB.prepare('UPDATE sessions SET expires_at = ? WHERE token_hash = ?').bind(now + SESSION_DAYS * DAY, hash).run();
+  }
   return { spaceId: row.space_id, hash };
 }
 
@@ -132,7 +138,7 @@ async function signIn(request, env) {
   const claims = await verifyGoogleCredential(body && body.credential, env);
   if (!claims) return json(request, 401, { error: 'bad-credential' });
   if (!allowedEmails(env).has(claims.email.toLowerCase())) return json(request, 403, { error: 'not-allowed' });
-  const db = env.DB, now = Date.now(), token = newToken(), expiresAt = now + SESSION_DAYS * 86400000;
+  const db = env.DB, now = Date.now(), token = newToken(), expiresAt = now + SESSION_DAYS * DAY;
   const spaceId = await sha256(`google:${claims.sub}`);
   await db.batch([
     db.prepare('DELETE FROM sessions WHERE expires_at < ?').bind(now),
@@ -166,7 +172,7 @@ async function handle(request, env) {
   const route = `${request.method} ${url.pathname}`;
   if (route === 'GET /v1/config') return json(request, 200, { googleClientId: env.GOOGLE_CLIENT_ID || null });
   if (route === 'POST /v1/session') return signIn(request, env);
-  if (!['DELETE /v1/session', 'GET /v1/progress', 'PUT /v1/progress', 'DELETE /v1/space'].includes(route)) {
+  if (!['DELETE /v1/session', 'DELETE /v1/sessions', 'GET /v1/progress', 'PUT /v1/progress', 'DELETE /v1/space'].includes(route)) {
     return json(request, 404, { error: 'not-found' });
   }
   const s = await session(request, env);
@@ -176,6 +182,10 @@ async function handle(request, env) {
   if (route === 'DELETE /v1/session') {
     await db.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(s.hash).run();
     return json(request, 200, { signedOut: true });
+  }
+  if (route === 'DELETE /v1/sessions') {   // sign out everywhere: every device's session for this account
+    await db.prepare('DELETE FROM sessions WHERE space_id = ?').bind(id).run();
+    return json(request, 200, { signedOut: 'everywhere' });
   }
   const space = await db.prepare('SELECT version FROM spaces WHERE id = ?').bind(id).first();
   if (!space) return json(request, 404, { error: 'no-space' });
