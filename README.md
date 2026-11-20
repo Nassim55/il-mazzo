@@ -267,3 +267,4 @@ Sign-in is built (Google, one profile per Google account, only the addresses you
 
 Once signed in, the foot of *Da fare* (the bell) reads *Signed in as …* with *Sign out* and *Sign out everywhere*. Signing out clears that device's copy (it's safe in your account); sessions last 90 days and renew while you use the app.
 
+**What goes live (Nov 2026).** The site is the files listed in `site-files.txt` — the page, its service worker (`sw.js`), `version.json`, the manifest and the icons — and the deploy publishes exactly those, printing the list in its log. A new file the page needs goes in that list; `tests/site-files.test.js` fails if the page, the service worker or the manifest asks for one that isn't there. (Until 20 November only `index.html` was published, so working offline, the update banner and the home-screen icon never reached the live site.)

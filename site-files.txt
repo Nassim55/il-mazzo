@@ -1,0 +1,8 @@
+# What the live site is made of (Nov 2026): the deploy (.github/workflows/tests.yml, "Prepare the site")
+# publishes exactly these, and tests/site-files.test.js fails if the page, its service worker or its
+# manifest asks for a file this list leaves out. One path per line; a folder brings everything in it.
+index.html
+sw.js
+version.json
+manifest.webmanifest
+icons

@@ -93,7 +93,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Prepare the site
-        run: mkdir _site && cp index.html _site/
+        # Exactly the files in site-files.txt (the page, its service worker, version.json, the manifest, the
+        # icons); a missing one stops the deploy. The list is printed so the log shows what went live.
+        run: |
+          mkdir _site
+          mapfile -t files < <(grep -vE '^[[:space:]]*(#|$)' site-files.txt)
+          cp -R "${files[@]}" _site/
+          find _site -type f | sort
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
