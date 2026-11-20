@@ -2893,6 +2893,11 @@
     #mode-toggle .mode-option { flex: 1 1 0; padding-left: 6px; padding-right: 6px; }
   }
 
+  /* A map's group subheadings (Nov 2026: Possessivi's Di chi? and Casi speciali) */
+  .map-group { display: flex; align-items: baseline; gap: 10px; padding: 18px 4px 8px; }
+  .map-group-name { font: italic 600 18px 'Cormorant Garamond', serif; color: var(--terracotta, #a23e2c); }
+  .map-group-en { font: 11px 'JetBrains Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--soft, #5a4d3f); }
+
 </style>
 </head>
 <body>
@@ -11539,18 +11544,18 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
                      al: 'msg', alla: 'fsg', ai: 'mpl', alle: 'fpl', dal: 'msg', dalla: 'fsg', dai: 'mpl', dalle: 'fpl', sul: 'msg', sulla: 'fsg', sui: 'mpl', sulle: 'fpl' };
   const POSS_JOIN = { nella: ['in', 'la'], nelle: ['in', 'le'], nel: ['in', 'il'], nei: ['in', 'i'], dal: ['da', 'il'], sul: ['su', 'il'], sui: ['su', 'i'], del: ['di', 'il'] };
   const POSS_GROUPS = [['chi', 'Di chi?', 'whose'], ['casi', 'Casi speciali', 'the special cases']];
-  const POSS_THEME_DEFS = [
-    ['mio', 'chi', 'mio · mia · miei · mie', 'my'],
-    ['tuo', 'chi', 'tuo · tua · tuoi · tue', 'your (tu)'],
-    ['suo', 'chi', 'suo · sua · suoi · sue', 'his, her, its'],
-    ['suo-formale', 'chi', 'Suo · Sua', 'your (formal)'],
-    ['nostro', 'chi', 'nostro · nostra · nostri · nostre', 'our'],
-    ['vostro', 'chi', 'vostro · vostra · vostri · vostre', 'your (voi)'],
-    ['loro', 'chi', 'il loro · la loro', 'their — loro never changes'],
-    ['famiglia', 'casi', 'mia sorella · le mie sorelle', 'family: no article for one'],
-    ['pronomi', 'casi', 'è mio · è il mio', 'mine, yours, theirs'],
-    ['preposizioni', 'casi', 'nella mia borsa', 'with a preposition'],
-    ['dopo', 'casi', 'a casa mia · colpa mia', 'after the noun, in set phrases']
+  const POSS_THEME_DEFS = [   // a short name for the map's row, the English and the forms beneath it (Nov 2026)
+    ['mio', 'chi', 'Mio', 'my · mio, mia, miei, mie'],
+    ['tuo', 'chi', 'Tuo', 'your (tu) · tuo, tua, tuoi, tue'],
+    ['suo', 'chi', 'Suo', 'his, her, its · suo, sua, suoi, sue'],
+    ['suo-formale', 'chi', 'Suo, formale', 'your (formal) · il Suo, la Sua'],
+    ['nostro', 'chi', 'Nostro', 'our · nostro, nostra, nostri, nostre'],
+    ['vostro', 'chi', 'Vostro', 'your (voi) · vostro, vostra, vostri, vostre'],
+    ['loro', 'chi', 'Loro', 'their · il loro, la loro — never changes'],
+    ['famiglia', 'casi', 'In famiglia', 'mia sorella — no article for one'],
+    ['pronomi', 'casi', 'È mio', 'mine, yours, theirs'],
+    ['preposizioni', 'casi', 'Nella mia borsa', 'with a preposition'],
+    ['dopo', 'casi', 'A casa mia', 'after the noun, in set phrases']
   ];
   // [theme, person (who the verb is for; null for a phrase without one), [Italian, English, other English, word for word, other Italian],
   //  the plural the same, or null]
@@ -12220,7 +12225,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       assocKey: 'avverbi-assoc-v1'
     },
     possessives: {
-      kind: 'phrase', sentences: true, panel: 'possessives', doneWord: 'phrases', chipOrder: 'level', themeGroups: POSS_GROUPS, keepPairs: true, numberToggle: true,
+      kind: 'phrase', sentences: true, panel: 'possessives', map: true, numberSwitch: true, doneWord: 'phrases', chipOrder: 'level', themeGroups: POSS_GROUPS, keepPairs: true,   // chosen like the other sections (Nov 2026): La mappa, one Practise switch
       numberKey: 'possessivi', numberLabel: 'Singolare · plurale',
       numberNote: 'Most come in pairs: the singular, then its plural straight after — <em>il mio libro</em>, then <em>i miei libri</em>; <em>mia sorella</em>, then <em>le mie sorelle</em>.',
       switchLabel: 'Possessivi', title: 'Possessivi', subtitle: 'Il Mazzo · I Possessivi',
@@ -13620,8 +13625,10 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const isVerbs = isVerbSubject();
     const modeOptions = isVerbs ? [['conjugations', 'Conjugations'], ['infinitives', 'Infinitives only']]
       : isAdjSubject() ? [['dictionary', 'Dictionary form'], ['forms', 'All forms']]
-      : cfg.numeri ? [['en-it', 'In lettere'], ['it-en', 'In cifre'], ['listen', 'A orecchio']] : null;
-    const currentMode = isVerbs ? verbMode : cfg.numeri ? direction : adjMode;
+      : cfg.numeri ? [['en-it', 'In lettere'], ['it-en', 'In cifre'], ['listen', 'A orecchio']]
+      : cfg.numberSwitch ? [['sg', 'Singolare'], ['both', 'Singolare e plurale']] : null;
+    if (cfg.numberSwitch && !activeNumbers().includes('sg')) saveNumbers(['sg', 'pl']);   // the old toggle's plural-only: both, now
+    const currentMode = isVerbs ? verbMode : cfg.numeri ? direction : cfg.numberSwitch ? (activeNumbers().includes('pl') ? 'both' : 'sg') : adjMode;
     const fam = familyOf(subject) || FAMILIES[0];
     document.getElementById('setup-top').innerHTML = `
       <div class="setup-top-inner">
@@ -13758,6 +13765,12 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       gameArea.querySelectorAll('#mode-toggle .mode-option').forEach(btn => {
         btn.addEventListener('click', () => {
           if (cfg.numeri) { numeriSetMode(btn.dataset.mode); return; }
+          if (cfg.numberSwitch) {   // Possessivi: one card a phrase, or each with its plural straight after
+            saveNumbers(btn.dataset.mode === 'both' ? ['sg', 'pl'] : ['sg']);
+            gameArea.querySelectorAll('#mode-toggle .mode-option').forEach(b => b.classList.toggle('active', b.dataset.mode === btn.dataset.mode));
+            updateReadout();
+            return;
+          }
           if (isVerbs) verbMode = btn.dataset.mode; else adjMode = btn.dataset.mode;
           gameArea.querySelectorAll('#mode-toggle .mode-option').forEach(b => {
             b.classList.toggle('active', b.dataset.mode === btn.dataset.mode);
@@ -14327,7 +14340,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const row = x => {
       const isOpen = open === x, inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length, added = inDeck === x.cells.length && topicInHand(x.t);
       return `
-        <div class="map-row${isOpen ? ' open' : ''}" data-topic="${x.t.key}">
+        <div class="map-row${isOpen ? ' open' : ''}" data-topic="${x.t.key}"${x.t.group ? ` data-group="${x.t.group}"` : ''}>
           <div class="map-line">
           <button type="button" class="map-head" aria-expanded="${isOpen}" aria-label="${escapeHTML(`${x.t.label}, ${x.t.en}: ${x.known} of ${x.cells.length} known (${mapTopicPct(x)}), ${x.tried.length} practised${inDeck ? `, ${inDeck} in your deck` : ''}`)}">
             <span class="map-name"><span class="map-it">${x.t.label}</span><span class="map-en">${x.t.en} · ${x.cells.length}</span>${inDeck ? `<span class="map-indeck">● ${inDeck} in your deck</span>` : ''}</span>
@@ -14357,7 +14370,10 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         </details>
       </div>
       <div class="map-layout">
-        <div class="map-rows">${topics.map(row).join('')}</div>
+        <div class="map-rows">${cfg.themeGroups   // Possessivi (Nov 2026): Di chi? then Casi speciali, in teaching order — mio before loro
+          ? cfg.themeGroups.map(([g, label, en]) => `<div class="map-group" data-group="${g}" data-label="${escapeHTML(label)}"><span class="map-group-name">${label}</span><span class="map-group-en">${en}</span></div>`
+              + inOrder.filter(x => x.t.group === g).map(row).join('')).join('')
+          : topics.map(row).join('')}</div>
         <aside class="endings map-panel" id="map-panel" aria-label="${open ? escapeHTML(open.t.label) : 'The topic you open'}">${open ? mapDetailHTML(open, true) : mapProgressHTML()}</aside>
       </div>`;
   }
@@ -15464,7 +15480,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-20T14:14Z';
+  const BUILD = '2026-11-20T14:52Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

@@ -12,8 +12,16 @@ ok(tabs.length === 13 && tabs[4] === 'Possessivi' && tabs[3] === 'Avverbi e cong
    'a section of its own, after Avverbi e congiunzioni');
 ok(ev('POSS_ITEMS.length') === 71 && ev('POSS_ITEMS.filter(n => n.pl).length') === 46 && ev('POSS_ITEMS.flatMap(cardsForItem).length') === 117,
    '71 phrases — 46 of them singular/plural pairs — 117 cards');
-const groups = [...d.querySelectorAll('#theme-chips .theme-group')].map(g => g.querySelector('.theme-group-btn').textContent + ': ' + g.querySelectorAll('.theme-chip').length);
-ok(groups.join(' · ') === 'Di chi?: 7 · Casi speciali: 4', `the themes: one per owner (mio … loro, and formal Suo), then the special cases (${groups.join(' · ')})`);
+const groups = [...d.querySelectorAll('#noun-map .map-group')].map(g => `${g.dataset.label}: ${d.querySelectorAll(`#noun-map .map-row[data-group="${g.dataset.group}"]`).length}`);
+ok(groups.join(' · ') === 'Di chi?: 7 · Casi speciali: 4', `La mappa: a row per owner (mio … loro, and formal Suo), then the special cases (${groups.join(' · ')})`);
+// ---- Chosen like the other sections (Nov 2026): the map, one Practise switch ----
+const rows = [...d.querySelectorAll('#noun-map .map-row')].map(r => r.dataset.topic);
+ok(rows.join() === ev('POSS_THEMES.map(t => t.key).join()') && rows[0] === 'mio' && rows[6] === 'loro',
+   'the rows keep their teaching order — mio, tuo, suo… loro, then the special cases — whatever you know best');
+ok(d.getElementById('theme-row').hidden && d.getElementById('grid-fold').hidden && !d.getElementById('number-toggle') && !d.getElementById('weak-panel'),
+   'no theme chips, no grid of phrases, no Singolare/Plurale toggle, no Da ripassare: the map is the way to choose');
+ok([...d.querySelectorAll('#mode-toggle .mode-option')].map(b => b.textContent).join() === 'Singolare,Singolare e plurale' && d.querySelector('#mode-toggle .mode-option.active').dataset.mode === 'both',
+   'one Practise switch: Singolare · Singolare e plurale — both, to start with');
 
 // ---- The chart ----
 const chart = d.querySelector('.poss-panel');
@@ -23,11 +31,12 @@ ok(cells.length === 24 && cells.slice(0, 4).join(',') === 'il mio,la mia,i miei,
    'the chart: every form with its article, io to loro, and the rules beside it');
 ok(ev("CHART_TITLES.possessives") === 'I possessivi', 'and in a round, ▦ I possessivi opens it');
 
-// ---- Singular, plural or both: its own setting ----
-d.querySelector('#number-toggle [data-num="pl"]').click();
+// ---- Singular, or with the plural: its own setting ----
+d.querySelector('#mode-toggle [data-mode="sg"]').click();
 ok(JSON.stringify(JSON.parse(B.w.localStorage.getItem('mazzo-verb-persons-v1')).possessivi) === '["sg"]' && !('prepositions' in JSON.parse(B.w.localStorage.getItem('mazzo-verb-persons-v1')))
    && ev('POSS_ITEMS.flatMap(cardsForItem).length') === 71, 'Singolare only: one card a phrase — kept for this section, Preposizioni\'s setting untouched');
-d.querySelector('#number-toggle [data-num="pl"]').click();
+d.querySelector('#mode-toggle [data-mode="both"]').click();
+ok(ev('POSS_ITEMS.flatMap(cardsForItem).length') === 117 && d.querySelector('#mode-toggle .mode-option.active').dataset.mode === 'both', 'Singolare e plurale: each with its plural straight after — 117 cards');
 
 // ---- A pair: the singular, then its plural ----
 B = boot({ 'flipcards-subject': 'possessives' });
