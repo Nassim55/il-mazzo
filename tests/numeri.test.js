@@ -79,6 +79,23 @@ inp.value = '1.987'; inp.dispatchEvent(new B.w.Event('input', { bubbles: true })
 ok(/millenovecentottantasette/.test(d.getElementById('numeri-out').textContent) && d.querySelectorAll('#numeri-out .nb-part').length === 4, '1.987 (with its dot) → millenovecentottantasette, in four parts');
 d.getElementById('chart-close').click();
 
+// ---- Numbers in order (Nov 2026): smallest first, whatever else is in the round ----
+const nums = () => ev('deck.filter(c => c.num).map(c => numeriValue(c))');
+const rising = a => a.every((v, i) => i === 0 || a[i - 1] < v);
+ev("numeriSetMode('en-it'); clearHand(); topicsIn(['cento']); capValue = ''; updateReadout();");
+d.getElementById('start-btn').click();
+ok(nums().length === 101 && nums()[0] === 0 && nums()[100] === 100 && rising(nums()), 'a whole row comes up in order: 0, 1, 2 … 100');
+ev('startGame()');
+ok(rising(nums()) && nums().length === 101, 'playing it again: still in order');
+ev('showSetup(); capValue = "30"; capMode = "random"; updateReadout();');
+d.getElementById('start-btn').click();
+ok(nums().length === 30 && rising(nums()), `a deck size of 30: thirty of them, picked at random, then in order (${nums().slice(0, 6).join(', ')}…)`);
+ev('showSetup(); capValue = "";');
+ev(`startMixedSession([...['n90', 'n5', 'n47', 'n12'].map(k => ({ subj: 'numeri', n: NUMERI_ITEMS.find(x => x.noun === k) })),
+  ...NOUN_ITEMS.slice(0, 4).map(n => ({ subj: 'nouns', n }))], { title: 'Ripasso del giorno', subtitle: 'test', doc: 'test' });`);
+ok(ev('deck.length') === 8 && ev('deck.filter(c => !c.num).length') === 4 && nums().join() === '5,12,47,90', 'a mixed round (Ripasso): the numbers rise in their places — 5, 12, 47, 90 — among the nouns');
+ev('showSetup()');
+
 // ---- Elsewhere, Listen goes back to EN → IT ----
 ev("subject = 'nouns'; showSetup();");
 ok(ev('direction') === 'en-it', 'opening Sostantivi: A orecchio stays in Numeri — the hand is back to EN → IT');

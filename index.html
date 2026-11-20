@@ -12835,7 +12835,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const parts = handSections();
     if (!parts.length) return;
     if (parts.length === 1 && parts[0] === subject) { startPassive(); return; }
-    startPassive(shuffleDeck(handCards()));
+    startPassive(numeriInOrder(shuffleDeck(handCards())));
   }
   function clearHand() {   // the whole hand: every section's deck
     for (const s of Object.keys(SUBJECTS)) {
@@ -14692,8 +14692,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   function passiveDeck() {
     if (playableKeys().size === 0) return [];
     const pool = buildDeck(), cap = effectiveDeckSize();
-    if (capMode === 'frequent' && cap < pool.length) return shuffleDeck(takeCards([...pool].sort((a, b) => compareFrequency(a.noun, b.noun)), cap));
-    return takeCards(shuffleDeck(pool), cap);
+    if (capMode === 'frequent' && cap < pool.length) return numeriInOrder(shuffleDeck(takeCards([...pool].sort((a, b) => compareFrequency(a.noun, b.noun)), cap)));
+    return numeriInOrder(takeCards(shuffleDeck(pool), cap));
   }
 
   async function passiveWake(on) {
@@ -14798,7 +14798,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   }
   function passiveMove(step) {
     let i = passive.index + step;
-    if (i >= passive.cards.length) { i = 0; passive.pass += 1; passive.cards = shuffleDeck(passive.cards); }   // round again, in a new order
+    if (i >= passive.cards.length) { i = 0; passive.pass += 1; passive.cards = numeriInOrder(shuffleDeck(passive.cards)); }   // round again, in a new order
     else if (i < 0) i = passive.cards.length - 1;
     passive.index = i;
   }
@@ -15550,7 +15550,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-20T15:29Z';
+  const BUILD = '2026-11-20T16:26Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
@@ -15955,7 +15955,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         ? others.sort((a, b) => compareFrequency(a.noun, b.noun))
         : verbsFirst(shuffle(others));
       const toAdd = focusLeftovers.concat(restOfPool).slice(0, newSize - deck.length);
-      deck = groupConjugations(deck.concat(shuffle(toAdd)), index + 1); // new cards arrive in random play order (a verb's forms together)
+      deck = numeriInOrder(groupConjugations(deck.concat(shuffle(toAdd)), index + 1), index + 1); // new cards arrive in random play order (a verb's forms together; the numbers in order)
     } else {
       return; // beyond the pool
     }
@@ -15991,12 +15991,24 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const others = sessionPool.filter(c => !inDeck.has(c.key) && !isFocus(c));
     const ordered = sessionPickMode === 'frequent' ? others.sort((a, b) => compareFrequency(a.noun, b.noun)) : verbsFirst(shuffle(others));
     const addR = ordered.slice(0, Math.max(0, rWant - haveR));
-    deck = groupConjugations(kept.concat(shuffle(addF.concat(addR))), index + 1);
+    deck = numeriInOrder(groupConjugations(kept.concat(shuffle(addF.concat(addR))), index + 1), index + 1);
     afterResize(currentKey);
   }
 
   // Shuffle a round's cards; in Preposizioni each item's cards stay together, in their
   // order (del libro, then dei libri), and a deck cut to size never splits a pair
+  // Numbers in order (Nov 2026): wherever number cards fall in a round they come up smallest first, in the
+  // slots they hold; every other card keeps its shuffled place. Applied once the cards are chosen (a deck size
+  // still picks at random), and from `from` on mid-round, so cards already played stay where they were.
+  const numeriValue = c => Number(String(c.noun || c.key || '').replace(/^n/, '')) || 0;
+  function numeriInOrder(cards, from = 0) {
+    const slots = [];
+    for (let i = from; i < cards.length; i++) if (cards[i] && cards[i].num) slots.push(i);
+    if (slots.length < 2) return cards;
+    const sorted = slots.map(i => cards[i]).sort((a, b) => numeriValue(a) - numeriValue(b));
+    slots.forEach((pos, k) => { cards[pos] = sorted[k]; });
+    return cards;
+  }
   function shuffleDeck(cards) {
     if (SUBJECTS[subject].inOrder) return [...cards];   // a scene's lines, in the scene's order
     if (!SUBJECTS[subject].keepPairs) return groupConjugations(shuffle(cards));
@@ -16162,8 +16174,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     if (resume) {
       // Riprendi: the saved deck, in its own order
     } else if (sessionMaxDeck && sessionMaxDeck.length > 0) {
-      // Play again / Reshuffle — replay the current active subset in new order
-      deck = shuffleDeck(deck);
+      // Play again / Reshuffle — replay the current active subset in new order (the numbers, in theirs)
+      deck = numeriInOrder(shuffleDeck(deck));
     } else {
       savedLive = false;   // a new deck: the saved one stays as it was
       // Fresh entry from setup — the pool is the selection (or the whole deck
@@ -16175,10 +16187,10 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       if (capMode === 'frequent' && cap < sessionPool.length) {
         // The N most common nouns of the selection, played in random order
         const byRank = [...sessionPool].sort((a, b) => compareFrequency(a.noun, b.noun));
-        sessionMaxDeck = shuffleDeck(takeCards(byRank, cap));
+        sessionMaxDeck = numeriInOrder(shuffleDeck(takeCards(byRank, cap)));
         sessionPickMode = 'frequent';
       } else {
-        sessionMaxDeck = takeCards(shuffleDeck(sessionPool), cap);
+        sessionMaxDeck = numeriInOrder(takeCards(shuffleDeck(sessionPool), cap));
         sessionPickMode = 'random';
       }
       sessionFocused = false;
@@ -17126,7 +17138,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       sessionMaxDeck = pickedCards;
       sessionFocused = true;
       sessionIsReview = false;   // your own pick, no longer just the missed cards
-      deck = shuffleDeck(pickedCards);
+      deck = numeriInOrder(shuffleDeck(pickedCards));
       index = 0;
       score = 0;
       streak = 0;
