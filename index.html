@@ -2617,7 +2617,7 @@
   .hand-known { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--ink-soft); }
   .hand-bar { display: block; height: 5px; margin-bottom: 5px; border-radius: 3px; background: rgba(28, 22, 17, 0.09); overflow: hidden; }
   .hand-bar i { display: block; height: 100%; background: var(--olive); }
-  .hand-slot { z-index: 0 !important; margin-left: 16px !important; align-items: center; justify-content: center; gap: 10px; text-align: center; background: transparent; box-shadow: none; border: 1.5px dashed rgba(28, 22, 17, 0.28);
+  .hand-slot { z-index: 0 !important; margin-left: 30px !important;   /* past the last card's tilt (about 21px), then a gap */ align-items: center; justify-content: center; gap: 10px; text-align: center; background: transparent; box-shadow: none; border: 1.5px dashed rgba(28, 22, 17, 0.28);
                color: var(--ink-soft); font-size: 12.5px; line-height: 1.35; padding: 16px; }
   .hand-plus { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.28); font-size: 15px; }
   .hand-more, .hand-loose { background: #f6efe0; }
@@ -2642,7 +2642,8 @@
     .hand { padding: 18px 12px; gap: 14px; }
     .hand-fan { flex-basis: 100%; min-height: 160px; padding: 6px 30px 22px; overflow: visible; }
     .hand-card { width: 96px; height: 136px; padding: 8px 8px 10px; margin: 0 calc(var(--ov, 18px) * -1 - 6px); border-radius: 7px; }
-    .hand-slot { margin-left: 12px !important; font-size: 10.5px; padding: 8px; }
+    .hand-slot { margin-left: 22px !important; font-size: 10.5px; padding: 8px; }
+    .hand-fan > .hand-slot:nth-child(n+3) { display: none; }   /* on a phone, + Add is for a hand of none or one: the cards need the room */
     .hand-plus { width: 26px; height: 26px; }
     .hand-name { font-size: 19px; } .hand-name.long { font-size: 16px; } .hand-name.longer { font-size: 14px; } .hand-loose .hand-name { font-size: 15px; }
     .hand-en { font-size: 8px; letter-spacing: 0.1em; } .hand-known { font-size: 8px; } .hand-n { font-size: 10.5px; }
@@ -2906,6 +2907,13 @@
   .rules-btn[hidden], .container:not([data-view="setup"]) .rules-btn { display: none; }
   .chart-overlay.from-setup .chart-pin { display: none; }
   @media (max-width: 600px) { .rules-btn { height: 36px; margin-left: 10px; padding: 0 12px; font-size: 11px; } }
+
+  /* The hand (Nov 2026): a card hovered or focused comes to the top; the fan stays inside its sheet and clear of the + Add slot */
+  .hand-card { z-index: var(--z, auto); }
+  .hand-card:not(.hand-slot):focus-within { z-index: 60; }
+  @media (hover: hover) { .hand-card:not(.hand-slot):hover { z-index: 60; } }
+  .hand-fan > .hand-card:first-child { margin-left: 0; }                         /* no pull past the fan's own edge */
+  .hand-fan > .hand-card:has(+ .hand-slot) { margin-right: 0; }
 
 </style>
 </head>
@@ -12843,6 +12851,27 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     syncChipsToDeck();
     updateReadout();
   }
+  // The fan fits its room (Nov 2026): if the usual overlap would spill the cards past the fan's edge or under
+  // + Add, they share the room evenly instead — on any screen, with any number of cards. The first card's tilt
+  // sits in the fan's left padding; the last one's in + Add's margin.
+  function fitHandFan(fan) {
+    const cards = [...fan.querySelectorAll('.hand-card:not(.hand-slot)')];
+    cards.forEach(c => { c.style.marginLeft = ''; c.style.marginRight = ''; });
+    if (cards.length < 2 || !fan.clientWidth) return;
+    const cs = getComputedStyle(fan), slot = fan.querySelector('.hand-slot');
+    const slotRoom = slot && slot.offsetWidth ? slot.offsetWidth + parseFloat(getComputedStyle(slot).marginLeft) : 0;
+    const w = cards[0].offsetWidth, mid = getComputedStyle(cards[1]);
+    const tilt = slotRoom ? 0 : Math.ceil(cards[0].offsetHeight * 0.11);   // the last card's tilted corner (13°), when no + Add margin takes it
+    const room = fan.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - slotRoom - tilt;
+    const usual = w + parseFloat(mid.marginLeft) + parseFloat(mid.marginRight);   // each card's step along the row, as the stylesheet has it
+    const share = (room - w) / (cards.length - 1);   // the step that just fills the room
+    if (usual > 0 && usual <= share) return;          // the usual fan fits: leave it be
+    const step = Math.max(8, usual > 0 ? Math.min(usual, share) : share);   // never backwards (a big overlap on small cards), never past the room
+    const m = `${(step - w) / 2}px`;
+    cards.forEach((c, i) => { if (i > 0) c.style.marginLeft = m; if (i < cards.length - 1) c.style.marginRight = m; });
+  }
+  let handFitTimer = 0;
+  window.addEventListener('resize', () => { clearTimeout(handFitTimer); handFitTimer = setTimeout(() => { const f = document.getElementById('hand-fan'); if (f) fitHandFan(f); }, 120); });
   function renderHand() {
     const fan = document.getElementById('hand-fan');
     if (!fan) return;
@@ -12874,11 +12903,15 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const main = items.filter(it => !it.loose), loosies = items.filter(it => it.loose);
     const shown = main.slice(-HAND_MAX), folded = main.length - shown.length;
     const all = [...(folded ? [{ more: folded }] : []), ...shown, ...loosies, ...(slotText ? [{ slot: slotText }] : [])];
-    const count = all.length, spread = Math.min(26, 7 * (count - 1)), step = count > 1 ? spread / (count - 1) : 0;
+    // Only the cards fan out (Nov 2026): the + Add slot stands upright after a gap, never under a card; the
+    // stacking order is a variable (--z), so a card hovered or focused can come to the top
+    const cards = all.filter(it => !it.slot);
+    const count = cards.length, spread = Math.min(26, 7 * (count - 1)), step = count > 1 ? spread / (count - 1) : 0;
     const overlap = count <= 4 ? 18 : Math.min(58, 18 + (count - 4) * 10);
-    fan.innerHTML = all.map((it, i) => {
-      const rot = count > 1 ? -spread / 2 + step * i : 0, lift = Math.round(Math.abs(rot) * 1.6);
-      const pos = `style="--rot: ${rot.toFixed(1)}deg; --lift: ${lift}px; --ov: ${overlap}px; z-index: ${i + 1}"`;
+    fan.innerHTML = all.map(it => {
+      const ci = cards.indexOf(it);
+      const rot = it.slot || count < 2 ? 0 : -spread / 2 + step * ci, lift = Math.round(Math.abs(rot) * 1.6);
+      const pos = `style="--rot: ${rot.toFixed(1)}deg; --lift: ${lift}px; --ov: ${overlap}px; --z: ${it.slot ? 0 : ci + 1}"`;
       if (it.slot) return `<div class="hand-card hand-slot" ${pos}><span class="hand-plus" aria-hidden="true">＋</span><span>${it.slot}</span></div>`;
       if (it.more) return `<div class="hand-card hand-more" ${pos}><div class="hand-mid"><span class="hand-name">+${it.more}</span><span class="hand-en">more topic${it.more === 1 ? '' : 's'}</span></div></div>`;
       const x = it.remove ? `<button type="button" class="hand-x" data-hand-remove="${it.remove}" data-section="${it.s}" aria-label="${escapeHTML(it.removeLabel || 'Take it out')}">✕</button>` : '';
@@ -12887,6 +12920,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         + `<div class="hand-mid"><span class="hand-name${size}">${escapeHTML(it.label)}</span><span class="hand-en">${escapeHTML(it.en || '')}</span></div>`
         + `<div class="hand-known">${it.pct != null ? `<span class="hand-bar"><i style="width: ${it.pct}%"></i></span>` : ''}<span><span class="hand-n">${it.n}</span>${it.foot || ''}</span></div></div>`;
     }).join('');
+    fitHandFan(fan);
   }
   // The saved deck, gathered back into the topics it came from: in each section, the topic holding most
   // of what's left, then the next — words in no topic of two or more share a Parole scelte card
@@ -15516,7 +15550,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-20T15:18Z';
+  const BUILD = '2026-11-20T15:29Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

@@ -53,4 +53,16 @@ B.ev("selectedNouns.clear(); updateReadout();");
 B.d.querySelector('#theme-chips [data-theme]').click();
 ok(B.d.querySelectorAll('#hand-fan .hand-card[data-topic]').length === 1 && /Tap a group below/.test(B.d.getElementById('hand-fan').textContent), 'Frasi: a theme chip puts its group in the hand');
 ok(B.errors.length === 0, 'no errors along the way');
+// ---- The fan (Nov 2026): a hovered card can come to the top; + Add stands apart ----
+{
+  const H = boot({ 'flipcards-subject': 'possessives' });
+  H.ev("clearHand(); topicsIn(['mio', 'tuo', 'suo']); updateReadout();");
+  const fanCards = [...H.d.querySelectorAll('#hand-fan .hand-card:not(.hand-slot)')], slot = H.d.querySelector('#hand-fan .hand-slot');
+  ok(fanCards.length === 3 && fanCards.every((c, i) => !c.style.zIndex && c.style.getPropertyValue('--z').trim() === String(i + 1)),
+     'the cards stack by --z, not an inline z-index — so a card hovered or focused can come to the top');
+  ok(slot && slot.style.getPropertyValue('--rot').trim() === '0.0deg' && slot.style.getPropertyValue('--z').trim() === '0'
+     && fanCards[0].style.getPropertyValue('--rot').trim() === '-7.0deg' && fanCards[2].style.getPropertyValue('--rot').trim() === '7.0deg',
+     '+ Add stands upright, out of the fan: only the cards tilt, from -7° to 7°');
+  ok(H.errors.length === 0, 'no errors');
+}
 done();
