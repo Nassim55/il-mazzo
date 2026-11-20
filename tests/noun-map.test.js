@@ -125,7 +125,7 @@ B.ev("direction = 'it-en'; stats = loadStats(); showSetup();");
 ok(!B.d.querySelector('#noun-map .map-cell:not(.new)') && /Italian → English/.test(B.d.querySelector('#noun-map .map-eyebrow').textContent),
    'it follows the direction: Italian → English has its own record');
 ok(B.errors.length === 0, 'no errors along the way');
-// ---- Each row by colour, green to red — known or not (Nov 2026) ----
+// ---- Each row: the known first, then the rest — each green to red (Nov 2026) ----
 const [redKnown, greenNot] = B.ev('NOUN_THEMES[0].nouns.slice(0, 2)');
 B.ev(`(() => { const st = readStats('nouns', 'en-it'); st[${JSON.stringify(redKnown)}] = { seen: 10, wrong: 4 }; st[${JSON.stringify(greenNot)}] = { seen: 10, wrong: 1 };
   localStorage.setItem(SUBJECTS.nouns.statsKeys['en-it'], JSON.stringify(st)); stats = loadStats();
@@ -133,8 +133,9 @@ B.ev(`(() => { const st = readStats('nouns', 'en-it'); st[${JSON.stringify(redKn
   saveSrs('nouns', 'en-it', s); })()`);
 const row0 = B.ev(`(() => { const x = mapTopic(NOUN_THEMES[0], new Map(NOUN_ITEMS.map(n => [n.noun, n])), loadSrs('nouns', 'en-it'), readStats('nouns', 'en-it')); return x.cells.map(c => ({ key: c.key, known: c.known })); })()`);
 const iRed = row0.findIndex(c => c.key === redKnown), iGreen = row0.findIndex(c => c.key === greenNot);
-ok(row0[iRed].known && !row0[iGreen].known && iGreen < iRed, 'a known word with a red history sits after a greener one not yet known — the row goes by colour');
+ok(row0[iRed].known && !row0[iGreen].known && iRed < iGreen, 'a known word, even with a red history, comes before a greener one not yet known');
 ok(B.ev(`(() => { const byKey = new Map(NOUN_ITEMS.map(n => [n.noun, n])); return NOUN_THEMES.every(t => { const x = mapTopic(t, byKey); const r = x.tried.map(c => c.rate || 0);
-  return r.every((v, i) => i === 0 || r[i - 1] <= v) && x.cells.slice(x.tried.length).every(c => !c.seen && !c.known); }); })()`),
-   "every topic's squares run green to red, and the ones not tried yet come last");
+  const k = x.tried.filter(c => c.known).length, run = a => a.every((v, i) => i === 0 || a[i - 1] <= v);
+  return x.tried.slice(0, k).every(c => c.known) && run(r.slice(0, k)) && run(r.slice(k)) && x.cells.slice(x.tried.length).every(c => !c.seen && !c.known); }); })()`),
+   "every topic: the known squares first, then the rest, each running green to red — and the ones not tried yet last");
 done();
