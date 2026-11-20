@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-keo7VANoYS379fZDxaQ5zMOGe/WH/pOKLd7lRyOUkSE=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5hd4oSu7puSWZd4QhDqDB4tabu5l+blB46dOTZnIM2c=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1872,11 +1872,6 @@
 
   /* ===== Sign-in (once per device) ===== */
   .signin-gate { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(243, 234, 216, 0.97); }
-  .signin-card { width: 100%; max-width: 420px; background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.14); border-top: 3px solid var(--terracotta); border-radius: 6px; box-shadow: 0 20px 60px rgba(28, 22, 17, 0.18); padding: 34px 32px 26px; text-align: center; }
-  .signin-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
-  .signin-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 46px; line-height: 1.05; margin: 8px 0 12px; color: var(--ink); }
-  .signin-text { font-size: 15px; line-height: 1.55; color: var(--ink-soft); margin: 0 0 22px; }
-  .signin-button { display: flex; justify-content: center; min-height: 44px; }
   .signin-msg { min-height: 1.2em; margin: 14px 0 0; font-size: 13.5px; color: var(--terracotta); }
 
   /* ===== Verbs: which persons to practise ===== */
@@ -2923,6 +2918,96 @@
   .todo-account b { color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
   .todo-account-acts { display: inline-flex; gap: 8px; }
   .todo-account .ghost { min-height: 36px; padding: 0 10px; font-size: 12px; }
+
+  /* The landing page (Nov 2026): what someone who isn't signed in sees — direction A, "Il tavolo" */
+  html.landing-open, html.landing-open body { overflow: hidden; }
+  .signin-gate.landing { display: block; padding: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--cream); color: var(--ink); font-family: 'DM Sans', sans-serif; }
+  .landing-wrap { max-width: 1200px; margin: 0 auto; box-sizing: border-box; padding-left: clamp(20px, 5vw, 64px); padding-right: clamp(20px, 5vw, 64px); }
+  .landing h1, .landing h2, .landing h3 { margin: 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; color: inherit; }
+  .landing h1 { font-size: clamp(54px, 7vw, 100px); line-height: 0.92; letter-spacing: -0.015em; outline: none; }
+  .landing h2 { font-size: clamp(38px, 4.4vw, 58px); line-height: 1; }
+  .landing p { margin: 0; }
+  .landing-mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #6f6152; }
+  .landing-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--terracotta); }
+  .landing-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: calc(22px + env(safe-area-inset-top, 0px)); padding-bottom: 22px; }
+  .landing-brand { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .landing-brand .landing-mono { font-size: 10px; }
+  .landing-wordmark { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 34px; line-height: 1; }
+  .landing-signin-top { flex: none; min-height: 44px; padding: 0 18px; border: 1px solid var(--ink); border-radius: 22px; background: transparent; color: var(--ink); font: 500 14px 'DM Sans', sans-serif; cursor: pointer; }
+  .landing-signin-top:hover { background: var(--ink); color: var(--cream); }
+  .landing-hero { display: flex; flex-wrap: wrap; align-items: center; gap: clamp(32px, 5vw, 72px); padding-top: clamp(24px, 5vw, 64px); padding-bottom: clamp(56px, 7vw, 104px); }
+  .landing-hero-text { flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+  .landing-lede { max-width: 34em; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.55; color: var(--ink-soft); }
+  .landing-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; }
+  .landing-google { min-height: 44px; min-width: 200px; }
+  .landing-link { padding: 0; border: 0; background: none; color: var(--terracotta); font: 500 15px 'DM Sans', sans-serif; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; min-height: 44px; }
+  .landing .signin-msg { margin: -12px 0 0; }
+  .landing .signin-msg:empty { display: none; }
+  .landing-note { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; line-height: 1.6; color: #6f6152; }
+  .landing-fan { flex: 1 1 400px; min-width: 0; display: flex; justify-content: center; align-items: center; padding: 28px 0 44px; }
+  .landing-card { position: relative; flex: none; width: clamp(96px, 22vw, 150px); aspect-ratio: 150 / 206; margin: 0 calc(-1 * clamp(18px, 3.4vw, 46px)); box-sizing: border-box; padding: clamp(9px, 1.6vw, 13px); display: flex; flex-direction: column; justify-content: space-between; background: #fffaf0; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.16), 0 10px 24px rgba(28, 22, 17, 0.16); }
+  .landing-card-tag { display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: clamp(9px, 1.6vw, 10px); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .landing-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; }
+  .landing-card-word { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: clamp(22px, 4.4vw, 32px); line-height: 1; }
+  .landing-card-word.small { font-size: clamp(20px, 3.8vw, 28px); }
+  .landing-card-en { margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: clamp(9px, 1.6vw, 10px); letter-spacing: 0.12em; text-transform: uppercase; color: #6f6152; }
+  .landing-card-bar { height: 4px; border-radius: 2px; background: rgba(28, 22, 17, 0.08); }
+  .landing-card-bar span { display: block; height: 4px; border-radius: 2px; }
+  .landing-band { background: var(--paper); border-top: 1px solid rgba(28, 22, 17, 0.10); border-bottom: 1px solid rgba(28, 22, 17, 0.10); }
+  .landing-section { padding-top: clamp(56px, 7vw, 104px); padding-bottom: clamp(56px, 7vw, 104px); display: flex; flex-direction: column; gap: clamp(32px, 4vw, 48px); }
+  .landing-head-block { display: flex; flex-direction: column; gap: 12px; max-width: 640px; }
+  .landing-sub { font-size: 17px; line-height: 1.6; color: var(--ink-soft); }
+  .landing-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+  .landing-step { display: flex; flex-direction: column; gap: 16px; padding: 28px; background: var(--cream); border-radius: 14px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.10); }
+  .landing-step p { font-size: 15.5px; line-height: 1.6; color: var(--ink-soft); }
+  .landing-step-art { height: 124px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .landing-step-art.column { flex-direction: column; gap: 14px; }
+  .landing-step-title { display: flex; align-items: baseline; gap: 12px; }
+  .landing-step-title h3 { font-size: 30px; line-height: 1.05; }
+  .landing-step-num { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--terracotta); }
+  .landing-mini { position: relative; width: 76px; height: 98px; margin-right: -12px; box-sizing: border-box; padding: 9px; display: flex; align-items: flex-start; background: #fffaf0; border-radius: 7px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.16), 0 6px 14px rgba(28, 22, 17, 0.12); font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 15px; line-height: 1.05; }
+  .landing-mini:last-child { margin-right: 0; }
+  .landing-key { width: 38px; height: 48px; display: flex; align-items: center; justify-content: center; background: #fffaf0; border-radius: 8px; box-shadow: 0 1px 0 rgba(28, 22, 17, 0.22), inset 0 0 0 1px rgba(28, 22, 17, 0.08); font-size: 21px; }
+  .landing-key.down { background: var(--ink); color: var(--cream); transform: translateY(-6px); }
+  .landing-chip { display: inline-flex; align-items: center; gap: 10px; padding: 8px 10px 8px 14px; background: #fffaf0; border-radius: 22px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.14); }
+  .landing-chip-name { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 19px; }
+  .landing-chip-count { min-width: 26px; height: 26px; padding: 0 6px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; border-radius: 13px; background: var(--terracotta); color: #fffaf0; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .landing-families { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(28px, 3vw, 44px); }
+  .landing-family { display: flex; flex-direction: column; }
+  .landing-family-head { display: flex; align-items: flex-start; gap: 10px; padding-bottom: 14px; border-bottom: 1.5px solid var(--ink); }
+  .landing-family-name { display: flex; flex-direction: column; gap: 6px; min-width: 0; }   /* the Italian name under the English: one line each, however long */
+  .landing-family-head h3 { font-size: 30px; line-height: 1; }
+  .landing-family-head .landing-dot { width: 10px; height: 10px; margin-top: 11px; }
+  .landing-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 14px 0; border-bottom: 1px solid rgba(28, 22, 17, 0.12); }
+  .landing-row-name { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 23px; line-height: 1.15; }
+  .landing-row-count { align-self: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-soft); }
+  .landing-row-desc { grid-column: 1 / -1; font-size: 14px; color: var(--ink-soft); }
+  .landing-progress { flex-direction: row; flex-wrap: wrap; align-items: center; gap: clamp(32px, 5vw, 64px); }
+  .landing-progress-text { flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .landing-legend { display: flex; flex-wrap: wrap; gap: 10px 20px; padding-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: var(--ink-soft); }
+  .landing-legend > span { display: inline-flex; align-items: center; gap: 8px; }
+  .landing-map { flex: 1 1 460px; min-width: 0; box-sizing: border-box; padding: clamp(18px, 2.4vw, 28px); background: #fffaf0; border-radius: 14px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.12), 0 14px 32px rgba(28, 22, 17, 0.10); }
+  .landing-map-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 12px; }
+  .landing-map-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 28px; line-height: 1; }
+  .landing-map-row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; align-items: start; padding: 12px 0; border-top: 1px solid rgba(28, 22, 17, 0.10); }
+  .landing-map-name { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 21px; line-height: 1.1; }
+  .landing-map-sub { margin-top: 2px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #6f6152; }
+  .landing-squares { display: flex; flex-wrap: wrap; gap: 3px; }
+  .landing-squares.row { gap: 4px; }
+  .landing-sq { display: inline-block; flex: none; width: 12px; height: 12px; border-radius: 3px; }
+  .landing-sq.big { width: 14px; height: 14px; }
+  .landing-sq.untried { box-sizing: border-box; border: 1px solid rgba(28, 22, 17, 0.25); }
+  .landing-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: clamp(24px, 3vw, 40px); }
+  .landing-feature { display: flex; flex-direction: column; gap: 12px; color: var(--terracotta); }
+  .landing-feature h3 { font-size: 26px; line-height: 1.1; color: var(--ink); }
+  .landing-feature p { font-size: 15.5px; line-height: 1.6; color: var(--ink-soft); }
+  .landing-end { background: var(--ink); color: var(--cream); }
+  .landing-end-inner { padding-top: clamp(64px, 8vw, 112px); padding-bottom: clamp(64px, 8vw, 112px); display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center; }
+  .landing-end h2 { font-size: clamp(42px, 5.4vw, 72px); }
+  .landing-end p { max-width: 32em; font-size: 17px; line-height: 1.6; color: var(--cream-deep); }
+  .landing-end .landing-note { color: #cdbfa8; }
+  .landing-foot { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px 24px; padding-top: 28px; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); }
+  .landing-foot .landing-mono { color: var(--ink-soft); }
 
 </style>
 </head>
@@ -15374,31 +15459,162 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const el = document.getElementById('signin-msg');
     if (el) el.textContent = text;
   }
+  // The landing page (Nov 2026): what someone who isn't signed in sees, instead of a sign-in card — direction A
+  // of the canvas, "Il tavolo". Signing in is unchanged: Google's own button (under the headline and again in
+  // the closing band), the allowed list, the same messages in #signin-msg. The sections and their counts come
+  // from FAMILIES and each section's items, so the page stays true as words are added.
+  const LANDING_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen', 'Twenty'];
+  function landingHTML() {
+    const word = n => LANDING_WORDS[n] || String(n);
+    const count = s => (SUBJECTS[s] && SUBJECTS[s].items ? SUBJECTS[s].items.length : 0).toLocaleString('en-GB');
+    const COUNT = { numeri: '0 – 1,000,000', dialoghi: 'scenes', story: 'a story' };
+    const DESC = { adjectives: 'Gender and number, in all their forms', story: 'La casa di pietra' };
+    const label = s => NAV_LABEL[s] || SECTION_SHORT[s] || SUBJECTS[s].title;
+    const sections = FAMILIES.reduce((n, f) => n + f.sections.length, 0);
+    const families = FAMILIES.map(f => `
+          <div class="landing-family">
+            <div class="landing-family-head"><span class="landing-dot" style="background: ${f.color}"></span><div class="landing-family-name"><h3>${escapeHTML(f.en.charAt(0).toUpperCase() + f.en.slice(1))}</h3><span class="landing-mono">${escapeHTML(f.name)}</span></div></div>
+            ${f.sections.map(s => `<div class="landing-row"><span class="landing-row-name">${escapeHTML(label(s))}</span><span class="landing-row-count">${COUNT[s] || count(s)}</span><span class="landing-row-desc">${escapeHTML(DESC[s] || SECTION_DESC[s] || '')}</span></div>`).join('')}
+          </div>`).join('');
+    const shade = ['var(--olive)', '#8a9a5b', '#c9a35a', 'var(--terracotta)'];
+    const mapRow = (name, sub, parts) => {
+      const sq = [];
+      parts.forEach((n, i) => { for (let j = 0; j < n; j++) sq.push(`<span class="landing-sq" style="background: ${shade[i]}"></span>`); });
+      while (sq.length < 50) sq.push('<span class="landing-sq untried"></span>');
+      return `<div class="landing-map-row"><div><div class="landing-map-name">${name}</div><div class="landing-map-sub">${sub}</div></div><div class="landing-squares">${sq.join('')}</div></div>`;
+    };
+    const card = (rot, lift, z, dot, tag, word, en, bar, barColour, small) => `
+            <div class="landing-card" style="transform: translateY(${lift}px) rotate(${rot}deg); z-index: ${z}">
+              <div class="landing-card-tag"><span class="landing-dot" style="background: ${dot}"></span>${tag}</div>
+              <div><div class="landing-card-word${small ? ' small' : ''}">${word}</div><div class="landing-card-en">${en}</div></div>
+              <div class="landing-card-bar"><span style="width: ${bar}%; background: ${barColour}"></span></div>
+            </div>`;
+    const google = id => `<div class="landing-google" id="${id}"></div>`;
+    return `
+    <div class="landing-wrap landing-head">
+      <div class="landing-brand"><span class="landing-wordmark">Il Mazzo</span><span class="landing-mono">Italian, one card at a time</span></div>
+      <button type="button" class="landing-signin-top" data-landing-signin>Sign in</button>
+    </div>
+    <section class="landing-wrap landing-hero">
+      <div class="landing-hero-text">
+        <div class="landing-eyebrow">Italian flashcards</div>
+        <h1 id="landing-title" tabindex="-1">Italian,<br>one card<br>at a time.</h1>
+        <p class="landing-lede">Nouns with their articles, verbs in every person, numbers up to a million — and a daily review that brings each word back just before you’d forget it.</p>
+        <div class="landing-cta">${google('signin-button')}<button type="button" class="landing-link" data-landing-how>See how it works</button></div>
+        <p class="signin-msg" id="signin-msg" aria-live="polite"></p>
+        <p class="landing-note">Private for now — sign in with an invited Google account.</p>
+      </div>
+      <div class="landing-fan" role="img" aria-label="A hand of five cards: la casa, parlare, bello, ventuno, Che ore sono?">${[
+        card(-13, 21, 1, 'var(--olive)', 'Sostantivi', 'la casa', 'the house', 80, 'var(--olive)'),
+        card(-6.5, 10, 2, 'var(--terracotta)', 'Verbi', 'parlare', 'io parlo · tu parli', 45, 'var(--gold)'),
+        card(0, 0, 3, 'var(--olive)', 'Aggettivi', 'bello', 'bella · belli · belle', 62, 'var(--olive)'),
+        card(6.5, 10, 4, 'var(--olive)', 'Numeri', 'ventuno', '21', 30, 'var(--terracotta)'),
+        card(13, 21, 5, 'var(--gold)', 'Frasi', 'Che ore sono?', 'what time is it?', 55, 'var(--gold)', true)].join('')}
+      </div>
+    </section>
+    <div class="landing-band" id="landing-how">
+      <section class="landing-wrap landing-section">
+        <div class="landing-head-block"><div class="landing-eyebrow">How it works</div><h2>Pick, play, review.</h2></div>
+        <div class="landing-steps">
+          <div class="landing-step">
+            <div class="landing-step-art" aria-hidden="true"><span class="landing-mini" style="transform: translateY(8px) rotate(-9deg)">il tempo</span><span class="landing-mini" style="z-index: 1">in famiglia</span><span class="landing-mini" style="z-index: 2; transform: translateY(8px) rotate(9deg)">0 – 100</span></div>
+            <div class="landing-step-title"><span class="landing-step-num">01</span><h3>Pick your topics</h3></div>
+            <p>Put whole topics in your hand — the weather, the family, numbers to a hundred — from any section, and play them together.</p>
+          </div>
+          <div class="landing-step">
+            <div class="landing-step-art" aria-hidden="true">${['à', 'è', 'é', 'ì', 'ò', 'ù'].map(c => `<span class="landing-key${c === 'é' ? ' down' : ''}">${c}</span>`).join('')}</div>
+            <div class="landing-step-title"><span class="landing-step-num">02</span><h3>Play a hand</h3></div>
+            <p>Type the Italian with every accent one tap away, flip the card when you’d rather say it aloud, or listen and answer.</p>
+          </div>
+          <div class="landing-step">
+            <div class="landing-step-art column" aria-hidden="true">
+              <span class="landing-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span class="landing-chip-name">Ripasso del giorno</span><span class="landing-chip-count">30</span></span>
+              <span class="landing-squares row">${['var(--terracotta)', 'var(--terracotta)', '#c9a35a', '#c9a35a', '#c9a35a', '#8a9a5b', '#8a9a5b', 'var(--olive)', 'var(--olive)', 'var(--olive)'].map(c => `<span class="landing-sq big" style="background: ${c}"></span>`).join('')}</span>
+            </div>
+            <div class="landing-step-title"><span class="landing-step-num">03</span><h3>Review every day</h3></div>
+            <p>Each day, Ripasso del giorno brings back up to thirty words — the ones you find hardest first — just before you’d forget them.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+    <section class="landing-wrap landing-section">
+      <div class="landing-head-block"><div class="landing-eyebrow">What’s inside</div><h2>The whole deck.</h2><p class="landing-sub">${word(sections)} sections in ${word(FAMILIES.length).toLowerCase()} families — play one, or mix topics from all of them.</p></div>
+      <div class="landing-families">${families}
+      </div>
+    </section>
+    <div class="landing-band">
+      <section class="landing-wrap landing-section landing-progress">
+        <div class="landing-progress-text">
+          <div class="landing-eyebrow">Your progress</div>
+          <h2>Every word gets its own square.</h2>
+          <p class="landing-sub">Every word you practise gets a square on its topic’s map, coloured from red to green by how often you get it right. A word only counts as known once you’ve got it right on three different days.</p>
+          <div class="landing-legend"><span><span class="landing-sq" style="background: var(--olive)"></span>known</span><span><span class="landing-sq" style="background: #c9a35a"></span>learning</span><span><span class="landing-sq" style="background: var(--terracotta)"></span>often wrong</span><span><span class="landing-sq untried"></span>not tried</span></div>
+        </div>
+        <div class="landing-map" role="img" aria-label="An example map of the adjectives: the most common fifty mostly known, the next fifty half known, the next fifty barely started">
+          <div class="landing-map-head"><span class="landing-map-title">Aggettivi</span><span class="landing-mono">The map · English → Italian</span></div>
+          ${mapRow('1–50', 'the 50 most common', [31, 8, 6, 2])}${mapRow('51–100', 'the next 50', [14, 9, 7, 4])}${mapRow('101–150', 'the next 50', [3, 4, 2, 1])}
+        </div>
+      </section>
+    </div>
+    <section class="landing-wrap landing-section">
+      <div class="landing-head-block"><div class="landing-eyebrow">Wherever you are</div><h2>In your pocket, at your desk, on a walk.</h2></div>
+      <div class="landing-features">
+        <div class="landing-feature"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="13" height="9" rx="1.5"></rect><path d="M1 17.5h15"></path><rect x="17" y="8" width="6" height="12" rx="1.5"></rect><path d="M19.5 17.5h1"></path></svg><h3>Phone and computer</h3><p>Sign in once on each, and your progress follows you from one to the other.</p></div>
+        <div class="landing-feature"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l20 20"></path><path d="M5.8 8.6A5.5 5.5 0 0 0 7 19.5h10.5"></path><path d="M10.4 5.1A5.5 5.5 0 0 1 17 9.5h.6a3.9 3.9 0 0 1 3.1 6.3"></path></svg><h3>No connection needed</h3><p>Once opened, Il Mazzo keeps working on the train or the plane, and catches up when you’re back online.</p></div>
+        <div class="landing-feature"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3z"></path><path d="M3 19a2 2 0 0 0 2 2h1v-6H3z"></path></svg><h3>Hands-free</h3><p>A spasso reads each card aloud, then its answer — for a walk, or the washing-up.</p></div>
+      </div>
+    </section>
+    <div class="landing-end">
+      <section class="landing-wrap landing-end-inner">
+        <h2>Ready? Take a card.</h2>
+        <p>Pick a topic and play your first hand. Your progress is kept in your Google account.</p>
+        ${google('signin-button-end')}
+        <p class="landing-note">Private for now — sign in with an invited Google account.</p>
+      </section>
+    </div>
+    <div class="landing-wrap landing-foot"><span class="landing-mono">Il Mazzo · Italian, one card at a time</span><span>Your progress lives in your Google account. Signing out clears the device.</span></div>`;
+  }
   function renderSigninGate(clientId, message = '') {
     let gate = document.getElementById('signin-gate');
     if (!gate) {
       gate = document.createElement('div');
       gate.id = 'signin-gate';
-      gate.className = 'signin-gate';
+      gate.className = 'signin-gate landing';
+      gate.setAttribute('role', 'dialog');
+      gate.setAttribute('aria-modal', 'true');
+      gate.setAttribute('aria-labelledby', 'landing-title');
+      gate.innerHTML = landingHTML();
       document.body.appendChild(gate);
+      document.documentElement.classList.add('landing-open');
+      const app = document.getElementById('container');
+      if (app) app.setAttribute('inert', '');   // the app behind waits: no tabbing or reading into it
+      gate.querySelector('[data-landing-signin]').addEventListener('click', () => {   // Sign in, top right: Google's button, and its quick prompt
+        const b = document.getElementById('signin-button');
+        if (b && b.scrollIntoView) b.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        try { google.accounts.id.prompt(); } catch (e) { /* not loaded yet */ }
+      });
+      gate.querySelector('[data-landing-how]').addEventListener('click', () => {
+        const how = document.getElementById('landing-how');
+        if (how && how.scrollIntoView) how.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      try { document.getElementById('landing-title').focus({ preventScroll: true }); } catch (e) { /* ignore */ }
     }
-    gate.innerHTML = `
-      <div class="signin-card" role="dialog" aria-modal="true" aria-labelledby="signin-title">
-        <div class="signin-eyebrow">Il Mazzo</div>
-        <h2 class="signin-title" id="signin-title">Bentornato</h2>
-        <p class="signin-text">Sign in with Google to keep your progress on every device.</p>
-        <div class="signin-button" id="signin-button"></div>
-        <p class="signin-msg" id="signin-msg" aria-live="polite">${storyEsc(message)}</p>
-      </div>`;
+    signinMessage(message);
     loadGoogleSignIn().then(() => {
       google.accounts.id.initialize({ client_id: clientId, callback: signinWithGoogle, auto_select: true, cancel_on_tap_outside: false });
-      google.accounts.id.renderButton(document.getElementById('signin-button'), { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', width: 260 });
+      for (const id of ['signin-button', 'signin-button-end']) {
+        const el = document.getElementById(id);
+        if (el) google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', width: 260 });
+      }
       google.accounts.id.prompt();
     }).catch(() => signinMessage("Couldn't load Google sign-in — check your connection and reload."));
   }
   function closeSigninGate() {
     const gate = document.getElementById('signin-gate');
     if (gate) gate.remove();
+    document.documentElement.classList.remove('landing-open');
+    const app = document.getElementById('container');
+    if (app) app.removeAttribute('inert');
   }
   async function signinWithGoogle(response) {
     signinMessage('Signing in…');
@@ -15583,7 +15799,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-20T18:59Z';
+  const BUILD = '2026-11-20T21:04Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
