@@ -5520,6 +5520,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     }
     const prev = srs[key] ? { ...srs[key] } : null;
     const r = srs[key] ? { ...srs[key] } : { b: 0, d: t, l: null };
+    if (logIt && typeof r.rd !== 'number') r.rd = knowState(r, readStats(subj, dir)[key]).days;   // days right: counted from now on, from the estimate
     const firstToday = r.l !== t;
     if (correct) {
       if (firstToday) { r.b = Math.min(r.b + 1, SRS_MAX_BOX); r.d = t + SRS_INTERVALS[r.b]; }
@@ -5528,7 +5529,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       r.d = t + 1;
     }
     r.l = t;
-    if (logIt) r.h = `${r.h || ''}${correct ? 1 : 0}`.slice(-KNOW_WINDOW);   // the last answers, for knowState
+    if (logIt) r.h = `${r.h || ''}${correct ? 1 : 0}`.slice(-KNOW_LOG);   // the last 20 answers, for knowState
+    if (logIt && correct && r.rl !== t) { r.rd += 1; r.rl = t; }   // a new day with a right answer
     if (correct && firstToday && r.b < SRS_KNOWN_BOX && knowState(r, readStats(subj, dir)[key]).known) {   // a word you know skips the short gaps (Nov 2026)
       r.b = SRS_KNOWN_BOX;
       r.d = t + SRS_INTERVALS[r.b];
@@ -5547,24 +5549,39 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // And a word you get wrong often isn't known, however good its last 10: wrong more than 1 time
   // in 4 overall (the square's colour past gold, towards terracotta) keeps it out — so the dots
   // and the colours never disagree, and a word that was hard has to bring its record back.
-  const KNOW_WINDOW = 10, KNOW_MIN_RIGHT = 5, KNOW_AT = 0.8, KNOW_BACK = 3, KNOW_MAX_WRONG = 0.25;
+  // Knowing a word (Nov 2026: the last 20 answers, and 3 different days). Known when it's right at least 5 times
+  // and on 8 of the last 10 answers; with no two mistakes in a row (unless 3 right since); wrong no more than
+  // 1 time in 4 over the last 20 answers (applied once more than 10 are logged — below that the 8-of-10 rule
+  // already caps it); and right on at least 3 different days, so one long sitting doesn't make a word known.
+  // Mistakes older than the last 20 answers are forgotten. Days are counted in r.rd (r.rl: the last day
+  // counted). Records from before that are estimated: the Ripasso box (up one a day with a right answer,
+  // back to 1 after a mistake), less one if the word was ever missed — at least 3 if known by the old rule.
+  const KNOW_WINDOW = 10, KNOW_LOG = 20, KNOW_MIN_RIGHT = 5, KNOW_AT = 0.8, KNOW_BACK = 3, KNOW_MAX_WRONG = 0.25, KNOW_DAYS = 3;
   function knowState(r, s) {
-    const log = String((r && r.h) || '').slice(-KNOW_WINDOW);
+    const full = String((r && r.h) || '').slice(-KNOW_LOG), log = full.slice(-KNOW_WINDOW);
     const seen = s && s.seen > 0 ? s.seen : 0, wrong = seen ? Math.min(s.wrong || 0, seen) : 0;
     const olderN = Math.max(0, seen - log.length), olderWrong = Math.max(0, Math.min(olderN, wrong - (log.split('0').length - 1)));
     const fromOld = Math.min(KNOW_WINDOW - log.length, olderN);
     const n = log.length + fromOld;
     const right = (log.split('1').length - 1) + (olderN ? fromOld * (olderN - olderWrong) / olderN : 0);
     const run = log.lastIndexOf('00'), blocked = run >= 0 && !log.slice(run + 2).startsWith('1'.repeat(KNOW_BACK));
-    const often = seen > 0 && wrong / seen > KNOW_MAX_WRONG;   // wrong more than 1 time in 4, overall
-    const pct = n ? right / n : 0, known = right >= KNOW_MIN_RIGHT && pct >= KNOW_AT && !blocked && !often;
+    const wrongIn = h => h.length - (h.split('1').length - 1);
+    const often = full.length > KNOW_WINDOW && wrongIn(full) / full.length > KNOW_MAX_WRONG;   // wrong more than 1 time in 4, over the last 20
+    const pct = n ? right / n : 0, recentOk = right >= KNOW_MIN_RIGHT && pct >= KNOW_AT && !blocked;
+    const oldKnown = recentOk && !(seen > 0 && wrong / seen > KNOW_MAX_WRONG);   // the rule before Nov 2026 (all-time 1 in 4): for the estimate only
+    const box = (r && r.b) || 0, guess = s && s.wrong > 0 ? Math.max(0, box - 1) : box;
+    const days = r && typeof r.rd === 'number' ? r.rd : oldKnown ? Math.max(KNOW_DAYS, guess) : guess;
+    const known = recentOk && !often && days >= KNOW_DAYS;
     // Why it isn't known yet, for the map's tooltips
     const short = Math.ceil(KNOW_MIN_RIGHT - right - 1e-9);
+    let more = 0;
+    for (let h = full; often && more < KNOW_LOG && wrongIn(h) / h.length > KNOW_MAX_WRONG; more++) h = `${h}1`.slice(-KNOW_LOG);
     const why = known || !n ? '' : blocked ? 'two mistakes in a row — 3 right in a row win it back'
       : short > 0 ? `${short} more right answer${short > 1 ? 's' : ''} to count`
       : pct < KNOW_AT ? `right ${Math.round(right)} of your last ${n} — needs ${Math.ceil(KNOW_AT * n - 1e-9)}`
-      : `wrong ${wrong} of ${seen} times — ${Math.max(1, Math.ceil(wrong / KNOW_MAX_WRONG - seen))} more right answer${Math.ceil(wrong / KNOW_MAX_WRONG - seen) === 1 ? '' : 's'} bring it to 1 in 4`;
-    return { n, right, pct, blocked, often, known, why };
+      : often ? `wrong ${wrongIn(full)} of your last ${full.length} — ${more} more right answer${more === 1 ? ' brings' : 's bring'} it to 1 in 4`
+      : `right on ${days} day${days === 1 ? '' : 's'} — needs ${KNOW_DAYS} different days`;
+    return { n, right, pct, blocked, often, days, known, why };
   }
   function srsUndoLast(subj, dir, key) {
     if (!lastSrsChange || lastSrsChange.subj !== subj || lastSrsChange.dir !== dir || lastSrsChange.key !== key) return false;
@@ -13823,7 +13840,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         <span class="mk"><i class="mk-cell mk-in" style="--c: ${mapColor(0.25, 5)}"></i>in your deck</span>
         <details class="map-how"><summary>How it's scored</summary>
           <p>A square's colour is your record with that word — olive if rarely wrong, terracotta if often; fainter after only a few tries.</p>
-          <p>dotted: known — right 5 times or more, and on 8 of your last 10 answers, and wrong no more than 1 time in 4 overall (so a square in the red half is never dotted); a slip won't undo it, two mistakes in a row will (3 right in a row win it back) · the % is how much of the topic you know · hover a square for why</p>
+          <p>dotted: known — right 5 times or more, on 8 of your last 10 answers, wrong no more than 1 time in 4 over your last 20, and right on 3 different days; a slip won't undo it, two mistakes in a row will (3 right in a row win it back), and mistakes older than your last 20 answers are forgotten · the colour is your whole history · the % is how much of the topic you know · hover a square for why</p>
         </details>
       </div>
       <div class="map-layout">
@@ -14934,7 +14951,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-19T17:16Z';
+  const BUILD = '2026-11-20T00:08Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

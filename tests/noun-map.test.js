@@ -50,7 +50,7 @@ const scores = [...map().querySelectorAll('.map-rows .map-row')].map(r => parseI
 const keysNow = [...map().querySelectorAll('.map-rows .map-row')].map(r => r.dataset.topic);
 ok(scores.every((x, i) => i === 0 || scores[i - 1] >= x) && keysNow[0] === [topicOf('casa'), topicOf('libro')].sort((a, b) => pctOf(b) - pctOf(a))[0] && !map().querySelector('[data-map-sort]') && !map().querySelector('#map-hide'),
    'topics by how much you know, the highest at the top — always, with no sort or hide links');
-ok(/dotted: known — right 5 times or more, and on 8 of your last 10 answers/.test(map().querySelector('.shade-key').textContent) && /the % is how much of the topic you know/.test(map().querySelector('.shade-key').textContent), 'the key says what the dots and the % mean');
+ok(/dotted: known — right 5 times or more, on 8 of your last 10 answers, wrong no more than 1 time in 4 over your last 20, and right on 3 different days/.test(map().querySelector('.shade-key').textContent) && /the % is how much of the topic you know/.test(map().querySelector('.shade-key').textContent), 'the key says what the dots and the % mean');
 
 // ---- The panel ----
 ok(panel().classList.contains('endings') && panel().querySelector('.endings-title').textContent === 'I progressi' && panel().querySelectorAll('.prog-tile').length === 3 && panel().querySelectorAll('.prog-chart').length === 2 && panel().querySelector('.prog-tiles + .prog-split'),

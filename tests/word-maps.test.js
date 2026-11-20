@@ -29,7 +29,10 @@ while (B.d.querySelector('.container').dataset.view === 'game' && B.ev('index < 
   B.d.getElementById('answer').value = B.ev('(currentCard ? currentCard() : deck[index]).italian'); B.d.getElementById('submit').click(); B.d.getElementById('submit').click();
 }
 B.ev('showSetup()');
-ok(B.ev("knowState(loadSrs('verbs', 'en-it').ballare, readStats('verbs', 'en-it').ballare).known") && cell('ballare').classList.contains('known'), 'ballare, conjugated right through (six persons): known — every answer counts');
+const ballare = () => B.ev("knowState(loadSrs('verbs', 'en-it').ballare, readStats('verbs', 'en-it').ballare)");
+ok(!ballare().known && ballare().why === 'right on 1 day — needs 3 different days', 'ballare, conjugated right through (six persons) in one round: not yet — right on 1 day');
+B.ev(`(() => { const t0 = today(); today = () => t0 + 1; srsAnswer('verbs', 'en-it', 'ballare', true); today = () => t0 + 2; srsAnswer('verbs', 'en-it', 'ballare', true); today = () => t0; showSetup(); })()`);
+ok(ballare().known && cell('ballare').classList.contains('known'), '…and right on each of the next two days: known — every answer counts');
 const scores = [...B.d.querySelectorAll('#noun-map .map-row')].map(r => parseInt(r.querySelector('.map-score').textContent, 10));
 ok(scores.every((x, i) => i === 0 || scores[i - 1] >= x), 'topics ranked by how much of them you know');
 

@@ -42,9 +42,9 @@ ok(B.ev("loadSrs('story', 'en-it').spesso.l") === B.ev('today()'), 'spesso count
 
 // ---- Known, on the map ----
 B = boot({ 'flipcards-subject': 'avverbi' });
-B.ev("for (let i = 0; i < 5; i++) srsAnswer('avverbi', 'en-it', 'sempre', true); document.getElementById('noun-map').innerHTML = nounMapInner();");
+B.ev(`(() => { const t0 = today(); for (let i = 0; i < 3; i++) srsAnswer('avverbi', 'en-it', 'sempre', true); today = () => t0 + 1; srsAnswer('avverbi', 'en-it', 'sempre', true); today = () => t0 + 2; srsAnswer('avverbi', 'en-it', 'sempre', true); today = () => t0; document.getElementById('noun-map').innerHTML = nounMapInner(); })()`);
 const band = B.ev("SUBJECTS.avverbi.themes.find(t => t.nouns.includes('sempre')).key");
-ok(B.d.querySelector(`.map-row[data-topic="${band}"] .map-cell.known`) && /^sempre — always: /.test(B.d.querySelector(`.map-row[data-topic="${band}"] .map-cell.known`).title), `right 5 times: sempre is known, dotted on the map (in ${band})`);
+ok(B.d.querySelector(`.map-row[data-topic="${band}"] .map-cell.known`) && /^sempre — always: /.test(B.d.querySelector(`.map-row[data-topic="${band}"] .map-cell.known`).title), `right 5 times, on 3 different days: sempre is known, dotted on the map (in ${band})`);
 ok(['avverbi-stats-v1', 'avverbi-stats-iten-v1', 'avverbi-stats-listen-v1', 'avverbi-stats-v1:srs', 'avverbi-assoc-v1'].every(k => B.ev(`syncedKeys().has(${JSON.stringify(k)})`)), 'its progress syncs');
 ok(B.errors.length === 0, 'no errors along the way');
 done();
