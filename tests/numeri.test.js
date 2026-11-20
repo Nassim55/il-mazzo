@@ -1,4 +1,4 @@
-// Numeri (Nov 2026): numbers by how they're built, then real life. In lettere (the digits → the Italian),
+// Numeri (Nov 2026): counting — every number to 100, every hundred to 10.000, every ten thousand to a million. In lettere (the digits → the Italian),
 // In cifre (the Italian → the digits), A orecchio (heard → the digits). Accents and spaces don't count.
 const { boot, ok, done } = require('./harness');
 const B = boot({ 'flipcards-subject': 'numeri' });
@@ -12,17 +12,17 @@ ok(W(1000) === 'mille' && W(2000) === 'duemila' && W(21000) === 'ventunomila' &&
    'mille, then mila; ventunomila; no accent inside a word (ventitremila); all one word');
 ok(W(1e6) === 'un milione' && W(2e6) === 'due milioni' && W(2.1e7) === 'ventun milioni' && W(1.5e6) === 'un milione cinquecentomila' && W(1e9) === 'un miliardo',
    'milione and miliardo apart, as nouns: un milione, due milioni, ventun milioni');
-ok(ev('numeriOrdinal(1)') === 'primo' && ev('numeriOrdinal(11)') === 'undicesimo' && ev('numeriOrdinal(23)') === 'ventitreesimo' && ev('numeriOrdinal(28)') === 'ventottesimo',
-   'ordinals: primo… decimo, then -esimo (ventitreesimo, ventottesimo)');
 
 // ---- The section ----
 ok([...d.querySelectorAll('#family-list-parole .section-name')].map(x => x.textContent).join() === 'Sostantivi,Aggettivi,Numeri,Avverbi e congiunzioni,Possessivi,Preposizioni'
-   && ev("SECTION_DESC.numeri") === 'Counting, prices, times and dates', 'Numeri sits in Parole, after Aggettivi: Counting, prices, times and dates');
-ok(ev('NUMERI_ITEMS.length') === 230 && ev('NUMERI_THEMES.map(t => t.nouns.length).join()') === '11,9,8,72,24,24,10,20,16,16,20'
-   && ev('NUMERI_ITEMS.every(n => n.note)') && ev('new Set(NUMERI_ITEMS.map(n => n.en)).size') === 230, '230 numbers in eleven rows, each with its note, every prompt different');
-ok(d.querySelectorAll('#noun-map .map-row').length === 11 && /In lettere/.test(d.querySelector('.map-eyebrow').textContent)
+   && ev("SECTION_DESC.numeri") === 'Counting, from zero to a million', 'Numeri sits in Parole, after Aggettivi: Counting, from zero to a million');
+ok(ev('NUMERI_ITEMS.length') === 299 && ev('NUMERI_THEMES.map(t => t.nouns.length).join()') === '101,99,99'
+   && ev("NUMERI_THEMES.map(t => NUMERI_DATA.find(p => p.key === t.nouns[0]).en + '-' + NUMERI_DATA.find(p => p.key === t.nouns[t.nouns.length - 1]).en).join()") === '0-100,200-10.000,20.000-1.000.000'
+   && ev('NUMERI_ITEMS.every(n => n.note)') && ev('new Set(NUMERI_ITEMS.map(n => n.en)).size') === 299,
+   '299 numbers in three rows — every number to 100, every hundred to 10.000, every ten thousand to a million — each with its note');
+ok(d.querySelectorAll('#noun-map .map-row').length === 3 && /In lettere/.test(d.querySelector('.map-eyebrow').textContent)
    && [...d.querySelectorAll('#mode-toggle .mode-option')].map(b => b.textContent).join() === 'In lettere,In cifre,A orecchio' && d.querySelector('#mode-toggle .mode-option.active').textContent === 'In lettere',
-   'the map: eleven rows; the switch In lettere · In cifre · A orecchio — In lettere to start with');
+   'the map: three rows; the switch In lettere · In cifre · A orecchio — In lettere to start with');
 
 // ---- In lettere: the digits, you write the Italian ----
 const pick = keys => ev(`clearHand(); ${JSON.stringify(keys)}.forEach(k => selectedNouns.add(k)); updateReadout();`);
@@ -40,8 +40,8 @@ const play = (keys, answers) => {
   ev('showSetup()');
   return out;
 };
-const lettere = play(['n23', 'y2026', 'n108', 'e350', 't0745'], { n23: 'ventitre', y2026: 'duemila ventisei', n108: 'centotto', e350: 'tre e cinquanta', t0745: 'le sette e quarantacinque' });
-ok(lettere.length === 5 && lettere.every(r => r.right), `In lettere: ventitre (no accent), duemila ventisei (a space), centotto, tre e cinquanta, le sette e quarantacinque — all right (${lettere.filter(r => !r.right).map(r => r.key).join(', ') || 'all'})`);
+const lettere = play(['n23', 'n2600', 'n180000', 'n100'], { n23: 'ventitre', n2600: 'duemila seicento', n180000: 'centoottantamila', n100: 'cento' });
+ok(lettere.length === 4 && lettere.every(r => r.right), `In lettere: ventitre (no accent), duemila seicento (a space), centoottantamila (cento's o kept), cento — all right (${lettere.filter(r => !r.right).map(r => r.key).join(', ') || 'all'})`);
 ok(/ventitré/.test(lettere.find(r => r.key === 'n23').fb), '…and the card shows the right spelling: ventitré');
 
 // ---- In cifre: the Italian, you type the digits ----

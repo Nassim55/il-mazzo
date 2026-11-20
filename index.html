@@ -2931,8 +2931,7 @@
       <div class="mz-row mz-digits"><button type="button" class="mz-key" data-k="1">1</button><button type="button" class="mz-key" data-k="2">2</button><button type="button" class="mz-key" data-k="3">3</button></div>
       <div class="mz-row mz-digits"><button type="button" class="mz-key" data-k="4">4</button><button type="button" class="mz-key" data-k="5">5</button><button type="button" class="mz-key" data-k="6">6</button></div>
       <div class="mz-row mz-digits"><button type="button" class="mz-key" data-k="7">7</button><button type="button" class="mz-key" data-k="8">8</button><button type="button" class="mz-key" data-k="9">9</button></div>
-      <div class="mz-row mz-digits"><button type="button" class="mz-key mz-fn" data-k="," aria-label="comma">,</button><button type="button" class="mz-key" data-k="0">0</button><button type="button" class="mz-key mz-fn" data-k=":" aria-label="colon">:</button></div>
-      <div class="mz-row mz-digits"><button type="button" class="mz-key mz-fn" data-k="/" aria-label="slash">/</button><button type="button" class="mz-key mz-del" data-k="del" aria-label="Delete"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h11v14H9l-6-7z"/><path d="M13 9l5 6M18 9l-5 6"/></svg></button><button type="button" class="mz-key mz-go" data-k="go" aria-label="Check"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+      <div class="mz-row mz-digits"><button type="button" class="mz-key mz-del" data-k="del" aria-label="Delete"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h11v14H9l-6-7z"/><path d="M13 9l5 6M18 9l-5 6"/></svg></button><button type="button" class="mz-key" data-k="0">0</button><button type="button" class="mz-key mz-go" data-k="go" aria-label="Check"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
     </div>
 
     <div id="controls"></div>
@@ -8967,14 +8966,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     }
     return out;
   }
-  const NUMERI_ORD = { 1: 'primo', 2: 'secondo', 3: 'terzo', 4: 'quarto', 5: 'quinto', 6: 'sesto', 7: 'settimo', 8: 'ottavo', 9: 'nono', 10: 'decimo' };
-  function numeriOrdinal(n) {   // -esimo: drop the last vowel and add it — but tre and sei keep theirs (ventitreesimo)
-    if (NUMERI_ORD[n]) return NUMERI_ORD[n];
-    const w = numeriWords(n).replace(/tré$/, 'tre');
-    return /(tre|sei)$/.test(w) ? `${w}esimo` : `${w.slice(0, -1)}esimo`;
-  }
   const numeriDigits = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');   // 1.000, 21.000 — Italian thousands
-  // The 230 numbers, in eleven rows by how they're built — then real life: prices, the time, dates
+  // The 299 numbers, in three rows: every number to 100, every hundred to 10.000, every ten thousand to a million
   const NUMERI_NOTES = {
     n0: "From Arabic <em>ṣifr</em>, empty, through medieval Latin <em>zephirum</em> — the same word gave English 'cipher'.",
     n1: "From Latin <em>unus</em>. Before a noun it shortens like the article: <em>un libro</em>, <em>una casa</em> — and so does a longer number: <em>ventun anni</em>.",
@@ -9007,53 +9000,6 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     n100: "From Latin <em>centum</em> — English 'cent', 'century'. It never changes: <em>duecento</em>, <em>trecento</em>; and <em>per cento</em> is per cent.",
     n1000: "From Latin <em>mille</em> — English 'millennium', 'mile' (a thousand paces). From two thousand it becomes <em>mila</em>: <em>duemila</em>.",
     n1000000: "Italian's own word: <em>mille</em> + <em>-one</em>, 'a big thousand' — English took 'million' from it. It's a noun: <em>un milione di euro</em>.",
-    n1000000000: "From French <em>milliard</em>: a thousand million, what English calls a billion. <em>Un miliardo di persone</em>.",
-    o1: "From Latin <em>primus</em> — English 'prime', 'primary'. Written <em>1º</em>; it agrees like any adjective: <em>la prima volta</em>.",
-    o2: "From Latin <em>secundus</em>, following — English 'second'. <em>Il secondo</em> is also the main course.",
-    o3: "From Latin <em>tertius</em> — English 'tertiary'. <em>Un terzo</em>: a third.",
-    o4: "From Latin <em>quartus</em>. <em>Un quarto</em>: a quarter — as in <em>le otto e un quarto</em>.",
-    o5: "From Latin <em>quintus</em> — English 'quintessence'.",
-    o6: "From Latin <em>sextus</em>. <em>Il sesto senso</em>: the sixth sense.",
-    o7: "From Latin <em>septimus</em>. <em>Al settimo cielo</em>: in seventh heaven.",
-    o8: "From Latin <em>octavus</em> — English 'octave'. <em>Gli ottavi di finale</em>: the round of sixteen.",
-    o9: "From Latin <em>nonus</em> — English 'noon' was once the ninth hour, <em>nona hora</em>.",
-    o10: "From Latin <em>decimus</em> — English 'decimate'. From eleven on, ordinals simply add <em>-esimo</em>.",
-    t0700: "<em>Le sette</em>: <em>le</em> stands for <em>le ore</em>, the hours. <em>Che ore sono? Sono le sette.</em>",
-    t0715: "<em>E un quarto</em>: and a quarter — <em>le sette e quindici</em> works too.",
-    t0730: "<em>E mezza</em> (or <em>e mezzo</em>): half past. Timetables say <em>le sette e trenta</em>.",
-    t0745: "Quarter to is <em>meno un quarto</em>: the next hour, less a quarter. Stations say <em>le sette e quarantacinque</em>.",
-    t0805: "Minutes past: <em>e</em> and the number — <em>le otto e cinque</em>.",
-    t0820: "<em>Le otto e venti</em> — no word for minutes needed.",
-    t0840: "After half past, people count down to the next hour: <em>le nove meno venti</em>.",
-    t0855: "<em>Le nove meno cinque</em>: five to nine.",
-    t0910: "<em>Le nove e dieci</em>: ten past nine.",
-    t0100: "One o'clock is singular: <em>è l'una</em>, never <em>sono le uno</em>.",
-    t0130: "<em>L'una e mezza</em>: half past one — still singular, <em>è l'una e mezza</em>.",
-    t1200: "Noon: <em>mezzogiorno</em>, the middle of the day. <em>A mezzogiorno</em>: at noon.",
-    t0000: "Midnight: <em>mezzanotte</em>, the middle of the night.",
-    t1300: "The 24-hour clock is everyday Italian: <em>le tredici</em> on tickets and timetables, <em>l'una</em> in conversation.",
-    t1830: "<em>Le diciotto e trenta</em> on a ticket; <em>le sei e mezza</em> with friends.",
-    t2115: "<em>Le ventuno e quindici</em> — or, talking, <em>le nove e un quarto</em> (di sera).",
-    d0101: "The first of the month is always <em>primo</em>; every other day is a plain number — <em>il due gennaio</em>. Capodanno: New Year's Day.",
-    d0601: "<em>Il sei gennaio</em>: Epiphany, when the Befana brings sweets to children.",
-    d1402: "<em>Il quattordici febbraio</em>: San Valentino. Months take a small letter.",
-    d0803: "<em>L'otto marzo</em>: <em>il</em> becomes <em>l'</em> before <em>otto</em> and <em>undici</em>. It's Festa della donna, women's day.",
-    d2504: "<em>Il venticinque aprile</em>: Liberation Day, for the end of the war in Italy in 1945.",
-    d0105: "<em>Il primo maggio</em>: Labour Day. <em>Primo</em> for the first, plain numbers after.",
-    d0206: "<em>Il due giugno</em>: Festa della Repubblica, for the 1946 referendum.",
-    d1508: "<em>Il quindici agosto</em>: Ferragosto, the heart of the Italian summer holiday.",
-    d1109: "<em>L'undici settembre</em>: before a vowel, <em>il</em> becomes <em>l'</em>.",
-    d0111: "<em>Il primo novembre</em>: Ognissanti, All Saints' Day.",
-    d2512: "<em>Il venticinque dicembre</em>: Natale.",
-    d3112: "<em>Il trentuno dicembre</em>: San Silvestro, New Year's Eve.",
-    y1492: "Years are said in full: <em>nel millequattrocentonovantadue</em>, when Cristoforo Colombo, from Genoa, crossed the Atlantic.",
-    y1861: "<em>Nel milleottocentosessantuno</em> Italy was unified — <em>l'Unità d'Italia</em>.",
-    y1946: "<em>Nel millenovecentoquarantasei</em> Italians voted for a republic.",
-    y1969: "<em>Nel millenovecentosessantanove</em>: the Moon landing, <em>lo sbarco sulla Luna</em>.",
-    y1989: "<em>Nel millenovecentottantanove</em> the Berlin Wall fell — and <em>cento</em> loses its o before <em>ottanta</em>.",
-    y2000: "<em>Il duemila</em>: the year 2000 — and <em>gli anni Duemila</em>, the 2000s.",
-    y2006: "<em>Nel duemilasei</em> Italy won the World Cup, in Berlin.",
-    y2026: "<em>Il duemilaventisei</em>: this year. All one word.",
   };
   function numeriNote(n) {   // the rule a spelling uses, for numbers without a note of their own
     const w = numeriWords(n), em = s => `<em>${s}</em>`;
@@ -9072,70 +9018,21 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     }
     if (n < 1e6) {
       if (n < 2000) return `${em('Mille')}, then the rest, all in one word: ${em(w)}${/tré$/.test(w) ? ` — the final ${em('tre')} takes its accent` : ''}.`;
-      if (Math.floor(n / 1000) % 10 === 1 && Math.floor(n / 1000) > 20) return `${em('Ventuno')} stays whole before ${em('mila')}: ${em(w)} — one word, as numbers below a million are.`;
+      if (/centottant/.test(w)) return `${em('Cento')} loses its o before ${em('ottanta')}, and ${em('mille')} becomes ${em('mila')}: ${em(w)} — all one word.`;
       return `From two thousand up, ${em('mille')} becomes ${em('mila')}, and it's all one word: ${em(w)}.`;
     }
-    if (n === 1500000) return `${em(w)} — most people simply say ${em('un milione e mezzo')}. ${em('Milione')} is a noun: written apart, with ${em('di')} before what it counts.`;
-    if (Math.floor(n / 1e6) === 21) return `${em(w)}: ${em('ventuno')} shortens before a noun, like ${em('un')}. ${em('Milioni')} take ${em('di')}: ${em('ventun milioni di abitanti')}.`;
     return `${em('Milione')} and ${em('miliardo')} are nouns: written apart, plural ${em('milioni')} and ${em('miliardi')}, with ${em('di')} before what they count — ${em(`${w} di euro`)}.`;
   }
-  const NUMERI_THEMES_DEF = [
-    ['dieci', 'Da zero a dieci', 'zero to ten'], ['teen', 'Da undici a diciannove', 'the teens'], ['decine', 'Le decine', 'venti, trenta… novanta'],
-    ['composti', 'Da 21 a 99', 'tens and units'], ['centinaia', 'Le centinaia', 'cento, duecento…'], ['migliaia', 'Le migliaia', 'mille, duemila…'],
-    ['milioni', 'Milioni e miliardi', 'un milione di…'], ['ordinali', 'Gli ordinali', 'primo, secondo…'], ['prezzi', 'I prezzi', '€ 3,50 — tre euro e cinquanta'],
-    ['ora', "L'ora", '7:45 — le otto meno un quarto'], ['date', 'Le date', 'il primo maggio · 1861']];
+  const NUMERI_THEMES_DEF = [   // simply counting (Nov 2026: three rows, no topics)
+    ['cento', 'Da zero a cento', 'every number'], ['diecimila', 'Fino a diecimila', 'by hundreds'], ['milione', 'Fino a un milione', 'by ten thousands']];
   const NUMERI_DATA = (() => {
     const out = [];
     const add = (theme, key, en, it, itAlts = [], enAlts = []) => out.push({ key, en, it, itAlts: [...new Set(itAlts)].filter(x => x !== it), enAlts: [...new Set(enAlts)].filter(x => x !== en),
                                                                           reg: 'neutral', themes: [theme], num: true, note: NUMERI_NOTES[key] || null });
     const cardinal = (theme, n) => { add(theme, `n${n}`, numeriDigits(n), numeriWords(n), numeriAlts(n)); out[out.length - 1].note = out[out.length - 1].note || numeriNote(n); };
-    for (let n = 0; n <= 10; n++) cardinal('dieci', n);
-    for (let n = 11; n <= 19; n++) cardinal('teen', n);
-    for (let n = 20; n <= 90; n += 10) cardinal('decine', n);
-    for (let n = 21; n <= 99; n++) if (n % 10) cardinal('composti', n);
-    [100, 101, 103, 108, 110, 111, 120, 150, 180, 199, 200, 201, 203, 208, 250, 280, 300, 333, 400, 500, 600, 700, 800, 999].forEach(n => cardinal('centinaia', n));
-    [1000, 1001, 1003, 1008, 1100, 1200, 1500, 1800, 1999, 2000, 2001, 2500, 3000, 5000, 8000, 10000, 11000, 15000, 20000, 21000, 28000, 50000, 100000, 500000].forEach(n => cardinal('migliaia', n));
-    [1e6, 1.5e6, 2e6, 1e7, 2.1e7, 6e7, 1e8, 1e9, 2e9, 8e9].forEach(n => cardinal('milioni', n));
-    out.find(p => p.key === 'n1500000').itAlts.push('un milione e cinquecentomila', 'un milione e mezzo');
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 20, 21, 23, 28, 30, 50, 100, 1000].forEach(n => {
-      const w = numeriOrdinal(n), base = numeriWords(n);
-      add('ordinali', `o${n}`, `${numeriDigits(n)}º`, w, [w.replace(/o$/, 'a')], [String(n)]);
-      const p = out[out.length - 1];
-      p.note = p.note || (n === 23 ? `From eleven, drop the last vowel and add <em>-esimo</em> — but <em>tre</em> keeps its e (and loses its accent): <em>ventitreesimo</em>.`
-        : `From eleven, drop the number's last vowel and add <em>-esimo</em>: <em>${base}</em> → <em>${w}</em>.`);
-    });
-    const euro = (e, c) => {   // the price, and the ways people say it
-      const ew = e === 0 ? '' : e === 1 ? 'un euro' : `${numeriWords(e)} euro`, cw = c ? numeriWords(c) : '';
-      const it = !e ? `${cw} centesimi` : c ? `${ew} e ${cw}` : ew;
-      const alts = !e ? [] : c ? [`${numeriWords(e)} e ${cw}`, `${ew} e ${cw} centesimi`, `${ew} ${cw}`] : [];
-      const en = `€ ${numeriDigits(e)},${String(c).padStart(2, '0')}`, enAlts = [];
-      if (!c) enAlts.push(String(e), numeriDigits(e)); else if (c % 10 === 0) enAlts.push(`${e},${c / 10}`);
-      add('prezzi', `e${e * 100 + c}`, en, it, alts, enAlts);
-      const p = out[out.length - 1];
-      p.note = !e ? 'Under a euro, just the cents: <em>cinquanta centesimi</em> — <em>un centesimo</em>, a cent.'
-        : e === 1 && !c ? '<em>Un euro</em>: <em>uno</em> shortens before a noun, like the article. And <em>euro</em> never changes: <em>due euro</em>.'
-        : !c ? `<em>${it}</em> — <em>euro</em> never takes an s.`
-        : `The euros, then <em>e</em> and the cents: <em>${it}</em>. In a shop you'll often hear just <em>${numeriWords(e)} e ${cw}</em>.`;
-    };
-    [[0, 50], [1, 0], [1, 20], [1, 50], [2, 99], [3, 50], [4, 80], [5, 0], [9, 90], [12, 90], [15, 0], [20, 50], [49, 99], [100, 0], [250, 0], [1500, 0]].forEach(([e, c]) => euro(e, c));
-    [['0700', '7:00', 'le sette', ['sono le sette'], ['7', '07:00', '19:00']], ['0715', '7:15', 'le sette e un quarto', ['le sette e quindici'], ['07:15', '19:15']],
-     ['0730', '7:30', 'le sette e mezza', ['le sette e mezzo', 'le sette e trenta'], ['07:30', '19:30']],
-     ['0745', '7:45', 'le otto meno un quarto', ['le sette e quarantacinque', 'le sette e tre quarti', 'le otto meno quindici'], ['07:45', '19:45']],
-     ['0805', '8:05', 'le otto e cinque', [], ['08:05', '20:05']], ['0820', '8:20', 'le otto e venti', [], ['08:20', '20:20']],
-     ['0840', '8:40', 'le nove meno venti', ['le otto e quaranta'], ['08:40', '20:40']], ['0855', '8:55', 'le nove meno cinque', ['le otto e cinquantacinque'], ['08:55', '20:55']],
-     ['0910', '9:10', 'le nove e dieci', [], ['09:10', '21:10']], ['0100', '1:00', "l'una", ["è l'una"], ['1', '01:00', '13:00', '13']],
-     ['0130', '1:30', "l'una e mezza", ["l'una e mezzo", "l'una e trenta"], ['01:30', '13:30']], ['1200', '12:00', 'mezzogiorno', ['le dodici', 'è mezzogiorno'], ['12']],
-     ['0000', '0:00', 'mezzanotte', ['le ventiquattro', 'è mezzanotte'], ['00:00', '24:00', '24']], ['1300', '13:00', 'le tredici', ["l'una"], ['13', '1:00']],
-     ['1830', '18:30', 'le diciotto e trenta', ['le sei e mezza', 'le sei e mezzo', 'le diciotto e mezza'], ['6:30']],
-     ['2115', '21:15', 'le ventuno e quindici', ['le nove e un quarto', 'le ventuno e un quarto'], ['9:15']]]
-      .forEach(([k, en, it, alts, enAlts]) => add('ora', `t${k}`, en, it, [...alts, ...alts.concat([it]).filter(a => /^le |^l'/.test(a)).map(a => a.replace(/^le |^l'/, ''))], enAlts));
-    const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
-    [[1, 1], [6, 1], [14, 2], [8, 3], [25, 4], [1, 5], [2, 6], [15, 8], [11, 9], [1, 11], [25, 12], [31, 12]].forEach(([d, m]) => {
-      const day = d === 1 ? 'primo' : numeriWords(d), art = /^[aeiou]/.test(day) ? "l'" : 'il ', it = `${art}${day} ${MONTHS[m - 1]}`;
-      add('date', `d${String(d).padStart(2, '0')}${String(m).padStart(2, '0')}`, `${d} ${MONTHS[m - 1]}`, it, [`${day} ${MONTHS[m - 1]}`],
-          [`${d}/${m}`, `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`, `${d}/${String(m).padStart(2, '0')}`]);
-    });
-    [1492, 1861, 1946, 1969, 1989, 2000, 2006, 2026].forEach(y => add('date', `y${y}`, String(y), numeriWords(y)));
+    for (let n = 0; n <= 100; n++) cardinal('cento', n);                   // every number
+    for (let n = 200; n <= 10000; n += 100) cardinal('diecimila', n);      // every hundred (0 and 100 are counted above)
+    for (let n = 20000; n <= 1000000; n += 10000) cardinal('milione', n);  // every ten thousand
     return out;
   })();
   const NUMERI_ITEMS = NUMERI_DATA.map(p => ({ noun: p.key, display: p.it, it: p.it, en: p.en, phrase: p, note: p.note }));
@@ -12304,9 +12201,9 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     },
     numeri: {
       kind: 'phrase', panel: 'numeri', map: true, numeri: true, doneWord: 'numbers', chipOrder: 'frequency',
-      switchLabel: 'Numeri', title: 'Numeri', subtitle: 'Il Mazzo · Contare, prezzi, ore e date',
+      switchLabel: 'Numeri', title: 'Numeri', subtitle: 'Il Mazzo · Da zero a un milione',
       setupTitle: 'Choose your numbers',
-      setupSub: 'Numbers by how they are built, then real life: prices, the time, dates. <em>In lettere</em>: see the digits, write the Italian. <em>In cifre</em>: the other way. <em>A orecchio</em>: hear it, type the digits. Accents and spaces don\'t count; the card always shows the right spelling.',
+      setupSub: 'Counting: every number to a hundred, every hundred to ten thousand, every ten thousand to a million. <em>In lettere</em>: see the digits, write the Italian. <em>In cifre</em>: the other way. <em>A orecchio</em>: hear it, type the digits. Accents and spaces don\'t count; the card always shows the right spelling, and the number in its parts.',
       itemWord: 'number', itemWords: 'numbers',
       items: NUMERI_ITEMS, themes: NUMERI_THEMES, frequency: NUMERI_ITEMS.map(n => n.noun),
       statsKeys: { 'en-it': 'numeri-stats-v1', 'it-en': 'numeri-stats-iten-v1', listen: 'numeri-stats-listen-v1' }, statsFormat: 'noun',
@@ -12426,7 +12323,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     { key: 'frasi', name: 'Frasi e storie', en: 'sentences & stories', color: 'var(--gold)', sections: ['phrases', 'sentences', 'dialoghi', 'story'] },
   ];
   const SECTION_DESC = {   // the header's menus (Nov 2026): a line under each section's name
-    nouns: 'Nouns, with their articles', adjectives: 'Gender and number', numeri: 'Counting, prices, times and dates', avverbi: 'The little words: adverbs, linking words',
+    nouns: 'Nouns, with their articles', adjectives: 'Gender and number', numeri: 'Counting, from zero to a million', avverbi: 'The little words: adverbs, linking words',
     possessives: 'Mio, tuo, suo — with their articles', prepositions: 'Di, a, da, in — and with the article',
     verbs: 'Regular verbs: -are, -ere, -ire', irregular: 'Essere, avere, fare, andare…', mipiace: 'Mi piace, mi manca, mi serve…',
     phrases: 'Everyday phrases', sentences: 'Put whole sentences together', dialoghi: 'Scenes from daily life', story: 'La casa di pietra, a story',
@@ -15567,7 +15464,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-20T14:07Z';
+  const BUILD = '2026-11-20T14:14Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
