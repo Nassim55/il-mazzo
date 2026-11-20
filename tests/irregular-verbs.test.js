@@ -5,7 +5,7 @@ const setAside = s => ev(`window.__aside = window.__aside || {}; window.__aside[
 const putBack = s => ev(`(window.__aside['${s}'] || []).forEach(k => subjectState['${s}'].selected.add(k)); subjectState['${s}'].topics = null;`);
 ok(warns.length === 0 && errors.length === 0, 'loads with no validator warnings or errors');
 const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => (b.querySelector('.section-name') || b).textContent.trim());
-ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Aggettivi', 'Avverbi e congiunzioni', 'Possessivi', 'Preposizioni', 'Regolari', 'Irregolari', 'Al contrario', 'Frasi', 'Scrittura', 'Dialoghi', 'Racconto']   /* the header's menus, family by family */), `subject switch: ${labels.join(' | ')}`);
+ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Aggettivi', 'Numeri', 'Avverbi e congiunzioni', 'Possessivi', 'Preposizioni', 'Regolari', 'Irregolari', 'Al contrario', 'Frasi', 'Scrittura', 'Dialoghi', 'Racconto']   /* the header's menus, family by family */), `subject switch: ${labels.join(' | ')}`);
 // Regular section keeps its own panel
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
 ok(d.querySelector('.map-chart .endings-title')?.textContent === 'Le desinenze' && !d.querySelector('.irregular-panel') && d.querySelectorAll('.verb-chip').length === 150, 'regular section: Le desinenze in the map\'s panel, 150 verbs');

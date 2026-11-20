@@ -13,8 +13,8 @@ const fams = [...d.querySelectorAll('.sections .family .family-name')].map(e => 
 const names = key => [...d.querySelectorAll(`#family-list-${key} .mode-option`)].map(b => b.querySelector('.section-name').textContent);
 const open = () => [...d.querySelectorAll('.family-menu.open')].map(m => m.dataset.familyMenu);
 ok(fams.join('|') === 'Parole|Verbi|Frasi e storie' && d.querySelector('.family[data-family="parole"]').classList.contains('active') && open().length === 0
-   && names('parole').join('|') === 'Sostantivi|Aggettivi|Avverbi e congiunzioni|Possessivi|Preposizioni' && d.querySelector('#family-list-parole [data-subject="nouns"]').classList.contains('active'),
-   `three families, Parole current, every menu closed; Parole's holds its five sections (${names('parole').join(', ')}), Sostantivi marked`);
+   && names('parole').join('|') === 'Sostantivi|Aggettivi|Numeri|Avverbi e congiunzioni|Possessivi|Preposizioni' && d.querySelector('#family-list-parole [data-subject="nouns"]').classList.contains('active'),
+   `three families, Parole current, every menu closed; Parole's holds its six sections (${names('parole').join(', ')}), Sostantivi marked`);
 d.querySelector('.family[data-family="verbi"]').click();
 ok(ev('subject') === 'nouns' && open().join() === 'verbi' && !d.getElementById('family-list-verbi').hidden && d.getElementById('family-list-parole').hidden
    && names('verbi').join('|') === 'Regolari|Irregolari|Al contrario' && d.querySelector('.family[data-family="verbi"]').getAttribute('aria-expanded') === 'true',
