@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-DOMoVYn1kHqTPGYs1L3sgvz/C/v9oLkf8OqdwHL15JE=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Xw0gaXVrdANiN0iSu9UFDsPV0tD4F8HaN9pWTCOIPY8=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -3009,6 +3009,14 @@
   .landing-foot { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px 24px; padding-top: 28px; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); }
   .landing-foot .landing-mono { color: var(--ink-soft); }
 
+  /* Pronomi (Nov 2026) */
+  .pron-sub { text-decoration: underline; text-decoration-color: var(--terracotta); text-decoration-thickness: 2px; text-underline-offset: 0.18em; }
+  .eg-pron { grid-template-columns: 54px repeat(2, minmax(0, 1fr)); }
+  .eg-pron .eg-cell { font-size: 15px; padding: 5px 2px 4px; }
+  .eg-pron .eg-person { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; }
+  .map-later .map-group-name { color: var(--ink-soft); }
+  .map-later-note { margin: 6px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); }
+
 </style>
 </head>
 <body>
@@ -5809,7 +5817,7 @@
       const p = n.phrase;
       return [{ key: p.key, noun: p.key, english: p.en, italian: p.it, accepted: [p.it, ...p.itAlts],
                 englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, natural: n.natural || null, sentPerson: n.person || null, type: n.type || null,
-                rule: n.rule || null, ownRule: n.ownRule || null, num: !!p.num, mech: !!n.mech, mechPrompt: n.mechPrompt || null }].flatMap(c => {
+                rule: n.rule || null, ownRule: n.ownRule || null, num: !!p.num, mech: !!n.mech, mechPrompt: n.mechPrompt || null, sub: n.sub || null }].flatMap(c => {
         if (!n.pl) return [c];
         const pl = { ...c, key: `${c.key}|pl`, english: n.pl.en, italian: n.pl.it, accepted: [n.pl.it, ...n.pl.itAlts], englishAll: [n.pl.en, ...n.pl.enAlts],
                      note: n.pl.note, mechPrompt: n.pl.mechPrompt, sentPerson: n.pl.person, number: 'pl' };
@@ -12115,6 +12123,141 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   });
   const POSS_THEMES = POSS_THEME_DEFS.map(([key, group, label, en]) => ({ key, group, label, en, nouns: POSS_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
   const POSS_ORDER = POSS_ITEMS.map(n => n.noun);
+  // ===== Pronomi (Nov 2026): the object pronouns — lo, gli, ci, ne. One card, two ways to play: from the
+  // English ("I see him." → Lo vedo.) or in place of the noun ("Vedo [Marco]." → Lo vedo.): the bracketed
+  // words are the ones the pronoun replaces, shown underlined. Every card's Italian is unique (its key).
+  const PRON_GROUPS = [['diretti', 'Diretti', 'him, her, it, them'], ['indiretti', 'Indiretti', 'to him, to her'], ['ci-ne', 'Ci e ne', 'there, some']];
+  const PRON_THEME_DEFS = [   // the map's rows, in teaching order: [key, group, short name, the English beneath]
+    ['lo-la', 'diretti', 'Lo, la', 'him, her, it'], ['li-le', 'diretti', 'Li, le', 'them'], ['mi-ti', 'diretti', 'Mi, ti, ci, vi', 'me, you, us'],
+    ['infinito', 'diretti', "Con l'infinito", 'vederlo, farlo'], ['senza-a', 'diretti', 'Senza «a»', 'wait for, look for, listen to'],
+    ['gli-le', 'indiretti', 'Gli, le', 'to him, to her'], ['a-me', 'indiretti', 'A me → mi', 'to me, to you, to us'], ['con-a', 'indiretti', 'Con «a»', 'phone, answer, ask'],
+    ['ci', 'ci-ne', 'Ci', 'there'], ['ne', 'ci-ne', 'Ne', 'some, of it']];
+  const PRON_TOPIC_NOTES = {
+    'lo-la': "<em>Lo</em> (him, it) and <em>la</em> (her, it) go before the verb; with <em>non</em>, after it: <em>non lo vedo</em>.",
+    'li-le': "<em>Li</em> for masculine (or mixed) plural, <em>le</em> for feminine plural — the pronoun agrees with the noun it replaces.",
+    'mi-ti': "<em>Me, te, noi, voi</em> after the verb are the strong forms, for emphasis; normally Italian puts <em>mi, ti, ci, vi</em> before it.",
+    'infinito': "With an infinitive the pronoun joins the end: <em>vedere</em> + <em>lo</em> = <em>vederlo</em>. After <em>volere, potere, dovere, sapere</em> it can also go first: <em>lo voglio vedere</em>.",
+    'senza-a': "English waits <em>for</em>, looks <em>for</em>, listens <em>to</em>; Italian <em>aspettare, cercare, ascoltare, guardare, pagare</em> take the thing directly — so <em>lo, la</em>.",
+    'gli-le': "<em>A</em> + a person becomes <em>gli</em> (to him) or <em>le</em> (to her), before the verb. In everyday Italian <em>gli</em> also means ‘to them’.",
+    'a-me': "<em>A me, a te, a noi, a voi</em> become <em>mi, ti, ci, vi</em> before the verb — the same words as the direct ones.",
+    'con-a': "English phones, answers, asks someone directly; Italian <em>telefonare, rispondere, chiedere, dire, sorridere</em> take <em>a</em> — so <em>gli, le</em>, never <em>lo, la</em>.",
+    'ci': "<em>Ci</em> replaces a place — <em>a Roma, in Sicilia, al mare</em> — and goes before the verb: <em>ci vado</em>.",
+    'ne': "<em>Ne</em> replaces a noun after a quantity, or <em>di</em> + something — the number stays: <em>ne voglio due</em>."
+  };
+  const PRON_DATA = [   // [topic, English, Italian, other right Italian, in place of the noun ([the words replaced]), a note of its own]
+    ['lo-la', "I see him.", "Lo vedo.", [], "Vedo [Marco]."],
+    ['lo-la', "I know her.", "La conosco.", [], "Conosco [Giulia]."],
+    ['lo-la', "I'm reading it (the book).", "Lo leggo.", [], "Leggo [il libro]."],
+    ['lo-la', "We're buying it (the house).", "La compriamo.", [], "Compriamo [la casa]."],
+    ['lo-la', "Do you know him?", "Lo conosci?", [], "Conosci [Paolo]?"],
+    ['lo-la', "I'm calling her tonight.", "La chiamo stasera.", [], "Chiamo [Anna] stasera."],
+    ['lo-la', "I don't know it (the city).", "Non la conosco.", [], "Non conosco [la città].", "With <em>non</em>, the pronoun comes after it — still before the verb: <em>non la conosco</em>."],
+    ['lo-la', "He's drinking it (the coffee).", "Lo beve.", [], "Beve [il caffè]."],
+    ['lo-la', "They're watching it (the film).", "Lo guardano.", [], "Guardano [il film]."],
+    ['lo-la', "I'm opening it (the window).", "La apro.", ["L'apro."], "Apro [la finestra].", "Before a vowel <em>lo</em> and <em>la</em> often shorten: <em>l'apro</em> — both are right."],
+    ['lo-la', "Are you eating it (the pizza)?", "La mangi?", [], "Mangi [la pizza]?"],
+    ['lo-la', "I don't know it (the answer).", "Non la so.", [], "Non so [la risposta]."],
+    ['li-le', "I'm buying them (the shoes).", "Le compro.", [], "Compro [le scarpe]."],
+    ['li-le', "I see them (the boys).", "Li vedo.", [], "Vedo [i ragazzi]."],
+    ['li-le', "We're inviting them (our friends).", "Li invitiamo.", [], "Invitiamo [gli amici].", "<em>Gli amici</em> are masculine plural, so <em>li</em> — not <em>gli</em>, which means ‘to him’."],
+    ['li-le', "She's washing them (the dishes).", "Li lava.", [], "Lava [i piatti]."],
+    ['li-le', "I'm looking for them (the keys).", "Le cerco.", [], "Cerco [le chiavi]."],
+    ['li-le', "Do you know them (the rules)?", "Le conosci?", [], "Conosci [le regole]?"],
+    ['li-le', "They're selling them (the books).", "Li vendono.", [], "Vendono [i libri]."],
+    ['li-le', "I'm eating them (the cherries).", "Le mangio.", [], "Mangio [le ciliegie]."],
+    ['li-le', "Are you taking them (the tickets)?", "Li prendi?", [], "Prendi [i biglietti]?"],
+    ['li-le', "We don't understand them (the words).", "Non le capiamo.", [], "Non capiamo [le parole]."],
+    ['mi-ti', "Do you love me?", "Mi ami?", [], "Ami [me]?"],
+    ['mi-ti', "I'm waiting for you.", "Ti aspetto.", [], "Aspetto [te]."],
+    ['mi-ti', "They're inviting us.", "Ci invitano.", [], "Invitano [noi]."],
+    ['mi-ti', "I'm calling you all tomorrow.", "Vi chiamo domani.", [], "Chiamo [voi] domani."],
+    ['mi-ti', "Can you hear me?", "Mi senti?", [], "Senti [me]?"],
+    ['mi-ti', "I understand you.", "Ti capisco.", [], "Capisco [te]."],
+    ['mi-ti', "She knows us.", "Ci conosce.", [], "Conosce [noi]."],
+    ['mi-ti', "Is he looking for me?", "Mi cerca?", [], "Cerca [me]?"],
+    ['mi-ti', "I'll help you.", "Ti aiuto.", [], "Aiuto [te]."],
+    ['mi-ti', "We're thanking you all.", "Vi ringraziamo.", [], "Ringraziamo [voi]."],
+    ['infinito', "I want to see it (the film).", "Voglio vederlo.", ["Lo voglio vedere."], "Voglio vedere [il film]."],
+    ['infinito', "I have to do them (the homework).", "Devo farli.", ["Li devo fare."], "Devo fare [i compiti]."],
+    ['infinito', "Can you call her?", "Puoi chiamarla?", ["La puoi chiamare?"], "Puoi chiamare [Anna]?"],
+    ['infinito', "I'm going to visit him.", "Vado a trovarlo.", ["Lo vado a trovare."], "Vado a trovare [il nonno].", "<em>Trovare</em> drops its <em>e</em> and takes the pronoun: <em>trovarlo</em>. <em>Lo vado a trovare</em> is right too."],
+    ['infinito', "It's nice to see you.", "È bello vederti.", [], "È bello vedere [te].", "Only one place for it here: on the end of the infinitive, <em>vederti</em>."],
+    ['infinito', "We want to buy it (the car).", "Vogliamo comprarla.", ["La vogliamo comprare."], "Vogliamo comprare [la macchina]."],
+    ['infinito', "I have to call them (my parents).", "Devo chiamarli.", ["Li devo chiamare."], "Devo chiamare [i miei genitori]."],
+    ['infinito', "Can I help you?", "Posso aiutarti?", ["Ti posso aiutare?"], "Posso aiutare [te]?"],
+    ['infinito', "I don't want to read it (the letter).", "Non voglio leggerla.", ["Non la voglio leggere."], "Non voglio leggere [la lettera]."],
+    ['infinito', "I know how to make it (the sauce).", "So farlo.", ["Lo so fare."], "So fare [il sugo]."],
+    ['senza-a', "I'm waiting for her.", "La aspetto.", ["L'aspetto."], "Aspetto [Maria].", "<em>Aspettare</em> is ‘to wait for’ — no preposition in Italian, so <em>la</em>. <em>L'aspetto</em> is right too."],
+    ['senza-a', "I'm looking for it (the station).", "La cerco.", [], "Cerco [la stazione]."],
+    ['senza-a', "Are you listening to me?", "Mi ascolti?", [], "Ascolti [me]?"],
+    ['senza-a', "We're looking at it (the map).", "La guardiamo.", [], "Guardiamo [la mappa]."],
+    ['senza-a', "I'm waiting for it (the bus).", "Lo aspetto.", ["L'aspetto."], "Aspetto [l'autobus]."],
+    ['senza-a', "He's listening to it (the radio).", "La ascolta.", ["L'ascolta."], "Ascolta [la radio]."],
+    ['senza-a', "They're looking for him.", "Lo cercano.", [], "Cercano [Luca]."],
+    ['senza-a', "I'm paying for it (the dinner).", "La pago.", [], "Pago [la cena]."],
+    ['gli-le', "I'm writing to him.", "Gli scrivo.", [], "Scrivo [a Marco]."],
+    ['gli-le', "I'm phoning her.", "Le telefono.", [], "Telefono [a Giulia].", "<em>Telefonare a</em> — <em>a lei</em>, to her — so <em>le</em>, not <em>la</em>. English ‘phone her’ hides the <em>a</em>."],
+    ['gli-le', "I'm giving him the keys.", "Gli do le chiavi.", [], "Do le chiavi [a Paolo].", "<em>Dare a qualcuno</em>: <em>a Paolo</em> becomes <em>gli</em>; the keys stay as they are."],
+    ['gli-le', "She's speaking to him.", "Gli parla.", [], "Parla [a suo padre]."],
+    ['gli-le', "Are you writing to her?", "Le scrivi?", [], "Scrivi [a Laura]?"],
+    ['gli-le', "We're sending him a message.", "Gli mandiamo un messaggio.", [], "Mandiamo un messaggio [a Luca]."],
+    ['gli-le', "I'm giving her a present.", "Le faccio un regalo.", [], "Faccio un regalo [a mia madre]."],
+    ['gli-le', "He's telling her everything.", "Le dice tutto.", [], "Dice tutto [a Sara]."],
+    ['gli-le', "I'm lending him my bike.", "Gli presto la bici.", [], "Presto la bici [a mio fratello]."],
+    ['gli-le', "I'm explaining the rule to her.", "Le spiego la regola.", [], "Spiego la regola [a Chiara]."],
+    ['gli-le', "I'm sending them a postcard.", "Gli mando una cartolina.", ["Mando loro una cartolina."], "Mando una cartolina [ai nonni].", "In everyday Italian <em>gli</em> is also ‘to them’; formally, <em>mando loro una cartolina</em>."],
+    ['gli-le', "May I offer you a coffee? (Lei)", "Le offro un caffè?", [], "Offro un caffè [a Lei]?", "The formal <em>Lei</em> takes <em>Le</em> — often written with a capital."],
+    ['a-me', "Can you write to me?", "Mi scrivi?", [], "Scrivi [a me]?"],
+    ['a-me', "I'm telling you the truth.", "Ti dico la verità.", [], "Dico la verità [a te]."],
+    ['a-me', "They're giving us a discount.", "Ci fanno uno sconto.", [], "Fanno uno sconto [a noi]."],
+    ['a-me', "I'm sending you all the photos.", "Vi mando le foto.", [], "Mando le foto [a voi]."],
+    ['a-me', "Will you lend me your pen?", "Mi presti la penna?", [], "Presti la penna [a me]?"],
+    ['a-me', "I'm writing to you tomorrow.", "Ti scrivo domani.", [], "Scrivo [a te] domani."],
+    ['a-me', "She's explaining the rules to us.", "Ci spiega le regole.", [], "Spiega le regole [a noi]."],
+    ['a-me', "Who's giving you all the tickets?", "Chi vi dà i biglietti?", [], "Chi dà i biglietti [a voi]?"],
+    ['a-me', "Can you pass me the salt?", "Mi passi il sale?", [], "Passi il sale [a me]?"],
+    ['a-me', "I'm making you a coffee.", "Ti faccio un caffè.", [], "Faccio un caffè [a te]."],
+    ['con-a', "I'm phoning him.", "Gli telefono.", [], "Telefono [a Marco].", "<em>Telefonare a</em> — so <em>gli</em>, not <em>lo</em>: English ‘phone him’ hides the <em>a</em>."],
+    ['con-a', "Are you answering her?", "Le rispondi?", [], "Rispondi [a Laura]?"],
+    ['con-a', "I'm asking him a favour.", "Gli chiedo un favore.", [], "Chiedo un favore [a Paolo]."],
+    ['con-a', "I'm telling her the news.", "Le dico la notizia.", [], "Dico la notizia [a Sara]."],
+    ['con-a', "He's phoning me tonight.", "Mi telefona stasera.", [], "Telefona [a me] stasera."],
+    ['con-a', "We're answering them (our clients).", "Gli rispondiamo.", ["Rispondiamo loro."], "Rispondiamo [ai clienti].", "<em>Rispondere a</em>; and <em>gli</em> is ‘to them’ too — formally, <em>rispondiamo loro</em>."],
+    ['con-a', "I'm asking you a question.", "Ti faccio una domanda.", [], "Faccio una domanda [a te]."],
+    ['con-a', "She's smiling at him.", "Gli sorride.", [], "Sorride [a Marco]."],
+    ['ci', "I'm going there tomorrow.", "Ci vado domani.", [], "Vado [a Roma] domani."],
+    ['ci', "We're going there by train.", "Ci andiamo in treno.", [], "Andiamo [a Milano] in treno."],
+    ['ci', "Are you coming there with me?", "Ci vieni con me?", [], "Vieni [al cinema] con me?"],
+    ['ci', "I live there.", "Ci abito.", [], "Abito [a Napoli]."],
+    ['ci', "They're staying there a week.", "Ci restano una settimana.", [], "Restano [a Firenze] una settimana."],
+    ['ci', "I'm going back there in the summer.", "Ci torno d'estate.", ["Ci torno in estate."], "Torno [in Sicilia] d'estate."],
+    ['ci', "Is he going there alone?", "Ci va da solo?", [], "Va [in palestra] da solo?"],
+    ['ci', "We're spending the holidays there.", "Ci passiamo le vacanze.", [], "Passiamo le vacanze [al mare]."],
+    ['ci', "I never go there.", "Non ci vado mai.", [], "Non vado mai [in centro]."],
+    ['ci', "I think about it often.", "Ci penso spesso.", [], "Penso spesso [al viaggio].", "<em>Ci</em> also stands for <em>a</em> + a thing: <em>pensare al viaggio</em> → <em>ci penso</em>."],
+    ['ne', "I want two (of them, apples).", "Ne voglio due.", [], "Voglio due [mele]."],
+    ['ne', "I'm buying three (of them, tickets).", "Ne compro tre.", [], "Compro tre [biglietti]."],
+    ['ne', "I have one (a brother).", "Ne ho uno.", [], "Ho un [fratello].", "<em>Ne</em> takes the noun; the number stays — and <em>un</em> becomes <em>uno</em> on its own."],
+    ['ne', "We drink a lot of it (coffee).", "Ne beviamo molto.", [], "Beviamo molto [caffè]."],
+    ['ne', "I'm eating a little of it (bread).", "Ne mangio un po'.", [], "Mangio un po' [di pane].", "<em>Ne</em> replaces <em>di pane</em>; <em>un po'</em> stays."],
+    ['ne', "We're talking about it (the trip).", "Ne parliamo.", [], "Parliamo [del viaggio].", "<em>Parlare di</em>: <em>ne</em> replaces <em>di</em> + the thing — <em>ne parliamo</em>, we talk about it."],
+    ['ne', "I want five (of them, eggs).", "Ne voglio cinque.", [], "Voglio cinque [uova]."],
+    ['ne', "I don't want any (sugar).", "Non ne voglio.", [], "Non voglio [zucchero]."],
+    ['ne', "She reads lots of them (books).", "Ne legge tanti.", [], "Legge tanti [libri]."],
+    ['ne', "What do you think of it (the film)?", "Che ne pensi?", [], "Che pensi [del film]?", "<em>Pensare di</em>, to think of (an opinion): <em>che ne pensi?</em>"],
+  ];
+  const PRON_ITEMS = PRON_DATA.map(([level, en, it, itAlts, sub, own]) => {
+    const key = sentenceKey(it), group = PRON_THEME_DEFS.find(d => d[0] === level)[1];
+    return { noun: key, display: it, it, en, level, group, type: 'pron', sub, natural: null, note: own || PRON_TOPIC_NOTES[level],
+             phrase: { key, it, en, itAlts: itAlts.filter(s => s !== it), enAlts: [], reg: 'neutral' } };
+  });
+  const PRON_THEMES = PRON_THEME_DEFS.map(([key, group, label, en]) => ({ key, group, label, en, nouns: PRON_ITEMS.filter(n => n.level === key).map(n => n.noun) }));
+  const PRON_ORDER = PRON_ITEMS.map(n => n.noun);
+  const PRON_MODES = { 'en-it': "Dall'inglese — the English, you write the Italian", 'it-en': 'Al posto del nome — a pronoun in place of the underlined words' };
+  const PRON_SHORT = { 'en-it': "Dall'inglese", 'it-en': 'Al posto del nome' };
+  const PRON_TABLE = [['io', 'mi', 'mi'], ['tu', 'ti', 'ti'], ['lui', 'lo', 'gli'], ['lei', 'la', 'le'], ['Lei', 'La', 'Le'], ['noi', 'ci', 'ci'], ['voi', 'vi', 'vi'], ['loro', 'li · le', 'gli']];
+  // "Vedo [Marco]." → the words in brackets underlined, the rest as it is
+  const pronSubHTML = sub => escapeHTML(sub).replace(/\[([^\]]+)\]/, '<span class="pron-sub">$1</span>');
 
   // The fusion table, for the side panel: rows the article, columns di · a · da · in · su
   const PREP_TABLE = [['il', ['del', 'al', 'dal', 'nel', 'sul']], ['lo', ['dello', 'allo', 'dallo', 'nello', 'sullo']], ["l'", ["dell'", "all'", "dall'", "nell'", "sull'"]],
@@ -12679,6 +12822,16 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       statsKeys: { 'en-it': 'possessivi-stats-v1', 'it-en': 'possessivi-stats-iten-v1', listen: 'possessivi-stats-listen-v1' }, statsFormat: 'noun',
       assocKey: 'possessivi-assoc-v1'
     },
+    pronomi: {
+      kind: 'phrase', sentences: true, panel: 'pronomi', map: true, pronomi: true, doneWord: 'phrases', chipOrder: 'level', themeGroups: PRON_GROUPS,   // Nov 2026: two ways to play on the switch
+      switchLabel: 'Pronomi', title: 'Pronomi', subtitle: 'Il Mazzo · I Pronomi',
+      setupTitle: 'Choose your pronouns',
+      setupSub: "Me, him, there, some: <em>lo vedo</em>, <em>gli scrivo</em>, <em>ci vado</em>, <em>ne voglio due</em>. <em>Dall'inglese</em>: see the English, write the Italian. <em>Al posto del nome</em>: put a pronoun in place of the underlined words.",
+      itemWord: 'phrase', itemWords: 'phrases',
+      items: PRON_ITEMS, themes: PRON_THEMES, frequency: PRON_ORDER,
+      statsKeys: { 'en-it': 'pronomi-stats-v1', 'it-en': 'pronomi-stats-sub-v1', listen: 'pronomi-stats-listen-v1' }, statsFormat: 'noun',
+      assocKey: 'pronomi-assoc-v1'
+    },
     prepositions: {
       kind: 'phrase', sentences: true, panel: 'prepositions', doneWord: 'phrases', chipOrder: 'level', themeGroups: PREP_GROUPS, keepPairs: true, numberToggle: true,
       switchLabel: 'Preposizioni', title: 'Preposizioni', subtitle: 'Il Mazzo · Le Preposizioni',
@@ -12740,7 +12893,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   function isAdjSubject() { return SUBJECTS[subject].kind === 'adjective'; }
   function isPhraseSubject() { return SUBJECTS[subject].kind === 'phrase'; }
   // The answer is the English side: IT → EN — and a number card heard (A orecchio), answered in digits
-  const answersEnglish = card => direction === 'it-en' || (direction === 'listen' && !!(card && card.num));
+  const answersEnglish = card => (direction === 'it-en' && !(card && card.type === 'pron')) || (direction === 'listen' && !!(card && card.num));   // Pronomi: Italian both ways
   const SUBJECT_KEY = 'flipcards-subject';
   const subjectState = {
     nouns: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
@@ -12752,6 +12905,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     numeri: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     avverbi: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     possessives: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
+    pronomi: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     prepositions: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     phrases: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     sentences: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
@@ -12766,19 +12920,19 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
 
   // ===== The sections, in three families (Nov 2026): the banner picks a family, then one of its sections =====
   const FAMILIES = [
-    { key: 'parole', name: 'Parole', en: 'words', color: 'var(--olive)', sections: ['nouns', 'adjectives', 'numeri', 'avverbi', 'possessives', 'prepositions'] },
+    { key: 'parole', name: 'Parole', en: 'words', color: 'var(--olive)', sections: ['nouns', 'adjectives', 'numeri', 'avverbi', 'possessives', 'pronomi', 'prepositions'] },
     { key: 'verbi', name: 'Verbi', en: 'verbs', color: 'var(--terracotta)', sections: ['verbs', 'irregular', 'mipiace'] },
     { key: 'frasi', name: 'Frasi e storie', en: 'sentences & stories', color: 'var(--gold)', sections: ['phrases', 'sentences', 'dialoghi', 'story'] },
   ];
   const SECTION_DESC = {   // the header's menus (Nov 2026): a line under each section's name
     nouns: 'Nouns, with their articles', adjectives: 'Gender and number', numeri: 'Counting, from zero to a million', avverbi: 'The little words: adverbs, linking words',
-    possessives: 'Mio, tuo, suo — with their articles', prepositions: 'Di, a, da, in — and with the article',
+    possessives: 'Mio, tuo, suo — with their articles', pronomi: 'Me, him, there, some — lo, gli, ci, ne', prepositions: 'Di, a, da, in — and with the article',
     verbs: 'Regular verbs: -are, -ere, -ire', irregular: 'Essere, avere, fare, andare…', mipiace: 'Mi piace, mi manca, mi serve…',
     phrases: 'Everyday phrases', sentences: 'Put whole sentences together', dialoghi: 'Scenes from daily life', story: 'La casa di pietra, a story',
   };
   const NAV_LABEL = { verbs: 'Regolari', irregular: 'Irregolari', mipiace: 'Al contrario' };   // inside Verbi, the family says the rest
   const SECTION_SHORT = { nouns: 'Sostantivi', verbs: 'Verbi regolari', irregular: 'Verbi irregolari', mipiace: 'Al contrario', adjectives: 'Aggettivi', numeri: 'Numeri',
-                          avverbi: 'Avverbi', possessives: 'Possessivi', prepositions: 'Preposizioni', phrases: 'Frasi', sentences: 'Scrittura' };
+                          avverbi: 'Avverbi', possessives: 'Possessivi', pronomi: 'Pronomi', prepositions: 'Preposizioni', phrases: 'Frasi', sentences: 'Scrittura' };
   const familyOf = s => FAMILIES.find(f => f.sections.includes(s));
   const FAMILY_LAST_KEY = 'mazzo-family-last', TABLE_TAB_KEY = 'mazzo-table-tab';
   function applySubject(s) {
@@ -12828,7 +12982,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // ===== Ripasso del giorno =====
   const RIPASSO_DIR_KEY = 'mazzo-ripasso-dir';
   const REVIEW_START = 30;   // cards in play at the start; Deck size reaches the rest
-  const REVIEW_LABEL = { nouns: 'noun', verbs: 'regular verb', irregular: 'irregular verb', adjectives: 'adjective', avverbi: 'small word', possessives: 'possessive', prepositions: 'preposition', phrases: 'phrase', sentences: 'sentence', story: 'story word' };
+  const REVIEW_LABEL = { nouns: 'noun', verbs: 'regular verb', irregular: 'irregular verb', adjectives: 'adjective', avverbi: 'small word', possessives: 'possessive', pronomi: 'pronoun', prepositions: 'preposition', phrases: 'phrase', sentences: 'sentence', story: 'story word' };
   let ripassoDir = 'en-it';
   try { const d = localStorage.getItem(RIPASSO_DIR_KEY); if (DIR_LABELS[d]) ripassoDir = d; } catch (e) { /* default */ }
 
@@ -13135,6 +13289,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     adjectives: 'Add the 50 most common from the map to your hand, then the next 50 — the dictionary form, or all four forms.',
     avverbi: 'Add the 50 most common from the map to your hand, then the next 50. Accents don\'t count.',
     possessives: 'Add whole groups below to your hand.',
+    pronomi: 'Add whole groups below to your hand.',
     prepositions: 'Add whole groups below to your hand.',
     phrases: 'Add whole groups below to your hand.',
     sentences: 'Add whole groups of sentences below to your hand.'
@@ -13458,7 +13613,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       direction = dir;   // one direction for the whole hand: every section follows
       Object.values(subjectState).forEach(st => { st.direction = direction; });
       document.querySelectorAll('#direction-toggle .mode-option').forEach(b => b.classList.toggle('active', b.dataset.direction === direction));
-      if (SUBJECTS[subject].numeri) document.querySelectorAll('#mode-toggle .mode-option').forEach(b => b.classList.toggle('active', b.dataset.mode === direction));
+      if (SUBJECTS[subject].numeri || SUBJECTS[subject].pronomi) document.querySelectorAll('#mode-toggle .mode-option').forEach(b => b.classList.toggle('active', b.dataset.mode === direction));
       stats = loadStats();   // each direction keeps its own progress
       if (document.getElementById('setup-meta')) renderSetupMeta();
       updateReadout();
@@ -13708,6 +13863,21 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         </div>
       </aside>
       `,
+    pronomi: () => `
+      <aside class="endings prep-panel pron-panel" aria-label="Pronouns">
+        <h3 class="endings-title">I pronomi</h3>
+        <div class="endings-sub">me, him, her — there, some</div>
+        <div class="eg eg-pron">
+          <div></div><div class="eg-class">diretti · him</div><div class="eg-class">indiretti · to him</div>
+          ${PRON_TABLE.map(([who, d, i]) => `<div class="eg-person">${who}</div><div class="eg-cell"><span class="eg-txt">${d}</span></div><div class="eg-cell"><span class="eg-txt">${i}</span></div>`).join('')}
+        </div>
+        <div class="endings-note"><div class="en-label">Before the verb</div><p><em>Lo vedo</em>, I see him. A <em>non</em> comes first: <em>non lo so</em>, I don't know.</p></div>
+        <div class="endings-note"><div class="en-label">Joined to an infinitive</div><p><em>Voglio vederlo</em> — <em>vedere</em> drops its <em>e</em>. After <em>volere, potere, dovere, sapere</em> it can go first too: <em>lo voglio vedere</em>.</p></div>
+        <div class="endings-note"><div class="en-label">Gli, le — to him, to her</div><p><em>Gli scrivo</em>, <em>le telefono</em>. In everyday Italian <em>gli</em> is ‘to them’ too: <em>gli mando una cartolina</em>.</p></div>
+        <div class="endings-note"><div class="en-label">No «a» in Italian</div><p><em>Aspettare, cercare, ascoltare, guardare, pagare</em> take <em>lo, la</em>: <em>la aspetto</em>, I'm waiting for her.</p></div>
+        <div class="endings-note"><div class="en-label">«A» in Italian</div><p><em>Telefonare, rispondere, chiedere, dire</em> take <em>gli, le</em>: <em>le telefono</em>, I'm phoning her.</p></div>
+        <div class="endings-note"><div class="en-label">Ci and ne</div><p><em>Ci</em>, there: <em>ci vado domani</em>. <em>Ne</em>, of it, of them, some: <em>ne voglio due</em>, I want two.</p></div>
+      </aside>`,
     possessives: () => `
       <aside class="endings prep-panel poss-panel" aria-label="Possessives">
         <h3 class="endings-title">I possessivi</h3>
@@ -13868,7 +14038,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       </aside>
       `
   };
-  const CHART_TITLES = { numeri: 'Come si costruiscono', endings: 'Le desinenze', irregular: 'Gli irregolari', agreement: 'Le concordanze', avverbi: 'Le parole piccole', possessives: 'I possessivi', prepositions: 'Le articolate', phrases: 'In pratica', mipiace: 'Come piacere' };
+  const CHART_TITLES = { numeri: 'Come si costruiscono', pronomi: 'I pronomi', endings: 'Le desinenze', irregular: 'Gli irregolari', agreement: 'Le concordanze', avverbi: 'Le parole piccole', possessives: 'I possessivi', prepositions: 'Le articolate', phrases: 'In pratica', mipiace: 'Come piacere' };
   // The chart for the card on screen (in Ripasso, the card's own section)
   document.getElementById('rules-btn').addEventListener('click', openRules);
   function chartKey() {
@@ -14125,9 +14295,10 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const modeOptions = isVerbs ? [['conjugations', 'Conjugations'], ['infinitives', 'Infinitives only']]
       : isAdjSubject() ? [['dictionary', 'Dictionary form'], ['forms', 'All forms']]
       : cfg.numeri ? [['en-it', 'In lettere'], ['it-en', 'In cifre'], ['listen', 'A orecchio']]
+      : cfg.pronomi ? [['en-it', "Dall'inglese"], ['it-en', 'Al posto del nome']]
       : cfg.numberSwitch ? [['sg', 'Singolare'], ['both', 'Singolare e plurale']] : null;
     if (cfg.numberSwitch && !activeNumbers().includes('sg')) saveNumbers(['sg', 'pl']);   // the old toggle's plural-only: both, now
-    const currentMode = isVerbs ? verbMode : cfg.numeri ? direction : cfg.numberSwitch ? (activeNumbers().includes('pl') ? 'both' : 'sg') : adjMode;
+    const currentMode = isVerbs ? verbMode : cfg.numeri || cfg.pronomi ? direction : cfg.numberSwitch ? (activeNumbers().includes('pl') ? 'both' : 'sg') : adjMode;
     const fam = familyOf(subject) || FAMILIES[0];
     document.getElementById('setup-top').innerHTML = `
       <div class="setup-top-inner">
@@ -14262,7 +14433,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     if (modeOptions) {
       gameArea.querySelectorAll('#mode-toggle .mode-option').forEach(btn => {
         btn.addEventListener('click', () => {
-          if (cfg.numeri) { numeriSetMode(btn.dataset.mode); return; }
+          if (cfg.numeri || cfg.pronomi) { numeriSetMode(btn.dataset.mode); return; }
           if (cfg.numberSwitch) {   // Possessivi: one card a phrase, or each with its plural straight after
             saveNumbers(btn.dataset.mode === 'both' ? ['sg', 'pl'] : ['sg']);
             gameArea.querySelectorAll('#mode-toggle .mode-option').forEach(b => b.classList.toggle('active', b.dataset.mode === btn.dataset.mode));
@@ -14852,7 +15023,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     };
     return `
       <div class="map-eyebrow-row">
-        <div class="theme-eyebrow map-eyebrow">La mappa · ${SUBJECTS[subject].numeri ? (NUMERI_MODES[direction] || NUMERI_MODES['en-it']) : dir}</div>
+        <div class="theme-eyebrow map-eyebrow">La mappa · ${SUBJECTS[subject].numeri ? (NUMERI_MODES[direction] || NUMERI_MODES['en-it']) : SUBJECTS[subject].pronomi ? (PRON_MODES[direction] || PRON_MODES['en-it']) : dir}</div>
         
       </div>
       <div class="shade-key map-key">
@@ -14871,7 +15042,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         <div class="map-rows">${cfg.themeGroups   // Possessivi (Nov 2026): Di chi? then Casi speciali, in teaching order — mio before loro
           ? cfg.themeGroups.map(([g, label, en]) => `<div class="map-group" data-group="${g}" data-label="${escapeHTML(label)}"><span class="map-group-name">${label}</span><span class="map-group-en">${en}</span></div>`
               + inOrder.filter(x => x.t.group === g).map(row).join('')).join('')
-          : topics.map(row).join('')}</div>
+          : topics.map(row).join('')}${cfg.pronomi ? `<div class="map-group map-later"><span class="map-group-name">Più avanti</span><span class="map-group-en">later</span></div><p class="map-later-note"><em>Me lo, glielo</em> — the doubled forms come with the past tense: <em>gliel'ho detto</em>, I told him.</p>` : ''}</div>
         <aside class="endings map-panel" id="map-panel" aria-label="${open ? escapeHTML(open.t.label) : 'The topic you open'}">${open ? mapDetailHTML(open, true) : mapProgressHTML()}</aside>
       </div>`;
   }
@@ -16131,7 +16302,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-21T00:00Z';
+  const BUILD = '2026-11-21T01:25Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
@@ -16861,8 +17032,9 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         : (card.person ? 'type the italian conjugation…' : 'type the italian infinitive…');
     } else if (isPhraseSubject()) {
       const shown = itToEn ? card.italian : card.english;
-      promptEl.textContent = shown;
-      promptEl.classList.toggle('long', shown.length > 18);
+      const inPlace = card.type === 'pron' && direction === 'it-en' && !!card.sub;   // Pronomi, Al posto del nome: the Italian, the words to replace underlined
+      if (inPlace) promptEl.innerHTML = pronSubHTML(card.sub); else promptEl.textContent = shown;
+      promptEl.classList.toggle('long', (inPlace ? card.sub : shown).length > 18);
       // A word-for-word sentence that reads oddly: its natural English underneath
       // (English → Italian only — the other ways round it would give the answer away)
       const natEl = document.getElementById('natural-en');
@@ -16871,9 +17043,9 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       natEl.innerHTML = showNatural ? `<span class="natural-label">in natural English</span> ${escapeHTML(card.natural)}` : '';
       metaEl.style.display = 'none';
       hintEl.style.display = '';
-      hintEl.textContent = card.num ? (itToEn ? 'in cifre' : 'in lettere')
+      hintEl.textContent = card.num ? (itToEn ? 'in cifre' : 'in lettere') : card.type === 'pron' ? (inPlace ? 'al posto del nome' : '+ pronome')
         : itToEn ? '→ in inglese' : (card.mech ? '+ preposizione articolata' : card.type === 'poss' ? '+ possessivo' : '+ frase');   // a fusion drill: join them
-      ans.placeholder = card.num ? (itToEn ? 'type the digits…' : 'type it in words…') : itToEn ? 'type the english meaning…' : 'type the italian phrase…';
+      ans.placeholder = card.num ? (itToEn ? 'type the digits…' : 'type it in words…') : card.type === 'pron' ? 'type the italian…' : itToEn ? 'type the english meaning…' : 'type the italian phrase…';
     } else if (isAdjSubject()) {
       // As in the adjectives game: the agreement type sits above the English, and
       // in All forms mode the hint names the gender and number to give
@@ -17435,7 +17607,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     return `<div class="nb-parts fb-parts">${numeriParts(n).map(p => `<span class="nb-part"><span class="nb-pw">${escapeHTML(p.w)}</span><span class="nb-pv">${numeriDigits(p.v)}</span></span>`).join('')}</div>`;
   }
   const NUMERI_SHORT = { 'en-it': 'In lettere', 'it-en': 'In cifre', listen: 'A orecchio' };
-  const dirShort = () => (SUBJECTS[subject].numeri ? NUMERI_SHORT[direction] || NUMERI_SHORT['en-it'] : DIR_LABELS[direction].short);
+  const dirShort = () => (SUBJECTS[subject].numeri ? NUMERI_SHORT[direction] || NUMERI_SHORT['en-it'] : SUBJECTS[subject].pronomi ? PRON_SHORT[direction] || PRON_SHORT['en-it'] : DIR_LABELS[direction].short);
   function setDirection(dir) {
     if (dir === direction) return;
     direction = dir;
