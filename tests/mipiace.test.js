@@ -108,7 +108,7 @@ const press = (g, k) => B.d.querySelector(`#mp-choose [data-mpg="${g}"][data-mpk
 const chosen = () => B.ev('[...selectedNouns].sort().join("|")');
 const expect = f => B.ev(`MIPIACE_ITEMS.filter(n => ${f}).map(n => n.noun).sort().join("|")`);
 const lit = () => [...B.d.querySelectorAll('#verb-grid .verb-chip:not(.unselected)')].length;
-const readout = () => B.d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').trim();
+const readout = () => [...B.d.querySelector('.deck-readout').childNodes].filter(n => !(n.classList && n.classList.contains('hand-title'))).map(n => n.textContent).join('').replace(/\s+/g, ' ').trim();   // the count, without its La tua mano label
 ok(B.ev('selectedNouns.size') === 0 && B.d.querySelectorAll('#mp-choose .on').length === 0 && !B.d.getElementById('mp-clear'), 'nothing chosen to start with');
 press('chi', 'mi');
 const nMi = B.ev("MIPIACE_ITEMS.filter(n => n.chi.includes('mi')).length");

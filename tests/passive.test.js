@@ -36,7 +36,7 @@ const txt = (B, id) => B.d.getElementById(id).textContent.trim();
   btn.click();
   ok(btn.classList.contains('active') && /A spasso · \d+ card/.test(B.d.getElementById('start-btn').textContent), 'chosen: the big button says A spasso');
   B.d.querySelector('#direction-toggle [data-direction="en-it"]').click();
-  ok(/Start practising/.test(B.d.getElementById('start-btn').textContent) && !btn.classList.contains('active'), 'EN → IT again: Start practising');
+  ok(/^▶ Start · /.test(B.d.getElementById('start-btn').textContent) && !btn.classList.contains('active'), 'EN → IT again: ▶ Start');
   B.ev("selectedNouns = new Set(); capValue = ''; updateReadout();");
   ok(B.d.getElementById('start-btn').disabled, 'with nothing to play, it waits');
 

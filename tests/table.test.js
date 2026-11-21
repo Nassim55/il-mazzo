@@ -7,8 +7,8 @@ const { boot, ok, done } = require('./harness');
 let B = boot({ 'flipcards-subject': 'nouns' });
 let d = B.d, ev = B.ev;
 const order = [...d.querySelectorAll('.setup-top-inner > *')].map(e => e.className.split(' ')[0]);
-ok(order.join() === 'masthead,table' && /Il Mazzo/.test(d.querySelector('.masthead').textContent) && d.querySelector('.masthead .sections') && d.querySelector('.masthead #bell')
-   && d.getElementById('setup-top').compareDocumentPosition(d.getElementById('app-title')) & 4, `Il Mazzo on top, the families and the bell beside it; then your hand (${order.join(' → ')})`);
+ok(order.join() === 'masthead,table,it-strip' && /Il Mazzo/.test(d.querySelector('.masthead').textContent) && d.querySelector('.masthead .sections') && d.querySelector('.masthead #bell')
+   && d.getElementById('setup-top').compareDocumentPosition(d.getElementById('app-title')) & 4, `Il Mazzo on top, the families and the bell beside it; then your hand, and Il mio italiano along the foot (${order.join(' → ')})`);
 const fams = [...d.querySelectorAll('.sections .family .family-name')].map(e => e.textContent);
 const names = key => [...d.querySelectorAll(`#family-list-${key} .mode-option`)].map(b => b.querySelector('.section-name').textContent);
 const open = () => [...d.querySelectorAll('.family-menu.open')].map(m => m.dataset.familyMenu);
