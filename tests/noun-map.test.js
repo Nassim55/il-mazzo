@@ -20,7 +20,7 @@ ok(B.d.getElementById('hand').compareDocumentPosition(B.d.getElementById('noun-m
    && B.d.querySelector('#hand #start-btn') && B.d.querySelector('#hand [data-direction="spasso"]') && B.d.querySelector('.setup-foot #setup-meta') && B.d.querySelector('.setup-foot #audio-row') && !B.d.querySelector('#setup-more'),
     `the hand — Start, with A spasso in its switch — comes above the map; your progress and the voice at the foot (${parts.filter(x => x !== 'theme-row').join(' → ')})`);
 ok(B.d.getElementById('theme-row').hidden && B.d.getElementById('verb-grid').closest('details.grid-fold') && !B.d.getElementById('grid-fold').open
-   && /Every noun, one by one \(1329\)/.test(B.d.querySelector('.grid-fold summary').textContent), 'the theme chips give way to the map; the 1329 nouns fold away underneath');
+   && /Every noun, one by one \(1360\)/.test(B.d.querySelector('.grid-fold summary').textContent), 'the theme chips give way to the map; the 1360 nouns fold away underneath');
 ok(B.d.querySelector('.container').dataset.map === '1' && ['verbs', 'irregular', 'adjectives'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '1') && ['phrases', 'prepositions'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '0'), 'a wide page for the map — the word sections');
 
 // ---- A topic's line ----
@@ -150,5 +150,12 @@ ok(B.ev(`(() => { const byKey = new Map(NOUN_ITEMS.map(n => [n.noun, n])); retur
   ok(['pane', 'torta', 'scontrino', 'resto'].every(k => top.nouns.includes(k)) && P.ev("SUBJECTS.nouns.themes.find(t => t.key === 'cibo').nouns.includes('pane')"),
      'and the ones the app already had join it, staying in their own topics too');
   ok(P.errors.length === 0 && P.warns.length === 0, 'no errors or warnings');
+}
+// ---- Giardino e orto, to 50 (Nov 21, 2026): mostly words of its own ----
+{
+  const G = boot({ 'flipcards-subject': 'nouns' });
+  const g = G.ev("(() => { const th = SUBJECTS.nouns.themes, t = th.find(t => t.key === 'giardino-orto'); return { n: t.nouns.length, only: t.nouns.filter(n => !th.some(x => x.key !== t.key && x.nouns.includes(n))).length, has: ['vanga', 'carriola', 'serra', 'terriccio', 'rosmarino', 'lombrico', 'coccinella'].every(k => t.nouns.includes(k)) }; })()");
+  ok(g.n === 50 && g.only >= 38 && g.has, `Giardino e orto: 50 nouns, ${g.only} of them found in no other topic — la vanga, la carriola, la serra, il terriccio, il rosmarino, il lombrico…`);
+  ok(G.errors.length === 0 && G.warns.length === 0, 'no errors or warnings');
 }
 done();

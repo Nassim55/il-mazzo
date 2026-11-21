@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9dErFytvevlf7jddm3e9uYjtGSQy2NpDcQhf+uqwQ14=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-mdcWX4VME2rAaLVwdvxnVSY3XhY29W2IyrLjEsUAKnI=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -4576,6 +4576,38 @@
     { en: "the counter",                   it: "il bancone",        noun: "bancone",        g: "m" },
     { en: "the tray",                      it: "il vassoio",        noun: "vassoio",        g: "m" },
     { en: "the filling",                   it: "il ripieno",        noun: "ripieno",        g: "m" },
+    // ---- Giardino e orto, to 50 (Nov 21, 2026): 31 garden nouns; notes in NOUN_NOTES, places in NOUN_FREQUENCY_ORDER ----
+    { en: "the spade",                     it: "la vanga",          noun: "vanga",          g: "f" },
+    { en: "the shovel",                    it: "la pala",           noun: "pala",           g: "f" },
+    { en: "the wheelbarrow",               it: "la carriola",       noun: "carriola",       g: "f" },
+    { en: "the lawnmower",                 it: "il tosaerba",       noun: "tosaerba",       g: "m" },
+    { en: "the sprinkler",                 it: "l'irrigatore",      noun: "irrigatore",     g: "m" },
+    { en: "the stake",                     it: "il paletto",        noun: "paletto",        g: "m" },
+    { en: "the greenhouse",                it: "la serra",          noun: "serra",          g: "f" },
+    { en: "the garden shed",               it: "il capanno",        noun: "capanno",        g: "m" },
+    { en: "the garden path",               it: "il vialetto",       noun: "vialetto",       g: "m" },
+    { en: "the potting soil",              it: "il terriccio",      noun: "terriccio",      g: "m" },
+    { en: "the fertiliser",                it: "il concime",        noun: "concime",        g: "m" },
+    { en: "the manure",                    it: "il letame",         noun: "letame",         g: "m" },
+    { en: "the compost",                   it: "il compost",        noun: "compost",        g: "m" },
+    { en: "the shoot (sprout)",            it: "il germoglio",      noun: "germoglio",      g: "m" },
+    { en: "the bulb (plant)",              it: "il bulbo",          noun: "bulbo",          g: "m" },
+    { en: "the stem",                      it: "lo stelo",          noun: "stelo",          g: "m" },
+    { en: "the petal",                     it: "il petalo",         noun: "petalo",         g: "m" },
+    { en: "the flower bud",                it: "il bocciolo",       noun: "bocciolo",       g: "m" },
+    { en: "the thorn",                     it: "la spina",          noun: "spina",          g: "f" },
+    { en: "the cutting (plant)",           it: "la talea",          noun: "talea",          g: "f" },
+    { en: "the rosemary",                  it: "il rosmarino",      noun: "rosmarino",      g: "m" },
+    { en: "the sage",                      it: "la salvia",         noun: "salvia",         g: "f" },
+    { en: "the mint",                      it: "la menta",          noun: "menta",          g: "f" },
+    { en: "the lavender",                  it: "la lavanda",        noun: "lavanda",        g: "f" },
+    { en: "the tulip",                     it: "il tulipano",       noun: "tulipano",       g: "m" },
+    { en: "the ivy",                       it: "l'edera",           noun: "edera",          g: "f" },
+    { en: "the pumpkin",                   it: "la zucca",          noun: "zucca",          g: "f" },
+    { en: "the snail",                     it: "la lumaca",         noun: "lumaca",         g: "f" },
+    { en: "the earthworm",                 it: "il lombrico",       noun: "lombrico",       g: "m" },
+    { en: "the ladybird",                  it: "la coccinella",     noun: "coccinella",     g: "f" },
+    { en: "the caterpillar",               it: "il bruco",          noun: "bruco",          g: "m" },
   ];
 
   // ===== Notes for every noun (Nov 2026, in batches, most common first) =====
@@ -5326,14 +5358,14 @@
     "pagnotta": "Probably from Provençal, a 'little bread' (Latin <em>panis</em>). A round, crusty loaf; <em>portare a casa la pagnotta</em>: to bring home the bacon.",
     "filone": "From <em>filo</em>, a thread (Latin <em>filum</em>) — English 'file', 'filament'. A long loaf; also a vein of ore, and a strand: <em>sullo stesso filone</em>, along the same lines.",
     "rosetta": "A little rose (Latin <em>rosa</em>) — the roll is scored like a flower; English 'rosette'. In Milan the same roll is <em>la michetta</em>.",
-    "michetta": "A little <em>mica</em>, a small loaf (Latin <em>mica</em>, a crumb) — Milan's name for the roll Rome calls <em>la rosetta</em>.",
+    "michetta": "A little <em>mica</em>, a small loaf (Latin <em>mica</em>, a crumb — English 'mica', the glittering mineral, is the same word). Milan's name for the roll Rome calls <em>la rosetta</em>.",
     "grissino": "From Piedmontese <em>grissia</em>, a long thin loaf — Turin's breadstick, now on restaurant tables everywhere. Plural: <em>i grissini</em>.",
     "focaccia": "From Late Latin <em>focacia</em>, bread baked on the hearth (<em>focus</em>) — English 'focus', 'fuel', and French <em>fougasse</em>. <em>La focaccia genovese</em>: dimpled and oily.",
     "schiacciata": "From <em>schiacciare</em>, to flatten, to squash — Tuscany's flat, oily bread, cousin of focaccia. <em>La schiacciata con l'uva</em> is the autumn sweet one, with grapes.",
-    "piadina": "From Romagnol <em>piada</em>, a flat round bread — perhaps from Greek <em>plakous</em>, a flat cake. Eaten folded round ham and cheese.",
+    "piadina": "From Romagnol <em>piada</em>, a flat round bread — perhaps from Greek <em>plakous</em>, a flat cake, which gave Latin, and English, 'placenta'. Eaten folded round ham and cheese.",
     "crosta": "From Latin <em>crusta</em>, a hard shell — English 'crust', 'crustacean', and 'custard', once a pie in a crust. <em>La crosta del pane</em>: the crust of the bread.",
     "mollica": "From Latin <em>mollis</em>, soft — English 'mollify', 'emollient'. The soft inside of the loaf; the outside is <em>la crosta</em>.",
-    "fetta": "Of uncertain origin — Greek <em>feta</em> cheese took its name from it: a slice. <em>Una fetta di torta</em>: a slice of cake.",
+    "fetta": "Of uncertain origin — the cheese English calls 'feta' took its name from it: a slice. <em>Una fetta di torta</em>: a slice of cake.",
     "pangrattato": "<em>Pane</em> + <em>grattato</em>, grated (<em>grattare</em>, to scratch — English 'grate'). Breadcrumbs, for coating and for topping.",
     "lievito": "From <em>levare</em>, to raise (Latin <em>levare</em>) — English 'leaven', 'lever', 'elevate'. <em>Il lievito di birra</em>: fresh yeast; <em>il lievito madre</em>: sourdough starter.",
     "impasto": "From <em>impastare</em>, to knead (<em>pasta</em>, dough) — English borrowed 'impasto' for paint laid on thick.",
@@ -5352,6 +5384,38 @@
     "bancone": "A big <em>banco</em>, a bench or counter (Germanic <em>bank</em>) — English 'bench', 'bank', 'banquet'. <em>Al bancone</em>: at the counter, where you order.",
     "vassoio": "Probably from <em>vaso</em>, a vessel (Latin <em>vas</em>) — English 'vase', 'vessel'. <em>Un vassoio di pasticcini</em>: a tray of pastries.",
     "ripieno": "From <em>riempire</em>, to fill (Latin <em>implere</em>) — English 'replenish', 'complete'. Also an adjective: <em>pasta ripiena</em>, stuffed pasta.",
+    // ---- Giardino e orto, to 50 (Nov 21, 2026) ----
+    "vanga": "From Late Latin <em>vanga</em>, perhaps from Germanic. <em>Vangare l'orto</em>: to dig over the vegetable plot.",
+    "pala": "From Latin <em>pala</em>, a shovel — English 'palette', a little shovel-shaped board, via French. <em>La pala d'altare</em>: an altarpiece.",
+    "carriola": "From <em>carro</em>, a cart (Latin <em>carrus</em>, from Gaulish) — English 'car', 'carry', 'career'. <em>Una carriola di terra</em>: a barrow-load of soil.",
+    "tosaerba": "<em>Tosa</em> (it clips — <em>tosare</em>, to shear; English 'tonsure') + <em>erba</em> (grass, English 'herb'). It doesn't change in the plural: <em>i tosaerba</em>.",
+    "irrigatore": "From <em>irrigare</em>, to water (Latin <em>rigare</em>) — English 'irrigate', 'irrigation'.",
+    "paletto": "A little <em>palo</em>, a pole (Latin <em>palus</em>, a stake) — English 'pole', 'palisade', and 'pale', as in beyond the pale.",
+    "serra": "From <em>serrare</em>, to shut in (Late Latin <em>serare</em>) — English 'serried', packed close. <em>L'effetto serra</em>: the greenhouse effect.",
+    "capanno": "A big <em>capanna</em>, a hut (Late Latin <em>capanna</em>) — English 'cabin' comes from the same word, via French.",
+    "vialetto": "A little <em>viale</em>, an avenue (from <em>via</em>, a way) — English 'via', 'viaduct', 'deviate'. <em>Il vialetto di ghiaia</em>: the gravel path.",
+    "terriccio": "From <em>terra</em>, earth (Latin <em>terra</em>) — English 'terrain', and 'terrier', the dog that goes to earth. Bought in bags for pots and seed trays.",
+    "concime": "From <em>concimare</em>, to feed the soil. <em>Il concime organico</em>: organic fertiliser.",
+    "letame": "From Latin <em>laetamen</em> (<em>laetus</em>, fertile — later glad, as in the name Letizia). Well-rotted, it feeds <em>l'orto</em>.",
+    "compost": "Borrowed from English 'compost' (Latin <em>compositum</em>, put together). It doesn't change in the plural; <em>la compostiera</em> is the compost bin.",
+    "germoglio": "From Latin <em>germen</em>, a sprout, a seed — English 'germ', 'germinate'. <em>I germogli di soia</em>: bean sprouts.",
+    "bulbo": "From Latin <em>bulbus</em>, Greek <em>bolbos</em>, an onion — English 'bulb', 'bulbous'. A light bulb is <em>una lampadina</em>.",
+    "stelo": "From Latin <em>stilus</em>, a stake, a stem — English 'style', once a writing stick, and 'stiletto'. <em>Un fiore dal lungo stelo</em>: a long-stemmed flower.",
+    "petalo": "From Greek <em>petalon</em>, a leaf spread out — English 'petal'. <em>M'ama, non m'ama</em>: one petal at a time.",
+    "bocciolo": "From <em>boccia</em>, a round bud or ball — <em>le bocce</em> is Italy's game of bowls, English 'boccia'. <em>Una rosa in bocciolo</em>: a rose in bud.",
+    "spina": "From Latin <em>spina</em>, a thorn, the backbone — English 'spine', 'spinal'. <em>Non c'è rosa senza spine</em>: no rose without thorns. It's also an electrical plug.",
+    "talea": "From Latin <em>talea</em>, a cutting, a rod — English 'tally', a notched stick, comes from it, and so does <em>tagliare</em>.",
+    "rosmarino": "From Latin <em>ros marinus</em>, 'dew of the sea' — English 'rosemary'; it grows wild along the coast.",
+    "salvia": "From Latin <em>salvia</em> (<em>salvus</em>, healthy) — the healing herb; English 'sage' (via French), 'salvation', 'safe'. <em>Burro e salvia</em>: the classic sauce for ravioli.",
+    "menta": "From Latin <em>mentha</em>, Greek <em>minthē</em> — English 'mint', 'menthol'. It spreads everywhere: grow it in a pot.",
+    "lavanda": "Perhaps from <em>lavare</em>, to wash — it scented the washing. English 'lavender'.",
+    "tulipano": "From Turkish <em>tülbend</em>, a turban — the shape of the flower; English 'tulip', 'turban'.",
+    "edera": "From Latin <em>hedera</em> — still the plant's botanical name. It climbs walls and trees and stays green all winter.",
+    "zucca": "Probably from Late Latin <em>cucutia</em>, a gourd — <em>la zucchina</em> is its little one, English 'zucchini'. Slang for the head: <em>avere sale in zucca</em>, to have brains.",
+    "lumaca": "From Latin <em>limax</em>, a slug, a snail. <em>Lento come una lumaca</em>: as slow as a snail — the gardener's enemy.",
+    "lombrico": "From Latin <em>lumbricus</em>, an earthworm. The gardener's friend: it airs the soil.",
+    "coccinella": "The little scarlet one — from Latin <em>coccinus</em>, scarlet; English 'cochineal', the red dye, shares the root. It eats aphids, so gardeners love it.",
+    "bruco": "From Latin <em>bruchus</em>, Greek <em>brouchos</em>, a wingless locust. <em>Il bruco diventa farfalla</em>: the caterpillar becomes a butterfly.",
   };
   for (const n of NOUN_ITEMS) if (!n.note && Object.prototype.hasOwnProperty.call(NOUN_NOTES, n.noun)) n.note = NOUN_NOTES[n.noun];
 
@@ -5366,7 +5430,8 @@
   // nouns of Oct 2026, and the 58 renovation nouns after them, were slotted in by the same
   // score, at the rank it earns among the others (which keep their order).
   // The 120 nouns of the new topics (Nov 2026) were slotted in the same way.
-  // The 34 bakery nouns (Nov 21, 2026) took the rank their wordfreq score earns among the others.
+  // The 34 bakery nouns (Nov 21, 2026) took the rank their wordfreq score earns among the others,
+  // and so did the 31 garden nouns after them.
   const NOUN_FREQUENCY_ORDER = [
     "anno", "parte", "cosa", "giorno", "persona", "tempo", "volta", "vita", "lavoro", "modo",
     "caso", "casa", "stato", "mondo", "uomo", "donna", "storia", "fine", "problema", "ora",
@@ -5451,56 +5516,59 @@
     "allergia", "fornello", "labbro", "schiena", "lacrima", "albergo", "vergogna", "mercoledì", "frutta", "ala",
     "allenamento", "deserto", "bicchiere", "stomaco", "residente", "gita", "azzurro", "barca", "formaggio", "sfera",
     "colloquio", "gola", "allenatore", "ginocchio", "petto", "viola", "respiro", "calendario", "zia", "valle",
-    "roccia", "collina", "pavimento", "orologio", "fallo", "cappello", "guaio", "orgoglio", "cantiere", "divano",
-    "conseguenza", "forno", "pollo", "grigio", "cartello", "mela", "seta", "cioccolato", "maglietta", "pesca",
-    "chitarra", "patata", "pedone", "camicia", "sentimento", "muscolo", "sabbia", "tariffa", "tempesta", "coltello",
-    "foglio", "occhiali", "piscina", "magazzino", "tristezza", "mento", "rigore", "anniversario", "lana", "sentiero",
-    "bicicletta", "gelato", "barba", "giacca", "deviazione", "pacco", "supermercato", "tè", "portafoglio", "panino",
-    "alba", "calce", "autunno", "pantaloni", "tramonto", "torneo", "mezzanotte", "golfo", "chilo", "maiale",
-    "riva", "quadrato", "pomodoro", "biscotto", "precedenza", "traguardo", "crema", "fetta", "taxi", "collana",
-    "fungo", "pancia", "coppa", "corridoio", "mancia", "sorgente", "farina", "abbonamento", "fattura", "verdura",
-    "ditta", "scarico", "sosta", "fegato", "vasca", "scimmia", "manica", "burro", "succo", "cognato",
-    "cestino", "penisola", "coincidenza", "barattolo", "pallone", "cemento", "ape", "camion", "cintura", "pino",
-    "arbitro", "nuvola", "secchio", "portiere", "miele", "tennis", "marrone", "balcone", "oliva", "valigia",
-    "pecora", "giunto", "candela", "grotta", "coniglio", "binario", "tunnel", "topo", "panchina", "fango",
-    "malta", "giocattolo", "alcol", "pianura", "noia", "profumo", "unghia", "banana", "bagaglio", "cantina",
-    "serpente", "limone", "nebbia", "farmacia", "vigilia", "tappeto", "frana", "straccio", "orizzonte", "municipio",
-    "sete", "sci", "polso", "tazza", "jeans", "zaino", "baia", "polmone", "soffitto", "maratona",
-    "pareggio", "lampada", "cipolla", "vetta", "colla", "cameriere", "umidità", "garage", "sacchetto", "pendenza",
-    "arancione", "salotto", "pepe", "millennio", "mattone", "cuoco", "oceano", "uva", "bolletta", "marea",
-    "preventivo", "nuoto", "noce", "scrivania", "ascensore", "gonna", "volpe", "quaderno", "mutande", "cuscino",
-    "agnello", "scopa", "taglia", "orso", "sapone", "torrente", "tuta", "mucca", "cascata", "farfalla",
-    "bottone", "gallina", "accendino", "cassetto", "mais", "tacco", "tronco", "vetrina", "triangolo", "armadio",
-    "prenotazione", "fulmine", "vulcano", "spuntino", "ragno", "dogana", "sportello", "carrello", "pasticceria", "rimozione",
-    "delfino", "mezzogiorno", "marciapiede", "lattina", "impasto", "guanto", "cotone", "elefante", "melone", "gradino",
-    "carrozza", "mattinata", "matita", "filone", "squalo", "calza", "stivale", "insalata", "pentola", "prosciutto",
-    "idraulico", "lava", "masso", "coscia", "guancia", "arancia", "fagiolo", "viaggiatore", "aglio", "panna",
-    "tonno", "piramide", "stufa", "bivio", "suocero", "stanchezza", "ciclismo", "camino", "cravatta", "quercia",
-    "lampadina", "stagno", "legna", "scaffale", "lavatrice", "turista", "cucchiaio", "pera", "caviglia", "cubo",
-    "edicola", "asino", "cappotto", "pisello", "caldaia", "palude", "padella", "fragola", "salsiccia", "bonifico",
-    "gomito", "sorpasso", "bancone", "finestrino", "crosta", "carota", "mosca", "frigorifero", "ripieno", "valanga",
-    "arcobaleno", "fazzoletto", "materasso", "lievito", "trave", "campanello", "rubinetto", "muratore", "cono", "yogurt",
-    "attraversamento", "spugna", "ombrello", "mandorla", "felpa", "mozzarella", "ghiacciaio", "marmellata", "pigiama", "maglione",
-    "braccialetto", "manzo", "controllore", "serratura", "ovale", "pedaggio", "aperitivo", "cartellino", "uragano", "lenzuolo",
-    "asciugamano", "vitello", "orecchino", "microonde", "telecomando", "aceto", "vagone", "parmigiano", "zero", "pendolare",
-    "scontrino", "zucchina", "superstrada", "focaccia", "tuono", "crepa", "peperone", "corteccia", "vassoio", "shampoo",
-    "cespuglio", "merenda", "casello", "pizzeria", "interruttore", "sciarpa", "tangenziale", "salame", "bibita", "schiacciata",
-    "salmone", "contatore", "sciroppo", "berretto", "oasi", "rasoio", "maniglia", "forchetta", "pancetta", "cozza",
-    "sandalo", "gambero", "melanzana", "laccio", "muffa", "geometra", "cece", "conoscente", "pannolino", "lavandino",
-    "bistecca", "aspirapolvere", "ananas", "brioche", "varco", "zappa", "rosetta", "siepe", "tacchino", "basilico",
-    "svincolo", "cornetto", "ferragosto", "locomotiva", "ciambella", "altoparlante", "ciliegia", "falegname", "elettricista", "algebra",
-    "abitante", "tabellone", "persiana", "soffitta", "pagnotta", "termometro", "rotaia", "campanile", "crostata", "spazzolino",
-    "catasto", "ciabatta", "girasole", "prezzemolo", "aiuola", "pendio", "cetriolo", "brezza", "ruscello", "rombo",
-    "rettangolo", "panettone", "faggio", "lavastoviglie", "biglietteria", "carciofo", "maionese", "detersivo", "castagno", "cerotto",
-    "tallone", "macchinista", "sopralluogo", "muschio", "grandine", "tegola", "trattoria", "panettiere", "teglia", "dentifricio",
-    "intonaco", "spinaci", "broccolo", "cerniera", "slip", "caparra", "crepuscolo", "ghiaia", "zafferano", "deodorante",
-    "anguria", "papavero", "lampone", "rugiada", "tovaglia", "gilet", "fornaio", "planimetria", "senape", "anagrafe",
-    "piadina", "etto", "sopracciglio", "lenticchia", "caricabatterie", "epifania", "portachiavi", "merluzzo", "infisso", "grembiule",
-    "termosifone", "panetteria", "pagella", "cipresso", "coppo", "mollica", "accappatoio", "fienile", "solaio", "racchetta",
-    "tovagliolo", "caffettiera", "smoking", "sedano", "olivo", "lattuga", "scodella", "davanzale", "albicocca", "tornello",
-    "pasticciere", "appendino", "bignè", "pasticcino", "architrave", "tarlo", "cannolo", "teiera", "rastrello", "grondaia",
-    "pangrattato", "ponteggio", "subentro", "bagnoschiuma", "vespaio", "capotreno", "strofinaccio", "sfogliatella", "massetto", "grissino",
-    "annaffiatoio", "stilatura", "parchimetro", "bombolone", "autovelox", "tornante", "dosso", "michetta", "strettoia"
+    "roccia", "collina", "pavimento", "orologio", "fallo", "cappello", "guaio", "orgoglio", "cantiere", "serra",
+    "divano", "conseguenza", "forno", "pollo", "grigio", "cartello", "mela", "seta", "cioccolato", "maglietta",
+    "pesca", "chitarra", "patata", "pedone", "camicia", "sentimento", "muscolo", "sabbia", "tariffa", "tempesta",
+    "coltello", "foglio", "spina", "occhiali", "piscina", "magazzino", "tristezza", "mento", "rigore", "anniversario",
+    "lana", "sentiero", "bicicletta", "gelato", "barba", "giacca", "deviazione", "pacco", "supermercato", "tè",
+    "portafoglio", "panino", "alba", "calce", "autunno", "pantaloni", "tramonto", "torneo", "mezzanotte", "golfo",
+    "chilo", "maiale", "riva", "quadrato", "pomodoro", "biscotto", "precedenza", "traguardo", "crema", "fetta",
+    "taxi", "collana", "fungo", "pancia", "coppa", "corridoio", "mancia", "sorgente", "farina", "abbonamento",
+    "fattura", "verdura", "ditta", "scarico", "sosta", "fegato", "vasca", "scimmia", "manica", "burro",
+    "succo", "cognato", "cestino", "penisola", "coincidenza", "barattolo", "pallone", "cemento", "ape", "camion",
+    "cintura", "pino", "arbitro", "nuvola", "secchio", "portiere", "miele", "tennis", "marrone", "balcone",
+    "oliva", "valigia", "pecora", "giunto", "candela", "grotta", "coniglio", "binario", "tunnel", "topo",
+    "panchina", "fango", "malta", "giocattolo", "alcol", "pianura", "noia", "profumo", "unghia", "banana",
+    "bagaglio", "cantina", "serpente", "limone", "nebbia", "farmacia", "vigilia", "tappeto", "frana", "straccio",
+    "orizzonte", "municipio", "sete", "sci", "polso", "tazza", "jeans", "zaino", "baia", "polmone",
+    "soffitto", "maratona", "pareggio", "lampada", "cipolla", "vetta", "colla", "cameriere", "umidità", "garage",
+    "sacchetto", "pendenza", "arancione", "salotto", "pepe", "millennio", "mattone", "cuoco", "oceano", "uva",
+    "bolletta", "marea", "preventivo", "nuoto", "noce", "scrivania", "zucca", "ascensore", "gonna", "volpe",
+    "quaderno", "mutande", "cuscino", "agnello", "scopa", "taglia", "orso", "sapone", "torrente", "tuta",
+    "mucca", "cascata", "farfalla", "bottone", "pala", "gallina", "accendino", "cassetto", "mais", "tacco",
+    "tronco", "vetrina", "triangolo", "armadio", "prenotazione", "fulmine", "vulcano", "spuntino", "ragno", "dogana",
+    "sportello", "carrello", "pasticceria", "rimozione", "delfino", "mezzogiorno", "marciapiede", "lattina", "impasto", "guanto",
+    "cotone", "elefante", "melone", "gradino", "carrozza", "mattinata", "matita", "menta", "filone", "squalo",
+    "calza", "stivale", "insalata", "pentola", "prosciutto", "idraulico", "lava", "masso", "coscia", "guancia",
+    "arancia", "fagiolo", "viaggiatore", "aglio", "panna", "tonno", "piramide", "stufa", "bivio", "suocero",
+    "stanchezza", "ciclismo", "camino", "cravatta", "quercia", "lampadina", "stagno", "legna", "scaffale", "lavatrice",
+    "turista", "cucchiaio", "pera", "caviglia", "cubo", "edicola", "asino", "cappotto", "pisello", "caldaia",
+    "palude", "padella", "fragola", "salsiccia", "bonifico", "gomito", "sorpasso", "bancone", "finestrino", "crosta",
+    "carota", "mosca", "frigorifero", "ripieno", "valanga", "arcobaleno", "fazzoletto", "materasso", "lievito", "trave",
+    "campanello", "rubinetto", "muratore", "cono", "yogurt", "attraversamento", "spugna", "ombrello", "mandorla", "felpa",
+    "mozzarella", "ghiacciaio", "marmellata", "pigiama", "maglione", "braccialetto", "manzo", "controllore", "serratura", "ovale",
+    "pedaggio", "aperitivo", "cartellino", "uragano", "lenzuolo", "asciugamano", "vitello", "orecchino", "microonde", "telecomando",
+    "aceto", "vagone", "parmigiano", "zero", "pendolare", "scontrino", "zucchina", "superstrada", "focaccia", "tuono",
+    "crepa", "peperone", "corteccia", "vassoio", "shampoo", "cespuglio", "merenda", "casello", "pizzeria", "interruttore",
+    "sciarpa", "tangenziale", "salame", "bibita", "schiacciata", "salmone", "contatore", "sciroppo", "berretto", "oasi",
+    "rasoio", "maniglia", "forchetta", "pancetta", "salvia", "cozza", "sandalo", "gambero", "melanzana", "laccio",
+    "muffa", "geometra", "cece", "conoscente", "pannolino", "lavandino", "bistecca", "letame", "lavanda", "aspirapolvere",
+    "ananas", "brioche", "varco", "zappa", "rosetta", "siepe", "tacchino", "basilico", "svincolo", "cornetto",
+    "ferragosto", "locomotiva", "ciambella", "altoparlante", "ciliegia", "falegname", "elettricista", "algebra", "abitante", "tabellone",
+    "persiana", "soffitta", "pagnotta", "termometro", "rotaia", "stelo", "lumaca", "campanile", "rosmarino", "crostata",
+    "spazzolino", "catasto", "ciabatta", "girasole", "prezzemolo", "aiuola", "pendio", "cetriolo", "brezza", "ruscello",
+    "rombo", "rettangolo", "panettone", "faggio", "lavastoviglie", "biglietteria", "carciofo", "maionese", "detersivo", "castagno",
+    "cerotto", "bulbo", "tallone", "macchinista", "sopralluogo", "muschio", "grandine", "tegola", "trattoria", "panettiere",
+    "teglia", "dentifricio", "intonaco", "spinaci", "broccolo", "cerniera", "slip", "caparra", "crepuscolo", "ghiaia",
+    "zafferano", "deodorante", "anguria", "papavero", "lampone", "rugiada", "tovaglia", "gilet", "bruco", "fornaio",
+    "planimetria", "senape", "anagrafe", "piadina", "concime", "etto", "terriccio", "edera", "sopracciglio", "lenticchia",
+    "caricabatterie", "epifania", "portachiavi", "merluzzo", "infisso", "grembiule", "termosifone", "panetteria", "vialetto", "pagella",
+    "cipresso", "paletto", "coppo", "mollica", "accappatoio", "fienile", "solaio", "racchetta", "tovagliolo", "capanno",
+    "caffettiera", "smoking", "sedano", "olivo", "lattuga", "coccinella", "vanga", "tulipano", "scodella", "davanzale",
+    "albicocca", "tornello", "petalo", "carriola", "pasticciere", "appendino", "bignè", "germoglio", "pasticcino", "architrave",
+    "tarlo", "talea", "cannolo", "teiera", "rastrello", "bocciolo", "grondaia", "pangrattato", "ponteggio", "subentro",
+    "bagnoschiuma", "vespaio", "capotreno", "compost", "tosaerba", "strofinaccio", "sfogliatella", "massetto", "grissino", "annaffiatoio",
+    "stilatura", "lombrico", "parchimetro", "bombolone", "autovelox", "irrigatore", "tornante", "dosso", "michetta", "strettoia"
   ];
   function rankOf(noun) { return frequencyRank[noun] ?? Infinity; }
 
@@ -6732,7 +6800,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     { key: 'istruzione', label: 'Scuola', en: 'School & study', nouns: ["scuola", "lezione", "lavagna", "insegnante", "maestro", "professore", "studente", "classe", "compito", "esame", "voto", "pagella", "diploma", "laurea", "università", "corso", "studio", "libro", "quaderno", "penna", "matita", "gomma", "traduzione", "errore", "laboratorio", "conversazione", "conoscenza", "compagno", "liceo", "nota", "argomento", "scienza", "frase", "racconto", "foglio", "materia", "appunto"] },
     { key: 'cucina-tavola', label: 'In cucina', en: 'Kitchen & table', nouns: ["pentola", "padella", "fornello", "forno", "frigorifero", "lavandino", "coltello", "forchetta", "cucchiaio", "piatto", "bicchiere", "tazza", "scodella", "bottiglia", "tovaglia", "grembiule", "teiera", "caffettiera", "ricetta", "tavola", "barattolo"] },
     { key: 'panetteria', label: 'In panetteria', en: 'At the bakery', nouns: ["panetteria", "pasticceria", "forno", "fornaio", "panettiere", "pasticciere", "pane", "pagnotta", "filone", "rosetta", "michetta", "panino", "ciabatta", "grissino", "focaccia", "schiacciata", "piadina", "pizza", "teglia", "crosta", "mollica", "fetta", "pangrattato", "farina", "lievito", "impasto", "burro", "zucchero", "cornetto", "brioche", "torta", "crostata", "biscotto", "pasticcino", "bignè", "cannolo", "sfogliatella", "bombolone", "ciambella", "panettone", "crema", "panna", "cioccolato", "marmellata", "ripieno", "vetrina", "bancone", "vassoio", "turno", "etto", "pezzo", "sacchetto", "scontrino", "resto"] },   // Nov 21, 2026: the bread, the pastries, the counter
-    { key: 'giardino-orto', label: 'Giardino e orto', en: 'Garden & vegetable plot', nouns: ["giardino", "orto", "prato", "aiuola", "siepe", "seme", "pianta", "fiore", "albero", "foglia", "radice", "ramo", "erba", "terra", "vaso", "zappa", "rastrello", "annaffiatoio", "secchio"] }
+    { key: 'giardino-orto', label: 'Giardino e orto', en: 'Garden & vegetable plot', nouns: ["giardino", "orto", "prato", "aiuola", "siepe", "seme", "pianta", "fiore", "albero", "foglia", "radice", "ramo", "erba", "terra", "vaso", "zappa", "rastrello", "annaffiatoio", "secchio", "vanga", "pala", "carriola", "tosaerba", "irrigatore", "paletto", "serra", "capanno", "vialetto", "terriccio", "concime", "letame", "compost", "germoglio", "bulbo", "stelo", "petalo", "bocciolo", "spina", "talea", "rosmarino", "salvia", "menta", "lavanda", "tulipano", "edera", "zucca", "lumaca", "lombrico", "coccinella", "bruco"] }
   ];
 
   // =====================================================================
@@ -16377,7 +16445,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-21T15:22Z';
+  const BUILD = '2026-11-21T15:43Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
