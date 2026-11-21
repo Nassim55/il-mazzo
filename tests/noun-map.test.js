@@ -12,7 +12,7 @@ const map = () => B.d.getElementById('noun-map');
 const panel = () => B.d.getElementById('map-panel');
 const row = k => map().querySelector(`.map-row[data-topic="${k}"]`);
 const redraw = () => B.ev("document.getElementById('noun-map').innerHTML = nounMapInner()");   // what the next frame does
-ok(B.errors.length === 0 && map() && map().querySelectorAll('.map-row').length === 34, 'the nouns page shows La mappa: a line for each of its 34 topics');
+ok(B.errors.length === 0 && map() && map().querySelectorAll('.map-row').length === 35, 'the nouns page shows La mappa: a line for each of its 35 topics');
 
 // ---- The page: the picks and Start first, then the map; no theme chips; the grid folded ----
 const parts = [...B.d.querySelectorAll('.setup-main > *')].map(e => e.id || e.className.split(' ')[0]);
@@ -20,7 +20,7 @@ ok(B.d.getElementById('hand').compareDocumentPosition(B.d.getElementById('noun-m
    && B.d.querySelector('#hand #start-btn') && B.d.querySelector('#hand [data-direction="spasso"]') && B.d.querySelector('.setup-foot #setup-meta') && B.d.querySelector('.setup-foot #audio-row') && !B.d.querySelector('#setup-more'),
     `the hand — Start, with A spasso in its switch — comes above the map; your progress and the voice at the foot (${parts.filter(x => x !== 'theme-row').join(' → ')})`);
 ok(B.d.getElementById('theme-row').hidden && B.d.getElementById('verb-grid').closest('details.grid-fold') && !B.d.getElementById('grid-fold').open
-   && /Every noun, one by one \(1295\)/.test(B.d.querySelector('.grid-fold summary').textContent), 'the theme chips give way to the map; the 1295 nouns fold away underneath');
+   && /Every noun, one by one \(1329\)/.test(B.d.querySelector('.grid-fold summary').textContent), 'the theme chips give way to the map; the 1329 nouns fold away underneath');
 ok(B.d.querySelector('.container').dataset.map === '1' && ['verbs', 'irregular', 'adjectives'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '1') && ['phrases', 'prepositions'].every(s => boot({ 'flipcards-subject': s }).d.querySelector('.container').dataset.map === '0'), 'a wide page for the map — the word sections');
 
 // ---- A topic's line ----
@@ -138,4 +138,17 @@ ok(B.ev(`(() => { const byKey = new Map(NOUN_ITEMS.map(n => [n.noun, n])); retur
   const k = x.tried.filter(c => c.known).length, run = a => a.every((v, i) => i === 0 || a[i - 1] <= v);
   return x.tried.slice(0, k).every(c => c.known) && run(r.slice(0, k)) && run(r.slice(k)) && x.cells.slice(x.tried.length).every(c => !c.seen && !c.known); }); })()`),
    "every topic: the known squares first, then the rest, each running green to red — and the ones not tried yet last");
+// ---- In panetteria (Nov 21, 2026): at the bakery ----
+{
+  const P = boot({ 'flipcards-subject': 'nouns' });
+  const top = P.ev("(() => { const t = SUBJECTS.nouns.themes.find(t => t.key === 'panetteria'); return t ? { label: t.label, en: t.en, n: t.nouns.length, nouns: t.nouns } : null; })()");
+  ok(top && top.label === 'In panetteria' && top.en === 'At the bakery' && top.n === 54 && !!P.d.querySelector('#noun-map .map-row[data-topic="panetteria"]'),
+     'In panetteria: a row of its own on the map — 54 nouns, from la pagnotta to lo scontrino');
+  const fresh = ['pagnotta', 'grissino', 'focaccia', 'cornetto', 'sfogliatella', 'mollica', 'vassoio', 'bignè'];
+  ok(fresh.every(k => P.ev(`(() => { const n = SUBJECTS.nouns.items.find(n => n.noun === ${JSON.stringify(k)}); return !!n && !!n.note && Number.isFinite(rankOf(n.noun)); })()`)),
+     'the new ones are full nouns: an article, a note on where the word comes from, and a place by frequency');
+  ok(['pane', 'torta', 'scontrino', 'resto'].every(k => top.nouns.includes(k)) && P.ev("SUBJECTS.nouns.themes.find(t => t.key === 'cibo').nouns.includes('pane')"),
+     'and the ones the app already had join it, staying in their own topics too');
+  ok(P.errors.length === 0 && P.warns.length === 0, 'no errors or warnings');
+}
 done();
