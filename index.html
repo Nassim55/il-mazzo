@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-61rQDxP4Lt8fpAi8Wzx5n5DVHIqzVBJ5Y+tVs51PmUk=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-XJ9V1QneFXPGkb+IJOaWjzL6/jFkMyQDvN7a+mOJt9k=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -3125,6 +3125,16 @@
     .section-bar .family-list { grid-row: 2; grid-column: 1 / -1; position: static; width: auto; margin-top: 4px; padding: 0 2px 4px; border: 0; box-shadow: none; background: transparent; }
   }
 
+  /* An example sentence with the answer (Nov 2026, Avverbi e congiunzioni): the word in bold, the English beneath */
+  .feedback-example { display: flex; flex-direction: column; gap: 3px; max-width: 34em; margin: 14px auto 0; }
+  .feedback-example .ex-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 21px; line-height: 1.3; color: var(--ink); }
+  .feedback-example .ex-it strong { font-weight: 700; }
+  .feedback-example .ex-en { font-size: 13.5px; line-height: 1.45; color: #6f6152; }
+  .feedback .feedback-example, .card .feedback .feedback-example .ex-it, .card .feedback .feedback-example .ex-en { text-transform: none; letter-spacing: normal; }   /* sentence case — the feedback's label styles stop here */
+  .card .feedback .feedback-example .ex-en { font-family: 'DM Sans', sans-serif; font-style: normal; font-weight: 400; }
+  .card .feedback .feedback-example .ex-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; }
+  @media (max-width: 600px) { .feedback-example .ex-it { font-size: 19px; } }
+
 </style>
 </head>
 <body>
@@ -6066,7 +6076,7 @@
     if (isPhraseSubject()) {
       const p = n.phrase;
       return [{ key: p.key, noun: p.key, english: p.en, italian: p.it, accepted: [p.it, ...p.itAlts],
-                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, natural: n.natural || null, sentPerson: n.person || null, type: n.type || null,
+                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, example: n.example || null, natural: n.natural || null, sentPerson: n.person || null, type: n.type || null,
                 rule: n.rule || null, ownRule: n.ownRule || null, num: !!p.num, mech: !!n.mech, mechPrompt: n.mechPrompt || null, sub: n.sub || null }].flatMap(c => {
         if (!n.pl) return [c];
         const pl = { ...c, key: `${c.key}|pl`, english: n.pl.en, italian: n.pl.it, accepted: [n.pl.it, ...n.pl.itAlts], englishAll: [n.pl.en, ...n.pl.enAlts],
@@ -9564,7 +9574,122 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     { key: "nonostante", it: "nonostante", en: "despite / even though", enAlts: ["in spite of", "although"], itAlts: [], reg: 'neutral', themes: ["collegare"],
       note: "<em>Non</em> + <em>ostante</em>, not standing in the way (Latin <em>obstare</em>) — English 'obstacle'. <em>Nonostante la pioggia, esco</em>: despite the rain, I'm going out." }
   ];
-  const AVV_ITEMS = AVV_DATA.map(p => ({ noun: p.key, display: p.it, it: p.it, en: p.en, phrase: p, note: p.note }));
+  // An example for every word (Nov 2026): shown with the answer, the word in bold, and read out after it — Italian, then English
+  const AVV_EXAMPLES = {
+    "sempre": ["Mia nonna beve sempre il caffè senza zucchero.", "My grandmother always drinks her coffee without sugar."],
+    "mai": ["Non bevo mai il latte.", "I never drink milk."],
+    "già": ["Sono già le otto!", "It's already eight o'clock!"],
+    "ancora": ["Dormi ancora?", "Are you still asleep?"],
+    "spesso": ["Andiamo spesso al cinema il sabato.", "We often go to the cinema on Saturdays."],
+    "presto": ["Domani mi alzo presto.", "Tomorrow I'm getting up early."],
+    "tardi": ["È tardi, torno a casa.", "It's late, I'm going home."],
+    "subito": ["Arrivo subito!", "I'll be right there!"],
+    "adesso": ["Adesso non posso parlare.", "I can't talk now."],
+    "poi": ["Prima mangiamo, poi andiamo al parco.", "First we eat, then we go to the park."],
+    "dopo": ["Ci vediamo dopo.", "See you later."],
+    "prima": ["Arrivo un'ora prima.", "I'll arrive an hour early."],
+    "ieri": ["Ieri era domenica.", "Yesterday was Sunday."],
+    "oggi": ["Oggi è il mio compleanno.", "Today is my birthday."],
+    "domani": ["Domani vado al mare.", "Tomorrow I'm going to the seaside."],
+    "stasera": ["Stasera mangiamo la pizza.", "Tonight we're having pizza."],
+    "ormai": ["Ormai è troppo tardi.", "By now it's too late."],
+    "intanto": ["Tu cucini, io intanto apparecchio la tavola.", "You cook — meanwhile I'll lay the table."],
+    "finalmente": ["Finalmente è venerdì!", "At last it's Friday!"],
+    "infine": ["Infine, vorrei ringraziare tutti.", "Finally, I'd like to thank everyone."],
+    "di-solito": ["Di solito pranzo a mezzogiorno.", "I usually have lunch at noon."],
+    "qualche-volta": ["Qualche volta prendo l'autobus.", "Sometimes I take the bus."],
+    "raramente": ["Guardo raramente la televisione.", "I rarely watch television."],
+    "ultimamente": ["Ultimamente dormo poco.", "Lately I haven't been sleeping much."],
+    "appena": ["Ti chiamo appena arrivo.", "I'll call you as soon as I arrive."],
+    "qui": ["Vieni qui!", "Come here!"],
+    "lì": ["Il gatto dorme lì, sulla sedia.", "The cat sleeps there, on the chair."],
+    "sopra": ["Il bagno è di sopra.", "The bathroom is upstairs."],
+    "sotto": ["Mia sorella abita di sotto.", "My sister lives downstairs."],
+    "dentro": ["Aspettami dentro.", "Wait for me inside."],
+    "fuori": ["I bambini giocano fuori.", "The children are playing outside."],
+    "vicino-avv": ["Abito qui vicino.", "I live nearby."],
+    "lontano-avv": ["Lavoro lontano da casa.", "I work far from home."],
+    "davanti": ["Ci vediamo davanti al cinema.", "See you in front of the cinema."],
+    "dietro": ["C'è un giardino dietro.", "There's a garden at the back."],
+    "accanto": ["La farmacia è qui accanto.", "The chemist's is right next door."],
+    "giù": ["Vieni giù, la cena è pronta!", "Come down, dinner's ready!"],
+    "su-avv": ["Vado su a prendere il libro.", "I'm going up to get the book."],
+    "ovunque": ["Ci sono zanzare ovunque.", "There are mosquitoes everywhere."],
+    "altrove": ["Qui è pieno, andiamo altrove.", "It's full here — let's go elsewhere."],
+    "intorno": ["Guardati intorno!", "Look around you!"],
+    "molto-avv": ["Questo film è molto bello.", "This film is very good."],
+    "poco-avv": ["Mangio poco la sera.", "I don't eat much in the evening."],
+    "troppo-avv": ["Lavori troppo.", "You work too much."],
+    "abbastanza": ["Il tè è abbastanza caldo?", "Is the tea hot enough?"],
+    "più": ["Non abito più a Londra.", "I don't live in London any more."],
+    "meno": ["Oggi fa meno caldo.", "It's less hot today."],
+    "tanto-avv": ["Ti voglio tanto bene.", "I love you so much."],
+    "quasi": ["Sono quasi le nove.", "It's almost nine o'clock."],
+    "almeno": ["Bevi almeno un bicchiere d'acqua.", "At least drink a glass of water."],
+    "circa": ["Costa circa venti euro.", "It costs about twenty euros."],
+    "solo-avv": ["Ho solo cinque minuti.", "I only have five minutes."],
+    "parecchio": ["Questa borsa costa parecchio.", "This bag costs quite a lot."],
+    "piuttosto": ["Il film è piuttosto lungo.", "The film is rather long."],
+    "affatto": ["Non sono affatto stanco.", "I'm not tired at all."],
+    "bene": ["Parli bene l'italiano!", "You speak Italian well!"],
+    "male": ["Dormo male quando fa caldo.", "I sleep badly when it's hot."],
+    "così": ["Si fa così.", "This is how it's done."],
+    "meglio": ["Oggi sto meglio, grazie.", "I'm feeling better today, thanks."],
+    "peggio": ["Canto peggio di mio fratello.", "I sing worse than my brother."],
+    "insieme": ["Ceniamo insieme stasera?", "Shall we have dinner together tonight?"],
+    "piano-avv": ["Parla piano, il bambino dorme.", "Speak softly, the baby's asleep."],
+    "forte-avv": ["Piove forte.", "It's raining hard."],
+    "volentieri": ["Ti aiuto volentieri.", "I'll gladly help you."],
+    "apposta": ["Lo fa apposta!", "He's doing it on purpose!"],
+    "velocemente": ["Il tempo passa velocemente.", "Time passes quickly."],
+    "lentamente": ["Il nonno cammina lentamente.", "Grandad walks slowly."],
+    "facilmente": ["Si arriva facilmente in treno.", "You can easily get there by train."],
+    "sì": ["Sì, ho fame.", "Yes, I'm hungry."],
+    "no": ["No, grazie, sono a posto.", "No thanks, I'm fine."],
+    "non": ["Non capisco.", "I don't understand."],
+    "forse": ["Forse domani piove.", "Maybe it'll rain tomorrow."],
+    "davvero": ["Davvero? Non ci credo!", "Really? I don't believe it!"],
+    "proprio": ["Hai proprio ragione.", "You're absolutely right."],
+    "certo-avv": ["Certo che puoi venire!", "Of course you can come!"],
+    "anche": ["Vengo anche io.", "I'm coming too."],
+    "neanche": ["Non lo so neanche io.", "I don't know either."],
+    "purtroppo": ["Purtroppo il negozio è chiuso.", "Unfortunately the shop is closed."],
+    "magari": ["Magari ci vediamo sabato.", "Maybe we'll see each other on Saturday."],
+    "sicuramente": ["Sicuramente arriva in ritardo.", "He'll definitely be late."],
+    "probabilmente": ["Probabilmente è a casa.", "He's probably at home."],
+    "soprattutto": ["Mi piace la frutta, soprattutto le fragole.", "I like fruit, especially strawberries."],
+    "perfino": ["Lavora perfino la domenica.", "He even works on Sundays."],
+    "infatti": ["Sembra stanco. Infatti dorme poco.", "He looks tired. In fact, he hardly sleeps."],
+    "invece": ["Non prendo il treno: vado invece in macchina.", "I'm not taking the train — I'm driving instead."],
+    "comunque": ["Piove, ma esco comunque.", "It's raining, but I'm going out anyway."],
+    "insomma": ["Insomma, non mi piace.", "In short, I don't like it."],
+    "cioè": ["Arrivo tra poco, cioè tra dieci minuti.", "I'll be there soon — that is, in ten minutes."],
+    "anzi": ["Non è brutto, anzi, è bellissimo!", "It's not ugly — on the contrary, it's beautiful!"],
+    "allora": ["Allora, cosa facciamo stasera?", "So, what are we doing tonight?"],
+    "eppure": ["È ricco, eppure non è felice.", "He's rich, and yet he isn't happy."],
+    "inoltre": ["La casa è grande; inoltre ha un bel giardino.", "The house is big; moreover, it has a lovely garden."],
+    "dove": ["Dove abiti?", "Where do you live?"],
+    "quando": ["Quando parti?", "When are you leaving?"],
+    "come": ["Come stai?", "How are you?"],
+    "perché": ["Perché ridi?", "Why are you laughing?"],
+    "quanto": ["Quanto costa questo libro?", "How much does this book cost?"],
+    "e": ["Prendo un caffè e un cornetto.", "I'll have a coffee and a croissant."],
+    "ma": ["È piccolo ma comodo.", "It's small but comfortable."],
+    "o": ["Vuoi il tè o il caffè?", "Would you like tea or coffee?"],
+    "però": ["Mi piace, però è caro.", "I like it, but it's expensive."],
+    "né": ["Non bevo né vino né birra.", "I drink neither wine nor beer."],
+    "tuttavia": ["È tardi; tuttavia il bar è ancora aperto.", "It's late; nevertheless, the bar is still open."],
+    "quindi": ["Piove, quindi resto a casa.", "It's raining, so I'm staying at home."],
+    "perciò": ["Sono stanco, perciò vado a letto.", "I'm tired — that's why I'm going to bed."],
+    "se": ["Se hai tempo, chiamami.", "If you have time, call me."],
+    "mentre": ["Ascolto la musica mentre cucino.", "I listen to music while I cook."],
+    "anche-se": ["Vado al lavoro anche se sono stanco.", "I'm going to work even though I'm tired."],
+    "siccome": ["Siccome è tardi, prendo un taxi.", "Since it's late, I'll take a taxi."],
+    "finché": ["Resto finché vuoi.", "I'll stay as long as you like."],
+    "che-cong": ["So che hai ragione.", "I know (that) you're right."],
+    "nonostante": ["Esce nonostante la pioggia.", "He goes out despite the rain."]
+  };
+  const AVV_ITEMS = AVV_DATA.map(p => ({ noun: p.key, display: p.it, it: p.it, en: p.en, phrase: p, note: p.note, example: AVV_EXAMPLES[p.key] || null }));
   const AVV_THEMES = [
     { key: 'tempo', label: "Tempo", en: "Time — when", nouns: AVV_DATA.filter(p => p.themes.includes('tempo')).map(p => p.key) },
     { key: 'luogo', label: "Luogo", en: "Place — where", nouns: AVV_DATA.filter(p => p.themes.includes('luogo')).map(p => p.key) },
@@ -15721,6 +15846,31 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       return true;
     } catch (e) { return false; }
   }
+  // Several pieces read one after the other — one cancel, then each in turn (Nov 2026: a word, then its example)
+  function speakSeq(texts) {
+    const v = chosenVoice(), list = texts.filter(Boolean);
+    if (!v || !list.length) return false;
+    try {
+      window.speechSynthesis.cancel();
+      for (const text of list) {
+        const u = new window.SpeechSynthesisUtterance(text);
+        u.voice = v;
+        u.lang = v.lang;
+        u.rate = audioPrefs.rate;
+        window.speechSynthesis.speak(u);
+      }
+      return true;
+    } catch (e) { return false; }
+  }
+  // What a card says once its answer shows: the word, and its example sentence where it has one
+  function speakCard(card) { return speakSeq([sayText(card), card.example ? card.example[0] : '']); }
+  // The example, shown with the answer: the sentence with the word in bold, its English beneath
+  function exampleHTML(card) {
+    if (!card.example) return '';
+    const [it, en] = card.example, word = String(card.italian).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const marked = escapeHTML(it).replace(new RegExp(`(^|[^\\p{L}])(${word})(?![\\p{L}])`, 'giu'), '$1<strong>$2</strong>');
+    return `<div class="feedback-example"><span class="ex-it" lang="it">${marked}</span><span class="ex-en">${escapeHTML(en)}</span></div>`;
+  }
   // What a card says aloud: the Italian answer, with the pronoun for a conjugation
   function sayText(card) {
     const base = (isVerbSubject() && card.person) ? `${card.pronounLabel.split(' / ')[0]} ${card.italian}` : card.italian;
@@ -16010,7 +16160,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   }
   function wireSpeakBtn(card) {
     const b = document.getElementById('speak-btn');
-    if (b) b.addEventListener('click', () => { speak(sayText(card)); });
+    if (b) b.addEventListener('click', () => { speakCard(card); });
   }
 
   // Voice settings on the setup screen
@@ -16780,7 +16930,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-22T15:53Z';
+  const BUILD = '2026-11-22T18:01Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
@@ -16949,11 +17099,11 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const pron = isVerbSubject() && card.pron ? ` <span class="pron">${card.pron}</span>` : '';
     const cue = isAdjSubject() && card.cue && !itToEn ? ` <span class="pron">(${escapeHTML(card.cue)})</span>` : '';
     const meaning = direction === 'listen' ? `<span class="fb-meaning">${escapeHTML(card.english)}</span>` : '';
-    const note = card.note ? `<div class="feedback-note">${card.note}</div>` : '';
+    const note = exampleHTML(card) + (card.note ? `<div class="feedback-note">${card.note}</div>` : '');
     fb.className = 'feedback gira';
     fb.innerHTML = `<div class="feedback-body"><strong class="gira-answer">${shown}</strong>${pron}${cue}${speakBtnHTML()}${meaning}${note}</div>`;
     wireSpeakBtn(card);
-    if (audioPrefs.auto) speak(sayText(card));
+    if (audioPrefs.auto) speakCard(card);
     document.getElementById('gira-turn').hidden = true;
     document.getElementById('gira-no').hidden = false;
     document.getElementById('gira-yes').hidden = false;
@@ -17869,7 +18019,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
 
     // Teaching notes now show on every answer, right or wrong, so the history
     // behind a word isn't missed when it keeps being answered correctly
-    const noteHTML = numeriPartsHTML(card) + (card.note ? `<div class="feedback-note">${card.note}</div>` : '');
+    const noteHTML = numeriPartsHTML(card) + exampleHTML(card) + (card.note ? `<div class="feedback-note">${card.note}</div>` : '');
     const assocHTML = `<div class="assoc" id="assoc"></div>`;
     // In listening mode the meaning is new information, so show it with the answer
     const meaningHTML = direction === 'listen' ? `<span class="fb-meaning">${escapeHTML(card.english)}</span>` : '';
@@ -17926,7 +18076,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     }
     renderAssociation(card);
     wireSpeakBtn(card);
-    if (audioPrefs.auto) speak(sayText(card));
+    if (audioPrefs.auto) speakCard(card);
     if (result.correct && saidAloud) fb.querySelector('.feedback-body').insertAdjacentHTML('afterbegin', '<div class="said-aloud">🎙 Said aloud</div>');
     if (!result.correct) {   // type it right before the next card
       mustRetype = true;
@@ -18013,7 +18163,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     scoreEl.textContent = score;
     const fb = document.getElementById('feedback');
     fb.className = 'feedback correct';
-    const noteHTML = numeriPartsHTML(card) + (card.note ? `<div class="feedback-note">${card.note}</div>` : '');
+    const noteHTML = numeriPartsHTML(card) + exampleHTML(card) + (card.note ? `<div class="feedback-note">${card.note}</div>` : '');
     const pronHTML = isVerbSubject() ? ` <span class="pron">${card.pron}</span>` : '';
     fb.innerHTML = `<div class="feedback-body">✓ Counted as correct — <strong>${card.english}</strong>${pronHTML}${speakBtnHTML()}${noteHTML}<div class="assoc" id="assoc"></div></div>`;
     renderAssociation(card);
