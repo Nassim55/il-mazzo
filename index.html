@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-3N51iMjTGmEA99qU+lUR2bTx1fr1sIZuWtG3WSztJNc=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-07/z5sZhlgPbT6a4RYB4n1JpxGq09b1u/NZQMM0JneA=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -15189,8 +15189,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         + `<div class="verb-chip-mark">●</div><div class="verb-chip-italian">${escapeHTML(c.it)}</div><div class="verb-chip-english">${escapeHTML(c.en)}</div></button>`;
     };
     // The actions, as the game's buttons: the dark one starts a round, the outlined ones fill the deck
-    const more = [
-      x.fresh.length && !x.fresh.every(c => selectedNouns.has(c.key)) ? `<button type="button" class="submit secondary" data-map-pick="new">+ Add the ${x.fresh.length} not tried</button>` : ''
+    const more = [   // Nov 2026: the words you know, to keep them fresh — in place of adding the untried ones
+      good.length ? `<button type="button" class="submit secondary map-practise" data-map-pick="known">▶ Practise the ${good.length} you know</button>` : ''
     ].filter(Boolean);
     const group = (label, list) => list.length ? `<div class="endings-note"><div class="en-label">${label}</div><div class="map-tiles">${list.map(tile).join('')}</div></div>` : '';
     return `
@@ -15522,9 +15522,9 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         if (!t) return;
         const x = mapTopic(t, new Map(SUBJECTS[subject].items.map(n => [n.noun, n])));
         const what = pick.dataset.mapPick;
-        if (what === 'unknown') {   // the ones not yet known, and off you go — your deck stays as it was for afterwards
+        if (what === 'unknown' || what === 'known') {   // the ones not yet known, or the ones you know, and off you go — your deck stays as it was for afterwards
           const keepWords = [...selectedNouns], keepTopics = syncDeckTopics().slice();
-          applyPick(mapNotKnown(x).map(c => c.key));
+          applyPick((what === 'known' ? x.cells.filter(c => c.known) : mapNotKnown(x)).map(c => c.key));
           const start = document.getElementById('start-btn');
           if (start) start.click();
           selectedNouns.clear();
@@ -15536,7 +15536,6 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         }
         if (what === 'all') topicEdit(() => topicsIn([t.key]));
         else if (what === 'none') topicEdit(() => topicsOut([t.key]));
-        else if (what === 'new') setWords([...selectedNouns, ...x.fresh.map(c => c.key)]);
       }
     });
   }
@@ -16696,7 +16695,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-21T16:56Z';
+  const BUILD = '2026-11-22T00:42Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

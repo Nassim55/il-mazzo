@@ -89,9 +89,7 @@ panel().querySelector('[data-map-pick="all"]').click();
 const animaliN = topicSize(topicOf('cane'));
 ok(B.ev('selectedNouns.size') === animaliN && /take them out/.test(panel().textContent) && row(topicOf('cane')).querySelector('.map-add.in'), `Add all: the whole topic (${animaliN}) is in — its line says ✓ In deck`);
 row(topicOf('casa')).querySelector('.map-head').click();
-panel().querySelector('[data-map-pick="new"]').click();
-const newInCasa = B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('casa'))}).nouns.filter(k => !${JSON.stringify(Object.keys(stats))}.includes(k)).length`);
-ok(B.ev('selectedNouns.size') >= animaliN + newInCasa - 2 && B.ev('selectedNouns.has("cane")'), 'Add the not tried, in another topic: added to what was there, not instead');
+ok(!panel().querySelector('[data-map-pick="new"]') && !/not tried<\/button>|Add the \d+ not tried/.test(panel().innerHTML), 'no button to add the untried ones (Nov 2026: it made way for the words you know)');
 panel().querySelector('[data-map-pick="all"]').click();
 panel().querySelector('[data-map-pick="none"]').click();
 ok(!B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('casa'))}).nouns.some(k => selectedNouns.has(k))`) && B.ev('selectedNouns.has("cane")') === !B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('casa'))}).nouns.includes("cane")`),
@@ -118,6 +116,23 @@ ok(B.d.querySelector('.container').dataset.view === 'game' && notKnown.length > 
    && B.ev(`deck.every(c => ${JSON.stringify(notKnown)}.includes(c.noun))`),
    `Practise the ones not yet known: a round of exactly those starts — tried or not (${notKnown.length} of ${openSize})`);
 ok(B.ev('[...selectedNouns].sort().join()') === deckBefore, '…and your deck is as it was, for afterwards');
+
+// ---- Practise the ones you know (Nov 2026): to keep them fresh ----
+B.ev('showSetup()');
+const casaKnown = B.ev(`NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('casa'))}).nouns.slice(0, 3)`);
+B.ev(`(() => { const k = SUBJECTS.nouns.statsKeys[direction], st = JSON.parse(localStorage.getItem(k) || '{}'), srs = JSON.parse(localStorage.getItem(k + ':srs') || '{}');
+  for (const w of ${JSON.stringify(casaKnown)}) { st[w] = { seen: 10, wrong: 0 }; srs[w] = { h: '1111111111', b: 3, rd: 3 }; }
+  localStorage.setItem(k, JSON.stringify(st)); localStorage.setItem(k + ':srs', JSON.stringify(srs)); })()`);
+redraw();
+row(topicOf('casa')).querySelector('.map-head').click();
+const knownBtn = panel().querySelector('button.submit.secondary.map-practise[data-map-pick="known"]');
+const knownNow = B.ev(`mapTopic(NOUN_THEMES.find(t => t.key === ${JSON.stringify(topicOf('casa'))}), new Map(NOUN_ITEMS.map(n => [n.noun, n]))).cells.filter(c => c.known).map(c => c.key)`);
+ok(!!knownBtn && knownBtn.textContent === `▶ Practise the ${knownNow.length} you know` && knownNow.length >= 3, `the topic's panel offers the words you know: ${knownBtn && knownBtn.textContent}`);
+const deckBefore2 = B.ev('[...selectedNouns].sort().join()');
+knownBtn.click();
+ok(B.d.querySelector('.container').dataset.view === 'game' && (B.ev('capValue') ? B.ev('deck.length') > 0 : B.ev('deck.length') === knownNow.length) && B.ev(`deck.every(c => ${JSON.stringify(knownNow)}.includes(c.noun))`),
+   `Practise the ones you know: a round of exactly those starts (${knownNow.length})`);
+ok(B.ev('[...selectedNouns].sort().join()') === deckBefore2, '…and your deck is as it was, for afterwards');
 
 // ---- Hide, direction ----
 B = boot({ 'flipcards-subject': 'nouns', 'sostantivi-stats-v1': JSON.stringify(stats) });
