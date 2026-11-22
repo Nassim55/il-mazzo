@@ -12,23 +12,34 @@ ok(order.join() === 'masthead,table,it-strip' && /Il Mazzo/.test(d.querySelector
 const fams = [...d.querySelectorAll('.sections .family .family-name')].map(e => e.textContent);
 const names = key => [...d.querySelectorAll(`#family-list-${key} .mode-option`)].map(b => b.querySelector('.section-name').textContent);
 const open = () => [...d.querySelectorAll('.family-menu.open')].map(m => m.dataset.familyMenu);
-ok(fams.join('|') === 'Parole|Verbi|Frasi e storie' && d.querySelector('.family[data-family="parole"]').classList.contains('active') && open().length === 0
-   && names('parole').join('|') === 'Sostantivi|Aggettivi|Numeri|Avverbi e congiunzioni|Possessivi|Pronomi|Preposizioni' && d.querySelector('#family-list-parole [data-subject="nouns"]').classList.contains('active'),
-   `three families, Parole current, every menu closed; Parole's holds its seven sections (${names('parole').join(', ')}), Sostantivi marked`);
-d.querySelector('.family[data-family="verbi"]').click();
-ok(ev('subject') === 'nouns' && open().join() === 'verbi' && !d.getElementById('family-list-verbi').hidden && d.getElementById('family-list-parole').hidden
-   && names('verbi').join('|') === 'Regolari|Irregolari|Al contrario' && d.querySelector('.family[data-family="verbi"]').getAttribute('aria-expanded') === 'true',
-   "Verbi: just its menu opens — Regolari, Irregolari, Al contrario — and nothing switches yet");
+const pill = () => d.getElementById('section-pill'), bar = () => d.getElementById('section-bar');
+// ---- The section pill (Nov 2026): at rest your section; tapped, the full bar of families ----
+ok(pill().textContent.trim() === 'Sostantivi' && pill().querySelector('.pill-dot') && bar().hidden && pill().getAttribute('aria-expanded') === 'false' && open().length === 0 && !d.querySelector('.family-name i'),
+   'at rest, one pill: Sostantivi with its green dot — the families tucked away, and no coloured dots');
+ok(fams.join('|') === 'Parole|Grammatica|Frasi e storie' && names('parole').join('|') === 'Sostantivi|Aggettivi|Verbi regolari|Verbi irregolari|Avverbi e congiunzioni|Numeri'
+   && [...d.querySelectorAll('#family-list-parole .family-group-name')].map(x => x.textContent).join('|') === 'Nomi e aggettivi|Verbi|Altre parole'
+   && names('grammatica').join('|') === 'Possessivi|Pronomi|Preposizioni|Al contrario' && names('frasi').join('|') === 'Frasi|Scrittura|Dialoghi|Racconto',
+   'three families: Parole (in three groups, the verbs among them), Grammatica, Frasi e storie');
+pill().click();
+ok(!bar().hidden && pill().getAttribute('aria-expanded') === 'true' && open().join() === 'parole' && !d.getElementById('family-list-parole').hidden
+   && d.querySelectorAll('.family-list .pill-dot').length === 1 && !!d.querySelector('#family-list-parole [data-subject="nouns"] .pill-dot') && d.querySelector('#family-list-parole [data-subject="nouns"]').getAttribute('aria-current') === 'true',
+   "tap it: the full bar opens, your family's menu with it — the green dot on Sostantivi, the only one");
+d.querySelector('.family[data-family="grammatica"]').click();
+ok(ev('subject') === 'nouns' && open().join() === 'grammatica' && d.getElementById('family-list-parole').hidden && d.querySelector('.family[data-family="grammatica"]').getAttribute('aria-expanded') === 'true',
+   "Grammatica: its menu in place of Parole's — nothing switched yet");
 d.querySelector('#subject-toggle [data-subject="mipiace"]').click();
-ok(ev('subject') === 'mipiace' && open().length === 0 && d.querySelector('.family[data-family="verbi"]').classList.contains('active') && d.querySelector('#family-list-verbi [data-subject="mipiace"]').classList.contains('active'),
-   'a section from the menu: switched, the menu closed, Verbi current, Al contrario marked in its menu');
-d.querySelector('.family[data-family="frasi"]').click();
-ok(open().join() === 'frasi' && names('frasi').join('|') === 'Frasi|Scrittura|Dialoghi|Racconto', 'Frasi e storie: Frasi, Scrittura, Dialoghi, Racconto');
+ok(ev('subject') === 'mipiace' && bar().hidden && pill().textContent.trim() === 'Al contrario' && d.activeElement === pill() && open().length === 0,
+   'choose Al contrario: switched, and the bar closes back to the pill — now Al contrario, with focus on it');
+pill().click();
+ok(open().join() === 'grammatica' && !!d.querySelector('#family-list-grammatica [data-subject="mipiace"] .pill-dot'), 'tap again: Grammatica open, the dot on Al contrario');
 d.dispatchEvent(new B.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-ok(open().length === 0, 'Esc closes a menu');
-d.querySelector('.family[data-family="parole"]').click();
+ok(bar().hidden && open().length === 0 && d.activeElement === pill() && ev('subject') === 'mipiace', 'Esc closes it — nothing changed, back to the pill');
+pill().click();
 d.body.click();
-ok(open().length === 0, 'and so does a click anywhere else');
+ok(bar().hidden && open().length === 0, 'and so does a click anywhere else');
+pill().click();
+d.getElementById('section-bar-close').click();
+ok(bar().hidden && d.activeElement === pill(), 'and its ×');
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
 
 // ---- The bell: Da fare ----

@@ -14,8 +14,8 @@ ok(W(1e6) === 'un milione' && W(2e6) === 'due milioni' && W(2.1e7) === 'ventun m
    'milione and miliardo apart, as nouns: un milione, due milioni, ventun milioni');
 
 // ---- The section ----
-ok([...d.querySelectorAll('#family-list-parole .section-name')].map(x => x.textContent).join() === 'Sostantivi,Aggettivi,Numeri,Avverbi e congiunzioni,Possessivi,Pronomi,Preposizioni'
-   && ev("SECTION_DESC.numeri") === 'Counting, from zero to a million', 'Numeri sits in Parole, after Aggettivi: Counting, from zero to a million');
+ok([...d.querySelectorAll('#family-list-parole .section-name')].map(x => x.textContent).join() === 'Sostantivi,Aggettivi,Verbi regolari,Verbi irregolari,Avverbi e congiunzioni,Numeri'
+   && ev("SECTION_DESC.numeri") === 'Counting, from zero to a million', 'Numeri closes Parole, under Altre parole: Counting, from zero to a million');
 ok(ev('NUMERI_ITEMS.length') === 299 && ev('NUMERI_THEMES.map(t => t.nouns.length).join()') === '101,99,99'
    && ev("NUMERI_THEMES.map(t => NUMERI_DATA.find(p => p.key === t.nouns[0]).en + '-' + NUMERI_DATA.find(p => p.key === t.nouns[t.nouns.length - 1]).en).join()") === '0-100,200-10.000,20.000-1.000.000'
    && ev('NUMERI_ITEMS.every(n => n.note)') && ev('new Set(NUMERI_ITEMS.map(n => n.en)).size') === 299,

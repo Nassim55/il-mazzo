@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-07/z5sZhlgPbT6a4RYB4n1JpxGq09b1u/NZQMM0JneA=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-61rQDxP4Lt8fpAi8Wzx5n5DVHIqzVBJ5Y+tVs51PmUk=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -3083,6 +3083,46 @@
     .it-overlay { align-items: flex-end; padding: 0; }
     .it-sheet { max-height: 92vh; overflow-y: auto; border-radius: 18px 18px 0 0; padding: 14px 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
     .it-big .it-num { font-size: 42px; }
+  }
+
+  /* The section pill (Nov 2026): at rest your section, with the one green dot; tapped, the full bar of families */
+  .section-pill { display: inline-flex; align-items: center; gap: 10px; max-width: 340px; height: 48px; box-sizing: border-box; padding: 0 18px 0 16px; border: 1px solid rgba(28, 22, 17, 0.3); border-radius: 24px; background: #fffaf0; color: var(--ink); font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 22px; cursor: pointer; }
+  .section-pill:hover { border-color: var(--ink); }
+  .pill-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pill-dot { flex: none; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--olive); }
+  .sections.open .section-pill { display: none; }
+  .section-bar { display: flex; align-items: center; gap: 4px; height: 52px; box-sizing: border-box; padding: 0 6px 0 8px; border: 1px solid rgba(28, 22, 17, 0.3); border-radius: 26px; background: #fffaf0; box-shadow: 0 10px 26px rgba(28, 22, 17, 0.1); }
+  .section-bar[hidden] { display: none; }
+  .masthead .section-bar .family-row { gap: 4px; }
+  .masthead .section-bar .family { height: 40px; min-height: 40px; padding: 0 14px; border: 0; border-radius: 20px; color: #5a4d3f; }
+  .masthead .section-bar .family .family-name { font-size: 21px; }
+  .masthead .section-bar .family.active { color: var(--ink); }
+  .masthead .section-bar .family-menu.open .family { background: var(--ink); color: var(--paper); }
+  .bar-close { flex: none; width: 40px; height: 40px; margin-left: 2px; border: 0; border-radius: 50%; background: transparent; color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .bar-close:hover { background: rgba(28, 22, 17, 0.06); }
+  .section-bar .family-list { top: calc(100% + 12px); left: -10px; width: 400px; }
+  .section-bar .family-menu:last-child .family-list { left: auto; right: -10px; }
+  .family-group { display: flex; flex-direction: column; gap: 2px; padding: 3px 0; }
+  .family-group-name { padding: 4px 14px 3px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #6f6152; }
+  .family-list .section-name { display: inline-flex; align-items: center; gap: 8px; }
+  .family-list .mode-option.active { background: #f3ead8; color: var(--ink); }
+  .family-list .mode-option.active .section-desc { color: #6f6152; }
+  .family-list .pill-dot { width: 8px; height: 8px; }
+  @media (max-width: 600px) {
+    #setup-top .masthead { position: relative; flex-wrap: nowrap; gap: 10px; width: 100%; min-width: 0; box-sizing: border-box; }   /* the screen's width, whatever the section's name */
+    #setup-top .masthead .mast-title { font-size: clamp(25px, 7.2vw, 28px); white-space: nowrap; }
+    #setup-top .masthead .mast-brand { flex: none; }   /* the title never wraps: a long section name shortens instead */
+    .masthead .sections { order: 1; flex: 1 1 0; width: auto; min-width: 0; display: flex; justify-content: flex-end; }   /* Il Mazzo, your section, the bell — one row; the pill takes what room is left */
+    .bell-wrap { order: 2; margin-left: 0; }
+    .section-pill { max-width: min(190px, 100%); height: 44px; gap: 8px; padding: 0 clamp(11px, 3.6vw, 14px) 0 clamp(10px, 3.1vw, 12px); font-size: clamp(17px, 4.9vw, 19px); }
+    .pill-dot { width: 8px; height: 8px; }
+    .section-bar { position: absolute; z-index: 60; left: -12px; right: -12px; top: calc(100% + 4px); height: auto; display: grid; grid-template-columns: auto auto auto 32px; align-items: center; gap: 2px; padding: 6px; border-radius: 22px; box-shadow: 0 14px 32px rgba(28, 22, 17, 0.14); }   /* each family's tab as wide as its name */
+    .section-bar .family-row, .section-bar .family-menu { display: contents; }
+    .masthead .section-bar .family { grid-row: 1; justify-content: center; padding: 0 clamp(5px, 2.2vw, 9px); }
+    .masthead .section-bar .family .family-name { font-size: clamp(14px, 4.1vw, 16px); white-space: nowrap; }
+    .section-bar .family .family-chev { display: none; }
+    .section-bar .bar-close { grid-row: 1; grid-column: 4; width: 32px; height: 40px; margin: 0; }
+    .section-bar .family-list { grid-row: 2; grid-column: 1 / -1; position: static; width: auto; margin-top: 4px; padding: 0 2px 4px; border: 0; box-shadow: none; background: transparent; }
   }
 
 </style>
@@ -13130,9 +13170,10 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   let frequencyRank = {};
 
   // ===== The sections, in three families (Nov 2026): the banner picks a family, then one of its sections =====
-  const FAMILIES = [
-    { key: 'parole', name: 'Parole', en: 'words', color: 'var(--olive)', sections: ['nouns', 'adjectives', 'numeri', 'avverbi', 'possessives', 'pronomi', 'prepositions'] },
-    { key: 'verbi', name: 'Verbi', en: 'verbs', color: 'var(--terracotta)', sections: ['verbs', 'irregular', 'mipiace'] },
+  const FAMILIES = [   // Nov 2026: words, grammar, and putting them to use — as Il mio italiano counts them
+    { key: 'parole', name: 'Parole', en: 'words', color: 'var(--olive)', sections: ['nouns', 'adjectives', 'verbs', 'irregular', 'avverbi', 'numeri'],
+      groups: [{ name: 'Nomi e aggettivi', sections: ['nouns', 'adjectives'] }, { name: 'Verbi', sections: ['verbs', 'irregular'] }, { name: 'Altre parole', sections: ['avverbi', 'numeri'] }] },
+    { key: 'grammatica', name: 'Grammatica', en: 'grammar', color: 'var(--terracotta)', sections: ['possessives', 'pronomi', 'prepositions', 'mipiace'] },
     { key: 'frasi', name: 'Frasi e storie', en: 'sentences & stories', color: 'var(--gold)', sections: ['phrases', 'sentences', 'dialoghi', 'story'] },
   ];
   const SECTION_DESC = {   // the header's menus (Nov 2026): a line under each section's name
@@ -13141,10 +13182,21 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     verbs: 'Regular verbs: -are, -ere, -ire', irregular: 'Essere, avere, fare, andare…', mipiace: 'Mi piace, mi manca, mi serve…',
     phrases: 'Everyday phrases', sentences: 'Put whole sentences together', dialoghi: 'Scenes from daily life', story: 'La casa di pietra, a story',
   };
-  const NAV_LABEL = { verbs: 'Regolari', irregular: 'Irregolari', mipiace: 'Al contrario' };   // inside Verbi, the family says the rest
+  const NAV_LABEL = { verbs: 'Verbi regolari', irregular: 'Verbi irregolari', mipiace: 'Al contrario' };   // the menus' and the section pill's names
   const SECTION_SHORT = { nouns: 'Sostantivi', verbs: 'Verbi regolari', irregular: 'Verbi irregolari', mipiace: 'Al contrario', adjectives: 'Aggettivi', numeri: 'Numeri',
                           avverbi: 'Avverbi', possessives: 'Possessivi', pronomi: 'Pronomi', prepositions: 'Preposizioni', phrases: 'Frasi', sentences: 'Scrittura' };
   const familyOf = s => FAMILIES.find(f => f.sections.includes(s));
+  const navLabel = s => NAV_LABEL[s] || SUBJECTS[s].switchLabel;
+  // A family's menu (Nov 2026): its sections, under small headings where it has them — the one you're on with the green dot
+  function familyMenuHTML(f, fam) {
+    const item = key => `<button type="button" class="mode-option${key === subject ? ' active' : ''}" data-subject="${key}" aria-pressed="${key === subject}"${key === subject ? ' aria-current="true"' : ''}>`
+      + `<span class="section-name">${key === subject ? '<span class="pill-dot" aria-hidden="true"></span>' : ''}${navLabel(key)}</span><span class="section-desc">${SECTION_DESC[key] || ''}</span></button>`;
+    return `<div class="family-menu" data-family-menu="${f.key}">`
+      + `<button type="button" class="family${f === fam ? ' active' : ''}" data-family="${f.key}" aria-haspopup="true" aria-expanded="false" aria-controls="family-list-${f.key}"><span class="family-name">${f.name}</span><svg class="family-chev" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>`
+      + `<div class="family-list" id="family-list-${f.key}" role="group" aria-label="${f.name}" hidden>`
+      + (f.groups ? f.groups.map(g => `<div class="family-group" role="group" aria-label="${g.name}"><span class="family-group-name" aria-hidden="true">${g.name}</span>${g.sections.map(item).join('')}</div>`).join('') : f.sections.map(item).join(''))
+      + `</div></div>`;
+  }
   const FAMILY_LAST_KEY = 'mazzo-family-last', TABLE_TAB_KEY = 'mazzo-table-tab';
   function applySubject(s) {
     if (subject) {
@@ -14418,10 +14470,39 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     if (list) list.hidden = !on;
   }
   function closeFamilyMenus(except) { document.querySelectorAll('.family-menu.open').forEach(m => { if (m !== except) setFamilyMenu(m, false); }); }
+  // The section pill (Nov 2026): at rest it shows your section; tapped, it opens into the full bar of families,
+  // your family's menu open; choosing a section, ×, Esc or a click elsewhere closes it back to the pill.
+  const sectionBarOpen = () => { const bar = document.getElementById('section-bar'); return !!bar && !bar.hidden; };
+  // The bar opens under the mouse (it grows from the pill), so a menu follows the mouse only once it has really
+  // moved — else the family that happens to land under the pointer would replace yours at once.
+  let barHoverFrom = null;
+  document.addEventListener('mousemove', e => { if (barHoverFrom && Math.hypot(e.clientX - barHoverFrom.x, e.clientY - barHoverFrom.y) > 6) barHoverFrom = null; });
+  function openSectionBar(focusCurrent, from) {
+    barHoverFrom = from || null;
+    const bar = document.getElementById('section-bar'), pill = document.getElementById('section-pill');
+    if (!bar) return;
+    closeTodo();
+    bar.hidden = false;
+    bar.closest('.sections').classList.add('open');
+    if (pill) pill.setAttribute('aria-expanded', 'true');
+    const fam = familyOf(subject) || FAMILIES[0], menu = document.querySelector(`.family-menu[data-family-menu="${fam.key}"]`);
+    closeFamilyMenus(menu);
+    if (menu) setFamilyMenu(menu, true);
+    const cur = menu && menu.querySelector('.mode-option.active');
+    if (focusCurrent && cur) cur.focus();
+  }
+  function closeSectionBar(focusPill) {
+    const bar = document.getElementById('section-bar'), pill = document.getElementById('section-pill');
+    closeFamilyMenus();
+    if (!bar || bar.hidden) return;
+    bar.hidden = true;
+    bar.closest('.sections').classList.remove('open');
+    if (pill) { pill.setAttribute('aria-expanded', 'false'); if (focusPill) pill.focus(); }
+  }
   function openTodo() {
     const todo = document.getElementById('todo'), bell = document.getElementById('bell');
     if (!todo || !bell) return;
-    closeFamilyMenus();
+    closeSectionBar();
     renderTableTabs();
     todo.hidden = false;
     bell.setAttribute('aria-expanded', 'true');
@@ -14434,21 +14515,23 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   }
   document.addEventListener('click', e => {
     if (!e.target.closest || !e.target.isConnected) return;
-    if (!e.target.closest('.family-menu')) closeFamilyMenus();
+    if (!e.target.closest('.sections')) closeSectionBar();
     if (!e.target.closest('.bell-wrap')) closeTodo();
   });
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    const open = document.querySelector('.family-menu.open');
-    if (open) { setFamilyMenu(open, false); const b = open.querySelector('.family'); if (b) b.focus(); return; }
+    if (sectionBarOpen()) { closeSectionBar(true); return; }
     const todo = document.getElementById('todo');
     if (todo && !todo.hidden) closeTodo(true);
   });
   function wireSubjectToggle() {
-    let closeTimer = null;
+    const pill = document.getElementById('section-pill'), barClose = document.getElementById('section-bar-close');
+    if (pill) pill.addEventListener('click', e => { if (sectionBarOpen()) closeSectionBar(true); else openSectionBar(e.detail === 0, e.detail ? { x: e.clientX, y: e.clientY } : null); });   // from a key, straight to your section in the list
+    if (barClose) barClose.addEventListener('click', () => closeSectionBar(true));
     document.querySelectorAll('.family-menu').forEach(menu => {
       const btn = menu.querySelector('.family');
       btn.addEventListener('click', e => {
+        if (!sectionBarOpen()) openSectionBar();
         const open = menu.classList.contains('open');
         closeTodo();
         closeFamilyMenus(menu);
@@ -14462,16 +14545,18 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         const first = menu.querySelector('.family-list .mode-option');
         if (first) first.focus();
       });
-      menu.addEventListener('mouseenter', () => { if (!canHover()) return; clearTimeout(closeTimer); closeTodo(); closeFamilyMenus(menu); setFamilyMenu(menu, true); });
-      menu.addEventListener('mouseleave', () => { if (!canHover()) return; clearTimeout(closeTimer); closeTimer = setTimeout(() => setFamilyMenu(menu, false), 180); });
+      menu.addEventListener('mouseenter', () => { if (!canHover() || !sectionBarOpen() || barHoverFrom) return; closeFamilyMenus(menu); setFamilyMenu(menu, true); });   // in the open bar, a family's menu follows the mouse — and stays till another is chosen
     });
     document.querySelectorAll('#subject-toggle .mode-option').forEach(btn => {
       btn.addEventListener('click', () => {
-        closeFamilyMenus();
-        if (btn.dataset.subject === subject) return;
-        storyStopSpeaking();
-        applySubject(btn.dataset.subject);
-        showSetup();
+        closeSectionBar();
+        if (btn.dataset.subject !== subject) {
+          storyStopSpeaking();
+          applySubject(btn.dataset.subject);
+          showSetup();
+        }
+        const p = document.getElementById('section-pill');   // back to the pill, now on the section chosen
+        if (p) p.focus();
       });
     });
     const bell = document.getElementById('bell');
@@ -14699,11 +14784,11 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
           <div class="mast-brand"><div class="mast-title">Il Mazzo</div><div class="mast-sub">Italiano, una carta alla volta</div></div>
           <div class="mast-tools">
             <nav class="sections" aria-label="Sections">
-              <div class="family-row" id="subject-toggle" role="group" aria-label="Families">${FAMILIES.map(f => `<div class="family-menu" data-family-menu="${f.key}">`
-                + `<button type="button" class="family${f === fam ? ' active' : ''}" data-family="${f.key}" aria-haspopup="true" aria-expanded="false" aria-controls="family-list-${f.key}"><span class="family-name"><i style="background: ${f.color}"></i>${f.name}</span><svg class="family-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>`
-                + `<div class="family-list" id="family-list-${f.key}" role="group" aria-label="${f.name}" hidden>`
-                + f.sections.map(key => `<button type="button" class="mode-option${key === subject ? ' active' : ''}" data-subject="${key}" aria-pressed="${key === subject}"><span class="section-name">${NAV_LABEL[key] || SUBJECTS[key].switchLabel}</span><span class="section-desc">${SECTION_DESC[key] || ''}</span></button>`).join('')
-                + `</div></div>`).join('')}</div>
+              <button type="button" class="section-pill" id="section-pill" aria-haspopup="true" aria-expanded="false" aria-controls="section-bar" aria-label="Section: ${navLabel(subject)} — open the sections"><span class="pill-dot" aria-hidden="true"></span><span class="pill-name">${navLabel(subject)}</span><svg class="family-chev" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+              <div class="section-bar" id="section-bar" hidden>
+                <div class="family-row" id="subject-toggle" role="group" aria-label="Families">${FAMILIES.map(f => familyMenuHTML(f, fam)).join('')}</div>
+                <button type="button" class="bar-close" id="section-bar-close" aria-label="Close the sections"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+              </div>
             </nav>
             <div class="bell-wrap">
               <button type="button" class="bell" id="bell" aria-haspopup="dialog" aria-expanded="false" aria-controls="todo" aria-label="Da fare"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="bell-count" id="bell-count" hidden></span></button>
@@ -16695,7 +16780,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-22T00:42Z';
+  const BUILD = '2026-11-22T15:53Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

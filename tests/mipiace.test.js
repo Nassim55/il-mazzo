@@ -18,8 +18,8 @@ const one = it => { const B0 = boot({ 'flipcards-subject': 'mipiace' }); const k
 let B = boot({ 'flipcards-subject': 'mipiace' });
 ok(B.warns.length === 0 && B.errors.length === 0, 'loads cleanly — every word of every accepted answer in the deck, nothing twice, none of Scrittura\'s sentences again');
 const tabs = [...B.d.querySelectorAll('#subject-toggle .mode-option')].map(b => (b.querySelector('.section-name') || b).textContent.trim());
-ok(tabs[9] === 'Al contrario' && tabs[8] === 'Irregolari' && tabs[7] === 'Regolari' && B.ev('SUBJECTS.mipiace.subtitle') === 'Il Mazzo · Verbs that work backwards',
-   'renamed Verbi al contrario — the verbs that work backwards — next to the other verb sections');
+ok(tabs[9] === 'Al contrario' && tabs[8] === 'Preposizioni' && tabs[3] === 'Verbi irregolari' && B.ev('SUBJECTS.mipiace.subtitle') === 'Il Mazzo · Verbs that work backwards',
+   'Al contrario — the verbs that work backwards — closes Grammatica (Nov 2026: the verbs themselves moved to Parole)');
 ok(B.ev('MIPIACE_ITEMS.length') === 133 && B.ev('MP_BACKWARDS.length') === 20 && B.ev("MP_BACKWARDS.every(r => MIPIACE_ITEMS.some(n => n.it === r[3]) && MIPIACE_ITEMS.some(n => n.lemma === r[0]))"),
    '133 sentences across 20 backwards verbs — every verb has some, and its example is one of them');
 ok(B.ev("MIPIACE_LEVELS.length") === 14 && B.ev("[...document.querySelectorAll('#verb-grid [data-noun]')].map(e => e.dataset.noun).join('|')") === B.ev("MIPIACE_ORDER.join('|')"),

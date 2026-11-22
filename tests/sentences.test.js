@@ -6,7 +6,7 @@ const { w, d, ev, errors, warns } = boot({ 'flipcards-subject': 'sentences' });
 ok(errors.length === 0 && warns.length === 0, 'loads cleanly: every word of every sentence is in the deck');
 ok(ev('SENTENCE_ITEMS.length') === 170 && ev('SENTENCE_THEMES.length') === 11, '170 sentences, in eleven levels (six present tense, five Mi piace)');
 const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => (b.querySelector('.section-name') || b).textContent.trim());
-ok(tabs.join('|') === 'Sostantivi|Aggettivi|Numeri|Avverbi e congiunzioni|Possessivi|Pronomi|Preposizioni|Regolari|Irregolari|Al contrario|Frasi|Scrittura|Dialoghi|Racconto' && d.querySelector('#subject-toggle [data-subject="sentences"]').classList.contains('active'), 'Scrittura is a section of its own, after Frasi');
+ok(tabs.join('|') === 'Sostantivi|Aggettivi|Verbi regolari|Verbi irregolari|Avverbi e congiunzioni|Numeri|Possessivi|Pronomi|Preposizioni|Al contrario|Frasi|Scrittura|Dialoghi|Racconto' && d.querySelector('#subject-toggle [data-subject="sentences"]').classList.contains('active'), 'Scrittura is a section of its own, after Frasi');
 
 // ---- Built from the deck, in the present tense ----
 const words = ev(`SENTENCE_ITEMS.flatMap(n => sentenceSegments(n.it).filter(s => s.ref).map(s => s.ref))`);

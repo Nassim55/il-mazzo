@@ -25,7 +25,7 @@ const { boot, ok, done } = require('./harness');
   const rows = [...gate.querySelectorAll('.landing-row')].map(r => [r.querySelector('.landing-row-name').textContent, r.querySelector('.landing-row-count').textContent]);
   const total = B.ev('FAMILIES.reduce((n, f) => n + f.sections.length, 0)');
   ok(rows.length === total && rows[0][0] === 'Sostantivi' && rows[0][1] === B.ev("SUBJECTS.nouns.items.length.toLocaleString('en-GB')")
-     && rows.some(r => r[0] === 'Regolari' && r[1] === String(B.ev('SUBJECTS.verbs.items.length'))),
+     && rows.some(r => r[0] === 'Verbi regolari' && r[1] === String(B.ev('SUBJECTS.verbs.items.length'))),
      `what's inside: every section, counted from the data (${rows.slice(0, 3).map(r => r.join(' ')).join(', ')}…)`);
   ok(new RegExp(`${B.ev(`LANDING_WORDS[${total}]`)} sections in three families`).test(gate.textContent), `"${B.ev(`LANDING_WORDS[${total}]`)} sections in three families"`);
   ok(!/\b(sync|synced|syncing|offline)\b/i.test(gate.textContent), 'nothing on it mentions syncing');

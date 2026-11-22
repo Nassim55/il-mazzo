@@ -6,8 +6,8 @@ const { boot, ok, done } = require('./harness');
 const B = boot({ 'flipcards-subject': 'pronomi' });
 const { d, ev } = B;
 ok(B.errors.length === 0 && B.warns.length === 0, 'loads cleanly');
-ok(ev("FAMILIES.find(f => f.key === 'parole').sections.join()") === 'nouns,adjectives,numeri,avverbi,possessives,pronomi,prepositions' && d.getElementById('app-title').textContent === 'Pronomi',
-   'a section of its own in Parole, after Possessivi');
+ok(ev("FAMILIES.find(f => f.key === 'grammatica').sections.join()") === 'possessives,pronomi,prepositions,mipiace' && d.getElementById('app-title').textContent === 'Pronomi',
+   'a section of its own in Grammatica, after Possessivi');
 
 // ---- The cards ----
 ok(ev('PRON_ITEMS.length') === 100 && ev('PRON_THEMES.map(t => t.nouns.length).join()') === '12,10,10,10,8,12,10,8,10,10', '100 cards in ten topics');
