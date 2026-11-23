@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-7YtHPq5zzI6Iqd1aIDf1yx5fq9Ieyiozyr1e1V0/lSw=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-oooHTDn2pMfwLWowp8G/lTPCN1nJDRptXUAtRp5jubE=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -13807,7 +13807,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const parts = handSections();
     if (!parts.length) return;
     if (parts.length === 1 && parts[0] === subject) { startPassive(); return; }
-    startPassive(numeriInOrder(shuffleDeck(handCards())));
+    startPassive(inPlayOrder(shuffleDeck(handCards())));
   }
   function clearHand() {   // the whole hand: every section's deck
     for (const s of Object.keys(SUBJECTS)) {
@@ -15948,8 +15948,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   function passiveDeck() {
     if (playableKeys().size === 0) return [];
     const pool = buildDeck(), cap = effectiveDeckSize();
-    if (capMode === 'frequent' && cap < pool.length) return numeriInOrder(shuffleDeck(takeCards([...pool].sort((a, b) => compareFrequency(a.noun, b.noun)), cap)));
-    return numeriInOrder(takeCards(shuffleDeck(pool), cap));
+    if (capMode === 'frequent' && cap < pool.length) return inPlayOrder(shuffleDeck(takeCards([...pool].sort((a, b) => compareFrequency(a.noun, b.noun)), cap)));
+    return inPlayOrder(takeCards(shuffleDeck(pool), cap));
   }
 
   async function passiveWake(on) {
@@ -16054,7 +16054,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   }
   function passiveMove(step) {
     let i = passive.index + step;
-    if (i >= passive.cards.length) { i = 0; passive.pass += 1; passive.cards = numeriInOrder(shuffleDeck(passive.cards)); }   // round again, in a new order
+    if (i >= passive.cards.length) { i = 0; passive.pass += 1; passive.cards = inPlayOrder(shuffleDeck(passive.cards)); }   // round again, in a new order
     else if (i < 0) i = passive.cards.length - 1;
     passive.index = i;
   }
@@ -16959,7 +16959,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-23T12:21Z';
+  const BUILD = '2026-11-23T23:13Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
@@ -17364,7 +17364,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         ? others.sort((a, b) => compareFrequency(a.noun, b.noun))
         : verbsFirst(shuffle(others));
       const toAdd = focusLeftovers.concat(restOfPool).slice(0, newSize - deck.length);
-      deck = numeriInOrder(groupConjugations(deck.concat(shuffle(toAdd)), index + 1), index + 1); // new cards arrive in random play order (a verb's forms together; the numbers in order)
+      deck = inPlayOrder(groupConjugations(deck.concat(shuffle(toAdd)), index + 1), index + 1); // new cards arrive in random play order (a verb's forms together; the numbers in order)
     } else {
       return; // beyond the pool
     }
@@ -17400,7 +17400,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const others = sessionPool.filter(c => !inDeck.has(c.key) && !isFocus(c));
     const ordered = sessionPickMode === 'frequent' ? others.sort((a, b) => compareFrequency(a.noun, b.noun)) : verbsFirst(shuffle(others));
     const addR = ordered.slice(0, Math.max(0, rWant - haveR));
-    deck = numeriInOrder(groupConjugations(kept.concat(shuffle(addF.concat(addR))), index + 1), index + 1);
+    deck = inPlayOrder(groupConjugations(kept.concat(shuffle(addF.concat(addR))), index + 1), index + 1);
     afterResize(currentKey);
   }
 
@@ -17410,6 +17410,35 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // slots they hold; every other card keeps its shuffled place. Applied once the cards are chosen (a deck size
   // still picks at random), and from `from` on mid-round, so cards already played stay where they were.
   const numeriValue = c => Number(String(c.noun || c.key || '').replace(/^n/, '')) || 0;
+  // Adverbs that mean the same, or nearly (molto, tanto): side by side in every round they share, so the small
+  // difference between them gets drilled (Nov 2026). One group per line — the order within a group is shuffled.
+  const AVV_TWINS = [
+    ['molto-avv', 'tanto-avv', 'parecchio', 'così'],       // very, so much, quite a lot, so
+    ['ma', 'però', 'tuttavia', 'eppure', 'comunque'],      // but, however, yet, anyway
+    ['allora', 'quindi', 'perciò'],                       // so, therefore
+    ['anche', 'inoltre', 'perfino', 'troppo-avv'],         // also, besides, even, too
+    ['abbastanza', 'piuttosto', 'invece'],                // quite, rather, instead
+    ['ancora', 'più'], ['adesso', 'ormai'], ['subito', 'presto'], ['poi', 'dopo'], ['finalmente', 'infine'],
+    ['appena', 'solo-avv'], ['sopra', 'su-avv'], ['sotto', 'giù'], ['vicino-avv', 'accanto'], ['intorno', 'circa'],
+    ['piano-avv', 'lentamente'], ['forse', 'magari'], ['davvero', 'proprio'], ['certo-avv', 'sicuramente'],
+    ['neanche', 'né'], ['infatti', 'anzi'], ['anche-se', 'nonostante']
+  ];
+  const AVV_TWIN_OF = new Map(AVV_TWINS.flatMap((g, i) => g.map(k => [k, i])));
+  function twinsTogether(cards, from = 0) {   // each group's cards from `from` on, gathered where its first one falls
+    const group = c => (c && (c.subject || subject) === 'avverbi') ? AVV_TWIN_OF.get(c.noun) : undefined;
+    const rest = cards.slice(from);
+    if (!rest.some(c => group(c) !== undefined)) return cards;
+    const out = [], placed = new Set();
+    rest.forEach((c, i) => {
+      if (placed.has(i)) return;
+      const g = group(c);
+      if (g === undefined) { out.push(c); placed.add(i); return; }
+      rest.forEach((d, j) => { if (!placed.has(j) && group(d) === g) { out.push(d); placed.add(j); } });
+    });
+    return cards.slice(0, from).concat(out);
+  }
+  // A round's order once its cards are chosen: numbers in their slots, near-synonym adverbs side by side
+  function inPlayOrder(cards, from = 0) { return twinsTogether(numeriInOrder(cards, from), from); }
   function numeriInOrder(cards, from = 0) {
     const slots = [];
     for (let i = from; i < cards.length; i++) if (cards[i] && cards[i].num) slots.push(i);
@@ -17584,7 +17613,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       // Riprendi: the saved deck, in its own order
     } else if (sessionMaxDeck && sessionMaxDeck.length > 0) {
       // Play again / Reshuffle — replay the current active subset in new order (the numbers, in theirs)
-      deck = numeriInOrder(shuffleDeck(deck));
+      deck = inPlayOrder(shuffleDeck(deck));
     } else {
       savedLive = false;   // a new deck: the saved one stays as it was
       // Fresh entry from setup — the pool is the selection (or the whole deck
@@ -17596,10 +17625,10 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       if (capMode === 'frequent' && cap < sessionPool.length) {
         // The N most common nouns of the selection, played in random order
         const byRank = [...sessionPool].sort((a, b) => compareFrequency(a.noun, b.noun));
-        sessionMaxDeck = numeriInOrder(shuffleDeck(takeCards(byRank, cap)));
+        sessionMaxDeck = inPlayOrder(shuffleDeck(takeCards(byRank, cap)));
         sessionPickMode = 'frequent';
       } else {
-        sessionMaxDeck = numeriInOrder(takeCards(shuffleDeck(sessionPool), cap));
+        sessionMaxDeck = inPlayOrder(takeCards(shuffleDeck(sessionPool), cap));
         sessionPickMode = 'random';
       }
       sessionFocused = false;
@@ -18548,7 +18577,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       sessionMaxDeck = pickedCards;
       sessionFocused = true;
       sessionIsReview = false;   // your own pick, no longer just the missed cards
-      deck = numeriInOrder(shuffleDeck(pickedCards));
+      deck = inPlayOrder(shuffleDeck(pickedCards));
       index = 0;
       score = 0;
       streak = 0;

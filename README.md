@@ -289,3 +289,5 @@ How it counts: a word counts once, whatever section teaches it (*rosso* the noun
 
 **A steadier section bar (Nov 2026).** The bar no longer reacts to where the mouse is: a family's sections show when you click it and stay until you click another, a double-click on the pill leaves the bar open, a click in the small gap under it doesn't close it, and progress arriving from another device waits until the bar (or *Da fare*) is closed before the page refreshes.
 
+**Near-synonyms side by side (Nov 2026).** In *Avverbi e congiunzioni*, words that share an English meaning or nearly do — *molto, tanto, parecchio, così*; *ma, però, tuttavia, eppure, comunque*; *allora, quindi, perciò*; *ancora / più*, *poi / dopo*, *forse / magari* and others — always come one after another in a round (in shuffled order within the group), so the small differences between them get drilled. The groups are one list in the code (`AVV_TWINS`), easy to change.
+
