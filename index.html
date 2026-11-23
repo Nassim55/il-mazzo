@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-XJ9V1QneFXPGkb+IJOaWjzL6/jFkMyQDvN7a+mOJt9k=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-7YtHPq5zzI6Iqd1aIDf1yx5fq9Ieyiozyr1e1V0/lSw=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -3098,9 +3098,12 @@
   .masthead .section-bar .family .family-name { font-size: 21px; }
   .masthead .section-bar .family.active { color: var(--ink); }
   .masthead .section-bar .family-menu.open .family { background: var(--ink); color: var(--paper); }
+  .masthead .section-bar .family { cursor: pointer; }
+  .masthead .section-bar .family-menu:not(.open) .family:hover { background: rgba(28, 22, 17, 0.07); color: var(--ink); }   /* a hint that a click opens it — the hover itself changes nothing */
   .bar-close { flex: none; width: 40px; height: 40px; margin-left: 2px; border: 0; border-radius: 50%; background: transparent; color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .bar-close:hover { background: rgba(28, 22, 17, 0.06); }
   .section-bar .family-list { top: calc(100% + 12px); left: -10px; width: 400px; }
+  .section-bar .family-list::before { content: ''; position: absolute; left: 0; right: 0; top: -14px; height: 14px; }   /* the gap above a list is part of it: a click there doesn't close the bar */
   .section-bar .family-menu:last-child .family-list { left: auto; right: -10px; }
   .family-group { display: flex; flex-direction: column; gap: 2px; padding: 3px 0; }
   .family-group-name { padding: 4px 14px 3px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #6f6152; }
@@ -14587,7 +14590,6 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // ===== Section switch =====
   // The header (Nov 2026): each family opens its own menu of sections — on hover where there's a mouse, on a tap or
   // a key everywhere; Esc or a click elsewhere closes it. The bell opens Da fare: Ripasso del giorno, Il mazzo salvato.
-  const canHover = () => typeof window.matchMedia === 'function' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   function setFamilyMenu(menu, on) {
     const btn = menu.querySelector('.family'), list = menu.querySelector('.family-list');
     menu.classList.toggle('open', on);
@@ -14598,12 +14600,10 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // The section pill (Nov 2026): at rest it shows your section; tapped, it opens into the full bar of families,
   // your family's menu open; choosing a section, ×, Esc or a click elsewhere closes it back to the pill.
   const sectionBarOpen = () => { const bar = document.getElementById('section-bar'); return !!bar && !bar.hidden; };
-  // The bar opens under the mouse (it grows from the pill), so a menu follows the mouse only once it has really
-  // moved — else the family that happens to land under the pointer would replace yours at once.
-  let barHoverFrom = null;
-  document.addEventListener('mousemove', e => { if (barHoverFrom && Math.hypot(e.clientX - barHoverFrom.x, e.clientY - barHoverFrom.y) > 6) barHoverFrom = null; });
-  function openSectionBar(focusCurrent, from) {
-    barHoverFrom = from || null;
+  // Nov 23: nothing in the bar follows the mouse — a family's sections show when you click it, and stay till you
+  // click another. (Menus that switched on hover moved what you were aiming at, and a click on the empty space
+  // they left closed the bar.) While the bar or Da fare is open, nothing redraws the page under you: see redrawSetup.
+  function openSectionBar(focusCurrent) {
     const bar = document.getElementById('section-bar'), pill = document.getElementById('section-pill');
     if (!bar) return;
     closeTodo();
@@ -14623,6 +14623,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     bar.hidden = true;
     bar.closest('.sections').classList.remove('open');
     if (pill) { pill.setAttribute('aria-expanded', 'false'); if (focusPill) pill.focus(); }
+    redrawSetupLater();
   }
   function openTodo() {
     const todo = document.getElementById('todo'), bell = document.getElementById('bell');
@@ -14637,6 +14638,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     if (!todo || todo.hidden) return;
     todo.hidden = true;
     if (bell) { bell.setAttribute('aria-expanded', 'false'); if (focusBell) bell.focus(); }
+    redrawSetupLater();
   }
   document.addEventListener('click', e => {
     if (!e.target.closest || !e.target.isConnected) return;
@@ -14651,16 +14653,22 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   });
   function wireSubjectToggle() {
     const pill = document.getElementById('section-pill'), barClose = document.getElementById('section-bar-close');
-    if (pill) pill.addEventListener('click', e => { if (sectionBarOpen()) closeSectionBar(true); else openSectionBar(e.detail === 0, e.detail ? { x: e.clientX, y: e.clientY } : null); });   // from a key, straight to your section in the list
+    if (pill) pill.addEventListener('click', e => {
+      if (e.detail > 1) return;   // the second click of a double-click: the bar is already open
+      if (sectionBarOpen()) closeSectionBar(true); else openSectionBar(e.detail === 0);   // from a key, straight to your section in the list
+    });
+    const bar = document.getElementById('section-bar');
+    // The bar opens where the pill was, under the pointer: the second click of a double-click lands on whatever is
+    // there now (a family, or ×) — it's ignored, so a double-click opens the bar and leaves it open
+    if (bar) bar.addEventListener('click', e => { if (e.detail > 1 && !e.target.closest('.mode-option')) e.stopPropagation(); }, true);
     if (barClose) barClose.addEventListener('click', () => closeSectionBar(true));
     document.querySelectorAll('.family-menu').forEach(menu => {
       const btn = menu.querySelector('.family');
-      btn.addEventListener('click', e => {
+      btn.addEventListener('click', () => {
         if (!sectionBarOpen()) openSectionBar();
-        const open = menu.classList.contains('open');
         closeTodo();
         closeFamilyMenus(menu);
-        setFamilyMenu(menu, e.detail > 0 && canHover() ? true : !open);   // a mouse that hovered it open keeps it open; a tap or a key toggles
+        setFamilyMenu(menu, true);   // a click shows that family's sections — never hides them
       });
       btn.addEventListener('keydown', e => {
         if (e.key !== 'ArrowDown') return;
@@ -14670,7 +14678,6 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         const first = menu.querySelector('.family-list .mode-option');
         if (first) first.focus();
       });
-      menu.addEventListener('mouseenter', () => { if (!canHover() || !sectionBarOpen() || barHoverFrom) return; closeFamilyMenus(menu); setFamilyMenu(menu, true); });   // in the open bar, a family's menu follows the mouse — and stays till another is chosen
     });
     document.querySelectorAll('#subject-toggle .mode-option').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -14872,7 +14879,29 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const more = document.getElementById('italiano-more');
     if (more) more.focus();
   }
+  // A redraw that isn't yours — progress arriving from another device — waits while the section bar or Da fare is
+  // open (it would close them under your mouse), and happens as soon as they close, keeping the pill's focus.
+  let setupDraws = 0, setupRedrawWaiting = false;
+  function setupMenuOpen() { const todo = document.getElementById('todo'); return sectionBarOpen() || !!(todo && !todo.hidden); }
+  function redrawSetup() {
+    if (container.dataset.view !== 'setup') return;
+    if (setupMenuOpen()) { setupRedrawWaiting = true; return; }
+    const pillFocused = !!(document.activeElement && document.activeElement.id === 'section-pill');
+    applySubject(subject);
+    showSetup();
+    const pill = document.getElementById('section-pill');
+    if (pillFocused && pill) pill.focus();
+  }
+  function redrawSetupLater() {   // once a menu closes: unless the page has been drawn again meanwhile (a section chosen)
+    if (!setupRedrawWaiting) return;
+    const at = setupDraws;
+    setTimeout(() => {
+      if (setupDraws !== at) { setupRedrawWaiting = false; return; }
+      if (setupRedrawWaiting && !setupMenuOpen()) { setupRedrawWaiting = false; redrawSetup(); }
+    }, 0);
+  }
   function showSetup() {
+    setupDraws++;
     closeRoundMenu();
     if (footObserver) { footObserver.disconnect(); footWatched = null; }
     delete container.dataset.round;
@@ -16393,7 +16422,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       meta.epochs[key] = +e || 0;
     }
     syncSaveMeta(meta);
-    if (container.dataset.view === 'setup') { applySubject(subject); showSetup(); }
+    redrawSetup();
   }
   // A reset or restore here should win over other devices' copies at the next sync
   function syncMarkReset(keys) {
@@ -16930,7 +16959,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-22T18:01Z';
+  const BUILD = '2026-11-23T12:21Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;

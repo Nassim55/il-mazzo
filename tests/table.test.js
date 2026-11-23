@@ -42,6 +42,20 @@ d.getElementById('section-bar-close').click();
 ok(bar().hidden && d.activeElement === pill(), 'and its ×');
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
 
+// ---- Nov 23: nothing moves under the mouse ----
+pill().click();
+d.querySelector('.family[data-family="grammatica"]').click();
+d.querySelector('.family[data-family="grammatica"]').click();
+ok(!bar().hidden && open().join() === 'grammatica', "clicking the open family again keeps its sections open");
+d.getElementById('section-bar-close').dispatchEvent(new B.w.MouseEvent('click', { bubbles: true, cancelable: true, detail: 2 }));
+pill().dispatchEvent(new B.w.MouseEvent('click', { bubbles: true, cancelable: true, detail: 2 }));
+ok(!bar().hidden && open().join() === 'grammatica', "a double-click's second click — on ×, where the pill was — leaves the bar open");
+const draws = ev('setupDraws');
+ev('syncApply(syncLocalSnapshot())');
+ok(!bar().hidden && ev('setupDraws') === draws && ev('setupRedrawWaiting'), 'progress arriving from another device waits while the bar is open — nothing redraws under you');
+d.dispatchEvent(new B.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+
 // ---- The bell: Da fare ----
 const badge = () => d.getElementById('bell-count');
 ok(!d.getElementById('table-tabs') && d.getElementById('table').contains(d.getElementById('hand')) && badge().hidden && d.getElementById('todo').hidden,
@@ -126,4 +140,16 @@ ok(row && /Il mazzo salvato/.test(row.textContent) && /cards, not started/.test(
 d.getElementById('saved-forget').click();
 ok(!d.getElementById('saved-resume') && d.getElementById('bell-count').textContent === '1', 'forget it: the saved deck leaves the list');
 ok(B.errors.length === 0, 'no errors here either');
-done();
+// ---- Last: once the bar closes, the progress that waited is drawn — your pill keeping its focus ----
+(async () => {
+  ev('showSetup()');
+  pill().click();
+  const at = ev('setupDraws');
+  ev('syncApply(syncLocalSnapshot())');
+  const held = !bar().hidden && ev('setupDraws') === at;
+  d.dispatchEvent(new B.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  await new Promise(r => setTimeout(r, 20));
+  ok(held && ev('setupDraws') === at + 1 && !ev('setupRedrawWaiting') && d.activeElement === pill() && bar().hidden,
+     '…and the page is drawn once the bar has closed, the pill keeping its focus');
+  done();
+})();
