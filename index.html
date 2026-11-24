@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IaRQalhvGCuJ0JoPktSIhvBc29wma+ZqR4zy4OhZ/t8=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-NEEUweB9vYFrCBC3mYIUZAuJSYfCMZvlutC1aVrv/e4=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -9694,6 +9694,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     "nonostante": ["Esce nonostante la pioggia.", "He goes out despite the rain."]
   };
   const AVV_ITEMS = AVV_DATA.map(p => ({ noun: p.key, display: p.it, it: p.it, en: p.en, phrase: p, note: p.note, example: AVV_EXAMPLES[p.key] || null }));
+  const AVV_BY_KEY = new Map(AVV_DATA.map(p => [p.key, p]));
   const AVV_THEMES = [
     { key: 'tempo', label: "Tempo", en: "Time — when", nouns: AVV_DATA.filter(p => p.themes.includes('tempo')).map(p => p.key) },
     { key: 'luogo', label: "Luogo", en: "Place — where", nouns: AVV_DATA.filter(p => p.themes.includes('luogo')).map(p => p.key) },
@@ -16960,7 +16961,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-24T09:32Z';
+  const BUILD = '2026-11-24T09:59Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
@@ -17425,16 +17426,57 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     ['neanche', 'né'], ['infatti', 'anzi'], ['anche-se', 'nonostante']
   ];
   const AVV_TWIN_OF = new Map(AVV_TWINS.flatMap((g, i) => g.map(k => [k, i])));
+  const AVV_NEAR = new Set(['molto-avv|tanto-avv', 'molto-avv|parecchio', 'parecchio|tanto-avv']);   // alike, with no meaning in common
+  // Inside a group, the order matters too (Nov 24): words that show the same meaning on their cards sit next to each
+  // other — però beside comunque ("however") and beside ma ("but") — so a word sharing nothing you can see with
+  // either (tuttavia, "nevertheless") never comes between them. Every order of the group's cards is scored; one of
+  // the best is picked at random, so it isn't always the same way round.
+  const avvMeanings = key => {
+    const p = AVV_BY_KEY.get(key), clean = s => s.replace(/\s*\(.*?\)\s*/g, ' ').trim().toLowerCase();
+    const shown = p ? p.en.split(' / ').map(clean) : [];
+    return { shown, all: shown.concat(p ? (p.enAlts || []).map(clean) : []) };
+  };
+  function twinScore(a, b) {
+    const ma = avvMeanings(a.noun), mb = avvMeanings(b.noun);
+    let s = ma.shown.some(x => mb.shown.includes(x)) ? 3 : ma.all.some(x => mb.all.includes(x)) ? 1 : 0;
+    if (AVV_NEAR.has([a.noun, b.noun].sort().join('|'))) s += 1;
+    return s;
+  }
+  function twinOrder(members) {   // a group's cards (at most five): the best way round, at random among equals
+    if (members.length < 3) return shuffle(members);
+    let best = [], top = -1;
+    const visit = (done, left) => {
+      if (!left.length) {
+        let s = 0;
+        for (let i = 1; i < done.length; i++) s += twinScore(done[i - 1], done[i]);
+        if (s > top) { top = s; best = [done]; } else if (s === top) best.push(done);
+        return;
+      }
+      left.forEach((c, i) => visit(done.concat([c]), left.filter((_, j) => j !== i)));
+    };
+    visit([], members);
+    return best[Math.floor(Math.random() * best.length)];
+  }
   function twinsTogether(cards, from = 0) {   // each group's cards from `from` on, gathered where its first one falls
     const group = c => (c && (c.subject || subject) === 'avverbi') ? AVV_TWIN_OF.get(c.noun) : undefined;
     const rest = cards.slice(from);
     if (!rest.some(c => group(c) !== undefined)) return cards;
     const out = [], placed = new Set();
+    const gather = g => { const m = []; rest.forEach((d, j) => { if (!placed.has(j) && group(d) === g) { m.push(d); placed.add(j); } }); return m; };
+    const anchor = from > 0 ? group(cards[from - 1]) : undefined;   // the card you're on: its group-mates still to come follow it at once
+    if (anchor !== undefined) {
+      const m = gather(anchor);
+      if (m.length) {
+        const order = twinOrder([cards[from - 1], ...m]);
+        const at = order.indexOf(cards[from - 1]);
+        out.push(...order.slice(at + 1), ...order.slice(0, at).reverse());
+      }
+    }
     rest.forEach((c, i) => {
       if (placed.has(i)) return;
       const g = group(c);
       if (g === undefined) { out.push(c); placed.add(i); return; }
-      rest.forEach((d, j) => { if (!placed.has(j) && group(d) === g) { out.push(d); placed.add(j); } });
+      out.push(...twinOrder(gather(g)));
     });
     return cards.slice(0, from).concat(out);
   }
@@ -17611,7 +17653,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     verbGate = null;
     gatedVerb = null;
     if (resume) {
-      // Riprendi: the saved deck, in its own order
+      // Riprendi: the saved deck, in its own order — the cards still to come regrouped, near-synonyms side by side
+      deck = inPlayOrder(deck, Math.min(deck.length, (resume.index || 0) + 1));
     } else if (sessionMaxDeck && sessionMaxDeck.length > 0) {
       // Play again / Reshuffle — replay the current active subset in new order (the numbers, in theirs)
       deck = inPlayOrder(shuffleDeck(deck));

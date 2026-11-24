@@ -35,13 +35,13 @@ const mixed = ev(`twinsTogether([
   { noun: 'gatto', key: 'nouns:gatto', subject: 'nouns' },
   { noun: 'perciò', key: 'avverbi:perciò', subject: 'avverbi' }
 ]).map(c => c.key)`);
-ok(mixed.join() === 'avverbi:quindi,avverbi:perciò,nouns:casa,phrases:allora,nouns:gatto', `a mixed round: quindi and perciò together, Frasi’s allora left alone (${mixed.join(' · ')})`);
+ok([mixed[0], mixed[1]].sort().join() === 'avverbi:perciò,avverbi:quindi' && mixed.slice(2).join() === 'nouns:casa,phrases:allora,nouns:gatto', `a mixed round: quindi and perciò together (either way round), Frasi’s allora left alone (${mixed.join(' · ')})`);
 
 // cards added mid-round: what came before stays where it was
 const mid = ev(`twinsTogether([
   { noun: 'molto-avv', key: 'a' }, { noun: 'ieri', key: 'b' }, { noun: 'tanto-avv', key: 'c' }, { noun: 'forse', key: 'd' }, { noun: 'oggi', key: 'e' }, { noun: 'magari', key: 'f' }
 ], 2).map(c => c.noun)`);
-ok(mid.join() === 'molto-avv,ieri,tanto-avv,forse,magari,oggi', `mid-round: the cards before stay put; forse and magari join up after (${mid.join(' · ')})`);
+ok(mid.slice(0, 3).join() === 'molto-avv,ieri,tanto-avv' && [mid[3], mid[4]].sort().join() === 'forse,magari' && mid[5] === 'oggi', `mid-round: the cards before stay put; forse and magari join up after, either way round (${mid.join(' · ')})`);
 
 // a real round from Start
 ev("clearHand(); topicsIn(SUBJECTS.avverbi.themes.map(t => t.key)); updateReadout();");
@@ -49,4 +49,29 @@ d.getElementById('start-btn').click();
 const round = ev('deck.map(c => c.noun)');
 ok(round.length > 20 && runsOk(round), `a round started with Start (${round.length} cards): near-synonyms side by side`);
 ok(B.errors.length === 0, 'no errors');
+
+// ---- Nov 24: inside a group, the words that show the same meaning sit next to each other ----
+const deckOf = keys => keys.map(k => `{ noun: ${JSON.stringify(k)}, key: ${JSON.stringify(k)} }`).join(', ');
+const next = (o, a, b) => Math.abs(o.indexOf(a) - o.indexOf(b)) === 1;
+let pc = true, mp = true, ways = new Set();
+for (let i = 0; i < 40; i++) {
+  const o = ev(`inPlayOrder(shuffleDeck(SUBJECTS.avverbi.items.map(n => ({ noun: n.noun, key: n.noun }))))`).map(c => c.noun);
+  if (!next(o, 'però', 'comunque')) pc = false;
+  if (!next(o, 'ma', 'però')) mp = false;
+  ways.add(o.indexOf('ma') < o.indexOf('comunque') ? 'ma first' : 'comunque first');
+}
+ok(pc && mp, 'però always beside comunque ("however") and beside ma ("but") — nothing that shares neither comes between');
+ok(ways.size === 2, 'and still not always the same way round');
+let sub = true;
+for (let i = 0; i < 20; i++) { const o = ev(`twinsTogether(shuffle([${deckOf(['però', 'oggi', 'tuttavia', 'qui', 'comunque', 'ieri'])}]))`).map(c => c.noun); if (!next(o, 'però', 'comunque')) sub = false; }
+ok(sub, 'with tuttavia in the round too, però and comunque still side by side');
+let others = true;
+for (let i = 0; i < 30; i++) {
+  const o = ev(`inPlayOrder(shuffleDeck(SUBJECTS.avverbi.items.map(n => ({ noun: n.noun, key: n.noun }))))`).map(c => c.noun);
+  if (!next(o, 'tanto-avv', 'così') || !next(o, 'anche', 'troppo-avv') || !next(o, 'abbastanza', 'piuttosto')) others = false;
+}
+ok(others, 'tanto beside così ("so"), anche beside troppo ("too"), abbastanza beside piuttosto ("quite")');
+const anchored = ev(`twinsTogether([${deckOf(['oggi', 'molto-avv', 'ieri', 'qui', 'tanto-avv'])}], 2)`).map(c => c.noun);
+ok(anchored.join() === 'oggi,molto-avv,tanto-avv,ieri,qui', `the card you're on pulls its group-mates up behind it: ${anchored.join(' · ')}`);
 done();
+
