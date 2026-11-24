@@ -39,7 +39,7 @@ const pianoBefore = JSON.stringify(B.ev("seedSrs('nouns', 'en-it').piano"));
 B.ev("selectedNouns = new Set(['piano-avv', 'spesso']); updateReadout();");
 B.d.getElementById('start-btn').click();
 for (let i = 0; i < 2; i++) { B.d.getElementById('answer').value = B.ev('deck[index].italian'); B.d.getElementById('submit').click(); B.d.getElementById('submit').click(); }
-ok(JSON.stringify(B.ev("loadSrs('nouns', 'en-it').piano")) === pianoBefore, 'piano, softly, keeps its own schedule — not the floor\'s');
+ok(JSON.stringify(B.ev("loadSrs('nouns', 'en-it').piano")) === pianoBefore, 'piano, slowly, keeps its own schedule — not the floor\'s');
 ok(B.ev("loadSrs('story', 'en-it').spesso.l") === B.ev('today()'), 'spesso counts for the story\'s spesso too — the same word');
 
 // ---- Known, on the map ----
@@ -49,4 +49,14 @@ const band = B.ev("SUBJECTS.avverbi.themes.find(t => t.nouns.includes('sempre'))
 ok(B.d.querySelector(`.map-row[data-topic="${band}"] .map-cell.known`) && /^sempre — always: /.test(B.d.querySelector(`.map-row[data-topic="${band}"] .map-cell.known`).title), `right 5 times, on 3 different days: sempre is known, dotted on the map (in ${band})`);
 ok(['avverbi-stats-v1', 'avverbi-stats-iten-v1', 'avverbi-stats-listen-v1', 'avverbi-stats-v1:srs', 'avverbi-assoc-v1'].every(k => B.ev(`syncedKeys().has(${JSON.stringify(k)})`)), 'its progress syncs');
 ok(B.errors.length === 0, 'no errors along the way');
+// ---- Each card's English leads with the meaning the word has most often (Nov 2026) ----
+const firsts = B.ev("Object.fromEntries(AVV_DATA.map(p => [p.key, p.en.split(' / ')[0]]))");
+const lead = { 'perché': 'because', 'come': 'like', 'così': 'like this', 'piano-avv': 'slowly', 'però': 'but', 'abbastanza': 'quite', 'forte-avv': 'hard', 'stasera': 'tonight', 'sicuramente': 'definitely', 'soprattutto': 'especially', 'inoltre': 'moreover', 'anche-se': 'even though', 'ancora': 'still', 'molto-avv': 'very' };
+const wrongLead = Object.entries(lead).filter(([k, w]) => firsts[k] !== w);
+ok(wrongLead.length === 0, `each leads with its commonest meaning — perché because, come like, piano slowly, però but${wrongLead.length ? ' — not: ' + wrongLead.map(([k]) => k).join(', ') : ''}`);
+const dup = B.ev("AVV_DATA.filter(p => { const en = p.en.split(' / ').map(x => x.toLowerCase()); return new Set(en).size !== en.length || (p.enAlts || []).some(a => en.includes(a.toLowerCase())); }).map(p => p.key)");
+ok(dup.length === 0, `no meaning listed twice, on the card or among the other accepted answers${dup.length ? ' — ' + dup.join(', ') : ''}`);
+ok(B.ev("AVV_ITEMS.find(n => n.noun === 'perché').example[0]") === 'Mangio perché ho fame.' && B.ev("AVV_ITEMS.find(n => n.noun === 'come').example[1]") === 'You talk like my mother!',
+   'and the example shows that meaning: Mangio perché ho fame; Parli come mia madre');
 done();
+
