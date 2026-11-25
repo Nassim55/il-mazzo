@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-XwerszHa6IlL60iW3DXnCVS8HpEpV/yLynObb2/XeLc=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Aq9/+Yg8VJj3UnUJUObacEAOxCXbPgOvmqyKei9+PZI=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1996,7 +1996,7 @@
   .prog-legend span:first-child i { margin-left: 0; }   /* the section's chart, in the map's panel */
 
   .map-cell.known { position: relative; }   /* known: counted in the topic's % */
-  .map-cell.known::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(250, 246, 236, 0.9); }
+  .map-cell.known::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--dot, rgba(250, 246, 236, 0.9)); }   /* fading: the dot takes the square's colour */
   .map-score { justify-self: end; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-faded); }
   .map-score[style] { color: var(--ink); border-bottom: 2px solid var(--c); padding-bottom: 1px; }
   .map-panel { display: none; }
@@ -2042,7 +2042,8 @@
   .mk-cell { display: inline-block; position: relative; width: 9px; height: 9px; border-radius: 2px; background: var(--c); }   /* the key's samples: their own classes, never counted as words */
   .mk-cell.mk-new { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.2); }
   .mk-cell.mk-in { outline: 1.5px solid var(--ink); outline-offset: 1px; }
-  .mk-cell.mk-known::after { content: ''; position: absolute; left: 50%; top: 50%; width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; border-radius: 50%; background: rgba(250, 246, 236, 0.9); }
+  .mk-cell.mk-known::after { content: ''; position: absolute; left: 50%; top: 50%; width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; border-radius: 50%; background: var(--dot, rgba(250, 246, 236, 0.9)); }
+  .mk-fade { display: inline-flex; gap: 2px; }
   .map-how { display: inline-block; margin-left: 12px; }
   .map-how > summary { cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-faded); text-decoration: underline; text-decoration-color: rgba(28, 22, 17, 0.25); text-underline-offset: 3px; }
   .map-how[open] { display: block; margin: 8px 0 0; }
@@ -2050,6 +2051,9 @@
   .map-line { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding-right: 6px; }
   .map-add { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; padding: 5px 11px; border-radius: 999px; border: 1px solid rgba(28, 22, 17, 0.25);
              background: transparent; color: var(--ink-soft); cursor: pointer; white-space: nowrap; transition: background 0.15s, border-color 0.15s; }
+  .map-fading { margin-top: 2px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: #7a5a20; }   /* Nov 25: a known word's square fades after a week without a right answer */
+  .map-add.map-ripassa { display: inline-flex; align-items: center; gap: 6px; border-color: var(--gold); background: rgba(176, 133, 64, 0.16); color: var(--ink); }
+  @media (hover: hover) { .map-add.map-ripassa:hover { background: rgba(176, 133, 64, 0.28); border-color: var(--gold); } }
   .map-add.in { background: var(--olive); border-color: var(--olive); color: var(--paper); }
   @media (hover: hover) {   /* a phone keeps :hover after a tap — the take-it-out colour only where there's a pointer */
     .map-add:hover { border-color: var(--ink); color: var(--ink); }
@@ -14714,27 +14718,54 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const mix = 0.3 + 0.62 * sure;   // bolder than the grid's: a small square has to carry it alone
     return `rgb(${a.map((x, i) => Math.round(SHADE_PAPER[i] + (x + (b[i] - x) * u - SHADE_PAPER[i]) * mix)).join(', ')})`;
   }
+  // Fading (Nov 25, Nassim): a known word's square fades when you haven't got it right for a while — fresh for a
+  // week, faint (never gone) by three weeks — so a finished topic shows when it wants a visit. Its dot takes the
+  // square's colour as it fades, so it still reads as known. Learning words don't fade: a pale square there already
+  // means few answers. Answering a word anywhere (any deck, Ripasso, its twin) refreshes it. Per direction, as known is.
+  const MAP_FRESH = 7, MAP_FADED = 21, MAP_FLOOR = 0.22, MAP_DOT = [250, 246, 236];
+  const mapFade = age => Math.max(0, Math.min(1, (age - MAP_FRESH) / (MAP_FADED - MAP_FRESH)));
+  function mapLastRight(r) {   // the last day it was answered right (r.rl); older records: its last answer, or the day its review was set from
+    if (!r) return null;
+    if (typeof r.rl === 'number') return r.rl;
+    if (typeof r.l === 'number') return r.l;
+    if (typeof r.d === 'number' && typeof r.b === 'number') return r.d - (SRS_INTERVALS[Math.min(r.b, SRS_MAX_BOX)] || 0);
+    return null;
+  }
+  function mapFadeColors(rate, seen, f) {   // washed into the paper, its dot in the square's own colour
+    const base = mapColor(rate, seen).match(/\d+/g).map(Number), m = (a, b, u) => a.map((x, i) => Math.round(x + (b[i] - x) * u));
+    return { c: `rgb(${m(base, SHADE_PAPER, (1 - MAP_FLOOR) * f).join(', ')})`, dot: `rgb(${m(MAP_DOT, base, f).join(', ')})` };
+  }
+  const mapCellStyle = c => { if (!c.fade) return `--c: ${mapColor(c.rate, c.seen)}`; const x = mapFadeColors(c.rate, c.seen, c.fade); return `--c: ${x.c}; --dot: ${x.dot}`; };
   // A topic's nouns, strongest first (then the most tried), the untried at the end
   // A topic's percentage is how much of it you know (knowState: your track record on each noun,
   // in this direction). Untried nouns count as not known.
   function mapTopic(t, byKey, srs = loadSrs(subject, direction), st = readStats(subject, direction)) {
+    const now = today();
     const cells = t.nouns.map(k => {
       const n = byKey.get(k), s = st[k], seen = s && s.seen > 0 ? s.seen : 0, wrong = seen ? Math.min(s.wrong || 0, seen) : 0;
-      const ks = knowState(srs[k], s);
-      return { key: k, it: n ? n.it : k, en: n ? n.en : '', seen, wrong, rate: seen ? wrong / seen : null, kpct: ks.pct, known: ks.known, why: ks.why };
+      const ks = knowState(srs[k], s), last = mapLastRight(srs[k]), age = last === null ? 0 : Math.max(0, now - last);
+      return { key: k, it: n ? n.it : k, en: n ? n.en : '', seen, wrong, rate: seen ? wrong / seen : null, kpct: ks.pct, known: ks.known, why: ks.why,
+               age, fade: ks.known && seen ? mapFade(age) : 0 };
     });
     const tried = cells.filter(c => c.seen || c.known)   // the known first, then the rest — each green to red, by colour (Nov 2026)
       .sort((a, b) => (b.known - a.known) || ((a.rate || 0) - (b.rate || 0)) || b.seen - a.seen || a.key.localeCompare(b.key));
     const fresh = cells.filter(c => !c.seen && !c.known);
     const seen = tried.reduce((x, c) => x + c.seen, 0), wrong = tried.reduce((x, c) => x + c.wrong, 0);
-    const known = cells.filter(c => c.known).length;
+    const known = cells.filter(c => c.known).length, fading = cells.filter(c => c.fade > 0);
     return { t, cells: [...tried, ...fresh], tried, fresh, seen, wrong, rate: seen ? wrong / seen : null,
              known, pct: cells.length ? Math.round(known / cells.length * 100) : 0,
+             fading, ripassa: fading.length >= Math.max(5, Math.ceil(known / 4)),   // a quarter of what you know (at least 5 words) is fading: Ripassa takes the row's button
+             fadeAvg: known ? cells.reduce((s, c) => s + c.fade, 0) / known : 0,
              often: tried.filter(c => c.rate >= 0.4).length, shaky: tried.filter(c => c.rate >= 0.15 && c.rate < 0.4).length };
   }
-  const mapCellTitle = c => `${c.it} — ${c.en}: ${c.seen ? `right ${c.seen - c.wrong} of ${c.seen} · ${c.known ? 'known' : c.why}` : 'not tried yet'}`;
+  const mapCellTitle = c => `${c.it} — ${c.en}: ${c.seen ? `right ${c.seen - c.wrong} of ${c.seen} · ${c.known ? (c.fade ? `known — fading: last right ${c.age} days ago` : 'known') : c.why}` : 'not tried yet'}`;
   const mapTopicPct = x => `${x.pct}%`;
   const mapPctColor = x => mapColor((100 - x.pct) / 200, 5);   // 100% known: olive · none: terracotta
+  const mapPctShade = x => {   // the row's % underline fades with its known words (Nov 25)
+    if (!x.fadeAvg) return mapPctColor(x);
+    const base = mapPctColor(x).match(/\d+/g).map(Number), u = (1 - MAP_FLOOR) * x.fadeAvg;
+    return `rgb(${base.map((v, i) => Math.round(v + (SHADE_PAPER[i] - v) * u)).join(', ')})`;
+  };
   const mapNotKnown = x => x.cells.filter(c => !c.known);   // the topic's words not yet known — tried or not (Nov 2026: in place of the 10 weakest)
   // A topic's nouns, in the site's own pieces: the side panel's title and labels, the grid's
   // tiles (shaded by your record; dashed and faded when not in the deck, the gold mark when
@@ -14960,18 +14991,19 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const topics = p.sortBy === 'order' ? inOrder   // the most known at the top, unless you ask for the topics' own order
       : inOrder.map((x, i) => [x, i]).sort(([a, i], [b, j]) => b.pct - a.pct || i - j).map(([x]) => x);
     const open = topics.find(x => x.t.key === mapOpen) || null;
-    const sq = c => `<i class="map-cell${c.seen ? '' : ' new'}${c.known ? ' known' : ''}${selectedNouns.has(c.key) ? ' in' : ''}"${c.seen ? ` style="--c: ${mapColor(c.rate, c.seen)}"` : ''} title="${escapeHTML(mapCellTitle(c))}"></i>`;
+    const sq = c => `<i class="map-cell${c.seen ? '' : ' new'}${c.known ? ' known' : ''}${c.fade ? ' fading' : ''}${selectedNouns.has(c.key) ? ' in' : ''}"${c.seen ? ` style="${mapCellStyle(c)}"` : ''} title="${escapeHTML(mapCellTitle(c))}"></i>`;
     const row = x => {
       const isOpen = open === x, inDeck = x.cells.filter(c => selectedNouns.has(c.key)).length, added = inDeck === x.cells.length && topicInHand(x.t);
       return `
         <div class="map-row${isOpen ? ' open' : ''}" data-topic="${x.t.key}"${x.t.group ? ` data-group="${x.t.group}"` : ''}>
           <div class="map-line">
-          <button type="button" class="map-head" aria-expanded="${isOpen}" aria-label="${escapeHTML(`${x.t.label}, ${x.t.en}: ${x.known} of ${x.cells.length} known (${mapTopicPct(x)}), ${x.tried.length} practised${inDeck ? `, ${inDeck} in your deck` : ''}`)}">
-            <span class="map-name"><span class="map-it">${x.t.label}</span><span class="map-en">${x.t.en} · ${x.cells.length}</span>${inDeck ? `<span class="map-indeck">● ${inDeck} in your deck</span>` : ''}</span>
+          <button type="button" class="map-head" aria-expanded="${isOpen}" aria-label="${escapeHTML(`${x.t.label}, ${x.t.en}: ${x.known} of ${x.cells.length} known (${mapTopicPct(x)}), ${x.tried.length} practised${x.fading.length ? `, ${x.fading.length} fading` : ''}${inDeck ? `, ${inDeck} in your deck` : ''}`)}">
+            <span class="map-name"><span class="map-it">${x.t.label}</span><span class="map-en">${x.t.en} · ${x.cells.length}</span>${x.fading.length ? `<span class="map-fading">${x.fading.length} fading</span>` : ''}${inDeck ? `<span class="map-indeck">● ${inDeck} in your deck</span>` : ''}</span>
             <span class="map-strip" aria-hidden="true">${x.cells.map(sq).join('')}</span>
-            <span class="map-score${x.tried.length ? '' : ' untried'}"${x.tried.length ? ` style="--c: ${mapPctColor(x)}"` : ''} title="${x.known} of ${x.cells.length} known">${mapTopicPct(x)}</span>
+            <span class="map-score${x.tried.length ? '' : ' untried'}"${x.tried.length ? ` style="--c: ${mapPctShade(x)}"` : ''} title="${x.known} of ${x.cells.length} known">${mapTopicPct(x)}</span>
           </button>
-          <button type="button" class="map-add${added ? ' in' : ''}" data-map-toggle="${x.t.key}" aria-pressed="${added}" title="${added ? `Take ${escapeHTML(x.t.label)} out of your deck` : `Put all ${x.cells.length} of ${escapeHTML(x.t.label)} in your deck`}">${added ? '✓ In deck' : '＋ Add'}</button>
+          ${x.ripassa ? `<button type="button" class="map-add map-ripassa" data-map-ripassa="${x.t.key}" title="Practise the ${x.fading.length} fading words of ${escapeHTML(x.t.label)} — your deck stays as it is"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>Ripassa · ${x.fading.length}</button>`
+            : `<button type="button" class="map-add${added ? ' in' : ''}" data-map-toggle="${x.t.key}" aria-pressed="${added}" title="${added ? `Take ${escapeHTML(x.t.label)} out of your deck` : `Put all ${x.cells.length} of ${escapeHTML(x.t.label)} in your deck`}">${added ? '✓ In deck' : '＋ Add'}</button>`}
           </div>
           ${isOpen ? `<div class="endings map-inline">${mapDetailHTML(x, false)}</div>` : ''}
         </div>`;
@@ -14988,9 +15020,11 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         <span class="mk"><i class="mk-cell mk-known" style="--c: ${mapColor(0, 5)}"></i>known</span>
         <span class="mk"><i class="mk-cell mk-new"></i>not tried</span>
         <span class="mk"><i class="mk-cell mk-in" style="--c: ${mapColor(0.25, 5)}"></i>in your deck</span>
+        <span class="mk"><span class="mk-fade"><i class="mk-cell mk-known" style="--c: ${mapColor(0, 5)}"></i><i class="mk-cell mk-known" style="--c: ${mapFadeColors(0, 5, 0.5).c}; --dot: ${mapFadeColors(0, 5, 0.5).dot}"></i><i class="mk-cell mk-known" style="--c: ${mapFadeColors(0, 5, 1).c}; --dot: ${mapFadeColors(0, 5, 1).dot}"></i></span>fresh → 3 weeks unpractised</span>
         <details class="map-how"><summary>How it's scored</summary>
           <p>A square's colour is your record with that word — olive if rarely wrong, terracotta if often; fainter after only a few tries.</p>
           <p>dotted: known — right 5 times or more, on 8 of your last 10 answers, wrong no more than 1 time in 4 over your last 20, and right on 3 different days; a slip won't undo it, two mistakes in a row will (3 right in a row win it back), and mistakes older than your last 20 answers are forgotten · the colour is your whole history · the % is how much of the topic you know · hover a square for why</p>
+          <p>fading: a known word's square fades once you haven't got it right for a week, and is faint after three — answer it anywhere and it's fresh again. When a quarter of a topic's known words are fading, its row offers ↻ Ripassa: a round of just those.</p>
         </details>
       </div>
       <div class="map-layout">
@@ -15038,6 +15072,17 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       refresh();
     };
     const topicEdit = change => { change(); syncChipsToDeck(); updateReadout(); refresh(); };
+    const mapPractise = keys => {   // a round of these words, and off you go — your deck stays as it was for afterwards
+      const keepWords = [...selectedNouns], keepTopics = syncDeckTopics().slice();
+      applyPick(keys);
+      const start = document.getElementById('start-btn');
+      if (start) start.click();
+      selectedNouns.clear();
+      keepWords.forEach(k => selectedNouns.add(k));
+      deckTopics = keepTopics;
+      syncChipsToDeck();
+      updateReadout();
+    };
     box.addEventListener('pointerover', e => {
       const hit = e.target.closest && e.target.closest('.prog-hit');
       if (hit) progShowTip(hit.closest('.prog-chart'), hit);
@@ -15047,6 +15092,12 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       if (chart && !chart.contains(e.relatedTarget)) progHideTip(chart);
     });
     box.addEventListener('click', e => {
+      const rip = e.target.closest('[data-map-ripassa]');
+      if (rip) {   // a topic's fading words (Nov 25)
+        const th = themeByKey(rip.dataset.mapRipassa);
+        if (th) mapPractise(mapTopic(th, new Map(SUBJECTS[subject].items.map(n => [n.noun, n]))).fading.map(c => c.key));
+        return;
+      }
       const tog = e.target.closest('[data-map-toggle]');
       if (tog) {   // a whole topic, in or out
         const th = themeByKey(tog.dataset.mapToggle);
@@ -15084,15 +15135,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         const x = mapTopic(t, new Map(SUBJECTS[subject].items.map(n => [n.noun, n])));
         const what = pick.dataset.mapPick;
         if (what === 'unknown' || what === 'known') {   // the ones not yet known, or the ones you know, and off you go — your deck stays as it was for afterwards
-          const keepWords = [...selectedNouns], keepTopics = syncDeckTopics().slice();
-          applyPick((what === 'known' ? x.cells.filter(c => c.known) : mapNotKnown(x)).map(c => c.key));
-          const start = document.getElementById('start-btn');
-          if (start) start.click();
-          selectedNouns.clear();
-          keepWords.forEach(k => selectedNouns.add(k));
-          deckTopics = keepTopics;
-          syncChipsToDeck();
-          updateReadout();
+          mapPractise((what === 'known' ? x.cells.filter(c => c.known) : mapNotKnown(x)).map(c => c.key));
           return;
         }
         if (what === 'all') topicEdit(() => topicsIn([t.key]));
@@ -16283,7 +16326,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-25T12:39Z';
+  const BUILD = '2026-11-25T14:11Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
