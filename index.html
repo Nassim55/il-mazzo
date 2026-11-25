@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-1PmmAoY/KnaS7aIdQAgvjPaOCb5o5YDaDyjRg8QSDto=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-XwerszHa6IlL60iW3DXnCVS8HpEpV/yLynObb2/XeLc=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -2914,7 +2914,7 @@
   .rc-p { margin: 0 0 1.05em; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 22.5px; line-height: 1.66; color: var(--ink); overflow-wrap: break-word; }
   .rc-first::first-letter { float: left; padding: 7px 9px 0 0; font-size: 3.5em; font-weight: 600; line-height: 0.82; color: var(--terracotta); }
   .rc-w { border-radius: 3px; cursor: pointer; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: background-color 0.3s; }
-  .rc-w:hover { background-color: rgba(90, 107, 58, 0.12); }
+  @media (hover: hover) { .rc-w:hover { background-color: rgba(90, 107, 58, 0.12); } }   /* a mouse's hint only: a phone would keep it after a tap, like a mark */
   .rc-w.is-marked { background-color: rgba(214, 171, 95, var(--a, 0.6)); }
   .rc-w.is-name { cursor: help; }
   .rc-w.is-flash { box-shadow: 0 0 0 2px var(--olive); }
@@ -2939,6 +2939,7 @@
   .rc-pop-status.is-on { color: var(--olive); }
   .rc-pop-actions { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
   .rc-pop-actions .ghost { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; }
+  .rc-pop-mark { width: auto; min-height: 40px; padding: 0 16px; }
   .rc-pop-close { margin-left: auto; width: 40px; padding: 0; justify-content: center; font-size: 20px; }
   @media (max-width: 760px) {
     .rc-listen { position: static; float: right; width: 32px; height: 32px; margin: 4px 0 6px 10px; }
@@ -10385,7 +10386,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         <div class="story-hero">
           <div class="setup-eyebrow">Racconti · Storie da leggere</div>
           <h2 class="story-title">I racconti</h2>
-          <p class="story-sub">Short stories at your level. Tap any word you don't know: it's marked straight away and becomes a card in your deck. As you learn it, its mark fades — until it's gone.</p>
+          <p class="story-sub">Short stories at your level. Tap any word to see what it means, and mark the ones you don't know: they're saved at once and become cards in your deck. As you learn each one, its mark fades — until it's gone.</p>
         </div>
         <section class="rc-section" aria-labelledby="rc-index-h">
           <h3 class="rc-h" id="rc-index-h">Indice</h3>
@@ -10393,7 +10394,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         </section>
         <section class="rc-section" aria-labelledby="rc-words-h">
           <div class="rc-words-head"><h3 class="rc-h" id="rc-words-h">Le tue parole</h3>${all.length ? `<button type="button" class="submit rc-practise-all" id="rc-practise-all">▶ Ripassa · ${all.length}</button>` : ''}</div>
-          ${chips || `<p class="rc-empty">No words yet. Open a story, and tap any word you don't know.</p>`}
+          ${chips || `<p class="rc-empty">No words yet. Open a story, tap a word you don't know, and mark it.</p>`}
         </section>
       </div>`;
     gameArea.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openRacconto(b.dataset.open, +(b.dataset.at || 0), b.dataset.word || null)));
@@ -10444,7 +10445,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         <header class="rc-head">
           <div class="setup-eyebrow">Racconto ${s.n} · ${s.level}</div>
           <h2 class="rc-title" id="rc-title" lang="it">${storyEsc(s.title)}</h2>
-          <p class="rc-tip">Tap a word you don't know: it's marked, saved, and becomes a card.</p>
+          <p class="rc-tip">Tap a word to see what it means. <em>Segna</em> marks one you don't know: it's saved at once, and becomes a card.</p>
         </header>
         <div class="rc-text">${paras}<p class="rc-fine" lang="it">Fine.</p></div>
         <footer class="rc-foot"><button type="button" class="story-read-btn" id="rc-back-end">‹ Back to the stories</button></footer>
@@ -10469,16 +10470,10 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       const w = e.target.closest && e.target.closest('.rc-w');
       if (w && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); raccontoTap(w); }
     });
-    root.addEventListener('click', e => { if (!e.target.closest('#rc-pop') && !e.target.closest('.rc-w')) raccontoHidePop(); });
-    root.addEventListener('keydown', e => { if (e.key === 'Escape') raccontoHidePop(); });
   }
-  function raccontoTap(el) {
-    const s = raccontoState.s, ref = el.dataset.ref, key = raccontoKey(ref);
+  function raccontoTap(el) {   // a tap shows what the word means (Nov 25: it no longer marks it) — Segna, in its box, does
     gameArea.querySelectorAll('.rc-w.is-flash').forEach(w => w.classList.remove('is-flash'));
-    if (ref.startsWith('name:')) { raccontoShowPop(el); return; }
-    let added = false;
-    if (!raccontoMarked().has(key)) { raccontoMark(s.id, ref, el.dataset.f, +el.closest('.rc-para').dataset.p); added = true; raccontoRepaint(); }
-    raccontoShowPop(el, added);
+    raccontoShowPop(el);
   }
   function raccontoRepaint() {   // the marks and their fading, without redrawing the text
     const marked = raccontoMarked(), strength = raccontoStrengths();
@@ -10496,7 +10491,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const info = raccontoInfo(s, el.dataset.ref, el.dataset.f, el.dataset.persons ? el.dataset.persons.split(',') : null);
     if (!pop || !info) return;
     const key = raccontoKey(el.dataset.ref), on = raccontoMarked().has(key), a = on ? raccontoStrengths()(key) : 0, form = el.dataset.f;
-    const status = info.name ? 'A name — not one for your deck' : !on ? 'Not in your words' : a >= 1 ? 'You know this one now' : added ? 'Marked — saved, and in your deck' : 'In your words — still learning';
+    const status = info.name ? 'A name — not one for your deck' : !on ? 'Not in your words yet' : a >= 1 ? 'You know this one now' : added ? 'Marked — saved, and in your deck' : 'In your words — still learning';
     const lemma = info.it && info.it.toLowerCase() !== form.toLowerCase() ? `<span class="rc-pop-lemma" lang="it">${storyEsc(info.it.replace(/'/g, '’'))}</span>` : '';
     const person = info.persons && info.persons.length ? `<p class="rc-pop-person"><span lang="it">${info.persons.map(q => `${RACCONTO_PERSON[q] || q} ${storyEsc(form.toLowerCase())}`).join(' · ')}</span></p>` : '';
     pop.innerHTML = `
@@ -10504,11 +10499,12 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       <p class="rc-pop-en">${storyEsc(info.en)}</p>${person}
       <p class="rc-pop-status${on && a < 1 ? ' is-on' : ''}">${status}</p>
       <div class="rc-pop-actions">
+        ${info.name ? '' : on ? `<button type="button" class="ghost" data-pop="unmark">Togli</button>` : `<button type="button" class="submit rc-pop-mark" data-pop="mark">Segna</button>`}
         <button type="button" class="ghost" data-pop="say"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>Ascolta</button>
-        ${info.name ? '' : on ? `<button type="button" class="ghost" data-pop="unmark">Togli</button>` : `<button type="button" class="ghost" data-pop="mark">Segna</button>`}
         <button type="button" class="ghost rc-pop-close" data-pop="close" aria-label="Close">×</button>
       </div>`;
     pop.hidden = false;
+    raccontoPopAway();
     const root = gameArea.querySelector('.rc-reader');
     if (root && !(window.matchMedia && window.matchMedia('(max-width: 600px)').matches)) {   // by the word on a computer; a sheet at the foot on a phone
       const r = el.getBoundingClientRect(), R = root.getBoundingClientRect(), w = pop.offsetWidth || 300;
@@ -10524,7 +10520,27 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       else if (act === 'mark') { raccontoMark(s.id, el.dataset.ref, form, +el.closest('.rc-para').dataset.p); raccontoRepaint(); raccontoShowPop(el, true); }
     }));
   }
-  function raccontoHidePop() { const pop = document.getElementById('rc-pop'); if (pop) pop.hidden = true; }
+  // While a word's box is open, a tap anywhere else on the page closes it (Nov 25) — and a tap that lands on another
+  // word only closes it, so tapping away never marks a word by mistake; buttons still do their job. Esc closes it too.
+  let raccontoAway = null;
+  function raccontoPopAway() {
+    if (raccontoAway) return;
+    const onClick = e => {
+      if (e.target.closest && e.target.closest('#rc-pop')) return;
+      const onWord = !!(e.target.closest && e.target.closest('.rc-w'));
+      raccontoHidePop();
+      if (onWord) { e.preventDefault(); e.stopPropagation(); }   // that tap was for closing the box, not marking
+    };
+    const onKey = e => { if (e.key === 'Escape') raccontoHidePop(); };
+    document.addEventListener('click', onClick, true);
+    document.addEventListener('keydown', onKey, true);
+    raccontoAway = () => { document.removeEventListener('click', onClick, true); document.removeEventListener('keydown', onKey, true); };
+  }
+  function raccontoHidePop() {
+    const pop = document.getElementById('rc-pop');
+    if (pop) pop.hidden = true;
+    if (raccontoAway) { raccontoAway(); raccontoAway = null; }
+  }
   function raccontoTrack() {   // where you are: the first paragraph still on the screen, saved as you go
     if (!raccontoState || container.dataset.view !== 'racconto') return;
     const paras = [...gameArea.querySelectorAll('.rc-para')];
@@ -10536,7 +10552,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     read[raccontoState.s.id] = { ...next, at: Date.now() };
     raccontiSave(RACCONTI_READ_KEY, read);
   }
-  function raccontoDetach() { if (raccontoScroll) { window.removeEventListener('scroll', raccontoScroll); raccontoScroll = null; } }
+  function raccontoDetach() { raccontoHidePop(); if (raccontoScroll) { window.removeEventListener('scroll', raccontoScroll); raccontoScroll = null; } }
   function raccontoClose() { raccontoStopSpeaking(); raccontoDetach(); showSetup(); }
   function raccontoSpeakPara(i) {   // a paragraph read aloud; again stops it
     const was = raccontoSpeech;
@@ -16267,7 +16283,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-24T16:04Z';
+  const BUILD = '2026-11-25T12:39Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
