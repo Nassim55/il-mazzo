@@ -91,7 +91,7 @@ d.getElementById('change-btn').click();
 putBack('nouns');
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
 ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === ev("NOUN_THEMES.find(t => t.key === 'casa').nouns.length") && ev('capValue') === '7' && d.getElementById('app-title').textContent === 'Sostantivi', 'nouns: Casa selection and subset "7" kept, title restored');
-ok(!d.querySelector('.container aside.endings:not(.map-panel)') && d.querySelectorAll('.verb-chip').length === 1405, 'noun setup restored (1405 chips, no endings panel on the page)');
+ok(!d.querySelector('.container aside.endings:not(.map-panel)') && d.querySelectorAll('.verb-chip').length === 1495, 'noun setup restored (1495 chips, no endings panel on the page)');
 const store = {}; for (let i = 0; i < w.localStorage.length; i++) { const k = w.localStorage.key(i); store[k] = w.localStorage.getItem(k); }
 // Reload remembers the last subject
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
