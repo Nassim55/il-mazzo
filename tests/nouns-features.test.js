@@ -52,7 +52,7 @@ ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateR
 ok(/100 most common/.test(d.getElementById('start-btn').textContent) && !d.getElementById('start-btn').disabled, 'All + 100, most common → Start · 100 most common cards');
 d.getElementById('start-btn').click();
 deck = ev('deck.map(c => c.noun)');
-ok(deck.length === 100 && ev('FREQUENCY_ORDER.slice(0, 100)').every(x => deck.includes(x)) && ev('sessionPool.length') === 1360, 'plays the 100 most common, pool = whole deck');
+ok(deck.length === 100 && ev('FREQUENCY_ORDER.slice(0, 100)').every(x => deck.includes(x)) && ev('sessionPool.length') === 1405, 'plays the 100 most common, pool = whole deck');
 d.getElementById('reshuffle-btn').click();
 ok(ev('deck.length') === 100, 'Reshuffle works with nothing selected');
 d.getElementById('change-btn').click();
@@ -66,7 +66,7 @@ ok(d.getElementById('feedback').className.includes('correct') && /solidus/.test(
 // --- hand-pick with nothing selected ---
 d.getElementById('change-btn').click(); ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 ev("openFocusModal('setup')");
-ok(d.getElementById('focus-total').textContent === '1360', 'Hand-pick with nothing selected lists all 1360');
+ok(d.getElementById('focus-total').textContent === '1405', 'Hand-pick with nothing selected lists all 1405');
 d.getElementById('focus-top-input').value = '100'; d.getElementById('focus-top-btn').click(); d.getElementById('focus-apply').click();
 ok(d.querySelectorAll('.verb-chip:not(.unselected)').length === 100, 'Hand-pick Top 100 lights up 100 chips');
 ok(errors.length === 0, `no runtime errors (${errors.join('; ')})`);

@@ -92,7 +92,7 @@ ok(notes === 300, `all 300 adjective notes render (${notes})`);
 // Other sections untouched; backups; reload
 d.getElementById('change-btn').click();
 d.querySelector('#subject-toggle [data-subject="nouns"]').click();
-ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === 0 && !d.querySelector('.setup-side') && d.querySelectorAll('.verb-chip').length === 1360, 'nouns unchanged: no side panel, 1360 chips');
+ok(ev('subject') === 'nouns' && ev('selectedNouns.size') === 0 && !d.querySelector('.setup-side') && d.querySelectorAll('.verb-chip').length === 1405, 'nouns unchanged: no side panel, 1405 chips');
 ok(['aggettivi-stats-v1', 'aggettivi-assoc-v1'].every(k => Object.keys(ev('buildBackup()').data).includes(k)), 'backups include the adjectives');
 d.querySelector('#subject-toggle [data-subject="adjectives"]').click();
 const store = {}; for (let i = 0; i < w.localStorage.length; i++) { const k = w.localStorage.key(i); store[k] = w.localStorage.getItem(k); }

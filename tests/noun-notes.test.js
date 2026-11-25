@@ -10,7 +10,7 @@ ok(keys.every(k => B.ev(`NOUN_ITEMS.find(n => n.noun === ${JSON.stringify(k)}).n
 const withNote = B.ev('NOUN_ITEMS.filter(n => n.note).length');
 ok(withNote === B.ev('NOUN_ITEMS.length'), `every noun has a note: ${withNote} of ${B.ev('NOUN_ITEMS.length')} (Nov 20, 2026 — a new noun needs one too)`);
 const firstWithout = B.ev('NOUN_FREQUENCY_ORDER.findIndex(k => !NOUN_ITEMS.find(n => n.noun === k).note)');
-ok(firstWithout === -1, `the most common nouns are covered first: the first ${firstWithout === -1 ? 1360 : firstWithout} by frequency all have one`);
+ok(firstWithout === -1, `the most common nouns are covered first: the first ${firstWithout === -1 ? 1405 : firstWithout} by frequency all have one`);
 const bad = keys.filter(k => {
   const v = notes[k];
   return (v.match(/<em>/g) || []).length !== (v.match(/<\/em>/g) || []).length || /<(?!\/?em>)/.test(v) || v.length < 40 || v.length > 420 || /\s{2,}/.test(v);
@@ -30,6 +30,6 @@ ok(B.errors.length === 0, 'no errors along the way');
 const newOnes = ['patente', 'allarme', 'influenza', 'aggiornamento', 'lavagna', 'etto', 'mutuo', 'orto'];
 ok(newOnes.every(k => B.ev(`!!NOUN_ITEMS.find(n => n.noun === ${JSON.stringify(k)}).note`)) && /all'arme/.test(B.ev("NOUN_ITEMS.find(n => n.noun === 'allarme').note")),
    'the new topics\' nouns arrive with their notes: l\'allarme — from all\'arme!, to arms');
-ok(B.ev("NOUN_THEMES.length") === 35 && ['strada-auto', 'misure', 'salute', 'emergenze', 'tecnologia', 'feste', 'burocrazia', 'soldi', 'istruzione', 'cucina-tavola', 'giardino-orto', 'panetteria'].every(k => B.ev(`NOUN_THEMES.some(t => t.key === ${JSON.stringify(k)} && t.nouns.every(n => NOUN_ITEMS.some(x => x.noun === n)))`)),
-   'the newer topics, every noun in them a real one: driving, measures, health, emergencies, technology, holidays, paperwork, money, school, the kitchen, the garden — and the bakery (Nov 21)');
+ok(B.ev("NOUN_THEMES.length") === 36 && ['strada-auto', 'misure', 'salute', 'emergenze', 'tecnologia', 'feste', 'burocrazia', 'soldi', 'istruzione', 'cucina-tavola', 'giardino-orto', 'panetteria', 'eria'].every(k => B.ev(`NOUN_THEMES.some(t => t.key === ${JSON.stringify(k)} && t.nouns.every(n => NOUN_ITEMS.some(x => x.noun === n)))`)),
+   'the newer topics, every noun in them a real one: driving, measures, health, emergencies, technology, holidays, paperwork, money, school, the kitchen, the garden, the bakery (Nov 21) — and Pizzeria & co. (Nov 25)');
 done();
