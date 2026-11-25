@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- What may run and where data may go (Nov 2026): this page's own script (by its hash — tools/stamp.sh updates it), Google's sign-in, the fonts, the sync API. tests/csp.test.js checks the hash. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-NEEUweB9vYFrCBC3mYIUZAuJSYfCMZvlutC1aVrv/e4=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-1PmmAoY/KnaS7aIdQAgvjPaOCb5o5YDaDyjRg8QSDto=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://il-mazzo-sync.il-mazzo.workers.dev https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f3ead8">
 <meta name="mobile-web-app-capable" content="yes">
@@ -136,10 +136,6 @@
   }
 
   /* ===== Setup view ===== */
-  .setup-intro {
-    text-align: center;
-    margin-bottom: 28px;
-  }
 
   .setup-eyebrow {
     font-family: 'JetBrains Mono', monospace;
@@ -148,23 +144,6 @@
     color: var(--gold);
     text-transform: uppercase;
     margin-bottom: 10px;
-  }
-
-  .setup-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-weight: 500;
-    font-size: 38px;
-    margin: 0 0 10px;
-    line-height: 1;
-  }
-
-  .setup-sub {
-    font-size: 13px;
-    color: var(--ink-soft);
-    margin: 0 auto;
-    max-width: 400px;
-    line-height: 1.55;
   }
 
   /* Heading for the noun grid, which now sits below the Start button */
@@ -319,17 +298,6 @@
   .shade-key-bar { width: 120px; height: 10px; border-radius: 5px; border: 1px solid rgba(28, 22, 17, 0.12); }
   .shade-key-note { flex-basis: 100%; font-size: 10px; }
 
-  .setup-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    font-size: 12px;
-    color: var(--ink-faded);
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
   .ghost {
     background: none;
     border: none;
@@ -345,12 +313,6 @@
   }
 
   .ghost:hover { color: var(--ink); text-decoration-color: var(--ink); }
-
-  .divider {
-    color: var(--ink-faded);
-    margin: 0 6px;
-    user-select: none;
-  }
 
   .deck-readout {
     font-family: 'JetBrains Mono', monospace;
@@ -560,9 +522,6 @@
   }
 
   /* ===== Hand-pick modal ===== */
-  .hand-pick-btn {
-    font-style: italic;
-  }
 
   .focus-modal {
     position: fixed;
@@ -1213,7 +1172,7 @@
     .stat { text-align: left; }
     .input-row { flex-direction: column; }
     button.submit { padding: 14px; }
-    .setup-title { font-size: 30px; }
+
     .verb-grid { grid-template-columns: repeat(2, 1fr); }
     .verb-chip-italian { font-size: 19px; }
   }
@@ -1309,26 +1268,12 @@
     flex-wrap: wrap;
   }
   .ripasso:empty { display: none; }
-  .ripasso-main { display: flex; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; }
-  .ripasso-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 22px; color: var(--ink); }
+
   .ripasso-text { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-soft); letter-spacing: 0.03em; }
   .ripasso-text strong { color: var(--ink); font-size: 13px; }
   .ripasso-parts { color: var(--ink-faded); margin-left: 6px; }
   .ripasso-text > .ripasso-parts:first-child { margin-left: 0; }
-  .ripasso-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .ripasso-dirs { display: inline-flex; border: 1px solid rgba(28, 22, 17, 0.18); border-radius: 3px; overflow: hidden; }
-  .ripasso-dirs button {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10.5px;
-    letter-spacing: 0.06em;
-    padding: 6px 9px;
-    background: transparent;
-    border: none;
-    color: var(--ink-soft);
-    cursor: pointer;
-  }
-  .ripasso-dirs button + button { border-left: 1px solid rgba(28, 22, 17, 0.18); }
-  .ripasso-dirs button.active { background: var(--ink); color: var(--cream); }
+
   button.submit.ripasso-start { padding: 10px 16px; font-size: 11px; }
   .card-section {
     top: auto;
@@ -1619,7 +1564,6 @@
     color: var(--ink);
   }
 
-
   @media (max-width: 1100px) {
     .container[data-side="1"][data-view="setup"] { max-width: none; }
     .container[data-side="1"] .setup-body { grid-template-columns: minmax(0, 1fr); gap: 28px; }
@@ -1652,171 +1596,31 @@
   }
   /* ===== Racconto ===== */
   .container[data-subject="story"][data-view="setup"] #game-area { max-width: none; }
-  .container[data-view="story"] { max-width: 860px; }
-  .container[data-view="story"] .stats,
-  .container[data-view="story"] .progress-bar,
-  .container[data-view="story"] #controls { display: none; }
+  .container[data-view="racconto"] { max-width: 860px; }
+  .container[data-view="racconto"] .stats,
+  .container[data-view="racconto"] .progress-bar,
+  .container[data-view="racconto"] #controls { display: none; }
 
   .story-hero { text-align: center; max-width: 640px; margin: 0 auto 22px; }
   .story-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 52px; line-height: 1.05; margin: 6px 0 12px; color: var(--ink); }
   .story-sub { font-size: 15px; line-height: 1.6; color: var(--ink-soft); margin: 0; }
-  .story-map { margin: 0 auto 28px; max-width: 900px; filter: drop-shadow(0 6px 18px rgba(28, 22, 17, 0.12)); }
-  .story-map-svg { display: block; width: 100%; height: auto; }
-  .map-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 34px; font-weight: 600; fill: var(--ink); }
-  .map-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; fill: var(--ink-faded); }
-  .map-place { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; fill: #4a3d30; }
-  .map-place.small { font-size: 11px; font-weight: 500; }
-  .map-region { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; letter-spacing: 0.3em; fill: #8a7a68; opacity: 0.8; }
-  .map-water { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14px; fill: #5b7882; }
+
   .map-hint { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14px; fill: #a23e2c; opacity: 0.75; }
-  .map-n { font-family: 'Cormorant Garamond', serif; font-size: 13px; font-weight: 700; fill: #6b5b48; }
-  .map-route { animation: map-march 1.6s linear infinite; }
-  @keyframes map-march { to { stroke-dashoffset: -26; } }
-  .map-pin { cursor: pointer; outline: none; }
-  .map-pin .pin-dot { fill: var(--paper); stroke: var(--terracotta); stroke-width: 2.2; transition: transform 0.15s; }
-  .map-pin .pin-num { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 700; fill: var(--terracotta); pointer-events: none; }
-  .map-pin .pin-label { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: #f4ead5; stroke-width: 4px; pointer-events: none; }
-  .map-pin .pin-pulse { fill: none; stroke: var(--terracotta); stroke-width: 1.5; opacity: 0; }
-  .map-pin.is-next .pin-pulse { animation: pin-pulse 2s ease-out infinite; transform-box: fill-box; transform-origin: center; }
-  @keyframes pin-pulse { 0% { opacity: 0.8; transform: scale(1); } 100% { opacity: 0; transform: scale(1.9); } }
-  .map-pin.is-read .pin-dot { fill: var(--terracotta); }
-  .map-pin.is-read .pin-num { fill: var(--paper); font-family: 'DM Sans', sans-serif; font-size: 14px; }
-  .map-pin.is-unread .pin-dot { stroke: #8a7a68; }
-  .map-pin.is-unread .pin-num { fill: #8a7a68; }
-  .map-pin:hover .pin-dot, .map-pin:focus-visible .pin-dot { stroke-width: 3.5; }
 
-  .story-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-  .story-card { position: relative; background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.12); border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 10px rgba(28, 22, 17, 0.06); transition: transform 0.2s, box-shadow 0.2s; }
-  .story-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(28, 22, 17, 0.12); }
-  .story-card.is-next { border-color: rgba(162, 62, 44, 0.45); }
-  .story-card-art { all: unset; display: block; cursor: pointer; line-height: 0; }
-  .story-card-art svg { display: block; width: 100%; height: auto; }
-  .story-card-art * { animation-play-state: paused !important; }
-  .story-card:hover .story-card-art * { animation-play-state: running !important; }
-  .story-card-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-  .story-card-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
-  .story-card-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 28px; margin: 0; color: var(--ink); line-height: 1.1; }
-  .story-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 4px; }
-  .story-card-score { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-faded); }
-  .story-read-btn, .reader-next, .rw-practise { background: var(--ink); color: var(--paper); border: none; border-radius: 3px; padding: 9px 16px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
-  .story-read-btn:hover, .reader-next:hover, .rw-practise:hover { background: var(--terracotta); }
-  .story-coming { text-align: center; color: var(--ink-faded); font-size: 14px; margin: 26px 0 0; }
-  .story-coming em { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--ink-soft); margin-right: 6px; }
-
-  .story-ready-bar { height: 5px; background: rgba(28, 22, 17, 0.08); border-radius: 3px; overflow: hidden; }
-  .story-ready-bar span { display: block; height: 100%; border-radius: 3px; background: var(--terracotta); transition: width 0.6s ease; }
-  .story-ready.close .story-ready-bar span { background: var(--gold); }
-  .story-ready.ready .story-ready-bar span { background: var(--olive); }
-  .story-ready-text { font-size: 12.5px; color: var(--ink-soft); margin-top: 6px; }
-  .story-ready-hint { color: var(--ink-faded); font-style: italic; margin-left: 4px; }
-
-  .story-stamp { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 112px; height: 112px; border-radius: 50%; border: 3px double var(--terracotta); color: var(--terracotta); transform: rotate(-14deg); background: rgba(251, 246, 234, 0.6); box-shadow: inset 0 0 0 4px rgba(251, 246, 234, 0.7), inset 0 0 0 5px rgba(162, 62, 44, 0.5); flex-shrink: 0; }
-  .story-stamp span { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.24em; text-transform: uppercase; margin-right: -0.24em; }
-  .story-stamp small { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.1em; margin-top: 4px; text-transform: uppercase; }
-  .story-stamp.is-small { position: absolute; top: 10px; right: 10px; width: 74px; height: 74px; background: rgba(251, 246, 234, 0.85); }
-  .story-stamp.is-small span { font-size: 13px; }
-  .story-stamp.is-small small { font-size: 7.5px; }
-  .story-stamp.is-landing { animation: stamp-land 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
-  @keyframes stamp-land { 0% { opacity: 0; transform: rotate(-30deg) scale(2.4); } 70% { opacity: 1; transform: rotate(-12deg) scale(0.94); } 100% { transform: rotate(-14deg) scale(1); } }
+  .story-read-btn{ background: var(--ink); color: var(--paper); border: none; border-radius: 3px; padding: 9px 16px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
+  .story-read-btn:hover{ background: var(--terracotta); }
 
   /* The reader */
-  .reader-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .reader-back { background: none; border: none; padding: 6px 0; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); cursor: pointer; }
-  .reader-back:hover { color: var(--terracotta); }
-  .reader-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--ink-faded); text-transform: uppercase; }
-  .reader-art { margin: 0 0 22px; border-radius: 6px; overflow: hidden; box-shadow: 0 10px 30px rgba(28, 22, 17, 0.18); line-height: 0; }
-  .reader-art svg { display: block; width: 100%; height: auto; }
-  .reader-head { text-align: center; max-width: 640px; margin: 0 auto 18px; }
-  .reader-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 48px; margin: 4px 0 14px; line-height: 1.05; }
-  .reader-head .story-ready { max-width: 360px; margin: 0 auto; }
-  .reader-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 16px 0 12px; }
-  .reader-tool { background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.2); border-radius: 20px; padding: 7px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--ink-soft); cursor: pointer; }
-  .reader-tool:hover { border-color: var(--terracotta); color: var(--terracotta); }
-  .reader-tool.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-  .reader-tool-hint { font-size: 12.5px; color: var(--ink-faded); align-self: center; }
-  .reader-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: 12px; color: var(--ink-faded); }
-  .lg { text-underline-offset: 4px; text-decoration-thickness: 1.5px; }
-  .lg-learning { text-decoration-line: underline; text-decoration-style: dotted; text-decoration-color: var(--gold); }
-  .lg-new { text-decoration-line: underline; text-decoration-style: dashed; text-decoration-color: var(--terracotta); }
-  .lg-story { text-decoration-line: underline; text-decoration-style: wavy; text-decoration-color: var(--terracotta); text-decoration-thickness: 1px; }
 
-  .reader-text { max-width: 640px; margin: 0 auto; font-family: 'Cormorant Garamond', serif; font-size: 22px; line-height: 1.7; color: var(--ink); }
-  .rd-para { margin-bottom: 18px; }
-  .rd-sent { display: grid; grid-template-columns: 28px minmax(0, 1fr) 30px; align-items: start; gap: 6px; border-radius: 4px; padding: 1px 0; transition: background 0.3s; }
-  .rd-sent.is-speaking { background: rgba(176, 133, 64, 0.16); box-shadow: inset 3px 0 0 var(--gold); }
-  .rd-it, .rd-en { margin: 0; }
-  .rd-en { font-family: 'DM Sans', sans-serif; font-size: 14.5px; line-height: 1.5; color: var(--ink-faded); font-style: italic; margin: 0 0 6px; }
-  .rd-play, .rd-en-btn { background: none; border: none; cursor: pointer; color: var(--ink-faded); opacity: 0.45; transition: opacity 0.15s, color 0.15s; margin-top: 9px; padding: 2px 0; }
-  .rd-play { font-size: 11px; }
-  .rd-en-btn { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; }
-  .rd-sent:hover .rd-play, .rd-sent:hover .rd-en-btn, .rd-play:focus-visible, .rd-en-btn:focus-visible, .rd-en-btn.active, .rd-sent.is-speaking .rd-play { opacity: 1; }
-  .rd-play:hover, .rd-en-btn:hover, .rd-en-btn.active { color: var(--terracotta); }
-  .rd-first::first-letter { font-size: 2.15em; line-height: 0.9; font-weight: 600; color: var(--terracotta); margin-right: 0.04em; }
   .w { cursor: pointer; border-radius: 3px; text-underline-offset: 5px; text-decoration-thickness: 1.5px; transition: background 0.15s; }
   .w:hover, .w:focus-visible { background: rgba(176, 133, 64, 0.18); outline: none; }
-  .w-learning { text-decoration-line: underline; text-decoration-style: dotted; text-decoration-color: var(--gold); }
-  .w-new { text-decoration-line: underline; text-decoration-style: dashed; text-decoration-color: rgba(162, 62, 44, 0.75); }
-  .w-story { text-decoration-line: underline; text-decoration-style: wavy; text-decoration-color: var(--terracotta); text-decoration-thickness: 1px; }
-  .w-name { font-variant: small-caps; letter-spacing: 0.02em; }
-  .w.is-open { background: rgba(162, 62, 44, 0.16); }
-  .w.is-found { background: rgba(90, 107, 58, 0.28); animation: found-glow 1.4s ease-out 2; }
-  @keyframes found-glow { 50% { background: rgba(90, 107, 58, 0.55); } }
-  .w.is-miss { animation: miss-shake 0.4s; background: rgba(162, 62, 44, 0.22); }
-  @keyframes miss-shake { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
-  .w-num { font-variant-numeric: oldstyle-nums; }
-  .reader-text.is-finding .w { background: rgba(176, 133, 64, 0.08); }
-  .reader-text.is-finding .w:hover { background: rgba(176, 133, 64, 0.3); }
-  .find-banner { position: sticky; top: 8px; z-index: 20; max-width: 640px; margin: 0 auto 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; background: var(--ink); color: var(--paper); border-radius: 4px; padding: 10px 14px; font-size: 14px; box-shadow: 0 6px 18px rgba(28, 22, 17, 0.25); }
-  .find-banner[hidden] { display: none; }
-  .find-q { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 18px; }
-  .find-actions { display: flex; gap: 8px; }
-  .find-show, .find-cancel { background: none; border: 1px solid rgba(251, 246, 234, 0.4); color: var(--paper); border-radius: 3px; padding: 5px 10px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; }
-  .find-show:hover, .find-cancel:hover { border-color: var(--paper); }
-
-  .word-pop { position: absolute; z-index: 60; width: 320px; background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.18); border-top: 3px solid var(--terracotta); border-radius: 4px; box-shadow: 0 12px 32px rgba(28, 22, 17, 0.22); padding: 14px 16px 16px; font-family: 'DM Sans', sans-serif; }
-  .word-pop[hidden] { display: none; }
-  .word-pop-close { position: absolute; top: 6px; right: 8px; background: none; border: none; font-size: 20px; color: var(--ink-faded); cursor: pointer; line-height: 1; padding: 2px 4px; }
-  .word-pop-head { display: flex; align-items: baseline; gap: 10px; padding-right: 22px; }
-  .word-pop-word { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 30px; font-weight: 600; color: var(--ink); line-height: 1.1; }
-  .word-pop-say { background: none; border: 1px solid rgba(28, 22, 17, 0.18); border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 14px; flex-shrink: 0; }
-  .word-pop-lemma { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
-  .word-pop-lemma em { font-family: 'Cormorant Garamond', serif; font-size: 17px; }
-  .word-pop-person { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em; color: var(--ink-faded); margin-left: 8px; }
-  .word-pop-meaning { font-size: 16px; color: var(--ink); margin: 8px 0 8px; line-height: 1.4; }
-  .word-pop-here { font-size: 13.5px; line-height: 1.45; color: var(--ink); background: rgba(176, 133, 64, 0.12); border-left: 2px solid var(--gold); padding: 6px 9px; margin: 0 0 9px; border-radius: 0 3px 3px 0; }
-  .word-pop-here span { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #8a6420; margin-bottom: 2px; }
-  .word-pop-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-  .word-pop-badge, .word-pop-status { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 7px; border-radius: 2px; background: rgba(28, 22, 17, 0.06); color: var(--ink-soft); }
-  .word-pop-status.s-known { background: rgba(90, 107, 58, 0.15); color: var(--olive); }
-  .word-pop-status.s-learning { background: rgba(176, 133, 64, 0.16); color: #8a6420; }
-  .word-pop-status.s-new { background: rgba(162, 62, 44, 0.12); color: var(--terracotta); }
-  .word-pop-note { font-size: 13px; line-height: 1.55; color: var(--ink-soft); max-height: 150px; overflow-y: auto; border-top: 1px solid rgba(28, 22, 17, 0.08); padding-top: 8px; margin-top: 4px; }
-  .word-pop-add { margin-top: 10px; width: 100%; background: var(--ink); color: var(--paper); border: none; border-radius: 3px; padding: 9px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; }
-  .word-pop-add:hover { background: var(--terracotta); }
-  .word-pop-add.is-added { background: rgba(90, 107, 58, 0.15); color: var(--olive); cursor: default; }
-
-  .rd-section-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 30px; margin: 0 0 14px; color: var(--ink); }
-  .rd-section-title span { display: block; font-family: 'JetBrains Mono', monospace; font-style: normal; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faded); margin-top: 4px; }
-  .reader-words, .reader-quiz { max-width: 640px; margin: 34px auto 0; padding-top: 26px; border-top: 1px solid rgba(28, 22, 17, 0.12); }
-  .rw-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .rw-chip { background: var(--paper); border: 1px dashed rgba(162, 62, 44, 0.45); border-radius: 3px; padding: 6px 10px; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 1px; }
-  .rw-chip:hover, .rw-chip.is-open { border-style: solid; border-color: var(--terracotta); }
-  .rw-chip.is-added { border-style: solid; border-color: rgba(90, 107, 58, 0.55); background: rgba(90, 107, 58, 0.07); }
-  .rw-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; font-weight: 600; color: var(--ink); }
-  .rw-en { font-size: 11.5px; color: var(--ink-faded); }
-  .rw-empty { color: var(--olive); font-style: italic; }
-  .rw-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; align-items: center; }
-  .rw-practise span { display: block; font-size: 10px; letter-spacing: 0.08em; text-transform: none; font-weight: 400; opacity: 0.75; margin-top: 2px; }
-  .rw-add-all { background: none; border: 1px solid var(--ink); border-radius: 3px; padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; color: var(--ink); }
-  .rw-add-all:hover:not(:disabled) { border-color: var(--terracotta); color: var(--terracotta); }
-  .rw-add-all:disabled { border-color: rgba(90, 107, 58, 0.5); color: var(--olive); cursor: default; }
 
   .quiz-q { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; background: var(--paper); border: 1px solid rgba(28, 22, 17, 0.1); border-radius: 4px; padding: 14px 16px; margin-bottom: 12px; transition: border-color 0.3s; }
   .quiz-q.is-right { border-color: rgba(90, 107, 58, 0.55); }
   .quiz-q.is-wrong { border-color: rgba(162, 62, 44, 0.45); }
   .quiz-num { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-style: italic; color: var(--gold); line-height: 1; }
   .quiz-text { font-family: 'Cormorant Garamond', serif; font-size: 21px; margin: 0 0 10px; line-height: 1.3; }
-  .quiz-kind { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--terracotta); margin-left: 6px; vertical-align: middle; }
+
   .quiz-opts { display: flex; flex-wrap: wrap; gap: 8px; }
   .quiz-opt { background: var(--cream); border: 1px solid rgba(28, 22, 17, 0.15); border-radius: 3px; padding: 8px 12px; font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--ink); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
   .quiz-opt:hover:not(:disabled) { border-color: var(--terracotta); }
@@ -1825,49 +1629,14 @@
   .quiz-opt.is-chosen { background: rgba(162, 62, 44, 0.12); border-color: var(--terracotta); opacity: 1; text-decoration: line-through; }
   .quiz-fb { margin: 10px 0 0; font-size: 14px; color: var(--ink-soft); font-style: italic; }
   .quiz-q.is-right .quiz-fb { color: var(--olive); }
-  .quiz-find-btn { background: var(--ink); color: var(--paper); border: none; border-radius: 3px; padding: 8px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; cursor: pointer; }
-  .quiz-find-btn:hover { background: var(--terracotta); }
-  .reader-end { max-width: 640px; margin: 10px auto 0; }
-  .end-card { display: flex; align-items: center; gap: 26px; background: var(--paper); border: 1px solid rgba(162, 62, 44, 0.3); border-radius: 4px; padding: 22px 24px; margin-top: 18px; }
-  .end-text h3 { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 28px; margin: 0 0 6px; }
-  .end-text p { margin: 0; color: var(--ink-soft); line-height: 1.5; }
-  .end-note { text-align: center; color: var(--ink-faded); font-style: italic; }
-  .reader-foot { max-width: 640px; margin: 34px auto 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 
   /* The pictures' small movements */
-  .story-art .twinkle { animation: art-twinkle 3.4s ease-in-out infinite; }
-  @keyframes art-twinkle { 50% { opacity: 0.25; } }
-  .art-c1 .rain { animation: art-rain 0.55s linear infinite; }
-  @keyframes art-rain { to { transform: translate(-6px, 48px); } }
-  .art-c1 .lamp-glow { animation: art-glow 4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-  @keyframes art-glow { 50% { opacity: 0.72; transform: scale(0.94); } }
-  .art-c1 .window-lit { animation: art-twinkle 7s ease-in-out infinite; }
-  .art-c2 .sun-glow { animation: art-glow 6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-  .art-c2 .sway { animation: art-sway 3.6s ease-in-out infinite alternate; }
-  @keyframes art-sway { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
-  .art-c3 .steam { animation: art-steam 3.3s ease-out infinite; opacity: 0; }
-  @keyframes art-steam { 0% { opacity: 0; transform: translateY(6px); } 30% { opacity: 0.8; } 100% { opacity: 0; transform: translateY(-26px); } }
-  .art-c3 .mote { animation: art-mote 9s ease-in-out infinite; opacity: 0; }
-  @keyframes art-mote { 0%, 100% { opacity: 0; transform: translate(0, 0); } 40% { opacity: 0.9; } 70% { opacity: 0.5; transform: translate(14px, -10px); } }
-  .art-c3 .flame { animation: art-flame 0.9s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: bottom; }
-  @keyframes art-flame { to { transform: scaleY(0.82) skewX(-4deg); opacity: 0.7; } }
-  @media (prefers-reduced-motion: reduce) {
-    .story-art *, .map-route, .map-pin .pin-pulse, .story-stamp.is-landing, .w.is-found, .w.is-miss { animation: none !important; }
-  }
 
   @media (max-width: 600px) {
     .story-title { font-size: 40px; }
-    .reader-title { font-size: 38px; }
-    .reader-text { font-size: 20px; }
-    .rd-sent { grid-template-columns: 22px minmax(0, 1fr) 26px; gap: 4px; }
-    .rd-play, .rd-en-btn { opacity: 0.7; }
-    .word-pop { position: fixed; left: 0 !important; right: 0; bottom: 0; top: auto !important; width: auto !important; max-height: 70vh; overflow-y: auto; border-radius: 12px 12px 0 0; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
-    .end-card { flex-direction: column; text-align: center; gap: 14px; }
-    .story-stamp { width: 96px; height: 96px; }
-    .map-pin .pin-label { font-size: 18px; }
+
     /* The map at a readable size, panned sideways like a real one */
-    .story-map { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-left: -4px; margin-right: -4px; padding: 0 4px 6px; }
-    .story-map-svg { min-width: 660px; }
+
   }
 
   /* ===== Sign-in (once per device) ===== */
@@ -2062,13 +1831,7 @@
   }
 
   /* A spasso: out and about, listen only */
-  .passive-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; margin-top: 12px; padding: 14px 18px; background: transparent;
-                 border: 1px solid var(--ink); border-radius: 3px; color: var(--ink); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; }
-  .passive-btn:hover:not(:disabled) { background: rgba(28, 22, 17, 0.05); }
-  .passive-btn:disabled { opacity: 0.4; cursor: default; }
-  .passive-btn[hidden] { display: none; }
-  .passive-btn-main { font-weight: 600; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; }
-  .passive-btn-sub { font-size: 13px; color: var(--ink-soft); }
+
   .passive-msg { margin: 8px 0 0; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--terracotta); text-align: center; }
   .passive-msg:empty { display: none; }
   .container[data-view="passive"] { max-width: 720px; }
@@ -2167,7 +1930,7 @@
   .map-eyebrow { margin-bottom: 0; }
   .map-eyebrow .ghost { margin-left: 6px; font-size: 11px; letter-spacing: 0.04em; text-transform: none; }
   .map-key { margin: 8px 0 12px; }
-  .map-sort .meta-sep { margin: 0 6px; color: var(--ink-faded); }
+
   .map-rows { border-top: 1px solid rgba(28, 22, 17, 0.1); }
   .map-row { border-bottom: 1px solid rgba(28, 22, 17, 0.1); }
   .map-head { display: grid; grid-template-columns: 132px minmax(0, 1fr) 40px; align-items: center; gap: 12px; width: 100%; padding: 8px 8px; margin: 0;
@@ -2183,7 +1946,7 @@
   .map-cell { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
   .map-cell.new { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.2); }
   .map-cell.in { outline: 1.5px solid var(--ink); outline-offset: 1px; }
-  .map-chart { margin-top: 22px; padding-top: 16px; border-top: 1px solid rgba(28, 22, 17, 0.1); }
+
   /* I progressi: the analytics in the map's panel */
   .prog-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 16px 0 6px; }
   .prog-tile { display: flex; flex-direction: column; padding: 10px 10px 9px; background: var(--cream); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.06); min-width: 0; }
@@ -2201,7 +1964,7 @@
   .prog-axis { font-family: 'JetBrains Mono', monospace; font-size: 8px; fill: var(--ink-faded); }
   .prog-area { fill: rgba(90, 107, 58, 0.14); }
   .prog-line { fill: none; stroke: var(--olive); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
-  .prog-dot { fill: var(--olive); }
+
   .prog-bar-due { fill: var(--gold); opacity: 0.75; }
   .prog-bar-due.now { opacity: 1; }
   .prog-cross { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 2 2; pointer-events: none; }
@@ -2211,7 +1974,7 @@
   .prog-tip.flip { transform: translate(-92%, 0); }
   .prog-tip.flip-l { transform: translate(-8%, 0); }
   .prog-line2 { fill: none; stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 3 2; stroke-linejoin: round; }
-  .prog-line2-pt { fill: var(--gold); }
+
   .prog-line-pt { fill: var(--olive); }
   .prog-line-skip { fill: none; stroke: var(--olive); stroke-width: 1.3; stroke-dasharray: 2 4; stroke-linecap: round; opacity: 0.55; }   /* across days without practice */
   .prog-vol { fill: rgba(28, 22, 17, 0.07); }
@@ -2231,7 +1994,7 @@
   .prog-seg.n { background: transparent; }
   .prog-legend { display: flex; flex-wrap: wrap; gap: 2px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-soft); margin: 7px 0 0; }
   .prog-legend span:first-child i { margin-left: 0; }   /* the section's chart, in the map's panel */
-  .map-chart > .endings { border: 0; box-shadow: none; background: none; padding: 0; margin: 0; position: static; max-height: none; }
+
   .map-cell.known { position: relative; }   /* known: counted in the topic's % */
   .map-cell.known::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(250, 246, 236, 0.9); }
   .map-score { justify-self: end; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-faded); }
@@ -2250,47 +2013,31 @@
   .map-hint, .noun-map .weak-empty { margin: 8px 0 4px; font-size: 12.5px; color: var(--ink-faded); }
   .map-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; margin-top: 6px; }
   .map-tile .verb-chip-italian { font-size: 19px; }
-  .map-jump { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
-  .map-jump:hover { border-color: var(--ink-soft); }
+
   .noun-map .weak-list li { list-style: none; }
   /* Sostantivi: the page is the map — wide, with the topic you open in a panel beside it */
   .container[data-map="1"][data-view="setup"] { max-width: 1180px; }
   .container[data-map="1"][data-view="setup"] #game-area { max-width: none; }
-  .container[data-map="1"] .setup-intro, .container[data-map="1"] .setup-controls, .container[data-map="1"] .setup-meta,
-  .container[data-map="1"] .audio-row, .container[data-map="1"] .deck-cap, .container[data-map="1"] .start-btn,
-  .container[data-map="1"] .passive-btn, .container[data-map="1"] .passive-msg, .container[data-map="1"] .mode-label,
+  .container[data-map="1"] .setup-meta,
+  .container[data-map="1"] .audio-row, .container[data-map="1"] .deck-cap, .container[data-map="1"] .start-btn, .container[data-map="1"] .passive-msg, .container[data-map="1"] .mode-label,
   .container[data-map="1"] .mode-toggle:not(.subject-toggle), .container[data-map="1"] .grid-fold { max-width: 660px; margin-left: auto; margin-right: auto; }
   .container[data-map="1"] .start-btn { display: block; width: 100%; }
   /* The setup's top (Nov 2026): a title and one line; the options as one row of toggles;
      four quick picks; a deck card with Start and A spasso; everything else in Settings & more */
-  .setup-intro .setup-sub { font-size: 15px; margin-top: 4px; }
+
   .setup-options { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; margin: 14px 0 6px; }
   .setup-options .opt { display: flex; align-items: center; gap: 10px; }
-  .opt-label, .quick-label, .more-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faded); }
+  .opt-label{ font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faded); }
   .setup-options .mode-toggle { margin: 0; max-width: none; width: auto; }
   .setup-options .mode-option { padding: 7px 14px; font-size: 11px; white-space: nowrap; }
-  .bench-intro .setup-intro { text-align: left; }   /* every section: the title and its line from the left */
-  .bench-intro .setup-intro .setup-sub { margin-left: 0; margin-right: 0; }
-  .setup-controls .quick-picks { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; }
-  .quick-label { margin-right: 6px; }
-  .deck-card { padding: 18px 20px 14px; background: var(--paper); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.08); }
-  .container:not([data-map="1"]) .deck-card { margin: 16px 0 18px; }
-  .deck-card .deck-readout { margin: 0 0 12px; text-align: left; }
-  .deck-card .start-btn { display: block; width: 100%; margin: 0; }
-  .deck-card .passive-btn { display: block; width: 100%; margin: 8px 0 0; padding: 10px 12px; }
-  .deck-card .passive-btn-main { font-size: 12px; }
-  .deck-card .passive-msg:empty { display: none; }
-  .setup-more { margin-top: 12px; border-top: 1px solid rgba(28, 22, 17, 0.08); padding-top: 8px; }
-  .setup-more > summary { cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faded); padding: 4px 0; }
-  .setup-more > summary:hover, .setup-more[open] > summary { color: var(--ink); }
+   /* every section: the title and its line from the left */
+
   .more-block { margin: 14px 0 4px; text-align: left; }
-  .more-label { margin-bottom: 6px; }
-  .more-block > *:not(.more-label) { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; text-align: left; justify-content: flex-start; }
+
   .more-block .deck-cap, .more-block .audio-row { flex-wrap: wrap; gap: 6px 8px; }
   .more-block .setup-meta { margin-top: 0; }
   .more-block .person-label { justify-content: flex-start; }
-  .more-about { font-size: 13px; line-height: 1.5; color: var(--ink-soft); margin: 0; }
-  .more-block .divider { margin: 0 6px; color: var(--ink-faded); }
+
   .map-key .mk { display: inline-flex; align-items: center; gap: 5px; margin-left: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-soft); }
   .mk-cell { display: inline-block; position: relative; width: 9px; height: 9px; border-radius: 2px; background: var(--c); }   /* the key's samples: their own classes, never counted as words */
   .mk-cell.mk-new { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.2); }
@@ -2309,12 +2056,10 @@
     .map-add.in:hover { background: transparent; color: var(--terracotta); border-color: var(--terracotta); }
   }
   .map-actions button.map-addall.in { background: var(--olive); border-color: var(--olive); }
-  .deck-topics { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: -6px 0 12px; font-size: 13px; color: var(--ink-soft); }
-  .deck-topic-list { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; color: var(--ink); }
-  .deck-hint { font-size: 12.5px; color: var(--ink-faded); }
+
   .deck-clear { font-size: 11px; }
   .hand[hidden] { display: none !important; }
-  .table .mode-toggle, .table .start-btn, .table .passive-btn, .table .passive-msg { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }   /* the table looks the same in every section */
+  .table .mode-toggle, .table .start-btn, .table .passive-msg { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }   /* the table looks the same in every section */
   .table-deck-line { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--ink-soft); text-align: left; }
   .table-deck-line.ripasso-parts { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
   .saved-more { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 16px; }
@@ -2450,7 +2195,7 @@
   .hand-bar-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
   .hand-bar-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 20px; line-height: 1.1; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hand-bar-sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-soft); }
-  .start-bar .hand-bar-spasso { width: auto; margin: 0; padding: 10px 16px; }
+
   .start-bar .hand-bar-start { width: auto; margin: 0; padding: 14px 22px; white-space: nowrap; }
   @media (max-width: 600px) {
     /* the round: compact, so the card and the answer sit above the keyboard */
@@ -2482,7 +2227,7 @@
       box-shadow: 0 -16px 40px rgba(28, 22, 17, 0.2); transform: translateY(105%); }
     .container.menu-open[data-view="game"] #controls { transform: none; }
     .start-bar { left: 0; right: 0; bottom: 0; width: auto; transform: none; border-radius: 14px 14px 0 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); animation: none; }
-    .start-bar .hand-bar-spasso, .hand-bar-n { display: none; }
+    .hand-bar-n { display: none; }
   }
   /* Gira: practise without typing */
   .answer-mode { display: flex; justify-content: center; gap: 2px; width: max-content; margin: 0 auto 14px; }
@@ -2559,7 +2304,7 @@
   .family { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 60px; padding: 10px 20px 9px; border: 0; border-bottom: 2px solid transparent; background: transparent; cursor: pointer; text-align: left; margin-bottom: -1px; }
   .family-name { display: inline-flex; align-items: center; gap: 9px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 27px; line-height: 1; color: var(--ink-soft); }
   .family-name i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
-  .family-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #6f6152; }
+
   .family.active { border-bottom-color: var(--ink); }
   .family.active .family-name, .family:hover .family-name { color: var(--ink); }
   .family.active .family-name { font-weight: 600; }
@@ -2567,29 +2312,21 @@
   .sections .subject-toggle .mode-option { flex: none; width: auto; }
   .sections .subject-toggle .mode-option[hidden] { display: none !important; }
   .table { margin: 0 0 8px; }
-  .table-tabs { display: flex; flex-wrap: wrap; gap: 2px; padding: 0 12px; border-bottom: 1px solid rgba(28, 22, 17, 0.1); }
-  .table-tab { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 60px; padding: 11px 20px 9px; margin-bottom: -1px; border: 0; border-radius: 4px 4px 0 0; background: transparent; cursor: pointer; text-align: left; }
-  .table-tab.on { background: var(--paper); box-shadow: inset 0 1px 0 rgba(28, 22, 17, 0.1), inset 1px 0 0 rgba(28, 22, 17, 0.1), inset -1px 0 0 rgba(28, 22, 17, 0.1); }
-  .table-tab-name { display: inline-flex; align-items: center; gap: 8px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 23px; line-height: 1; color: var(--ink-soft); }
-  .table-tab.on .table-tab-name, .table-tab:hover .table-tab-name { color: var(--ink); }
-  .table-tab.on .table-tab-name { font-weight: 600; }
-  .table-tab-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #6f6152; }
-  .table-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--terracotta); }
+
   .table-panel { background: var(--paper); border-radius: 0 0 3px 3px; box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.1); }
   .table-panel > .hand { margin: 0; background: transparent; box-shadow: none; }
   .table-panel > .ripasso { margin: 0 !important; padding: 24px 30px !important; border: 0 !important; box-shadow: none !important; background: transparent !important; }
   .section-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; margin: 16px 0 8px; text-align: left; }
-  .section-tools .section-line { flex: 1 1 100%; margin: 0; font-size: 14px; color: var(--ink-soft); text-align: left; }
-  .section-tools .setup-options, .section-tools .sentence-types, .section-tools .prep-numbers { margin: 0; }
-  .section-tools .setup-more { margin: 0 0 0 auto; }
-  .section-tools .setup-more[open] { flex: 1 1 100%; margin: 0; }
+
+  .section-tools .setup-options{ margin: 0; }
+
   .hand-sect { display: inline-flex; align-items: center; gap: 5px; max-width: 104px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
                font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
   .hand-sect i { display: inline-block; flex: none; width: 6px; height: 6px; border-radius: 50%; }
   @media (max-width: 600px) {
     .mast-title { font-size: 46px; }
-    .family { padding: 8px 12px 7px; min-height: 52px; } .family-name { font-size: 21px; } .family-sub { font-size: 8.5px; }
-    .table-tab { padding: 9px 12px 7px; min-height: 52px; } .table-tab-name { font-size: 18px; } .table-tab-sub { font-size: 8.5px; }
+    .family { padding: 8px 12px 7px; min-height: 52px; } .family-name { font-size: 21px; }
+
     .hand-sect { font-size: 7px; max-width: 70px; }
     .hand-side .setup-options .opt { flex-wrap: wrap; }
     .hand-side .mode-toggle .mode-option { padding: 8px 9px; font-size: 10px; letter-spacing: 0.04em; }
@@ -2629,12 +2366,12 @@
   .hand-side > .passive-msg:empty { display: none; }
   .hand-title { margin: 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 38px; line-height: 1; color: var(--ink); }
   .hand-sub { margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6f6152; }
-  .hand-line { font-size: 13.5px; color: var(--ink-soft); margin: -4px 0 0; text-align: left; }
+
   .hand-count { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; text-align: left; }
   .hand-big { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 64px; line-height: 0.9; color: var(--ink); }
   .hand-unit { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--ink-soft); }
   .hand-side .setup-options { margin: 0; }
-  .hand-side .sentence-types, .hand-side .prep-numbers { margin: 0; }
+
   @media (max-width: 600px) {
     .hand { padding: 18px 12px; gap: 14px; }
     .hand-fan { flex-basis: 100%; min-height: 160px; padding: 6px 30px 22px; overflow: visible; }
@@ -2881,7 +2618,6 @@
   .container.kb-digits .mz-row:not(.mz-digits) { display: none; }
   .container.kb-digits .mz-digits { display: flex; gap: 6px; }
   .mz-digits .mz-key { flex: 1 1 0; height: 52px; font-size: 26px; }
-  .mz-digits .mz-fn { background: #e2d6bd; }
 
   .feedback-body .fb-parts { justify-content: center; margin: 10px 0 2px; }
   .feedback-body .fb-parts, .feedback-body .fb-parts * { text-transform: none; letter-spacing: normal; }   /* the parts in their own lettering, not the feedback label's */
@@ -3119,12 +2855,13 @@
     .bell-wrap { order: 2; margin-left: 0; }
     .section-pill { max-width: min(190px, 100%); height: 44px; gap: 8px; padding: 0 clamp(11px, 3.6vw, 14px) 0 clamp(10px, 3.1vw, 12px); font-size: clamp(17px, 4.9vw, 19px); }
     .pill-dot { width: 8px; height: 8px; }
-    .section-bar { position: absolute; z-index: 60; left: -12px; right: -12px; top: calc(100% + 4px); height: auto; display: grid; grid-template-columns: auto auto auto 32px; align-items: center; gap: 2px; padding: 6px; border-radius: 22px; box-shadow: 0 14px 32px rgba(28, 22, 17, 0.14); }   /* each family's tab as wide as its name */
+    .section-bar { position: absolute; z-index: 60; left: -12px; right: -12px; top: calc(100% + 4px); height: auto; display: grid; grid-template-columns: auto auto auto auto 32px; align-items: center; gap: 2px; padding: 6px; border-radius: 22px; box-shadow: 0 14px 32px rgba(28, 22, 17, 0.14); }   /* each family's tab as wide as its name */
     .section-bar .family-row, .section-bar .family-menu { display: contents; }
     .masthead .section-bar .family { grid-row: 1; justify-content: center; padding: 0 clamp(5px, 2.2vw, 9px); }
     .masthead .section-bar .family .family-name { font-size: clamp(14px, 4.1vw, 16px); white-space: nowrap; }
     .section-bar .family .family-chev { display: none; }
-    .section-bar .bar-close { grid-row: 1; grid-column: 4; width: 32px; height: 40px; margin: 0; }
+    .section-bar .bar-close { grid-row: 1; grid-column: 5; width: 32px; height: 40px; margin: 0; }
+    .section-bar .family-more { display: none; }   /* Frasi e dialoghi → Frasi: four tabs across a phone */
     .section-bar .family-list { grid-row: 2; grid-column: 1 / -1; position: static; width: auto; margin-top: 4px; padding: 0 2px 4px; border: 0; box-shadow: none; background: transparent; }
   }
 
@@ -3137,6 +2874,87 @@
   .card .feedback .feedback-example .ex-en { font-family: 'DM Sans', sans-serif; font-style: normal; font-weight: 400; }
   .card .feedback .feedback-example .ex-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; }
   @media (max-width: 600px) { .feedback-example .ex-it { font-size: 19px; } }
+
+  /* ===== Racconti (Nov 2026): the stories' contents, and a page made for reading ===== */
+  .rc-home { display: flex; flex-direction: column; gap: 28px; }
+  .rc-section { display: flex; flex-direction: column; gap: 4px; }
+  .rc-h { margin: 0; padding-bottom: 8px; border-bottom: 1px solid rgba(28, 22, 17, 0.14); font-family: 'JetBrains Mono', monospace; font-weight: 400; font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6f6152; }
+  .rc-index { list-style: none; margin: 0; padding: 0; }
+  .rc-entry { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 6px 18px; align-items: center; padding: 20px 4px; border-bottom: 1px solid rgba(28, 22, 17, 0.1); }
+  .rc-num { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 36px; line-height: 1; color: var(--gold); text-align: center; }
+  .rc-entry-title { margin: 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 32px; line-height: 1.05; }
+  .rc-entry-title button { padding: 0; border: 0; background: none; font: inherit; color: var(--ink); cursor: pointer; text-align: left; }
+  .rc-entry-title button:hover { color: var(--olive); }
+  .rc-entry-blurb { margin: 6px 0 0; max-width: 36em; font-size: 14.5px; line-height: 1.55; color: var(--ink-soft); }
+  .rc-entry-meta { margin: 8px 0 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: #6f6152; }
+  .rc-entry-actions { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+  .rc-entry-actions .ghost { min-height: 40px; }
+  .rc-words-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(28, 22, 17, 0.14); }
+  .rc-words-head .rc-h { padding: 0; border: 0; }
+  .rc-practise-all { width: auto; min-height: 40px; padding: 0 16px; }
+  .rc-words-group { padding: 14px 0 6px; }
+  .rc-words-story { margin: 0 0 10px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 20px; color: var(--ink-soft); }
+  .rc-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .rc-chip { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 1px; min-height: 44px; padding: 6px 12px 7px; border: 0; border-radius: 8px; background: rgba(214, 171, 95, var(--a, 0.5)); box-shadow: inset 0 0 0 1px rgba(28, 22, 17, 0.1); color: var(--ink); text-align: left; cursor: pointer; }
+  .rc-chip.is-learnt { background: transparent; opacity: 0.7; }
+  .rc-chip-it { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 19px; line-height: 1.1; }
+  .rc-chip-en { font-size: 12px; color: var(--ink-soft); }
+  .rc-empty { margin: 14px 0 0; font-size: 14.5px; color: var(--ink-soft); }
+
+  .rc-reader { position: relative; }
+  .rc-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; display: flex; align-items: center; gap: 14px; padding: 10px 0; background: var(--cream); border-bottom: 1px solid rgba(28, 22, 17, 0.12); }
+  .rc-back { min-height: 44px; }
+  .rc-bar-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 20px; color: var(--ink-soft); }
+  .rc-bar-practise { width: auto; min-height: 44px; padding: 0 16px; }
+  .rc-reader .rc-head { display: block; margin: 0; padding: 40px 0 6px; border: 0; background: none; text-align: center; }   /* not the app's page-header row */
+  .rc-title { margin: 8px 0 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 54px; line-height: 1.02; color: var(--ink); }
+  .rc-tip { margin: 14px auto 0; max-width: 30em; font-size: 14px; line-height: 1.5; color: var(--ink-soft); }
+  .rc-text { max-width: 640px; margin: 26px auto 0; }
+  .rc-para { position: relative; }
+  .rc-p { margin: 0 0 1.05em; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 22.5px; line-height: 1.66; color: var(--ink); overflow-wrap: break-word; }
+  .rc-first::first-letter { float: left; padding: 7px 9px 0 0; font-size: 3.5em; font-weight: 600; line-height: 0.82; color: var(--terracotta); }
+  .rc-w { border-radius: 3px; cursor: pointer; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: background-color 0.3s; }
+  .rc-w:hover { background-color: rgba(90, 107, 58, 0.12); }
+  .rc-w.is-marked { background-color: rgba(214, 171, 95, var(--a, 0.6)); }
+  .rc-w.is-name { cursor: help; }
+  .rc-w.is-flash { box-shadow: 0 0 0 2px var(--olive); }
+  .rc-w:focus-visible { outline: 2px solid var(--olive); outline-offset: 1px; }
+  .rc-listen { position: absolute; left: -54px; top: 6px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; padding: 0; border: 1px solid rgba(28, 22, 17, 0.18); border-radius: 50%; background: transparent; color: var(--ink-soft); cursor: pointer; opacity: 0; transition: opacity 0.2s; }
+  .rc-para:hover .rc-listen, .rc-listen:focus-visible, .rc-para.is-speaking .rc-listen { opacity: 1; }
+  .rc-para.is-speaking .rc-listen { border-color: var(--olive); background: var(--olive); color: var(--paper); }
+  .rc-para.is-speaking::before { content: ''; position: absolute; left: -14px; top: 8px; bottom: 1.2em; width: 3px; border-radius: 2px; background: var(--olive); }
+  @media (hover: none) { .rc-listen { opacity: 0.55; } }
+  .rc-break { margin: 0.6em 0 1.4em; text-align: center; font-size: 22px; letter-spacing: 0.5em; color: var(--gold); }
+  .rc-fine { margin: 1.4em 0 0; text-align: center; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 24px; color: var(--ink-soft); }
+  .rc-foot { display: flex; justify-content: center; padding: 30px 0 48px; }
+  .rc-pop { position: absolute; z-index: 40; width: 300px; box-sizing: border-box; padding: 14px 16px 12px; border-radius: 12px; background: #fffaf0; box-shadow: 0 14px 34px rgba(28, 22, 17, 0.2), inset 0 0 0 1px rgba(28, 22, 17, 0.12); }
+  .rc-pop[hidden] { display: none; }
+  .rc-pop-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .rc-pop-form { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 27px; line-height: 1.1; }
+  .rc-pop-lemma { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 19px; color: var(--ink-soft); }
+  .rc-pop-lemma::before { content: '→ '; font-style: normal; }
+  .rc-pop-en { margin: 4px 0 0; font-size: 15px; line-height: 1.45; }
+  .rc-pop-person { margin: 4px 0 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; color: var(--ink-soft); }
+  .rc-pop-status { margin: 10px 0 0; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #6f6152; }
+  .rc-pop-status.is-on { color: var(--olive); }
+  .rc-pop-actions { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .rc-pop-actions .ghost { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; }
+  .rc-pop-close { margin-left: auto; width: 40px; padding: 0; justify-content: center; font-size: 20px; }
+  @media (max-width: 760px) {
+    .rc-listen { position: static; float: right; width: 32px; height: 32px; margin: 4px 0 6px 10px; }
+    .rc-para.is-speaking::before { left: -10px; }
+  }
+  @media (max-width: 600px) {
+    .rc-entry { grid-template-columns: 34px minmax(0, 1fr); }
+    .rc-entry-actions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
+    .rc-entry-title { font-size: 27px; }
+    .rc-num { font-size: 28px; }
+    .rc-title { font-size: 40px; }
+    .rc-reader .rc-head { padding-top: 26px; }
+    .rc-p { font-size: 20.5px; line-height: 1.62; }
+    .rc-bar-title { font-size: 17px; }
+    .rc-pop { position: fixed; left: 8px; right: 8px; top: auto !important; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); width: auto; }
+  }
 
 </style>
 </head>
@@ -6079,7 +5897,7 @@
     if (isPhraseSubject()) {
       const p = n.phrase;
       return [{ key: p.key, noun: p.key, english: p.en, italian: p.it, accepted: [p.it, ...p.itAlts],
-                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, example: n.example || null, natural: n.natural || null, sentPerson: n.person || null, type: n.type || null,
+                englishAll: [...p.en.split(' / '), ...p.enAlts], reg: p.reg, note: n.note || null, example: n.example || null, exampleWord: n.exampleWord || null, natural: n.natural || null, sentPerson: n.person || null, type: n.type || null,
                 rule: n.rule || null, ownRule: n.ownRule || null, num: !!p.num, mech: !!n.mech, mechPrompt: n.mechPrompt || null, sub: n.sub || null }].flatMap(c => {
         if (!n.pl) return [c];
         const pl = { ...c, key: `${c.key}|pl`, english: n.pl.en, italian: n.pl.it, accepted: [n.pl.it, ...n.pl.itAlts], englishAll: [n.pl.en, ...n.pl.enAlts],
@@ -6352,7 +6170,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // nouns, verbs and adjectives, and the words added from the story: mostly single words
   // (Nov 2026: phrases, sentences and dialogue lines stay in their own sections, which
   // still keep their progress) — most overdue first, then the shakiest
-  const RIPASSO_SECTIONS = ['nouns', 'verbs', 'irregular', 'adjectives', 'numeri', 'avverbi', 'story'];
+  const RIPASSO_SECTIONS = ['nouns', 'verbs', 'irregular', 'adjectives', 'numeri', 'avverbi', 'racconti'];
   const sentenceTypeOff = (subj, key, on) => SUBJECTS[subj].typeFilter && !on.includes(SENTENCE_TYPE_OF[key]);
   // Ripasso as a daily dose (Nov 2026). Today's order: words you're getting wrong (the last answer wrong,
   // or back at the start of the schedule), then the most overdue, then the most common. Once a day, a
@@ -9890,169 +9708,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // Validate coverage — logs only, no UI impact. A noun CAN appear in
   // multiple themes (themes are tags, not exclusive buckets) — we only
   // flag accidental duplicates within a single theme.
-  // ===== Racconto: La casa di pietra =====
-  // A diary in Italian, in the present tense, set in Boarezzo in the Valganna. The
-  // narrator is the reader. Every word in the text is tappable: words from the deck
-  // link to their cards; words the deck doesn't have yet are taught from STORY_WORDS
-  // (and drilled as the Racconto section); small function words just show a meaning.
-  // A chapter's `glossary` maps a word or phrase as it appears in the text (lower
-  // case; words of a phrase separated by one space, an elided word keeping its
-  // apostrophe: "c' è") to a STORY_WORDS key. `senses` settles a word that could be
-  // read two ways (a plural, or a verb form that is also a noun), as "nouns:casa",
-  // "verbs:partire" or "fn:vicino". `context` adds what a word means in this chapter
-  // when its card has a wider meaning (paese: country, but here a village). The
-  // start-up check warns about any word left unexplained, and the tests fail on it.
-  const STORY_WORDS = {
-    'ottobre': { it: 'ottobre', en: 'October', note: 'From Latin <em>october</em>, from <em>octo</em> “eight”: it was the eighth month of the old Roman year, which began in March. <em>Otto</em>, eight, is in the same chapter.' },
-    'piovere': { it: 'piove', lemma: 'piovere', en: "it's raining / it rains", enAlts: ['it is raining', 'it rains', 'raining', 'rains'], note: 'From Latin <em>pluere</em> — English <em>pluvial</em>. Weather verbs have no subject in Italian: <em>piove</em> is simply “it rains”.' },
-    'buio': { it: 'buio', en: 'dark', note: 'Origin uncertain, possibly a late Latin <em>burius</em>. It means dark for lack of light (<em>fuori è buio</em>); as a noun, <em>il buio</em> is the dark.' },
-    'piano piano': { it: 'piano piano', en: 'slowly, little by little', enAlts: ['slowly', 'little by little', 'gradually'], note: '<em>Piano</em> means soft, gentle, slow — from Latin <em>planus</em> “flat, smooth”, English <em>plain</em>. Doubled, it means little by little. The pianoforte is literally the “soft-loud”.' },
-    'lontano': { it: 'lontano', en: 'distant, far away', enAlts: ['distant', 'far away', 'far', 'faraway'], note: 'From Vulgar Latin <em>longitanus</em>, from <em>longe</em> “far” — a relative of <em>lungo</em>, long.' },
-    'finalmente': { it: 'finalmente', en: 'at last, finally', enAlts: ['at last', 'finally'], note: '<em>Finale</em> + <em>-mente</em>, the Italian <em>-ly</em>. From Latin <em>finis</em> “end” — English <em>final</em>, <em>finish</em>.' },
-    'scuro': { it: 'scuro', en: 'dark (in colour)', enAlts: ['dark'], note: 'From Latin <em>obscurus</em> — English <em>obscure</em>. <em>Scuro</em> is dark in colour (<em>occhi scuri</em>); <em>buio</em> is dark for lack of light.' },
-    'in fondo': { it: 'in fondo', en: 'at the end, at the bottom', enAlts: ['at the end', 'at the bottom'], note: '<em>Il fondo</em> is the bottom or far end — Latin <em>fundus</em>, English <em>foundation</em>. <em>In fondo alla strada</em>: at the end of the road. Figuratively, <em>in fondo</em> means “deep down, after all”.' },
-    "c'è": { it: "c'è", en: 'there is', enAlts: ["there's"], note: '<em>Ci</em> “there” + <em>è</em> “is”. The plural is <em>ci sono</em>, there are.' },
-    'ci sono': { it: 'ci sono', en: 'there are', note: '<em>Ci</em> + <em>sono</em>: there are — the plural of <em>c’è</em>.' },
-    'spesso': { it: 'spesso', en: 'thick', note: 'From Latin <em>spissus</em> “thick, dense”. As an adjective it means thick (<em>muri spessi</em>); as an adverb, <em>spesso</em> means “often” — things packed close together.' },
-    'camino': { it: 'il camino', en: 'the fireplace', enAlts: ['fireplace', 'the hearth', 'hearth', 'chimney'], note: 'From Latin <em>caminus</em> “furnace, hearth”; English <em>chimney</em> comes from the same word through French. Don’t confuse it with <em>cammino</em>, a path — one <em>m</em> against two.' },
-    'perfetto': { it: 'perfetto', en: 'perfect', note: 'From Latin <em>perfectus</em>, “completely made” (<em>per</em> + <em>facere</em>) — English <em>perfect</em>.' },
-    'selvatico': { it: 'selvatico', en: 'wild', note: 'From Latin <em>silvaticus</em> “of the woods”, from <em>silva</em> “forest”. English <em>savage</em> comes from the same word through French; <em>sylvan</em> from <em>silva</em> directly.' },
-    'da qui': { it: 'da qui', en: 'from here', note: '<em>Da</em> “from” + <em>qui</em> “here”.' },
-    'orto': { it: "l'orto", en: 'the vegetable garden', enAlts: ['vegetable garden', 'the kitchen garden', 'kitchen garden', 'vegetable patch'], note: 'From Latin <em>hortus</em> “garden” — English <em>horticulture</em>. An <em>orto</em> grows vegetables; a flower garden is a <em>giardino</em>.' },
-    'diverso': { it: 'diverso', en: 'different', note: 'From Latin <em>diversus</em>, “turned different ways” — English <em>diverse</em>. <em>Diverso da</em>: different from.' },
-    'si muove': { it: 'si muove', en: 'it moves', enAlts: ['moves', 'it is moving'], note: '<em>Muovere</em> “to move” (Latin <em>movere</em>), used reflexively: the stone “moves itself”. Galileo is said to have muttered <em>eppur si muove</em> — “and yet it moves”.' },
-    'metallo': { it: 'il metallo', en: 'metal', enAlts: ['the metal'], note: 'From Latin <em>metallum</em> “mine, metal”, from Greek — English <em>metal</em>.' },
-    'riga': { it: 'la riga', en: 'the line (of writing)', enAlts: ['line', 'the line', 'row'], note: 'A line of writing, a stripe, or a ruler — from a Germanic word for “line” brought by the Lombards, the people who gave Lombardy its name.' },
-    'a lungo': { it: 'a lungo', en: 'for a long time', enAlts: ['for long', 'at length'], note: 'From <em>lungo</em>, long: <em>la guardo a lungo</em>, I look at it for a long time.' },
-    'bussare': { it: 'bussa', lemma: 'bussare', en: 'knocks', enAlts: ['he knocks', 'she knocks', 'someone knocks', 'is knocking'], note: 'Origin uncertain, probably imitating the knock itself. <em>Bussare alla porta</em>: to knock at the door.' },
-    'anziano': { it: 'anziano', en: 'elderly', enAlts: ['old', 'aged'], note: 'From Vulgar Latin <em>antianus</em>, from <em>ante</em> “before” — English <em>ancient</em> comes from the same word. <em>Anziano</em> is the polite word for people; <em>vecchio</em> can sound blunt.' },
-    'cesto': { it: 'il cesto', en: 'the basket', enAlts: ['basket'], note: 'From Latin <em>cista</em> “box, chest” — English <em>chest</em> comes from the same word.' },
-    'vicina': { it: 'la vicina', en: 'the neighbour (a woman)', enAlts: ['neighbour', 'the neighbour', 'neighbor', 'the neighbor'], note: 'From Latin <em>vicinus</em>, from <em>vicus</em> “village” — English <em>vicinity</em>. <em>Il vicino, la vicina</em>: the neighbour; <em>vicino a</em>: near.' },
-    'cioè': { it: 'cioè', en: 'I mean, that is', enAlts: ['i mean', 'that is', 'that is to say', 'i.e.'], note: '<em>Ciò è</em> — “that is” — run together: the Italian <em>i.e.</em>, used all the time to correct oneself: <em>nuova… cioè, vecchia!</em>' },
-    'si accomodi': { it: 'si accomodi', en: 'make yourself at home (formal)', enAlts: ['make yourself at home', 'make yourself comfortable', 'have a seat', 'come in'], note: 'The polite <em>Lei</em> form of <em>accomodarsi</em>, to make oneself comfortable — English <em>accommodate</em>. To a friend: <em>accomodati!</em>' },
-    'silenzio': { it: 'il silenzio', en: 'silence', enAlts: ['the silence'], note: 'From Latin <em>silentium</em> — English <em>silence</em>. <em>In silenzio</em>: in silence.' },
-    'sorridere': { it: 'sorride', lemma: 'sorridere', en: 'smiles', enAlts: ['she smiles', 'he smiles', 'is smiling'], note: '<em>Sub</em> “a little” + <em>ridere</em> “to laugh”: to smile is to laugh a little. English <em>ridiculous</em> comes from <em>ridere</em>.' },
-    'invitare': { it: 'invito', lemma: 'invitare', en: 'I invite', enAlts: ['invite', 'i ask'], note: 'From Latin <em>invitare</em> — English <em>invite</em>. <em>La invito a entrare</em>: I invite her in.' }
-  };
-
-  const STORY_CHAPTERS = [
-    {
-      id: 'c1', title: "L'arrivo", place: 'Malpensa → Boarezzo', art: 'c1',
-      paragraphs: [
-        [["È ottobre e piove.", "It's October and it's raining."],
-         ["L'aereo arriva a Malpensa alle otto di sera.", "The plane arrives at Malpensa at eight in the evening."],
-         ["Ho una valigia pesante e una chiave in tasca.", "I have a heavy suitcase and a key in my pocket."],
-         ["È la chiave di una casa di pietra.", "It's the key to a stone house."],
-         ["Non conosco ancora la casa.", "I don't know the house yet."]],
-        [["Prendo il treno per Varese e guardo fuori dal finestrino.", "I take the train to Varese and look out of the window."],
-         ["Fuori è buio, ma vedo le luci dei paesi.", "Outside it's dark, but I can see the lights of the villages."],
-         ["A Varese prendo l'autobus per la Valganna.", "In Varese I take the bus to the Valganna."],
-         ["L'autobus sale piano piano tra le montagne.", "The bus climbs slowly between the mountains."],
-         ["Scendo vicino al lago di Ganna.", "I get off near Lake Ganna."]],
-        [["L'aria è fredda e pulita.", "The air is cold and clean."],
-         ["Cammino su una strada stretta tra gli alberi.", "I walk along a narrow road between the trees."],
-         ["Ascolto: solo il vento e un cane lontano.", "I listen: only the wind and a distant dog."],
-         ["Finalmente arrivo a Boarezzo.", "At last I arrive in Boarezzo."],
-         ["Le case sono vecchie, di pietra grigia, con i tetti scuri.", "The houses are old, made of grey stone, with dark roofs."],
-         ["In fondo alla strada c'è una casa con una porta verde.", "At the end of the road there's a house with a green door."],
-         ["È lei: è la mia casa.", "That's the one: it's my house."]],
-        [["Metto la chiave nella serratura.", "I put the key in the lock."],
-         ["La chiave gira male, poi la porta si apre.", "The key turns stiffly, then the door opens."],
-         ["Dentro è freddo e buio, ma io sono felice.", "Inside it's cold and dark, but I'm happy."],
-         ["Domani comincia il lavoro.", "Tomorrow the work begins."]]
-      ],
-      senses: { case: 'nouns:casa', luci: 'nouns:luce', paesi: 'nouns:paese', montagne: 'nouns:montagna', alberi: 'nouns:albero',
-                tetti: 'nouns:tetto', vicino: 'fn:vicino', lavoro: 'nouns:lavoro', porta: 'nouns:porta', solo: 'fn:solo' },   // solo il vento: only, not alone
-      context: { paesi: 'villages — paese means a country, but also a village or small town' },
-      glossary: { ottobre: 'ottobre', piove: 'piovere', buio: 'buio', 'piano piano': 'piano piano', lontano: 'lontano',
-                  finalmente: 'finalmente', scuri: 'scuro', 'in fondo': 'in fondo', "c' è": "c'è" },
-      questions: [
-        { q: "Quando arriva l'aereo?", options: ['alle otto di sera', 'alle otto di mattina', 'a mezzogiorno'], answer: 0 },
-        { q: 'Di che colore è la porta della casa?', options: ['verde', 'grigia', 'gialla'], answer: 0 },
-        { q: 'Come si sente il narratore, dentro la casa?', options: ['felice', 'stanco', 'arrabbiato'], answer: 0 },
-        { find: 'nouns:chiave', q: 'Trova la parola che vuol dire «key».' }
-      ]
-    },
-    {
-      id: 'c2', title: 'La casa', place: 'Boarezzo', art: 'c2',
-      paragraphs: [
-        [["La mattina il sole entra dalla finestra.", "In the morning the sun comes in through the window."],
-         ["Adesso vedo bene la casa.", "Now I can see the house properly."],
-         ["È piccola ma bella, con muri spessi e un grande camino.", "It's small but beautiful, with thick walls and a big fireplace."],
-         ["In cucina c'è un tavolo vecchio e due sedie.", "In the kitchen there's an old table and two chairs."],
-         ["Al primo piano ci sono due camere.", "On the first floor there are two bedrooms."],
-         ["Una finestra è rotta e il tetto non è perfetto: quando piove, entra l'acqua.", "One window is broken and the roof isn't perfect: when it rains, water comes in."],
-         ["Mamma mia, quanto lavoro!", "My goodness, so much work!"]],
-        [["Apro la porta del giardino.", "I open the door to the garden."],
-         ["Il giardino è pieno di erba alta e di fiori selvatici.", "The garden is full of tall grass and wild flowers."],
-         ["Da qui vedo il lago e le montagne.", "From here I can see the lake and the mountains."],
-         ["Penso: magari un giorno ho un orto e un gatto.", "I think: maybe one day I'll have a vegetable garden and a cat."]],
-        [["Torno dentro.", "I go back inside."],
-         ["Vicino al camino c'è una pietra diversa dalle altre.", "Near the fireplace there's a stone that's different from the others."],
-         ["La tocco e si muove.", "I touch it and it moves."],
-         ["Dietro la pietra c'è una piccola scatola di metallo.", "Behind the stone there's a small metal box."],
-         ["Dentro c'è una lettera, gialla e molto vecchia.", "Inside there's a letter, yellow and very old."],
-         ["Leggo la prima riga: «Cara Maria, aspetto la tua risposta…»", "I read the first line: 'Dear Maria, I'm waiting for your reply…'"],
-         ["In fondo c'è un nome, Giovanni, e una data: 1923.", "At the bottom there's a name, Giovanni, and a date: 1923."]],
-        [["Chi sono Maria e Giovanni?", "Who are Maria and Giovanni?"],
-         ["Metto la lettera sul tavolo e la guardo a lungo.", "I put the letter on the table and look at it for a long time."],
-         ["Questa casa ha una storia.", "This house has a story."],
-         ["E io voglio conoscerla.", "And I want to know it."]]
-      ],
-      senses: { muri: 'nouns:muro', sedie: 'nouns:sedia', camere: 'nouns:camera', fiori: 'nouns:fiore', montagne: 'nouns:montagna',
-                vicino: 'fn:vicino', conoscerla: 'verbs:conoscere', altre: 'fn:altro', lavoro: 'nouns:lavoro', porta: 'nouns:porta',
-                cucina: 'nouns:cucina' },
-      glossary: { spessi: 'spesso', camino: 'camino', "c' è": "c'è", 'ci sono': 'ci sono', perfetto: 'perfetto', piove: 'piovere',
-                  selvatici: 'selvatico', 'da qui': 'da qui', orto: 'orto', diversa: 'diverso', 'si muove': 'si muove',
-                  metallo: 'metallo', riga: 'riga', 'in fondo': 'in fondo', 'a lungo': 'a lungo' },
-      questions: [
-        { q: "Cosa c'è in cucina?", options: ['un tavolo e due sedie', 'un letto e un armadio', 'un camino rotto'], answer: 0 },
-        { q: "Perché entra l'acqua quando piove?", options: ['il tetto non è perfetto', 'la porta è aperta', 'il giardino è pieno di erba'], answer: 0 },
-        { q: "Cosa c'è dietro la pietra?", options: ['una scatola con una lettera', 'una chiave vecchia', 'un piccolo gatto'], answer: 0 },
-        { find: 'nouns:giardino', q: 'Trova la parola che vuol dire «garden».' }
-      ]
-    },
-    {
-      id: 'c3', title: 'La vicina', place: 'Boarezzo', art: 'c3',
-      paragraphs: [
-        [["Qualcuno bussa alla porta.", "Someone knocks at the door."],
-         ["È una signora anziana con un cesto di uova.", "It's an elderly lady with a basket of eggs."],
-         ["«Buongiorno! Sono Rosa, la vicina.»", "'Good morning! I'm Rosa, the neighbour.'"],
-         ["«Buongiorno, signora. Piacere, mi chiamo…»", "'Good morning, signora. Nice to meet you, my name is…'"],
-         ["«Lo so, lo so! Tutto il paese parla della casa nuova… cioè, vecchia!»", "'I know, I know! The whole village is talking about the new house… I mean, the old one!'"],
-         ["Rosa ride.", "Rosa laughs."]],
-        [["La invito a entrare e preparo un caffè.", "I invite her in and make some coffee."],
-         ["«Grazie, molto gentile.»", "'Thank you, that's very kind.'"],
-         ["«Prego, si accomodi.»", "'Please, make yourself at home.'"],
-         ["Le mostro la lettera.", "I show her the letter."],
-         ["Rosa la legge in silenzio, poi guarda il camino.", "Rosa reads it in silence, then looks at the fireplace."],
-         ["«Maria… sì, conosco questo nome. È la sorella di mia nonna.»", "'Maria… yes, I know that name. She's my grandmother's sister.'"],
-         ["«Davvero?»", "'Really?'"],
-         ["«Davvero. Nelle storie di mia nonna, Maria abita qui, in questa casa.»", "'Really. In my grandmother's stories, Maria lives here, in this very house.'"]],
-        [["«E Giovanni?»", "'And Giovanni?'"],
-         ["Rosa sorride: «Giovanni è un ragazzo del paese.»", "Rosa smiles: 'Giovanni is a boy from the village.'"],
-         ["«Un giorno parte per l'America…»", "'One day he leaves for America…'"],
-         ["«E poi?»", "'And then?'"],
-         ["«E poi… è una storia lunga. Lei ha tempo domenica?»", "'And then… it's a long story. Do you have time on Sunday?'"],
-         ["«Sì, certo! Volentieri.»", "'Yes, of course! Gladly.'"],
-         ["«Allora a domenica. Porto una torta.»", "'Sunday it is, then. I'll bring a cake.'"]],
-        [["Rosa esce e io guardo ancora la lettera.", "Rosa leaves, and I look at the letter again."],
-         ["Maria, Giovanni, l'America…", "Maria, Giovanni, America…"],
-         ["La casa di pietra comincia a parlare.", "The stone house is beginning to speak."]]
-      ],
-      senses: { uova: 'nouns:uovo', storie: 'nouns:storia', parte: 'verbs:partire', porto: 'verbs:portare', legge: 'verbs:leggere',
-                mostro: 'verbs:mostrare', porta: 'nouns:porta' },
-      context: { paese: 'the village — paese means a country, but also a village or small town' },
-      glossary: { bussa: 'bussare', anziana: 'anziano', cesto: 'cesto', vicina: 'vicina', 'cioè': 'cioè', 'si accomodi': 'si accomodi',
-                  silenzio: 'silenzio', camino: 'camino', sorride: 'sorridere', invito: 'invitare' },
-      questions: [
-        { q: 'Chi è Rosa?', options: ['la vicina', 'la sorella di Maria', 'la nonna del narratore'], answer: 0 },
-        { q: 'Chi è Maria, per Rosa?', options: ['la sorella di sua nonna', 'sua madre', 'una vicina'], answer: 0 },
-        { q: 'Dove va Giovanni, un giorno?', options: ["in America", 'a Varese', 'a Milano'], answer: 0 },
-        { find: 'phrases:volentieri', q: 'Trova la parola che vuol dire «gladly».' }
-      ]
-    }
-  ];
+  // ===== The word engine's small words and names (Scrittura and the Racconti read text with them) =====
 
   // Small, frequent words: a meaning on tap, never drilled
   const STORY_FN = {
@@ -10097,20 +9753,6 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     "nel", "nello", "nella", "nei", "negli", "nelle", "nell'", "sul", "sullo", "sulla", "sui", "sugli", "sulle", "sull'", "in", "di", "a",
     "da", "con", "su", "per", "tra", "fra", "mio", "mia", "tuo", "tua", "suo", "sua", "questo", "questa", "quello", "quella", "quanto", "quanta", "ogni"]);
 
-  // The story's own words, drilled like phrases (any of the listed forms counts)
-  const STORY_ITEMS = Object.entries(STORY_WORDS).map(([key, w]) => {
-    const it = w.it, bare = it.replace(/^(il|lo|la|i|gli|le|un|una) |^l'/i, '');
-    const itAlts = [...new Set([bare, w.lemma].filter(x => x && x !== it))];
-    const enAlts = [...new Set([...(w.enAlts || []), w.en.replace(/^the /, '').replace(/ \(.*\)$/, '')].filter(x => x && x !== w.en))];
-    return { noun: key, display: it, it, en: w.en, note: w.note,
-             phrase: { key, it, en: w.en, itAlts, enAlts, reg: 'neutral' } };
-  });
-  const STORY_THEMES = STORY_CHAPTERS.map((ch, i) => ({
-    key: ch.id, label: `Capitolo ${i + 1}`, en: ch.title,
-    nouns: [...new Set(Object.values(ch.glossary))].filter(k => !STORY_CHAPTERS.slice(0, i).some(prev => Object.values(prev.glossary).includes(k)))
-  }));
-  const STORY_ORDER = STORY_THEMES.flatMap(t => t.nouns);
-
   // ===== Racconto: illustrations =====
   // Drawn in code so they scale to any screen and need no image files. Scattered
   // details (stones, grass, trees, lights) come from a seeded random generator, so
@@ -10123,253 +9765,6 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
-  const f1 = n => Math.round(n * 10) / 10;
-  function svgConifer(x, y, h, fill) {
-    const w = h * 0.42;
-    return `<path d="M${f1(x)} ${f1(y - h)} L${f1(x + w * 0.62)} ${f1(y - h * 0.45)} L${f1(x + w * 0.3)} ${f1(y - h * 0.45)} L${f1(x + w)} ${f1(y)} L${f1(x - w)} ${f1(y)} L${f1(x - w * 0.3)} ${f1(y - h * 0.45)} L${f1(x - w * 0.62)} ${f1(y - h * 0.45)}Z" fill="${fill}"/>`;
-  }
-  function svgStones(x, y, w, h, seed, shades) {
-    const r = storyRng(seed);
-    let out = '', yy = y;
-    while (yy < y + h - 2) {
-      const rowH = 9 + r() * 7;
-      let xx = x - r() * 14;
-      while (xx < x + w) {
-        const sw = 14 + r() * 22, x0 = Math.max(x, xx), x1 = Math.min(x + w, xx + sw);
-        if (x1 - x0 > 3) out += `<rect x="${f1(x0 + 0.8)}" y="${f1(yy + 0.8)}" width="${f1(x1 - x0 - 1.6)}" height="${f1(Math.min(rowH, y + h - yy) - 1.6)}" rx="3" fill="${shades[Math.floor(r() * shades.length)]}"/>`;
-        xx += sw;
-      }
-      yy += rowH;
-    }
-    return out;
-  }
-  function svgGrass(x0, x1, yBase, n, seed, colors, hMin, hMax) {
-    const r = storyRng(seed);
-    let out = '';
-    for (let i = 0; i < n; i++) {
-      const x = x0 + r() * (x1 - x0), h = hMin + r() * (hMax - hMin), lean = (r() - 0.5) * h * 0.5;
-      out += `<path d="M${f1(x - 2)} ${yBase} Q${f1(x + lean * 0.4)} ${f1(yBase - h * 0.6)} ${f1(x + lean)} ${f1(yBase - h)} Q${f1(x + lean * 0.3 + 1)} ${f1(yBase - h * 0.5)} ${f1(x + 2.5)} ${yBase}Z" fill="${colors[i % colors.length]}"/>`;
-    }
-    return out;
-  }
-
-  // Chapter 1 — night in the valley, in the rain
-  function artArrivo() {
-    const r = storyRng(11);
-    let lights = '';
-    for (let i = 0; i < 26; i++) {
-      const x = 40 + r() * 560, y = 158 + r() * 52;
-      lights += `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(0.8 + r() * 1.3)}" fill="#f4cf7d" opacity="${f1(0.55 + r() * 0.45)}" class="twinkle" style="animation-delay:${f1(r() * 4)}s"/>`;
-    }
-    let trees = '';
-    for (let i = 0; i < 34; i++) {
-      const x = 440 + r() * 330, y = 252 + (x - 440) * -0.15 + r() * 60;
-      trees += svgConifer(x, y, 18 + r() * 26, i % 3 ? '#0e1523' : '#131c2e');
-    }
-    let left = '';
-    for (let i = 0; i < 16; i++) left += svgConifer(10 + r() * 150, 300 + r() * 40, 20 + r() * 26, '#0d1320');
-    const house = (x, y, w, h, lit, door) => `
-      <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#4c5263"/>
-      ${svgStones(x, y, w, h, x * 7 + y, ['#555b6c', '#4a5060', '#5e6476', '#444a59'])}
-      <path d="M${x - 5} ${y + 1} L${x + w / 2} ${y - h * 0.55} L${x + w + 5} ${y + 1}Z" fill="#262b38"/>
-      <rect x="${x + w * 0.2}" y="${y + h * 0.25}" width="${w * 0.18}" height="${h * 0.24}" fill="${lit ? '#f2c66d' : '#1c2130'}"${lit ? ' class="window-lit"' : ''}/>
-      ${door ? `<path d="M${x + w * 0.58} ${y + h} V${y + h * 0.5} Q${x + w * 0.68} ${y + h * 0.4} ${x + w * 0.78} ${y + h * 0.5} V${y + h}Z" fill="#46663f"/>` : `<rect x="${x + w * 0.6}" y="${y + h * 0.25}" width="${w * 0.18}" height="${h * 0.24}" fill="${lit ? '#e8b85c' : '#1c2130'}"/>`}`;
-    return `<svg viewBox="0 0 800 360" class="story-art art-c1" role="img" aria-label="Night in the valley: rain over the lake, the lights of the villages, and a road climbing to a hamlet of stone houses">
-      <defs>
-        <linearGradient id="c1-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#101827"/><stop offset="0.55" stop-color="#22304b"/><stop offset="1" stop-color="#3a4a67"/></linearGradient>
-        <linearGradient id="c1-lake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#40557a"/><stop offset="1" stop-color="#1b2538"/></linearGradient>
-        <radialGradient id="c1-glow"><stop offset="0" stop-color="#ffd98a" stop-opacity="0.9"/><stop offset="0.35" stop-color="#f6c66e" stop-opacity="0.35"/><stop offset="1" stop-color="#f6c66e" stop-opacity="0"/></radialGradient>
-        <radialGradient id="c1-vignette" cx="0.5" cy="0.45" r="0.75"><stop offset="0.6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.45"/></radialGradient>
-        <pattern id="c1-rain" width="48" height="48" patternUnits="userSpaceOnUse">
-          <line x1="8" y1="2" x2="5" y2="17" stroke="#c4d2e8" stroke-opacity="0.38" stroke-width="1.1"/>
-          <line x1="30" y1="24" x2="27" y2="36" stroke="#c4d2e8" stroke-opacity="0.3" stroke-width="1"/>
-          <line x1="42" y1="6" x2="40" y2="14" stroke="#c4d2e8" stroke-opacity="0.22" stroke-width="0.9"/>
-        </pattern>
-      </defs>
-      <rect width="800" height="360" fill="url(#c1-sky)"/>
-      <g fill="#35435f" opacity="0.55"><ellipse cx="170" cy="62" rx="190" ry="34"/><ellipse cx="520" cy="44" rx="240" ry="30"/><ellipse cx="760" cy="80" rx="150" ry="26"/></g>
-      <path d="M0 176 L60 128 L104 150 L170 92 L238 146 L300 116 L372 160 L440 104 L506 144 L578 96 L652 140 L724 108 L800 132 V360 H0Z" fill="#2a3954"/>
-      <path d="M0 214 Q110 168 236 200 T470 192 T800 172 V360 H0Z" fill="#212f48"/>
-      ${lights}
-      <path d="M40 268 Q200 240 372 254 Q470 262 428 288 Q300 306 116 298 Q24 292 40 268Z" fill="url(#c1-lake)"/>
-      <g stroke="#f4cf7d" stroke-linecap="round" opacity="0.5"><line x1="150" y1="266" x2="168" y2="266" stroke-width="1.4"/><line x1="262" y1="272" x2="290" y2="272" stroke-width="1.2"/><line x1="200" y1="282" x2="214" y2="282" stroke-width="1"/><line x1="330" y1="262" x2="346" y2="262" stroke-width="1.2"/></g>
-      <g stroke="#9db0cc" stroke-opacity="0.35" stroke-width="1" stroke-linecap="round"><line x1="90" y1="276" x2="130" y2="276"/><line x1="230" y1="290" x2="290" y2="290"/><line x1="350" y1="276" x2="400" y2="276"/></g>
-      <path d="M408 360 Q500 236 800 206 V360Z" fill="#161f31"/>
-      ${trees}
-      <path d="M250 360 Q340 316 452 308 Q560 300 604 266 Q632 244 664 240" fill="none" stroke="#4b5974" stroke-width="7" stroke-linecap="round"/>
-      <path d="M250 360 Q340 316 452 308 Q560 300 604 266 Q632 244 664 240" fill="none" stroke="#8a9bb8" stroke-width="1.2" stroke-dasharray="2 9" opacity="0.7"/>
-      ${house(668, 208, 44, 34, true, false)}${house(716, 196, 50, 40, false, false)}${house(770, 204, 40, 36, true, false)}
-      ${house(612, 214, 46, 34, false, true)}
-      <circle cx="596" cy="250" r="46" fill="url(#c1-glow)" class="lamp-glow"/>
-      <line x1="596" y1="252" x2="596" y2="292" stroke="#0b111c" stroke-width="2.4"/><path d="M590 250 h12 l-3 -7 h-6z" fill="#0b111c"/><circle cx="596" cy="252" r="2.6" fill="#fff0c4"/>
-      <g fill="#0a0f19"><circle cx="566" cy="272" r="4.2"/><path d="M561 278 q5 -3 10 0 l2 17 h-4 l-2 -10 l-2 10 h-4z"/><rect x="573" y="285" width="10" height="9" rx="1.5"/><line x1="575" y1="285" x2="579" y2="281" stroke="#0a0f19" stroke-width="1.4"/></g>
-      ${left}
-      <rect class="rain" x="-48" y="-48" width="896" height="456" fill="url(#c1-rain)"/>
-      <rect width="800" height="360" fill="url(#c1-vignette)"/>
-    </svg>`;
-  }
-
-  // Chapter 2 — the stone house in the morning, and the letter behind the stone
-  function artCasa() {
-    const r = storyRng(23);
-    let flowers = '';
-    const fc = ['#b8432f', '#e0b13b', '#7d8fc6', '#f4efe2', '#b8432f', '#d98c3a'];
-    for (let i = 0; i < 70; i++) {
-      const x = 10 + r() * 780, y = 312 + r() * 46, s = 2 + r() * 2.6;
-      flowers += `<g class="sway" style="animation-delay:${f1(r() * 3)}s;transform-origin:${f1(x)}px ${f1(y + 12)}px"><line x1="${f1(x)}" y1="${f1(y)}" x2="${f1(x + (r() - 0.5) * 4)}" y2="${f1(y + 14)}" stroke="#5f7240" stroke-width="1"/><circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(s)}" fill="${fc[i % fc.length]}"/>${i % 4 === 0 ? `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(s * 0.38)}" fill="#3b2a1a" opacity="0.7"/>` : ''}</g>`;
-    }
-    let sparkles = '';
-    for (let i = 0; i < 9; i++) sparkles += `<line x1="${f1(60 + r() * 300)}" y1="${f1(214 + r() * 8)}" x2="${f1(60 + r() * 300 + 8)}" y2="${f1(214 + r() * 8)}" stroke="#fff" stroke-width="1.2" stroke-linecap="round" class="twinkle" style="animation-delay:${f1(r() * 3)}s"/>`;
-    const hx = 424, hy = 128, hw = 290, hh = 176;
-    return `<svg viewBox="0 0 800 360" class="story-art art-c2" role="img" aria-label="Morning: the stone house with its green door and a broken window, a garden full of wild flowers, the lake and mountains behind, and an old letter found behind a stone">
-      <defs>
-        <linearGradient id="c2-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef0e6"/><stop offset="0.7" stop-color="#f7e2b6"/><stop offset="1" stop-color="#f3cf93"/></linearGradient>
-        <radialGradient id="c2-sun"><stop offset="0" stop-color="#fff3c9"/><stop offset="0.25" stop-color="#f6cf72" stop-opacity="0.9"/><stop offset="1" stop-color="#f6cf72" stop-opacity="0"/></radialGradient>
-        <clipPath id="c2-inset"><circle cx="96" cy="270" r="64"/></clipPath>
-      </defs>
-      <rect width="800" height="360" fill="url(#c2-sky)"/>
-      <circle cx="200" cy="150" r="110" fill="url(#c2-sun)" class="sun-glow"/>
-      <circle cx="200" cy="150" r="26" fill="#f8d77e"/>
-      <path d="M0 170 L80 120 L150 150 L230 96 L310 146 L380 112 L470 156 L560 100 L650 140 L730 110 L800 128 V360 H0Z" fill="#aab6c0"/>
-      <path d="M0 196 Q90 160 190 184 T400 176 T620 170 T800 168 V360 H0Z" fill="#8d9dac"/>
-      <path d="M0 210 H420 V230 H0Z" fill="#b6c8d3"/>
-      ${sparkles}
-      <path d="M0 226 Q140 206 300 222 T620 214 T800 210 V360 H0Z" fill="#8a9c6c"/>
-      <path d="M0 262 Q160 236 330 252 T800 246 V360 H0Z" fill="#748a52"/>
-      <rect x="${hx}" y="${hy}" width="${hw}" height="${hh}" fill="#bfb5a2"/>
-      ${svgStones(hx, hy, hw, hh, 7, ['#a9a092', '#b9b09f', '#968e80', '#c4bba9', '#a39a8a'])}
-      <path d="M${hx - 16} ${hy + 2} L${hx + 70} ${hy - 62} H${hx + hw - 70} L${hx + hw + 16} ${hy + 2}Z" fill="#4c4a47"/>
-      <g stroke="#3a3836" stroke-width="1" opacity="0.6">${Array.from({ length: 7 }, (_, i) => `<line x1="${hx - 6 + i * 4}" y1="${hy - 8 - i * 8}" x2="${hx + hw + 6 - i * 4}" y2="${hy - 8 - i * 8}"/>`).join('')}</g>
-      <path d="M${hx + 168} ${hy - 30} l18 -2 l-4 12 l-16 1z" fill="#f3d9a6"/>
-      <rect x="${hx + 214}" y="${hy - 88}" width="30" height="56" fill="#9d9485"/>${svgStones(hx + 214, hy - 88, 30, 56, 3, ['#8f8679', '#a39a8b', '#857d70'])}<rect x="${hx + 210}" y="${hy - 92}" width="38" height="7" fill="#5a5753"/>
-      <path d="M${hx + 122} ${hy + hh} V${hy + 92} Q${hx + 145} ${hy + 66} ${hx + 168} ${hy + 92} V${hy + hh}Z" fill="#4b6a41"/>
-      <path d="M${hx + 122} ${hy + hh} V${hy + 92} Q${hx + 145} ${hy + 66} ${hx + 168} ${hy + 92} V${hy + hh}" fill="none" stroke="#6e5a3c" stroke-width="3"/>
-      <circle cx="${hx + 158}" cy="${hy + 132}" r="2.6" fill="#2e2a24"/>
-      <g><rect x="${hx + 34}" y="${hy + 70}" width="44" height="50" fill="#33414a"/><rect x="${hx + 14}" y="${hy + 70}" width="18" height="50" fill="#6f5a3b"/><rect x="${hx + 80}" y="${hy + 70}" width="18" height="50" fill="#6f5a3b"/><line x1="${hx + 56}" y1="${hy + 70}" x2="${hx + 56}" y2="${hy + 120}" stroke="#d9cdb4" stroke-width="2"/><line x1="${hx + 34}" y1="${hy + 95}" x2="${hx + 78}" y2="${hy + 95}" stroke="#d9cdb4" stroke-width="2"/></g>
-      <g><rect x="${hx + 208}" y="${hy + 70}" width="44" height="50" fill="#33414a"/><path d="M${hx + 214} ${hy + 76} l14 18 l-8 6 l16 14 M${hx + 232} ${hy + 74} l-6 14 l10 4" stroke="#c9d6dc" stroke-width="1.2" fill="none"/><rect x="${hx + 254}" y="${hy + 74}" width="18" height="50" fill="#6f5a3b" transform="rotate(14 ${hx + 254} ${hy + 74})"/><line x1="${hx + 208}" y1="${hy + 95}" x2="${hx + 252}" y2="${hy + 95}" stroke="#d9cdb4" stroke-width="2"/></g>
-      <g><rect x="${hx + 52}" y="${hy + 14}" width="34" height="38" fill="#33414a"/><rect x="${hx + 204}" y="${hy + 14}" width="34" height="38" fill="#33414a"/><rect x="${hx + 36}" y="${hy + 14}" width="15" height="38" fill="#6f5a3b"/><rect x="${hx + 239}" y="${hy + 14}" width="15" height="38" fill="#6f5a3b"/></g>
-      <path d="M${hx + 140} ${hy + hh} Q${hx + 120} 330 ${hx + 70} 360 H${hx + 190} Q${hx + 168} 330 ${hx + 152} ${hy + hh}Z" fill="#cdbf9f"/>
-      ${svgGrass(0, 800, 362, 260, 5, ['#6b7f44', '#7f9351', '#5c7039', '#8fa25e'], 18, 52)}
-      ${flowers}
-      <g class="inset">
-        <circle cx="96" cy="270" r="68" fill="#fbf6ea" stroke="#b08540" stroke-width="2"/>
-        <g clip-path="url(#c2-inset)">
-          <rect x="30" y="200" width="140" height="140" fill="#efe4cc"/>
-          <rect x="44" y="282" width="62" height="40" rx="4" fill="#8f949a" transform="rotate(-6 75 302)"/><rect x="44" y="282" width="62" height="10" rx="3" fill="#a9aeb3" transform="rotate(-6 75 302)"/>
-          <g transform="rotate(5 104 254)"><rect x="66" y="222" width="80" height="64" fill="#f6e7bf" stroke="#d8c18d"/>
-          <text x="74" y="240" font-family="Cormorant Garamond, Georgia, serif" font-style="italic" font-size="11" fill="#4a3b28">Cara Maria,</text>
-          <g stroke="#9b8660" stroke-width="1"><line x1="74" y1="250" x2="138" y2="250"/><line x1="74" y1="258" x2="134" y2="258"/><line x1="74" y1="266" x2="128" y2="266"/></g>
-          <text x="112" y="280" font-family="Cormorant Garamond, Georgia, serif" font-style="italic" font-size="9" fill="#6b5838">1923</text></g>
-        </g>
-      </g>
-    </svg>`;
-  }
-
-  // Chapter 3 — coffee with Rosa in the kitchen
-  function artVicina() {
-    const r = storyRng(37);
-    let motes = '';
-    for (let i = 0; i < 14; i++) motes += `<circle cx="${f1(150 + r() * 260)}" cy="${f1(80 + r() * 160)}" r="${f1(0.8 + r() * 1.2)}" fill="#fff4d6" class="mote" style="animation-delay:${f1(r() * 6)}s"/>`;
-    let eggs = '';
-    [[612, 262, '#f3e9d6'], [636, 256, '#e2c79f'], [660, 263, '#f1e4cc'], [624, 248, '#dcbf94'], [650, 246, '#f5ecdc']].forEach(([x, y, c]) => {
-      eggs += `<ellipse cx="${x}" cy="${y}" rx="11" ry="14" fill="${c}"/><ellipse cx="${x - 4}" cy="${y - 5}" rx="3" ry="4" fill="#fff" opacity="0.5"/>`;
-    });
-    const steam = [0, 1, 2].map(i => `<path class="steam" style="animation-delay:${i * 1.1}s" d="M${392 + i * 9} 196 q-8 -14 0 -26 q8 -12 0 -26" fill="none" stroke="#fffaf0" stroke-width="3" stroke-linecap="round"/>`).join('');
-    return `<svg viewBox="0 0 800 360" class="story-art art-c3" role="img" aria-label="The kitchen: a moka pot steaming on the table, two cups, a basket of eggs, the old letter, and sunlight through the window">
-      <defs>
-        <linearGradient id="c3-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eed9b4"/><stop offset="1" stop-color="#dcbf90"/></linearGradient>
-        <linearGradient id="c3-view" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe1e6"/><stop offset="1" stop-color="#eef0dc"/></linearGradient>
-        <linearGradient id="c3-moka" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6f7072"/><stop offset="0.35" stop-color="#d4d4d0"/><stop offset="0.55" stop-color="#9c9d9b"/><stop offset="1" stop-color="#5c5d5f"/></linearGradient>
-        <linearGradient id="c3-table" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a6d45"/><stop offset="1" stop-color="#7a5435"/></linearGradient>
-        <linearGradient id="c3-beam" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2c8" stop-opacity="0.55"/><stop offset="1" stop-color="#fff2c8" stop-opacity="0"/></linearGradient>
-      </defs>
-      <rect width="800" height="360" fill="url(#c3-wall)"/>
-      <rect x="120" y="36" width="190" height="150" fill="url(#c3-view)"/>
-      <path d="M120 150 Q170 118 222 138 T310 128 V186 H120Z" fill="#9aae7c"/><path d="M120 168 Q190 146 250 162 T310 156 V186 H120Z" fill="#7d955c"/>
-      <path d="M150 112 L190 78 L224 104 L256 84 L300 116 V130 H150Z" fill="#b3c0c6" opacity="0.8"/>
-      <g fill="none" stroke="#7a5a3a" stroke-width="7"><rect x="120" y="36" width="190" height="150"/><line x1="215" y1="36" x2="215" y2="186"/><line x1="120" y1="111" x2="310" y2="111"/></g>
-      <path d="M104 28 Q120 110 108 200 H136 Q128 110 140 28Z" fill="#f6eedd" opacity="0.92"/>
-      <rect x="100" y="24" width="230" height="8" rx="3" fill="#6b4c30"/>
-      <polygon points="122,186 310,186 470,360 210,360" fill="url(#c3-beam)"/>
-      ${motes}
-      <g><line x1="520" y1="40" x2="520" y2="62" stroke="#5a4632" stroke-width="2"/><circle cx="520" cy="96" r="30" fill="#b46a3c"/><circle cx="520" cy="96" r="22" fill="#c98250"/><rect x="514" y="58" width="12" height="12" rx="2" fill="#8a5230"/></g>
-      <rect x="690" y="70" width="110" height="200" fill="#a99f8e"/>${svgStones(690, 70, 110, 200, 41, ['#9c9282', '#b1a796', '#8c8374', '#a59b8a'])}
-      <rect x="712" y="150" width="88" height="120" fill="#2b241e"/><path d="M712 150 Q756 128 800 150" fill="none" stroke="#8c8374" stroke-width="6"/>
-      <g><rect x="726" y="236" width="70" height="12" rx="6" fill="#6b4a2c"/><rect x="732" y="224" width="64" height="12" rx="6" fill="#7d5733"/><path d="M748 224 q6 -18 14 -4 q4 -12 10 2" fill="#e08a3a" opacity="0.85" class="flame"/></g>
-      <path d="M0 250 H800 V360 H0Z" fill="url(#c3-table)"/>
-      <g stroke="#6a472c" stroke-width="1" opacity="0.5"><path d="M0 276 Q200 270 400 278 T800 274" fill="none"/><path d="M0 310 Q240 302 480 312 T800 306" fill="none"/><path d="M0 340 Q300 334 560 342 T800 338" fill="none"/></g>
-      <rect x="0" y="246" width="800" height="6" fill="#6e4a2e"/>
-      <ellipse cx="400" cy="300" rx="44" ry="8" fill="#5e3f26" opacity="0.5"/>
-      <path d="M372 300 L380 252 H420 L428 300Z" fill="url(#c3-moka)"/>
-      <path d="M380 252 L374 236 H426 L420 252Z" fill="url(#c3-moka)"/><rect x="372" y="228" width="56" height="9" rx="3" fill="#8b8c8a"/>
-      <path d="M384 228 L388 206 H412 L416 228Z" fill="url(#c3-moka)"/><path d="M412 210 L432 200 L428 210Z" fill="#7d7e7c"/>
-      <circle cx="400" cy="202" r="5" fill="#2a2a2a"/><path d="M372 238 q-22 4 -18 30 q2 10 18 8" fill="none" stroke="#1f1f1f" stroke-width="7" stroke-linecap="round"/>
-      ${steam}
-      <g><ellipse cx="270" cy="304" rx="36" ry="8" fill="#e9e2d4"/><path d="M248 280 h44 l-5 22 q-17 6 -34 0z" fill="#f6f1e6"/><path d="M292 284 q12 1 9 10 q-2 6 -11 5" fill="none" stroke="#f6f1e6" stroke-width="4"/><ellipse cx="270" cy="281" rx="22" ry="4" fill="#5b3a22"/></g>
-      <g><ellipse cx="520" cy="316" rx="36" ry="8" fill="#e9e2d4"/><path d="M498 292 h44 l-5 22 q-17 6 -34 0z" fill="#f6f1e6"/><path d="M498 296 q-12 1 -9 10 q2 6 11 5" fill="none" stroke="#f6f1e6" stroke-width="4"/><ellipse cx="520" cy="293" rx="22" ry="4" fill="#5b3a22"/></g>
-      <g transform="rotate(-8 150 320)"><rect x="100" y="296" width="110" height="64" fill="#f5e6bd" stroke="#d6bf8a"/><g stroke="#9b8660" stroke-width="1.2"><line x1="112" y1="312" x2="196" y2="312"/><line x1="112" y1="322" x2="190" y2="322"/><line x1="112" y1="332" x2="198" y2="332"/><line x1="112" y1="342" x2="170" y2="342"/></g><text x="168" y="354" font-family="Cormorant Garamond, Georgia, serif" font-style="italic" font-size="11" fill="#6b5838">1923</text></g>
-      <g><path d="M590 270 Q588 300 610 304 H666 Q688 300 686 270Z" fill="#b8894f"/>
-      <g stroke="#8f6634" stroke-width="1.4" opacity="0.8"><line x1="594" y1="280" x2="682" y2="280"/><line x1="596" y1="290" x2="680" y2="290"/>${Array.from({ length: 9 }, (_, i) => `<line x1="${598 + i * 10}" y1="272" x2="${598 + i * 10}" y2="302"/>`).join('')}</g>
-      ${eggs}<path d="M588 270 Q638 214 688 270" fill="none" stroke="#9c7140" stroke-width="5"/><path d="M590 272 H686" stroke="#a87b45" stroke-width="6" stroke-linecap="round"/></g>
-    </svg>`;
-  }
-
-  // The map: the journey from Malpensa up the valley, with a pin for each chapter
-  function storyMapSVG(pins) {
-    const r = storyRng(51);
-    const mtn = (x, y, s) => `<path d="M${f1(x - s)} ${f1(y)} L${f1(x)} ${f1(y - s * 1.15)} L${f1(x + s)} ${f1(y)}" fill="#efe3c8" stroke="#6b5b48" stroke-width="1.3" stroke-linejoin="round"/>${[0.25, 0.45, 0.65].map(k => `<line x1="${f1(x + s * k * 0.55)}" y1="${f1(y - s * 1.15 * (1 - k))}" x2="${f1(x + s * k * 0.55 + s * 0.28)}" y2="${f1(y - s * 1.15 * (1 - k) + s * 0.34)}" stroke="#6b5b48" stroke-width="0.9"/>`).join('')}`;
-    const tree = (x, y) => `<circle cx="${f1(x)}" cy="${f1(y)}" r="4.6" fill="#8d9c6c" stroke="#5e6b45" stroke-width="0.9"/><line x1="${f1(x)}" y1="${f1(y + 4.6)}" x2="${f1(x)}" y2="${f1(y + 8)}" stroke="#5e6b45" stroke-width="1"/>`;
-    let mountains = '', trees = '';
-    [[70, 140, 26], [118, 120, 34], [170, 146, 24], [92, 196, 22], [650, 92, 38], [706, 120, 28], [748, 96, 24], [688, 176, 22], [330, 92, 26], [384, 74, 32], [436, 98, 24]].forEach(([x, y, s]) => { mountains += mtn(x, y, s); });
-    // Three woods: the valley's west and east slopes, and the hills north-west of the lake
-    const woods = [[178, 270, 196, 330], [596, 700, 196, 330], [250, 372, 112, 150]];
-    for (let i = 0; i < 46; i++) {
-      const [x0, x1, y0, y1] = woods[i % 3];
-      trees += tree(x0 + r() * (x1 - x0), y0 + r() * (y1 - y0));
-    }
-    // Up the valley from Varese, round the south shore of the lake, up to Boarezzo
-    const route = 'M108 392 C190 400 260 388 318 362 C376 336 404 318 412 286 C420 252 410 226 424 206 C436 190 452 188 470 190 C500 192 530 186 544 168 C552 156 554 146 556 136';
-    const pinSVG = pins.map(p => `
-      <g class="map-pin is-${p.state}" data-ch="${p.id}" tabindex="0" role="button" aria-label="${storyEsc(`Capitolo ${p.n}: ${p.title}${p.state === 'read' ? ' (letto)' : ''}`)}" transform="translate(${p.x} ${p.y})">
-        <circle class="pin-pulse" r="17"/>
-        <circle class="pin-dot" r="15"/>
-        <text class="pin-num" y="5" text-anchor="middle">${p.state === 'read' ? '✓' : p.n}</text>
-        <text class="pin-label" y="${p.labelBelow ? 32 : -24}" text-anchor="middle">${storyEsc(p.title)}</text>
-      </g>`).join('');
-    return `<svg viewBox="0 0 900 440" class="story-map-svg" role="group" aria-label="Mappa del racconto: da Malpensa a Boarezzo">
-      <defs>
-        <radialGradient id="map-paper" cx="0.5" cy="0.5" r="0.7"><stop offset="0.55" stop-color="#f6ecd6"/><stop offset="1" stop-color="#e6d6b4"/></radialGradient>
-      </defs>
-      <rect x="4" y="4" width="892" height="432" rx="6" fill="url(#map-paper)" stroke="#8a7a68" stroke-width="1.5"/>
-      <rect x="12" y="12" width="876" height="416" rx="3" fill="none" stroke="#b5a184" stroke-width="0.8"/>
-      ${mountains}${trees}
-      <path d="M452 140 Q478 118 512 126 Q540 136 528 160 Q512 182 480 176 Q446 170 452 140Z" fill="#c9d8dc" stroke="#6e8a94" stroke-width="1.2"/>
-      <g stroke="#8fa8b0" stroke-width="0.8" fill="none" opacity="0.8"><path d="M470 146 q8 -3 16 0"/><path d="M482 158 q8 -3 16 0"/><path d="M496 142 q6 -2 12 0"/></g>
-      <text x="494" y="108" class="map-water" text-anchor="middle">Lago di Ganna</text>
-      <path d="${route}" fill="none" stroke="#a23e2c" stroke-width="2.4" stroke-dasharray="7 6" stroke-linecap="round" class="map-route"/>
-      <path d="M572 116 C600 96 616 80 640 66 C670 50 700 40 760 30" fill="none" stroke="#a23e2c" stroke-width="1.6" stroke-dasharray="2 7" stroke-linecap="round" opacity="0.55"/>
-      <g transform="translate(108 392)"><path d="M-16 0 L14 -4 L18 0 L14 4Z M-4 -1 L-10 -12 L-4 -12 L6 -2Z M-4 1 L-10 12 L-4 12 L6 2Z M-14 -1 L-18 -6 L-15 -6 L-10 -1Z" fill="#4a3d30"/></g>
-      <text x="108" y="420" class="map-place" text-anchor="middle">Malpensa</text>
-      <g transform="translate(318 362)"><rect x="-14" y="-8" width="9" height="10" fill="#6b5b48"/><rect x="-3" y="-20" width="7" height="22" fill="#6b5b48"/><path d="M-3 -20 L0.5 -27 L4 -20Z" fill="#6b5b48"/><rect x="6" y="-11" width="10" height="13" fill="#6b5b48"/></g>
-      <text x="318" y="386" class="map-place" text-anchor="middle">Varese</text>
-      <text x="300" y="248" class="map-region" text-anchor="middle" transform="rotate(-72 300 248)">Valganna</text>
-      <g transform="translate(440 198)"><rect x="-7" y="-6" width="6" height="7" fill="#6b5b48"/><rect x="1" y="-9" width="6" height="10" fill="#6b5b48"/></g>
-      <text x="428" y="200" class="map-place small" text-anchor="end">Ganna</text>
-      <g transform="translate(560 128)"><rect x="-4" y="-5" width="8" height="6" fill="#6b5b48"/><path d="M-5 -5 L0 -10 L5 -5Z" fill="#6b5b48"/><rect x="12" y="-3" width="9" height="7" fill="#7a6a56"/><path d="M11 -3 L16.5 -9 L22 -3Z" fill="#7a6a56"/></g>
-      <text x="588" y="108" class="map-place" text-anchor="start">Boarezzo</text>
-      <g transform="translate(772 30)"><path d="M-14 4 Q0 12 14 4 L10 10 H-10Z" fill="#4a3d30"/><line x1="0" y1="4" x2="0" y2="-14" stroke="#4a3d30" stroke-width="1.4"/><path d="M1 -13 L11 -2 H1Z" fill="#efe3c8" stroke="#4a3d30" stroke-width="1"/></g>
-      <text x="768" y="58" class="map-hint" text-anchor="middle">per l'America →</text>
-      <g transform="translate(70 66)">
-        <text class="map-title" x="0" y="0">La Valganna</text>
-        <text class="map-sub" x="2" y="22">il viaggio del racconto</text>
-      </g>
-      <g transform="translate(830 380)" class="map-compass"><circle r="22" fill="none" stroke="#8a7a68" stroke-width="1"/><path d="M0 -26 L5 0 L0 26 L-5 0Z" fill="#6b5b48"/><path d="M0 -26 L5 0 L-5 0Z" fill="#a23e2c"/><text y="-30" text-anchor="middle" class="map-n">N</text></g>
-      ${pinSVG}
-    </svg>`;
-  }
-  const STORY_ART = { c1: artArrivo, c2: artCasa, c3: artVicina };
-  // Where each chapter's pin sits on the map
-  const STORY_PINS = { c1: [414, 262, true], c2: [556, 98, false], c3: [622, 136, true] };
 
   // ===== Dialoghi: the scenes, the player, the questions and the dictation =====
   // Progress is { read: {scene: date of the first full listen}, quiz: {scene: best score} },
@@ -10647,20 +10042,9 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     startGame();
   }
 
-  // ===== Racconto: the map, the reader, the word cards and the questions =====
-  const STORY_PROGRESS_KEY = 'mazzo-story-v1';
+  // ===== The word engine: Italian text read against the decks (Scrittura and the Racconti) =====
   function storyEsc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  // Read fresh each time, so a restored backup shows straight away
-  function loadStoryProgress() {
-    try {
-      const o = JSON.parse(localStorage.getItem(STORY_PROGRESS_KEY) || '{}') || {};
-      return { read: o.read && typeof o.read === 'object' ? o.read : {}, quiz: o.quiz && typeof o.quiz === 'object' ? o.quiz : {} };
-    } catch (e) { return { read: {}, quiz: {} }; }
-  }
-  function saveStoryProgress(p) {
-    try { localStorage.setItem(STORY_PROGRESS_KEY, JSON.stringify(p)); syncTouched(); } catch (e) { /* storage full */ }
   }
 
   // ----- Words: which card (or meaning) each word of the text belongs to -----
@@ -10746,98 +10130,10 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   let storyItemMaps = null;
   function storyItem(subj, key) {
     if (!storyItemMaps) {
-      const src = { nouns: NOUN_ITEMS, verbs: VERB_ITEMS, irregular: IRREG_ITEMS, adjectives: ADJ_ITEMS, phrases: PHRASE_ITEMS, story: STORY_ITEMS };
+      const src = { nouns: NOUN_ITEMS, verbs: VERB_ITEMS, irregular: IRREG_ITEMS, adjectives: ADJ_ITEMS, phrases: PHRASE_ITEMS };
       storyItemMaps = Object.fromEntries(Object.entries(src).map(([s, items]) => [s, new Map(items.map(n => [n.noun, n]))]));
     }
     return storyItemMaps[subj] ? storyItemMaps[subj].get(key) || null : null;
-  }
-  // The chapter's learnable words: every deck item and story word, in order of appearance
-  function storyChapterRefs(ch) {
-    const refs = new Map();
-    for (const para of ch.paragraphs) for (const [it] of para) for (const sg of storySegments(ch, it)) {
-      if (!sg.ref) continue;
-      const [kind] = splitRef(sg.ref);
-      if (kind !== 'fn' && kind !== 'name' && !refs.has(sg.ref)) refs.set(sg.ref, sg.text);
-    }
-    return refs;
-  }
-  // Known: box 2 or more in either direction; learning: on the schedule or practised
-  function storyStatusReader() {
-    const cache = new Map();
-    const get = (k, f) => { if (!cache.has(k)) cache.set(k, f()); return cache.get(k); };
-    return (subj, key) => {
-      let box = -1;
-      for (const dir of ['en-it', 'it-en']) {
-        const r = get(`srs|${subj}|${dir}`, () => seedSrs(subj, dir))[key];
-        if (r) box = Math.max(box, r.b);
-      }
-      if (box >= 2) return 'known';
-      if (box >= 0) return 'learning';
-      for (const dir of ['en-it', 'it-en']) {
-        const s = get(`st|${subj}|${dir}`, () => readStats(subj, dir))[key];
-        if (s && s.seen) return 'learning';
-      }
-      return 'new';
-    };
-  }
-  function storyReadiness(ch, statusOf) {
-    const refs = [...storyChapterRefs(ch).keys()];
-    const known = refs.filter(ref => statusOf(...splitRef(ref)) === 'known').length;
-    return { known, total: refs.length, pct: refs.length ? Math.round(known / refs.length * 100) : 0 };
-  }
-  function storyReadyHTML(rd) {
-    const level = rd.pct >= 85 ? 'ready' : rd.pct >= 60 ? 'close' : 'stretch';
-    const hint = { ready: 'Pronto da leggere', close: 'Quasi pronto', stretch: 'Una bella sfida' }[level];
-    return `<div class="story-ready ${level}">
-      <div class="story-ready-bar" aria-hidden="true"><span style="width:${rd.pct}%"></span></div>
-      <div class="story-ready-text">Conosci <strong>${rd.known}</strong> parole su ${rd.total} · ${rd.pct}% <span class="story-ready-hint">${hint}</span></div>
-    </div>`;
-  }
-
-  // ----- The map and the chapters -----
-  let storyResume = null;   // a chapter to reopen after practising its words
-  function renderStoryHome() {
-    if (storyResume) { const id = storyResume; storyResume = null; openStoryChapter(id); return; }
-    const prog = loadStoryProgress(), statusOf = storyStatusReader();
-    const firstUnread = STORY_CHAPTERS.findIndex(ch => !prog.read[ch.id]);
-    const pins = STORY_CHAPTERS.map((ch, i) => {
-      const [x, y, below] = STORY_PINS[ch.id];
-      return { id: ch.id, n: i + 1, title: ch.title, x, y, labelBelow: below,
-               state: prog.read[ch.id] ? 'read' : i === firstUnread ? 'next' : 'unread' };
-    });
-    const cards = STORY_CHAPTERS.map((ch, i) => {
-      const read = prog.read[ch.id], quiz = prog.quiz[ch.id];
-      return `
-        <article class="story-card${read ? ' is-read' : ''}${i === firstUnread ? ' is-next' : ''}" data-ch="${ch.id}">
-          <button type="button" class="story-card-art" data-open="${ch.id}" aria-label="Leggi il capitolo ${i + 1}, ${storyEsc(ch.title)}">${STORY_ART[ch.art]()}</button>
-          ${read ? `<div class="story-stamp is-small" aria-label="Letto"><span>Letto</span><small>${storyEsc(storyDateLabel(read))}</small></div>` : ''}
-          <div class="story-card-body">
-            <div class="story-card-eyebrow">Capitolo ${i + 1} · ${storyEsc(ch.place)}</div>
-            <h3 class="story-card-title">${storyEsc(ch.title)}</h3>
-            ${storyReadyHTML(storyReadiness(ch, statusOf))}
-            <div class="story-card-foot">
-              <button type="button" class="story-read-btn" data-open="${ch.id}">${read ? 'Rileggi' : 'Leggi'} →</button>
-              ${quiz ? `<span class="story-card-score">Domande: ${quiz.score}/${quiz.total}</span>` : ''}
-            </div>
-          </div>
-        </article>`;
-    }).join('');
-    gameArea.innerHTML = `
-      <div class="story-home">
-        <div class="story-hero">
-          <div class="setup-eyebrow">Racconto a puntate · Boarezzo, Valganna</div>
-          <h2 class="story-title">La casa di pietra</h2>
-          <p class="story-sub">A diary in Italian, in the present tense, built from the words you're learning. Tap any word for its meaning and its card. The underlines show what you know, what you're learning and what's new, and each chapter's meter shows how much of it you can already read.</p>
-        </div>
-        <div class="story-map" id="story-map">${storyMapSVG(pins)}</div>
-        <div class="story-cards">${cards}</div>
-        <p class="story-coming"><em>Il racconto continua…</em> More chapters are on the way.</p>
-      </div>`;
-    gameArea.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openStoryChapter(b.dataset.open)));
-    gameArea.querySelectorAll('.map-pin').forEach(p => {
-      p.addEventListener('click', () => openStoryChapter(p.dataset.ch));
-      p.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openStoryChapter(p.dataset.ch); } });
-    });
   }
   const STORY_MONTHS = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
   function storyDateLabel(iso) {
@@ -10849,432 +10145,435 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
-  // ----- The reader -----
-  let storyState = null;
-  function openStoryChapter(id) {
-    const i = STORY_CHAPTERS.findIndex(c => c.id === id);
-    if (i < 0) return;
-    const ch = STORY_CHAPTERS[i];
-    storyStopSpeaking();
-    container.dataset.view = 'story'; syncPinnedChart();
-    storyState = { ch, i, answers: ch.questions.map(() => null), find: null, findTries: 0, added: new Set(),
-                   sentences: ch.paragraphs.flat() };
-    renderStoryReader();
-    try { window.scrollTo(0, 0); } catch (e) { /* jsdom */ }
-  }
-  const STORY_STATUS_LABEL = { known: 'You know this word', learning: "You're learning this", new: 'New to you' };
-  function storyTokenHTML(sg, statusOf) {
-    if (!sg.ref) return sg.num ? `<span class="w-num">${storyEsc(sg.text)}</span>` : storyEsc(sg.text);
-    const [kind, key] = splitRef(sg.ref);
-    let cls = 'w';
-    if (kind === 'fn') cls += ' w-fn';
-    else if (kind === 'name') cls += ' w-name';
-    else cls += ` w-${statusOf(kind, key)}${kind === 'story' ? ' w-story' : ''}`;
-    return `<span class="${cls}" role="button" tabindex="0" data-ref="${storyEsc(sg.ref)}"${sg.persons ? ` data-p="${sg.persons.join(',')}"` : ''}>${storyEsc(sg.text)}</span>`;
-  }
-  function storyQuestionHTML(q, qi) {
-    const a = storyState.answers[qi];
-    if (q.find) {
-      return `<div class="quiz-q${a === null ? '' : a ? ' is-right' : ' is-wrong'}" data-q="${qi}">
-        <div class="quiz-num">${qi + 1}</div>
-        <div class="quiz-main">
-          <p class="quiz-text">${storyEsc(q.q)} <span class="quiz-kind">Trova la parola</span></p>
-          ${a === null ? `<button type="button" class="quiz-find-btn" data-q="${qi}">Tocca la parola nel testo ↑</button>`
-            : `<p class="quiz-fb">${a ? 'Esatto!' : 'Eccola — evidenziata nel testo.'}</p>`}
-        </div></div>`;
-    }
-    const r = storyRng(qi * 977 + storyState.i * 131 + 7);
-    const order = q.options.map((_, k) => k).sort(() => r() - 0.5);
-    return `<div class="quiz-q${a === null ? '' : a ? ' is-right' : ' is-wrong'}" data-q="${qi}">
-      <div class="quiz-num">${qi + 1}</div>
-      <div class="quiz-main">
-        <p class="quiz-text">${storyEsc(q.q)}</p>
-        <div class="quiz-opts">${order.map(k => `<button type="button" class="quiz-opt" data-q="${qi}" data-k="${k}"${a !== null ? ' disabled' : ''}>${storyEsc(q.options[k])}</button>`).join('')}</div>
-        <p class="quiz-fb" hidden></p>
-      </div></div>`;
-  }
-  function renderStoryReader() {
-    const { ch, i } = storyState;
-    const statusOf = storyStatusReader();
-    let s = 0;
-    const paras = ch.paragraphs.map(para => `<div class="rd-para">${para.map(([it, en]) => {
-      const html = storySegments(ch, it).map(sg => storyTokenHTML(sg, statusOf)).join('');
-      const row = `<div class="rd-sent" data-i="${s}">
-          <button type="button" class="rd-play" data-i="${s}" aria-label="Ascolta la frase" title="Ascolta la frase">▶</button>
-          <div class="rd-body"><p class="rd-it${s === 0 ? ' rd-first' : ''}">${html}</p><p class="rd-en" hidden>${storyEsc(en)}</p></div>
-          <button type="button" class="rd-en-btn" data-i="${s}" aria-label="Show the English" title="Show the English">EN</button>
-        </div>`;
-      s++;
-      return row;
-    }).join('')}</div>`).join('');
-    const next = STORY_CHAPTERS[i + 1];
-    gameArea.innerHTML = `
-      <div class="reader">
-        <div class="reader-nav">
-          <button type="button" class="reader-back" id="reader-back">← La mappa</button>
-          <span class="reader-count">Capitolo ${i + 1} di ${STORY_CHAPTERS.length}</span>
-        </div>
-        <figure class="reader-art">${STORY_ART[ch.art]()}</figure>
-        <div class="reader-head">
-          <div class="setup-eyebrow">Capitolo ${i + 1} · ${storyEsc(ch.place)}</div>
-          <h2 class="reader-title">${storyEsc(ch.title)}</h2>
-          <div id="reader-ready">${storyReadyHTML(storyReadiness(ch, statusOf))}</div>
-          <div class="reader-tools">
-            ${chosenVoice() ? '<button type="button" class="reader-tool" id="rd-listen" aria-pressed="false">▶ Ascolta il capitolo</button>'
-              : '<span class="reader-tool-hint">🔊 Add an Italian voice in the voice settings to hear the story read aloud.</span>'}
-            <button type="button" class="reader-tool" id="rd-en-all" aria-pressed="false">EN · Traduzione</button>
-          </div>
-          <div class="reader-legend" aria-hidden="true">
-            <span class="lg lg-known">conosci</span><span class="lg lg-learning">stai imparando</span><span class="lg lg-new">nuova</span><span class="lg lg-story">dal racconto</span>
-          </div>
-        </div>
-        <div class="find-banner" id="find-banner" hidden></div>
-        <div class="reader-text" id="reader-text">${paras}</div>
-        <section class="reader-words" id="reader-words"></section>
-        <section class="reader-quiz" id="reader-quiz">
-          <h3 class="rd-section-title">Domande <span>Questions about the chapter</span></h3>
-          <div id="quiz-list">${ch.questions.map(storyQuestionHTML).join('')}</div>
-        </section>
-        <section class="reader-end" id="reader-end"></section>
-        <div class="reader-foot">
-          <button type="button" class="reader-back" id="reader-back-2">← La mappa</button>
-          ${next ? `<button type="button" class="reader-next" id="reader-next">Capitolo ${i + 2}: ${storyEsc(next.title)} →</button>` : ''}
-        </div>
-      </div>`;
-    renderStoryWords();
-    renderStoryEnd();
-    wireStoryReader();
-  }
-  // The chapter's words still to learn, with a one-tap route into the review
-  function renderStoryWords() {
-    const { ch } = storyState;
-    const el = document.getElementById('reader-words');
-    if (!el) return;
-    const statusOf = storyStatusReader();
-    const refs = storyChapterRefs(ch);
-    const todo = [...refs].filter(([ref]) => statusOf(...splitRef(ref)) !== 'known');
-    const fresh = todo.filter(([ref]) => !storyState.added.has(ref));
-    el.innerHTML = `
-      <h3 class="rd-section-title">Le parole del capitolo <span>${refs.size} words · ${refs.size - todo.length} you know</span></h3>
-      ${todo.length ? `<div class="rw-chips">${todo.map(([ref, surface]) => {
-        const info = storyWordInfo(ref, surface);
-        return `<button type="button" class="rw-chip${storyState.added.has(ref) ? ' is-added' : ''}" data-ref="${storyEsc(ref)}" data-s="${storyEsc(surface)}"><span class="rw-it">${storyEsc(info.dict || surface)}</span><span class="rw-en">${storyEsc(info.meaning)}</span></button>`;
-      }).join('')}</div>` : '<p class="rw-empty">You know every word in this chapter. Bravo!</p>'}
-      <div class="rw-actions">
-        <button type="button" class="rw-practise" id="rw-practise">▶ Esercitati con le parole del capitolo <span>${refs.size} cards, mixed</span></button>
-        ${todo.length ? `<button type="button" class="rw-add-all" id="rw-add-all"${fresh.length ? '' : ' disabled'}>${fresh.length ? `+ Aggiungi ${fresh.length === todo.length ? 'tutte' : `le altre ${fresh.length}`} a Ripasso` : '✓ Tutte in Ripasso oggi'}</button>` : ''}
-      </div>`;
-    el.querySelectorAll('.rw-chip').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); storyShowWord(b); }));
-    document.getElementById('rw-practise').addEventListener('click', () => startChapterPractice(ch));
-    const all = document.getElementById('rw-add-all');
-    if (all) all.addEventListener('click', () => {
-      for (const [ref] of fresh) { storySchedule(...splitRef(ref)); storyState.added.add(ref); }
-      renderStoryWords();
-    });
-  }
-  function storyQuizDone() { return storyState.answers.every(a => a !== null); }
-  function renderStoryEnd() {
-    const el = document.getElementById('reader-end');
-    if (!el) return;
-    const { ch, i } = storyState;
-    const prog = loadStoryProgress();
-    if (!storyQuizDone()) {
-      el.innerHTML = prog.read[ch.id] ? `<p class="end-note">You've read this chapter — the stamp is on the map.</p>` : '';
-      return;
-    }
-    const score = storyState.answers.filter(Boolean).length, total = storyState.answers.length;
-    const wasRead = !!prog.read[ch.id];
-    if (!wasRead) prog.read[ch.id] = storyTodayISO();
-    const best = prog.quiz[ch.id];
-    if (!best || score >= best.score) prog.quiz[ch.id] = { score, total };
-    saveStoryProgress(prog);
-    const next = STORY_CHAPTERS[i + 1];
-    el.innerHTML = `
-      <div class="end-card">
-        <div class="story-stamp${wasRead ? '' : ' is-landing'}"><span>Letto</span><small>${storyEsc(storyDateLabel(prog.read[ch.id]))}</small></div>
-        <div class="end-text">
-          <h3>Capitolo ${i + 1} completato</h3>
-          <p>${score} of ${total} questions right${score === total ? ' — perfetto!' : '.'} ${next ? `Next: <em>${storyEsc(next.title)}</em>.` : 'More chapters soon.'}</p>
-        </div>
-      </div>`;
-  }
-
-  // ----- Word cards -----
-  const STORY_PERSON = { io: 'io', tu: 'tu', lui: 'lui / lei', noi: 'noi', voi: 'voi', loro: 'loro' };
-  const STORY_SECTION = { nouns: 'Sostantivi', verbs: 'Verbi regolari', irregular: 'Verbi irregolari', adjectives: 'Aggettivi', phrases: 'Frasi', story: 'Dal racconto' };
-  function storyWordInfo(ref, surface, persons) {
-    const [kind, key] = splitRef(ref);
-    const ctx = storyState && storyState.ch.context;
-    const here = ctx && own(ctx, String(surface).toLowerCase()) ? ctx[String(surface).toLowerCase()] : null;
-    const info = storyWordInfoBase(kind, key, surface, persons);
-    return here ? { ...info, here } : info;
-  }
-  function storyWordInfoBase(kind, key, surface, persons) {
-    if (kind === 'fn') return { head: surface, meaning: STORY_FN[key], badge: 'Small word', drill: false };
-    if (kind === 'name') return { head: surface, meaning: STORY_NAMES[key], badge: 'Name', drill: false };
-    if (kind === 'story') {
-      const w = STORY_WORDS[key];
-      const dict = w.lemma || w.it;
-      return { head: surface, dict, lemma: dict.toLowerCase() !== surface.toLowerCase() ? dict : null, meaning: w.en, note: w.note,
-               badge: STORY_SECTION.story, subj: 'story', key, drill: true };
-    }
-    const n = storyItem(kind, key);
-    if (!n) return { head: surface, meaning: '', badge: '', drill: false };
-    const base = { head: surface, meaning: n.en, note: n.note || null, badge: STORY_SECTION[kind], subj: kind, key, drill: true };
-    if (kind === 'verbs' || kind === 'irregular') {
-      const who = persons ? persons.map(p => STORY_PERSON[p]).join(' · ') : null;
-      return { ...base, dict: n.it, lemma: n.it.toLowerCase() !== surface.toLowerCase() ? n.it : null, person: who };
-    }
-    if (kind === 'phrases') return { ...base, dict: n.it, lemma: null };
-    const dict = n.it || key;
-    return { ...base, dict, lemma: dict.toLowerCase() !== surface.toLowerCase() ? dict : null };
-  }
-  function storySchedule(subj, key) {
-    const srs = loadSrs(subj, ripassoDir), t = today();
-    if (!srs[key]) srs[key] = { b: 0, d: t, l: null };
-    else if (srs[key].d > t) srs[key].d = t;
-    saveSrs(subj, ripassoDir, srs);
-  }
-  let storyPopFor = null;
-  function storyShowWord(el) {
-    let pop = document.getElementById('word-pop');
-    if (!pop) {
-      pop = document.createElement('div');
-      pop.id = 'word-pop';
-      pop.className = 'word-pop';
-      pop.setAttribute('role', 'dialog');
-      pop.hidden = true;
-      document.body.appendChild(pop);
-    }
-    if (storyPopFor === el && !pop.hidden) { storyHideWord(); return; }
-    const ref = el.dataset.ref, surface = el.dataset.s || el.textContent;
-    const info = storyWordInfo(ref, surface, el.dataset.p ? el.dataset.p.split(',') : null);
-    const statusOf = storyStatusReader();
-    const status = info.drill ? statusOf(info.subj, info.key) : null;
-    const added = storyState.added.has(ref);
-    pop.innerHTML = `
-      <button type="button" class="word-pop-close" aria-label="Close">×</button>
-      <div class="word-pop-head">
-        <span class="word-pop-word">${storyEsc(info.head)}</span>
-        ${chosenVoice() ? '<button type="button" class="word-pop-say" aria-label="Hear it" title="Hear it">🔊</button>' : ''}
-      </div>
-      ${info.lemma || info.person ? `<div class="word-pop-lemma">${info.lemma ? `→ <em>${storyEsc(info.lemma)}</em>` : ''}${info.person ? `<span class="word-pop-person">${storyEsc(info.person)}</span>` : ''}</div>` : ''}
-      <div class="word-pop-meaning">${storyEsc(info.meaning)}</div>
-      ${info.here ? `<div class="word-pop-here"><span>In questa frase</span>${storyEsc(info.here)}</div>` : ''}
-      <div class="word-pop-meta">
-        ${info.badge ? `<span class="word-pop-badge">${storyEsc(info.badge)}</span>` : ''}
-        ${status ? `<span class="word-pop-status s-${status}">${STORY_STATUS_LABEL[status]}</span>` : ''}
-      </div>
-      ${info.note ? `<div class="word-pop-note">${info.note}</div>` : ''}
-      ${info.drill ? `<button type="button" class="word-pop-add${added ? ' is-added' : ''}"${added ? ' disabled' : ''}>${added ? "✓ In today's Ripasso" : '+ Ripasso'}</button>` : ''}`;
-    pop.hidden = false;
-    storyPopFor = el;
-    document.querySelectorAll('.w.is-open, .rw-chip.is-open').forEach(x => x.classList.remove('is-open'));
-    el.classList.add('is-open');
-    pop.querySelector('.word-pop-close').addEventListener('click', storyHideWord);
-    const say = pop.querySelector('.word-pop-say');
-    if (say) say.addEventListener('click', () => { storyStopSpeaking(); speak(surface); });
-    const add = pop.querySelector('.word-pop-add');
-    if (add && !added) add.addEventListener('click', () => {
-      storySchedule(info.subj, info.key);
-      storyState.added.add(ref);
-      add.textContent = "✓ In today's Ripasso";
-      add.classList.add('is-added');
-      add.disabled = true;
-      renderStoryWords();
-    });
-    // Next to the word on wide screens; a sheet at the bottom on phones (CSS)
-    if (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) { pop.style.left = pop.style.top = ''; return; }
-    const r = el.getBoundingClientRect(), pw = Math.min(340, window.innerWidth - 24);
-    const left = Math.max(12, Math.min(r.left + window.scrollX + r.width / 2 - pw / 2, window.scrollX + window.innerWidth - pw - 12));
-    pop.style.width = `${pw}px`;
-    pop.style.left = `${left}px`;
-    const below = r.bottom + window.scrollY + 10, h = pop.offsetHeight || 220;
-    pop.style.top = `${(r.bottom + h + 16 > window.innerHeight && r.top > h + 16) ? r.top + window.scrollY - h - 10 : below}px`;
-  }
-  function storyHideWord() {
-    const pop = document.getElementById('word-pop');
-    if (pop) pop.hidden = true;
-    if (storyPopFor) storyPopFor.classList.remove('is-open');
-    storyPopFor = null;
-  }
-
-  // ----- Reading aloud -----
-  let storySpeech = null;
-  function storyStopSpeaking() {
-    if (storySpeech) {
-      storySpeech.cancelled = true;
-      storySpeech = null;
-      try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
-    }
-    document.querySelectorAll('.rd-sent.is-speaking').forEach(e => e.classList.remove('is-speaking'));
-    const b = document.getElementById('rd-listen');
-    if (b) { b.textContent = '▶ Ascolta il capitolo'; b.setAttribute('aria-pressed', 'false'); b.classList.remove('active'); }
-  }
-  // Queue the sentences together (so it also works where speech must start from a
-  // tap), highlighting each one as it is read
-  function storySpeak(from, to) {
-    const v = chosenVoice();
-    if (!v || !storyState) return;
-    storyStopSpeaking();
-    const run = { cancelled: false, chapter: to - from > 1 };
-    storySpeech = run;
-    const rows = document.querySelectorAll('.rd-sent');
-    try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
-    for (let k = from; k < to; k++) {
-      const u = new window.SpeechSynthesisUtterance(storyState.sentences[k][0].replace(/[«»]/g, '').replace(/…/g, '.'));
-      u.voice = v;
-      u.lang = v.lang;
-      u.rate = audioPrefs.rate;
-      u.onstart = () => {
-        if (run.cancelled) return;
-        rows.forEach(r => r.classList.toggle('is-speaking', +r.dataset.i === k));
-        const row = rows[k];
-        if (row && to - from > 1 && row.scrollIntoView) {
-          const rr = row.getBoundingClientRect();
-          if (rr.top < 80 || rr.bottom > window.innerHeight - 40) row.scrollIntoView({ block: 'center', behavior: 'smooth' });
-        }
-      };
-      u.onend = () => {
-        if (run.cancelled) return;
-        if (rows[k]) rows[k].classList.remove('is-speaking');
-        if (k === to - 1) storyStopSpeaking();
-      };
-      window.speechSynthesis.speak(u);
-    }
-    if (to - from > 1) {
-      const b = document.getElementById('rd-listen');
-      if (b) { b.textContent = '■ Ferma'; b.setAttribute('aria-pressed', 'true'); b.classList.add('active'); }
-    }
-  }
-
-  // ----- Questions -----
-  function storyAnswer(qi, k) {
-    if (storyState.answers[qi] !== null) return;
-    const q = storyState.ch.questions[qi], right = k === q.answer;
-    storyState.answers[qi] = right;
-    const box = document.querySelector(`.quiz-q[data-q="${qi}"]`);
-    box.classList.add(right ? 'is-right' : 'is-wrong');
-    box.querySelectorAll('.quiz-opt').forEach(b => {
-      b.disabled = true;
-      if (+b.dataset.k === q.answer) b.classList.add('is-correct');
-      else if (+b.dataset.k === k) b.classList.add('is-chosen');
-    });
-    const fb = box.querySelector('.quiz-fb');
-    fb.hidden = false;
-    fb.textContent = right ? 'Esatto!' : `No — ${q.options[q.answer]}.`;
-    renderStoryEnd();
-  }
-  function storyStartFind(qi) {
-    storyState.find = qi;
-    storyState.findTries = 0;
-    storyHideWord();
-    document.getElementById('reader-text').classList.add('is-finding');
-    const banner = document.getElementById('find-banner');
-    banner.hidden = false;
-    banner.innerHTML = `<span class="find-q">${storyEsc(storyState.ch.questions[qi].q)}</span>
-      <span class="find-actions"><button type="button" class="find-show" id="find-show">Mostrami</button><button type="button" class="find-cancel" id="find-cancel">Annulla</button></span>`;
-    document.getElementById('find-cancel').addEventListener('click', storyEndFind);
-    document.getElementById('find-show').addEventListener('click', () => storyFinishFind(false));
-    const text = document.getElementById('reader-text');
-    if (text.scrollIntoView) banner.scrollIntoView({ block: 'start', behavior: 'smooth' });
-  }
-  function storyEndFind() {
-    storyState.find = null;
-    const text = document.getElementById('reader-text');
-    if (text) text.classList.remove('is-finding');
-    const banner = document.getElementById('find-banner');
-    if (banner) { banner.hidden = true; banner.innerHTML = ''; }
-  }
-  function storyFinishFind(right) {
-    const qi = storyState.find;
-    const target = storyState.ch.questions[qi].find;
-    document.querySelectorAll('#reader-text .w').forEach(w => { if (w.dataset.ref === target) w.classList.add('is-found'); });
-    storyState.answers[qi] = right;
-    storyEndFind();
-    const box = document.querySelector(`.quiz-q[data-q="${qi}"]`);
-    box.outerHTML = storyQuestionHTML(storyState.ch.questions[qi], qi);
-    renderStoryEnd();
-    const fresh = document.querySelector(`.quiz-q[data-q="${qi}"]`);
-    if (fresh && fresh.scrollIntoView) setTimeout(() => fresh.scrollIntoView({ block: 'center', behavior: 'smooth' }), 700);
-  }
-  function storyTapWord(el) {
-    if (storyState.find === null) { storyShowWord(el); return; }
-    const target = storyState.ch.questions[storyState.find].find;
-    if (el.dataset.ref === target) { storyFinishFind(storyState.findTries === 0); return; }
-    storyState.findTries++;
-    el.classList.remove('is-miss');
-    void el.offsetWidth;
-    el.classList.add('is-miss');
-  }
-
-  function wireStoryReader() {
-    const back = () => { storyStopSpeaking(); storyHideWord(); showSetup(); };
-    document.getElementById('reader-back').addEventListener('click', back);
-    document.getElementById('reader-back-2').addEventListener('click', back);
-    const next = document.getElementById('reader-next');
-    if (next) next.addEventListener('click', () => openStoryChapter(STORY_CHAPTERS[storyState.i + 1].id));
-    const text = document.getElementById('reader-text');
-    text.addEventListener('click', e => {
-      const w = e.target.closest('.w');
-      if (w) { e.stopPropagation(); storyTapWord(w); return; }
-      const play = e.target.closest('.rd-play');
-      if (play) { storyHideWord(); storySpeak(+play.dataset.i, +play.dataset.i + 1); return; }
-      const en = e.target.closest('.rd-en-btn');
-      if (en) {
-        const p = en.closest('.rd-sent').querySelector('.rd-en');
-        p.hidden = !p.hidden;
-        en.classList.toggle('active', !p.hidden);
+  // ===== Racconti (Nov 2026): short stories to read. Tap a word you don't know: it's marked at once (saved there and
+  // then), its meaning shows, and it becomes a card in the section's deck; as you learn the card, the mark fades away.
+  // A story's words are read by the word engine above (storySegments): the decks' nouns, verbs, adjectives and phrases,
+  // the small words (STORY_FN) and names — plus the story's own `senses` (a form read one way here: sei is six) and
+  // `glossary` (forms and expressions no deck has → RACCONTI_WORDS). '---' in `paragraphs` is a section break.
+  const RACCONTI = [
+    {
+      id: 'fontanella', n: 'I', title: 'Il treno per Fontanella', level: 'A1', minutes: 10,
+      blurb: 'Paolo, an engineer in grey Milan, takes the train to the mountains one Saturday — and meets Rosa.',
+      paragraphs: [
+        "Mi chiamo Paolo. Ho trentadue anni e abito a Milano, in un appartamento piccolo vicino alla stazione. Sono ingegnere. Lavoro in un ufficio grande e grigio, con molte persone e molti computer. Lavoro dal lunedì al venerdì, dalle nove alle sei.",
+        "Ogni mattina prendo il treno delle otto. Il treno è sempre pieno. Le persone leggono il giornale, guardano il telefono o dormono. Io bevo un caffè e guardo fuori dalla finestra. Fuori ci sono case, strade, macchine. Tutto è grigio, come il mio ufficio.",
+        "Ma oggi è sabato. Oggi non lavoro.",
+        "Sono le sette di mattina e sono già sveglio. Apro la finestra. Il cielo è blu e c'è il sole. Fa caldo. Penso: «Oggi non resto a casa. Oggi vado in montagna.»",
+        "Faccio colazione in cucina: un caffè, un cornetto e un bicchiere di succo d'arancia. Poi preparo lo zaino. Nello zaino metto una bottiglia d'acqua, un panino con il formaggio, due mele e un libro. Metto anche una giacca, perché in montagna la sera fa freddo.",
+        "Vado alla stazione a piedi. È vicina: dieci minuti. Alla biglietteria c'è un uomo con gli occhiali.",
+        "«Buongiorno. Un biglietto per Varese, per favore.»",
+        "«Solo andata o andata e ritorno?»",
+        "«Andata e ritorno.»",
+        "«Sono undici euro.»",
+        "Pago e vado al binario quattro. Il treno parte alle otto e mezza. Oggi non è pieno. Mi siedo vicino alla finestra.",
+        "Di fronte a me c'è una signora anziana. Ha i capelli bianchi, un vestito verde e un cestino grande sulle gambe. Nel cestino ci sono pane, formaggio e una bottiglia di vino. La signora mi guarda e sorride.",
+        "«Buongiorno, giovanotto. Lei va a Varese?»",
+        "«Sì, signora. Ma non conosco la città. Voglio camminare in montagna.»",
+        "«In montagna? Che bello! Io abito in un piccolo paese vicino a Varese. Si chiama Fontanella.»",
+        "«Fontanella? Non lo conosco.»",
+        "«Nessuno lo conosce!» ride la signora. «È molto piccolo. Ci sono solo trenta persone, una chiesa, una fontana e molti gatti.»",
+        "La signora si chiama Rosa. Ha ottantadue anni. Ogni venerdì va a Milano da sua sorella, dorme da lei e il sabato mattina torna a casa. Rosa parla molto, ma io ascolto volentieri. Parla del paese, del suo giardino e del suo cane, Bruno.",
+        "«Paolo,» dice Rosa, «perché non viene a Fontanella? Intorno al paese ci sono molti sentieri nel bosco. E dalla collina si vede il lago.»",
+        "Penso un momento. Non ho programmi. Non conosco nessuno a Varese.",
+        "«Va bene,» rispondo. «Perché no?»",
+        "Alla stazione di Varese prendiamo l'autobus. L'autobus è vecchio e lento. La strada sale tra gli alberi, curva dopo curva. Rosa conosce l'autista: si chiama Gianni e ha una figlia a Londra. Qui tutti conoscono tutti.",
+        "Dopo quaranta minuti arriviamo a Fontanella. Scendo dall'autobus e guardo intorno. Il paese è bellissimo. Le case sono di pietra, vecchie e grigie, ma non è un grigio triste come a Milano. Ci sono fiori rossi alle finestre. In piazza ci sono una piccola chiesa e una fontana con l'acqua fresca. Un gatto nero dorme al sole.",
+        "«Ecco casa mia,» dice Rosa.",
+        "La casa di Rosa è piccola, con una porta di legno verde e un giardino pieno di pomodori, insalata e fiori. Un cane grande e marrone corre verso di noi.",
+        "«Bruno! Bravo, Bruno!»",
+        "Bruno è molto contento. Salta su Rosa, poi su di me. Rosa ride.",
+        "«Lei ha fame, Paolo? È quasi mezzogiorno.»",
+        "«Un po', sì. Ma ho un panino nello zaino.»",
+        "«Un panino? No, no, no. Oggi mangia con me.»",
+        "Rosa cucina la pasta con i pomodori del giardino e il basilico. Poi mette in tavola il pane, il formaggio e il vino. Mangiamo fuori, sotto un albero. È tutto buonissimo.",
+        "Rosa parla della sua vita. Ha due figli. Il figlio abita a Torino e la figlia abita in Germania. Vengono a Fontanella solo a Natale e ad agosto.",
+        "«La casa è grande per una persona sola,» dice Rosa. «Ma ho Bruno, ho il giardino, ho i miei gatti. E il venerdì vado in città. Sono contenta.»",
+        "Dopo pranzo prendo lo zaino.",
+        "«Il sentiero per la collina comincia dietro la chiesa,» spiega Rosa. «È facile. Due ore per andare e tornare. Bruno viene con Lei. Lui conosce la strada.»",
+        "Cammino nel bosco con Bruno. Gli alberi sono alti e verdi. Sento solo gli uccelli e il vento. Non ci sono macchine, non ci sono telefoni. Il sentiero sale, sale, sale. Sono stanco, ma sono felice.",
+        "Dopo un'ora arrivo in cima alla collina. Mi siedo su una pietra e guardo. Davanti a me c'è il lago, grande e blu. Intorno ci sono le montagne. Lontano, molto lontano, vedo anche la neve sulle Alpi. Bruno si siede vicino a me. Mangio una mela e do un pezzo di pane a Bruno.",
+        "Penso al mio ufficio grigio, al treno pieno, al computer. Qui è tutto diverso. Qui il tempo è lento.",
+        "Resto sulla collina per molto tempo. Leggo il libro, guardo il lago, dormo un po' al sole. Quando apro gli occhi, il sole è basso. Guardo l'orologio: sono le cinque e mezza!",
+        "Corro giù per il sentiero con Bruno. Arrivo in piazza alle sei e cinque. Rosa è davanti alla fontana.",
+        "«Rosa! A che ora parte l'autobus per Varese?»",
+        "Rosa mi guarda e sorride.",
+        "«L'ultimo autobus parte alle sei, Paolo.»",
+        "«Alle sei? Ma… adesso sono le sei e cinque!»",
+        "«Eh, sì.»",
+        "«E adesso? Come torno a Milano?»",
+        "Rosa ride.",
+        "«Non c'è problema. Ho una camera libera. È la camera di mio figlio. Stasera mangiamo la minestra, e domani mattina c'è l'autobus delle otto.»",
+        "La sera mangiamo la minestra in cucina, vicino al fuoco. Fuori fa freddo, ma la cucina è calda. Bruno dorme sotto il tavolo. Rosa racconta storie del paese: storie di vecchie famiglie, di case antiche e di un lupo nel bosco. Io ascolto e bevo un bicchiere di vino rosso.",
+        "La camera è piccola e semplice, con un letto di legno e una finestra sul bosco. Non sento macchine. Sento solo il silenzio. Dormo benissimo.",
+        "La mattina Rosa prepara il caffè. Poi mi accompagna alla fermata dell'autobus. Bruno viene con noi.",
+        "«Grazie di tutto, Rosa. Lei è molto gentile.»",
+        "«Grazie a Lei, Paolo. Una casa con ospiti è una casa felice.»",
+        "L'autobus arriva. Salgo e guardo dal finestrino. Rosa saluta con la mano. Bruno abbaia.",
+        "---",
+        "È lunedì. Sono le otto di mattina e sono sul treno, come ogni giorno. Il treno è pieno. Le persone leggono il giornale, guardano il telefono o dormono. Io bevo il mio caffè e guardo fuori dalla finestra. Fuori ci sono case, strade, macchine. Tutto è grigio.",
+        "Ma oggi non sono triste. Nella tasca della giacca ho un foglio di carta. Sul foglio ci sono un indirizzo e un numero di telefono. Sotto, in una bella scrittura antica, ci sono tre parole: «Sabato. Pasta. Bruno.»",
+        "Sorrido. So già dove vado sabato."
+      ],
+      names: { paolo: 'Paolo — the narrator, an engineer in Milan', fontanella: "Fontanella — Rosa's village, near Varese", bruno: "Bruno — Rosa's dog", gianni: 'Gianni — the bus driver', alpi: 'le Alpi — the Alps' },
+      senses: {
+        sei: 'story:sei', sveglio: 'story:sveglio', natale: 'story:natale',
+        solo: 'avverbi:solo-avv', vicino: 'avverbi:vicino-avv', lontano: 'avverbi:lontano-avv', come: 'avverbi:come', dopo: 'avverbi:dopo', quasi: 'avverbi:quasi',
+        oggi: 'avverbi:oggi', 'già': 'avverbi:già', intorno: 'avverbi:intorno', 'giù': 'avverbi:giù', o: 'avverbi:o',
+        anni: 'nouns:anno', persone: 'nouns:persona', case: 'nouns:casa', strade: 'nouns:strada', macchine: 'nouns:macchina', mele: 'nouns:mela', minuti: 'nouns:minuto',
+        gambe: 'nouns:gamba', gatti: 'nouns:gatto', sentieri: 'nouns:sentiero', programmi: 'nouns:programma', alberi: 'nouns:albero', fiori: 'nouns:fiore', finestre: 'nouns:finestra',
+        pomodori: 'nouns:pomodoro', figli: 'nouns:figlio', ore: 'nouns:ora', uccelli: 'nouns:uccello', telefoni: 'nouns:telefono', montagne: 'nouns:montagna', occhi: 'nouns:occhio',
+        storie: 'nouns:storia', famiglie: 'nouns:famiglia', ospiti: 'nouns:ospite', parole: 'nouns:parola',
+        paolo: 'name:paolo', fontanella: 'name:fontanella', bruno: 'name:bruno', gianni: 'name:gianni', alpi: 'name:alpi'
+      },
+      glossary: {
+        "c' è": 'c-e', 'ci sono': 'ci-sono', "un po'": 'un-po', 'a piedi': 'a-piedi', 'di fronte': 'di-fronte-a', 'in cima': 'in-cima', 'fa caldo': 'fa-caldo', 'fa freddo': 'fa-freddo',
+        'che bello': 'che-bello', 'si chiama': 'si-chiama', 'un momento': 'un-momento', 'andata e ritorno': 'andata-e-ritorno', 'solo andata': 'solo-andata',
+        ingegnere: 'ingegnere', trentadue: 'trentadue', nove: 'nove', undici: 'undici', quattro: 'quattro', trenta: 'trenta', ottantadue: 'ottantadue', quaranta: 'quaranta',
+        andata: 'andata', anziana: 'anziano', sorride: 'sorridere', sorrido: 'sorridere', giovanotto: 'giovanotto', nessuno: 'nessuno', autista: 'autista',
+        bellissimo: 'bellissimo', buonissimo: 'buonissimo', benissimo: 'benissimo', ecco: 'ecco', verso: 'verso', ad: 'ad', agosto: 'agosto', eh: 'eh',
+        minestra: 'minestra', abbaia: 'abbaiare', scrittura: 'scrittura', capelli: 'capelli', fontana: 'fontana'
       }
+    }
+  ];
+  // The stories' own words: what no deck has, in its dictionary form (`alts`: also accepted when you write it)
+  const RACCONTI_WORDS = {
+    'c-e': { it: "c'è", en: 'there is' }, 'ci-sono': { it: 'ci sono', en: 'there are' }, 'un-po': { it: "un po'", en: 'a bit / a little' },
+    'a-piedi': { it: 'a piedi', en: 'on foot' }, 'di-fronte-a': { it: 'di fronte a', en: 'opposite / facing' }, 'in-cima': { it: 'in cima a', en: 'at the top of' },
+    'fa-caldo': { it: 'fa caldo', en: "it's hot" }, 'fa-freddo': { it: 'fa freddo', en: "it's cold" }, 'che-bello': { it: 'che bello!', en: 'how lovely!', alts: ['che bello'] },
+    'si-chiama': { it: 'si chiama', en: 'is called (his / her name is)' }, 'un-momento': { it: 'un momento', en: 'a moment' },
+    'andata-e-ritorno': { it: 'andata e ritorno', en: 'return (there and back)' }, 'solo-andata': { it: 'solo andata', en: 'one way (a single)' },
+    ingegnere: { it: "l'ingegnere", en: 'the engineer', alts: ['ingegnere'] }, trentadue: { it: 'trentadue', en: 'thirty-two' }, nove: { it: 'nove', en: 'nine' },
+    undici: { it: 'undici', en: 'eleven' }, quattro: { it: 'quattro', en: 'four' }, sei: { it: 'sei', en: 'six' }, trenta: { it: 'trenta', en: 'thirty' },
+    ottantadue: { it: 'ottantadue', en: 'eighty-two' }, quaranta: { it: 'quaranta', en: 'forty' },
+    andata: { it: "l'andata", en: 'the way there (one way)', alts: ['andata'] }, anziano: { it: 'anziano', en: 'elderly' }, sorridere: { it: 'sorridere', en: 'to smile' },
+    giovanotto: { it: 'il giovanotto', en: 'the young man', alts: ['giovanotto'] }, nessuno: { it: 'nessuno', en: 'nobody / no one' },
+    autista: { it: "l'autista", en: 'the driver', alts: ['autista'] }, bellissimo: { it: 'bellissimo', en: 'really beautiful' },
+    buonissimo: { it: 'buonissimo', en: 'delicious / really good' }, benissimo: { it: 'benissimo', en: 'really well' }, ecco: { it: 'ecco', en: "here is / here's" },
+    verso: { it: 'verso', en: 'towards' }, ad: { it: 'ad', en: 'to / at (before a vowel)' }, agosto: { it: 'agosto', en: 'August' }, eh: { it: 'eh', en: 'well / eh' },
+    minestra: { it: 'la minestra', en: 'the soup', alts: ['minestra'] }, abbaiare: { it: 'abbaiare', en: 'to bark' },
+    scrittura: { it: 'la scrittura', en: 'the handwriting', alts: ['scrittura'] }, capelli: { it: 'i capelli', en: 'the hair', alts: ['capelli'] },
+    sveglio: { it: 'sveglio', en: 'awake' }, natale: { it: 'Natale', en: 'Christmas' }, fontana: { it: 'la fontana', en: 'the fountain', alts: ['fontana'] }
+  };
+  const RACCONTI_WORDS_KEY = 'mazzo-racconti-words-v1';   // { card key: { ref, story, p, f, on, at } } — every mark and unmark; the newer wins
+  const RACCONTI_READ_KEY = 'mazzo-racconti-read-v1';     // { story: { p, done, at } } — where you were
+  const RACCONTI_ITEMS = [], RACCONTI_ORDER = [];         // the section's deck: rebuilt from the marks (raccontiRebuild)
+  const RACCONTI_THEMES = RACCONTI.map(s => ({ key: s.id, label: s.title, en: `Racconto ${s.n}`, nouns: [] }));
+  const RACCONTO_PERSON = { io: 'io', tu: 'tu', lui: 'lui / lei', noi: 'noi', voi: 'voi', loro: 'loro' };
+  const raccontoById = id => RACCONTI.find(s => s.id === id) || null;
+  // A marked deck word keeps its deck's key (binario, prendere, come): practise it in either place and both count
+  // (ripassoTwins); the small words, phrases and the stories' own words keep their kind in front, so no key meets a deck's
+  const RACCONTO_LINKED = new Set(['nouns', 'verbs', 'irregular', 'adjectives', 'avverbi']);
+  const raccontoKey = ref => { const [k, key] = splitRef(ref); return RACCONTO_LINKED.has(k) ? key : ref.replace(':', '-'); };
+  function raccontiLoad(key) {
+    try { const v = JSON.parse(localStorage.getItem(key) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch (e) { return {}; }
+  }
+  function raccontiSave(key, v) {   // at once — nothing to press, nothing to wait for; the sync follows by itself
+    try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) { /* storage full */ }
+    syncTouched();
+  }
+  // What a word is: its dictionary form and meaning (a name: just what it names)
+  function raccontoInfo(story, ref, form, persons) {
+    const [kind, key] = splitRef(ref);
+    const from = (it, en, alts) => ({ kind, key, it, en, alts: alts || [], persons: persons || null });
+    if (kind === 'nouns') { const n = NOUN_ITEMS.find(x => x.noun === key); return n ? from(n.it, n.en) : null; }
+    if (kind === 'verbs' || kind === 'irregular') { const v = [...verbData, ...irregularVerbData].find(x => x.it === key); return v ? from(v.it, v.en) : null; }
+    if (kind === 'adjectives') { const a = adjData.find(x => x.it === key); return a ? from(a.it, a.en) : null; }
+    if (kind === 'phrases') { const q = phraseData.find(x => x.key === key); return q ? from(q.it, q.en, q.itAlts) : null; }
+    if (kind === 'avverbi') { const q = AVV_BY_KEY.get(key); return q ? from(q.it, q.en, q.itAlts) : null; }
+    if (kind === 'fn') return own(STORY_FN, key) ? from(key, STORY_FN[key]) : null;
+    if (kind === 'story') { const w = RACCONTI_WORDS[key]; return w ? from(w.it, w.en, w.alts) : null; }
+    if (kind === 'name') { const g = (story && story.names && story.names[key]) || STORY_NAMES[key]; return g ? { kind, key, it: form || key, en: g, name: true, alts: [] } : null; }
+    return null;
+  }
+  // The sentence of the story a word was met in — its card's example
+  function raccontoSentence(story, p, form) {
+    const text = (story.paragraphs[p] || '').trim();
+    const parts = text.match(/[^.!?…]+[.!?…]+[»"]*|[^.!?…]+$/g) || [text];
+    const re = new RegExp(`(^|[^\\p{L}'])${String(form).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'iu');
+    return (parts.find(x => re.test(x)) || parts[0]).replace(/^[\s«»"]+|[\s«»"]+$/g, '').trim();
+  }
+  function raccontoItem(rec) {   // a marked word's card: its dictionary form, its meaning, the sentence you met it in
+    const story = raccontoById(rec.story), info = story && raccontoInfo(story, rec.ref, rec.f);
+    if (!info || info.name || !info.en) return null;
+    const key = raccontoKey(rec.ref), bare = String(info.it).replace(/^(il|lo|la|i|gli|le)\s+|^l'/i, '');
+    const alts = [...new Set([...(info.alts || []), ...(bare !== info.it ? [bare] : [])])].filter(a => a !== info.it);
+    const phrase = { key, it: info.it, en: info.en, enAlts: [], itAlts: alts, reg: 'neutral', themes: [rec.story] };
+    return { noun: key, display: info.it, it: info.it, en: info.en, phrase, note: `From the story <em>${storyEsc(story.title)}</em>.`,
+             example: [raccontoSentence(story, rec.p, rec.f), ''], exampleWord: rec.f, story: rec.story };
+  }
+  function raccontiRebuild() {   // the deck from the marks: one card per marked word, in the order you marked them
+    const words = raccontiLoad(RACCONTI_WORDS_KEY);
+    const recs = Object.values(words).filter(r => r && r.on && raccontoById(r.story)).sort((a, b) => (a.at || 0) - (b.at || 0));
+    RACCONTI_ITEMS.length = 0; RACCONTI_ORDER.length = 0;
+    RACCONTI_THEMES.forEach(th => { th.nouns.length = 0; });
+    for (const rec of recs) {
+      const item = raccontoItem(rec);
+      if (!item || RACCONTI_ITEMS.some(n => n.noun === item.noun)) continue;
+      RACCONTI_ITEMS.push(item); RACCONTI_ORDER.push(item.noun);
+      const th = RACCONTI_THEMES.find(x => x.key === rec.story);
+      if (th) th.nouns.push(item.noun);
+    }
+  }
+  const raccontoMarked = () => { const w = raccontiLoad(RACCONTI_WORDS_KEY); return new Set(Object.keys(w).filter(k => w[k] && w[k].on)); };
+  function raccontoMark(storyId, ref, form, p) {
+    const words = raccontiLoad(RACCONTI_WORDS_KEY);
+    words[raccontoKey(ref)] = { ref, story: storyId, p, f: form, on: 1, at: Date.now() };
+    raccontiSave(RACCONTI_WORDS_KEY, words);
+    raccontiRebuild();
+  }
+  function raccontoUnmark(key) {
+    const words = raccontiLoad(RACCONTI_WORDS_KEY);
+    if (!words[key]) return;
+    words[key] = { ...words[key], on: 0, at: Date.now() };   // kept, switched off: so an older mark on another device doesn't bring it back
+    raccontiSave(RACCONTI_WORDS_KEY, words);
+    raccontiRebuild();
+  }
+  // How well you know a marked word, 0 (new) → 1 (known): its card's record in either direction, by the maps' own rule
+  function raccontoStrengths() {
+    const dirs = ['en-it', 'it-en'].map(d => ({ srs: loadSrs('racconti', d), st: readStats('racconti', d) }));
+    return key => {
+      let best = 0;
+      for (const { srs, st } of dirs) {
+        const r = srs[key], s = st[key];
+        if (knowState(r, s).known) return 1;
+        const last = String((r && r.h) || '').slice(-10), right = (last.match(/1/g) || []).length;
+        best = Math.max(best, Math.min(0.9, (right / 8) * 0.65 + Math.min(1, ((r && r.rd) || 0) / 3) * 0.25));
+      }
+      return best;
+    };
+  }
+  const raccontoAlpha = a => (0.1 + 0.55 * (1 - a)).toFixed(2);   // the mark's highlight: strong when new, fading as you learn
+  const raccontoWords = s => s.paragraphs.filter(x => x !== '---').reduce((n, x) => n + (x.match(STORY_WORD_RE) || []).length, 0);
+  function raccontoLearning(storyId) {   // marked words not yet known — a story's, or every story's
+    const strength = raccontoStrengths();
+    return [...new Set(RACCONTI_THEMES.filter(th => !storyId || th.key === storyId).flatMap(th => th.nouns))].filter(k => strength(k) < 1);
+  }
+  // ---- The contents ----
+  function renderRaccontiHome() {
+    raccontiRebuild();
+    const words = raccontiLoad(RACCONTI_WORDS_KEY), read = raccontiLoad(RACCONTI_READ_KEY), strength = raccontoStrengths();
+    const entries = RACCONTI.map(s => {
+      const marked = RACCONTI_THEMES.find(th => th.key === s.id).nouns, known = marked.filter(k => strength(k) >= 1).length;
+      const learning = marked.filter(k => strength(k) < 1).length, at = read[s.id] || {};
+      const verb = at.p > 0 ? 'Continua' : at.done ? 'Rileggi' : 'Leggi';
+      return `
+        <li class="rc-entry">
+          <span class="rc-num" aria-hidden="true">${s.n}</span>
+          <div class="rc-entry-main">
+            <h3 class="rc-entry-title" lang="it"><button type="button" data-open="${s.id}"${at.p > 0 ? ` data-at="${at.p}"` : ''}>${storyEsc(s.title)}</button></h3>
+            <p class="rc-entry-blurb">${storyEsc(s.blurb)}</p>
+            <p class="rc-entry-meta">${s.level} · ${raccontoWords(s).toLocaleString('en-GB')} words · about ${s.minutes} minutes${marked.length ? ` · ${marked.length} marked, ${known} learnt` : ''}</p>
+          </div>
+          <div class="rc-entry-actions">
+            <button type="button" class="story-read-btn" data-open="${s.id}"${at.p > 0 ? ` data-at="${at.p}"` : ''}>${verb} →</button>
+            ${learning ? `<button type="button" class="ghost rc-practise" data-practise="${s.id}">Ripassa · ${learning}</button>` : ''}
+          </div>
+        </li>`;
+    }).join('');
+    const groups = RACCONTI.map(s => ({ s, keys: RACCONTI_THEMES.find(th => th.key === s.id).nouns })).filter(g => g.keys.length);
+    const chips = groups.map(g => `
+        <div class="rc-words-group">
+          <h4 class="rc-words-story" lang="it">${storyEsc(g.s.title)}</h4>
+          <div class="rc-chips">${g.keys.map(k => {
+            const n = RACCONTI_ITEMS.find(x => x.noun === k), a = strength(k), rec = words[k] || {};
+            return `<button type="button" class="rc-chip${a >= 1 ? ' is-learnt' : ''}" data-open="${g.s.id}" data-at="${rec.p || 0}" data-word="${k}" style="--a: ${a >= 1 ? 0 : raccontoAlpha(a)}"><span class="rc-chip-it" lang="it">${storyEsc(n.it)}</span><span class="rc-chip-en">${storyEsc(n.en)}</span></button>`;
+          }).join('')}</div>
+        </div>`).join('');
+    const all = raccontoLearning();
+    gameArea.innerHTML = `
+      <div class="rc-home">
+        <div class="story-hero">
+          <div class="setup-eyebrow">Racconti · Storie da leggere</div>
+          <h2 class="story-title">I racconti</h2>
+          <p class="story-sub">Short stories at your level. Tap any word you don't know: it's marked straight away and becomes a card in your deck. As you learn it, its mark fades — until it's gone.</p>
+        </div>
+        <section class="rc-section" aria-labelledby="rc-index-h">
+          <h3 class="rc-h" id="rc-index-h">Indice</h3>
+          <ol class="rc-index">${entries}</ol>
+        </section>
+        <section class="rc-section" aria-labelledby="rc-words-h">
+          <div class="rc-words-head"><h3 class="rc-h" id="rc-words-h">Le tue parole</h3>${all.length ? `<button type="button" class="submit rc-practise-all" id="rc-practise-all">▶ Ripassa · ${all.length}</button>` : ''}</div>
+          ${chips || `<p class="rc-empty">No words yet. Open a story, and tap any word you don't know.</p>`}
+        </section>
+      </div>`;
+    gameArea.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openRacconto(b.dataset.open, +(b.dataset.at || 0), b.dataset.word || null)));
+    gameArea.querySelectorAll('[data-practise]').forEach(b => b.addEventListener('click', () => raccontoPractise(raccontoLearning(b.dataset.practise))));
+    const allBtn = document.getElementById('rc-practise-all');
+    if (allBtn) allBtn.addEventListener('click', () => raccontoPractise(raccontoLearning()));
+  }
+  // ---- The reader ----
+  let raccontoState = null, raccontoScroll = null, raccontoSpeech = null;
+  function openRacconto(id, at, word) {
+    const s = raccontoById(id);
+    if (!s) return;
+    raccontoStopSpeaking();
+    raccontoDetach();
+    container.dataset.view = 'racconto'; syncPinnedChart();
+    raccontoState = { s, p: at || 0 };
+    renderRaccontoReader();
+    const target = at ? gameArea.querySelector(`.rc-para[data-p="${at}"]`) : null;
+    try { if (target) target.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); } catch (e) { /* jsdom */ }
+    if (word) gameArea.querySelectorAll('.rc-w').forEach(w => { if (raccontoKey(w.dataset.ref) === word) w.classList.add('is-flash'); });
+    raccontoScroll = () => raccontoTrack();
+    window.addEventListener('scroll', raccontoScroll, { passive: true });
+  }
+  function renderRaccontoReader() {
+    const { s } = raccontoState, marked = raccontoMarked(), strength = raccontoStrengths();
+    let first = true;
+    const paras = s.paragraphs.map((text, i) => {
+      if (text === '---') return `<div class="rc-break" aria-hidden="true">⁂</div>`;
+      const body = storySegments(s, text).map(sg => {
+        const shown = storyEsc(sg.text.replace(/'/g, '’'));
+        if (!sg.ref) return shown;
+        const key = raccontoKey(sg.ref), on = marked.has(key), a = on ? strength(key) : 0, name = sg.ref.startsWith('name:');
+        const cls = `rc-w${name ? ' is-name' : ''}${on ? (a >= 1 ? ' is-learnt' : ' is-marked') : ''}`;
+        return `<span class="${cls}" role="button" tabindex="0" data-ref="${storyEsc(sg.ref)}" data-f="${storyEsc(sg.text)}"${sg.persons ? ` data-persons="${sg.persons.join(',')}"` : ''}${on && a < 1 ? ` style="--a: ${raccontoAlpha(a)}"` : ''}>${shown}</span>`;
+      }).join('');
+      const cls = `rc-p${first ? ' rc-first' : ''}${/^«/.test(text) ? ' rc-said' : ''}`;
+      first = false;
+      return `<div class="rc-para" data-p="${i}"><button type="button" class="rc-listen" data-listen="${i}" aria-label="Listen to this paragraph"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></button><p class="${cls}" lang="it">${body}</p></div>`;
+    }).join('');
+    const learning = raccontoLearning(s.id).length;
+    gameArea.innerHTML = `
+      <article class="rc-reader" aria-labelledby="rc-title">
+        <div class="rc-bar">
+          <button type="button" class="ghost rc-back" id="rc-back">‹ Indice</button>
+          <span class="rc-bar-title" lang="it">${storyEsc(s.title)}</span>
+          <button type="button" class="submit rc-bar-practise" id="rc-practise"${learning ? '' : ' hidden'}>Ripassa · <span id="rc-count">${learning}</span></button>
+        </div>
+        <header class="rc-head">
+          <div class="setup-eyebrow">Racconto ${s.n} · ${s.level}</div>
+          <h2 class="rc-title" id="rc-title" lang="it">${storyEsc(s.title)}</h2>
+          <p class="rc-tip">Tap a word you don't know: it's marked, saved, and becomes a card.</p>
+        </header>
+        <div class="rc-text">${paras}<p class="rc-fine" lang="it">Fine.</p></div>
+        <footer class="rc-foot"><button type="button" class="story-read-btn" id="rc-back-end">‹ Back to the stories</button></footer>
+        <div class="rc-pop" id="rc-pop" role="dialog" aria-label="The word" hidden></div>
+      </article>`;
+    wireRaccontoReader();
+  }
+  function wireRaccontoReader() {
+    const root = gameArea.querySelector('.rc-reader');
+    if (!root) return;
+    document.getElementById('rc-back').addEventListener('click', raccontoClose);
+    document.getElementById('rc-back-end').addEventListener('click', raccontoClose);
+    document.getElementById('rc-practise').addEventListener('click', () => raccontoPractise(raccontoLearning(raccontoState.s.id)));
+    const text = root.querySelector('.rc-text');
+    text.addEventListener('click', e => {
+      const l = e.target.closest('[data-listen]');
+      if (l) { raccontoSpeakPara(+l.dataset.listen); return; }
+      const w = e.target.closest('.rc-w');
+      if (w) { e.stopPropagation(); raccontoTap(w); }
     });
     text.addEventListener('keydown', e => {
-      const w = e.target.closest && e.target.closest('.w');
-      if (w && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); storyTapWord(w); }
+      const w = e.target.closest && e.target.closest('.rc-w');
+      if (w && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); raccontoTap(w); }
     });
-    const listen = document.getElementById('rd-listen');
-    // Stops the chapter if it's being read; otherwise reads it (over any single sentence)
-    if (listen) listen.addEventListener('click', () => {
-      if (storySpeech && storySpeech.chapter) storyStopSpeaking(); else storySpeak(0, storyState.sentences.length);
-    });
-    const enAll = document.getElementById('rd-en-all');
-    enAll.addEventListener('click', () => {
-      const on = enAll.getAttribute('aria-pressed') !== 'true';
-      enAll.setAttribute('aria-pressed', String(on));
-      enAll.classList.toggle('active', on);
-      document.querySelectorAll('.rd-sent').forEach(row => {
-        row.querySelector('.rd-en').hidden = !on;
-        row.querySelector('.rd-en-btn').classList.toggle('active', on);
-      });
-    });
-    document.getElementById('quiz-list').addEventListener('click', e => {
-      const opt = e.target.closest('.quiz-opt');
-      if (opt) { storyAnswer(+opt.dataset.q, +opt.dataset.k); return; }
-      const find = e.target.closest('.quiz-find-btn');
-      if (find) storyStartFind(+find.dataset.q);
-    });
+    root.addEventListener('click', e => { if (!e.target.closest('#rc-pop') && !e.target.closest('.rc-w')) raccontoHidePop(); });
+    root.addEventListener('keydown', e => { if (e.key === 'Escape') raccontoHidePop(); });
   }
-  // Close the word card on a tap elsewhere or Escape
-  document.addEventListener('click', e => {
-    if (!storyPopFor) return;
-    if (e.target.closest && (e.target.closest('#word-pop') || e.target.closest('.w') || e.target.closest('.rw-chip'))) return;
-    storyHideWord();
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && storyPopFor) storyHideWord();
-  });
-
-  // Every word of a chapter in one mixed session, then back to the chapter
-  function startChapterPractice(ch) {
-    const list = [];
-    for (const ref of storyChapterRefs(ch).keys()) {
-      const [subj, key] = splitRef(ref), n = storyItem(subj, key);
-      if (n) list.push({ subj, n });
+  function raccontoTap(el) {
+    const s = raccontoState.s, ref = el.dataset.ref, key = raccontoKey(ref);
+    gameArea.querySelectorAll('.rc-w.is-flash').forEach(w => w.classList.remove('is-flash'));
+    if (ref.startsWith('name:')) { raccontoShowPop(el); return; }
+    let added = false;
+    if (!raccontoMarked().has(key)) { raccontoMark(s.id, ref, el.dataset.f, +el.closest('.rc-para').dataset.p); added = true; raccontoRepaint(); }
+    raccontoShowPop(el, added);
+  }
+  function raccontoRepaint() {   // the marks and their fading, without redrawing the text
+    const marked = raccontoMarked(), strength = raccontoStrengths();
+    gameArea.querySelectorAll('.rc-w').forEach(w => {
+      const key = raccontoKey(w.dataset.ref), on = marked.has(key), a = on ? strength(key) : 0;
+      w.classList.toggle('is-marked', on && a < 1);
+      w.classList.toggle('is-learnt', on && a >= 1);
+      if (on && a < 1) w.style.setProperty('--a', raccontoAlpha(a)); else w.style.removeProperty('--a');
+    });
+    const n = raccontoLearning(raccontoState.s.id).length, btn = document.getElementById('rc-practise');
+    if (btn) { btn.hidden = !n; document.getElementById('rc-count').textContent = n; }
+  }
+  function raccontoShowPop(el, added) {
+    const pop = document.getElementById('rc-pop'), s = raccontoState.s;
+    const info = raccontoInfo(s, el.dataset.ref, el.dataset.f, el.dataset.persons ? el.dataset.persons.split(',') : null);
+    if (!pop || !info) return;
+    const key = raccontoKey(el.dataset.ref), on = raccontoMarked().has(key), a = on ? raccontoStrengths()(key) : 0, form = el.dataset.f;
+    const status = info.name ? 'A name — not one for your deck' : !on ? 'Not in your words' : a >= 1 ? 'You know this one now' : added ? 'Marked — saved, and in your deck' : 'In your words — still learning';
+    const lemma = info.it && info.it.toLowerCase() !== form.toLowerCase() ? `<span class="rc-pop-lemma" lang="it">${storyEsc(info.it.replace(/'/g, '’'))}</span>` : '';
+    const person = info.persons && info.persons.length ? `<p class="rc-pop-person"><span lang="it">${info.persons.map(q => `${RACCONTO_PERSON[q] || q} ${storyEsc(form.toLowerCase())}`).join(' · ')}</span></p>` : '';
+    pop.innerHTML = `
+      <div class="rc-pop-head"><span class="rc-pop-form" lang="it">${storyEsc(form.replace(/'/g, '’'))}</span>${lemma}</div>
+      <p class="rc-pop-en">${storyEsc(info.en)}</p>${person}
+      <p class="rc-pop-status${on && a < 1 ? ' is-on' : ''}">${status}</p>
+      <div class="rc-pop-actions">
+        <button type="button" class="ghost" data-pop="say"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>Ascolta</button>
+        ${info.name ? '' : on ? `<button type="button" class="ghost" data-pop="unmark">Togli</button>` : `<button type="button" class="ghost" data-pop="mark">Segna</button>`}
+        <button type="button" class="ghost rc-pop-close" data-pop="close" aria-label="Close">×</button>
+      </div>`;
+    pop.hidden = false;
+    const root = gameArea.querySelector('.rc-reader');
+    if (root && !(window.matchMedia && window.matchMedia('(max-width: 600px)').matches)) {   // by the word on a computer; a sheet at the foot on a phone
+      const r = el.getBoundingClientRect(), R = root.getBoundingClientRect(), w = pop.offsetWidth || 300;
+      pop.style.top = `${r.bottom - R.top + 10}px`;
+      pop.style.left = `${Math.max(8, Math.min(r.left - R.left - 24, R.width - w - 8))}px`;
     }
-    if (!list.length) return;
-    storyStopSpeaking();
-    storyHideWord();
-    storyResume = ch.id;
-    startMixedSession(list, { title: ch.title, subtitle: 'Il Mazzo · Parole del Racconto', doc: `Il Mazzo · ${ch.title}` });
+    pop.querySelectorAll('[data-pop]').forEach(b => b.addEventListener('click', ev => {
+      ev.stopPropagation();
+      const act = b.dataset.pop;
+      if (act === 'say') speak(form);
+      else if (act === 'close') raccontoHidePop();
+      else if (act === 'unmark') { raccontoUnmark(key); raccontoRepaint(); raccontoShowPop(el); }
+      else if (act === 'mark') { raccontoMark(s.id, el.dataset.ref, form, +el.closest('.rc-para').dataset.p); raccontoRepaint(); raccontoShowPop(el, true); }
+    }));
+  }
+  function raccontoHidePop() { const pop = document.getElementById('rc-pop'); if (pop) pop.hidden = true; }
+  function raccontoTrack() {   // where you are: the first paragraph still on the screen, saved as you go
+    if (!raccontoState || container.dataset.view !== 'racconto') return;
+    const paras = [...gameArea.querySelectorAll('.rc-para')];
+    const cur = paras.find(x => x.getBoundingClientRect().bottom > 120);
+    const p = cur ? +cur.dataset.p : 0, atEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 40;
+    const read = raccontiLoad(RACCONTI_READ_KEY), was = read[raccontoState.s.id] || {};
+    const next = atEnd ? { p: 0, done: true } : { p, done: !!was.done };
+    if (was.p === next.p && !!was.done === next.done) return;
+    read[raccontoState.s.id] = { ...next, at: Date.now() };
+    raccontiSave(RACCONTI_READ_KEY, read);
+  }
+  function raccontoDetach() { if (raccontoScroll) { window.removeEventListener('scroll', raccontoScroll); raccontoScroll = null; } }
+  function raccontoClose() { raccontoStopSpeaking(); raccontoDetach(); showSetup(); }
+  function raccontoSpeakPara(i) {   // a paragraph read aloud; again stops it
+    const was = raccontoSpeech;
+    raccontoStopSpeaking();
+    if (was === i || !raccontoState) return;
+    const v = typeof chosenVoice === 'function' ? chosenVoice() : null, para = gameArea.querySelector(`.rc-para[data-p="${i}"]`);
+    if (!v || !para || !window.speechSynthesis) return;
+    const u = new window.SpeechSynthesisUtterance(raccontoState.s.paragraphs[i]);
+    u.voice = v; u.lang = v.lang; u.rate = audioPrefs.rate;
+    u.onend = () => { if (raccontoSpeech === i) raccontoStopSpeaking(); };
+    raccontoSpeech = i;
+    para.classList.add('is-speaking');
+    try { window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); } catch (e) { raccontoStopSpeaking(); }
+  }
+  function raccontoStopSpeaking() {
+    if (raccontoSpeech !== null) { try { window.speechSynthesis.cancel(); } catch (e) { /* none */ } }
+    raccontoSpeech = null;
+    if (typeof gameArea !== 'undefined' && gameArea) gameArea.querySelectorAll('.rc-para.is-speaking').forEach(x => x.classList.remove('is-speaking'));
+  }
+  // ---- Practising the marked words ----
+  function raccontoPractise(keys) {   // a round of these words; the section's own choice of words is left as it was
+    keys = keys.filter(k => RACCONTI_ITEMS.some(n => n.noun === k));
+    if (!keys.length) return;
+    raccontoStopSpeaking(); raccontoDetach();
+    if (subject !== 'racconti') applySubject('racconti');
+    showSetup();
+    const keepWords = [...selectedNouns], keepTopics = (syncDeckTopics() || []).slice();
+    deckTopics = null;
+    selectedNouns.clear();
+    keys.forEach(k => selectedNouns.add(k));
+    updateReadout();
+    startGame();
+    selectedNouns.clear();
+    keepWords.forEach(k => selectedNouns.add(k));
+    deckTopics = keepTopics;
+    syncChipsToDeck();
+    updateReadout();
   }
 
   // ===== Scrittura: sentences to write in full =====
@@ -13002,7 +12301,6 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     check('irregular', IRREG_ITEMS, IRREG_THEMES, IRREG_FREQUENCY_ORDER);
     check('adjectives', ADJ_ITEMS, ADJ_THEMES, ADJ_FREQUENCY_ORDER);
     check('phrases', PHRASE_ITEMS, PHRASE_THEMES, PHRASE_ORDER);
-    check('story', STORY_ITEMS, STORY_THEMES, STORY_ORDER);
     check('sentences', SENTENCE_ITEMS, SENTENCE_THEMES, SENTENCE_ORDER);
     check('prepositions', PREP_ITEMS, PREP_THEMES, PREP_ORDER);
     for (const n of PREP_ITEMS) {
@@ -13060,20 +12358,12 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
         if (!q.options[q.answer] || !d.lines[q.line] || new Set(q.options).size !== q.options.length) console.warn(`[dialoghi] ${d.id}: question "${q.q}" is malformed`);
       }
     }
-    for (const ch of STORY_CHAPTERS) {
+    for (const s of RACCONTI) {   // every word of every story reads as something: a deck item, a small word, a name, or the story's own
       const unknown = [];
-      for (const para of ch.paragraphs) for (const [it] of para) for (const sg of storySegments(ch, it)) if (sg.unknown) unknown.push(sg.text);
-      if (unknown.length) console.warn(`[story] ${ch.id}: words with no card, gloss or meaning:`, unknown);
-      const badSense = Object.entries(ch.senses).filter(([, ref]) => {
-        const [k, key] = splitRef(ref);
-        return k === 'fn' ? !own(STORY_FN, key) : !storyItem(k, key);
-      });
-      if (badSense.length) console.warn(`[story] ${ch.id}: senses pointing nowhere:`, badSense);
-      const badGloss = Object.entries(ch.glossary).filter(([, key]) => !own(STORY_WORDS, key));
-      if (badGloss.length) console.warn(`[story] ${ch.id}: glossary entries with no story word:`, badGloss);
-      const refs = storyChapterRefs(ch);
-      for (const q of ch.questions) if (q.find && !refs.has(q.find)) console.warn(`[story] ${ch.id}: "find" target not in the text:`, q.find);
-      if (!STORY_ART[ch.art] || !STORY_PINS[ch.id]) console.warn(`[story] ${ch.id}: missing picture or map pin`);
+      for (const para of s.paragraphs) if (para !== '---') for (const sg of storySegments(s, para)) if (sg.unknown) unknown.push(sg.text);
+      if (unknown.length) console.warn(`[racconti] ${s.id}: words with no reading:`, unknown);
+      const bad = [...Object.values(s.senses), ...Object.values(s.glossary).map(k => `story:${k}`)].filter(ref => { const [k, key] = splitRef(ref); return k !== 'name' && !raccontoInfo(s, ref, key); });
+      if (bad.length) console.warn(`[racconti] ${s.id}: readings pointing nowhere:`, bad);
     }
     const phraseNoNote = PHRASE_ITEMS.filter(n => !n.note).map(n => n.noun);
     if (phraseNoNote.length) console.warn('[phrases] without a note:', phraseNoNote);
@@ -13257,14 +12547,14 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     },
     // The story: its setup screen is the map and the chapters; its items are the words
     // the story teaches, drilled like phrases in Ripasso and chapter practice
-    story: {
-      kind: 'phrase', story: true, panel: null, doneWord: 'words', chipOrder: 'frequency',
-      switchLabel: 'Racconto', title: 'Racconto', subtitle: 'Il Mazzo · La Casa di Pietra',
-      setupTitle: 'La casa di pietra', setupSub: '',
+    racconti: {
+      kind: 'phrase', racconti: true, panel: null, doneWord: 'words', chipOrder: 'frequency',
+      switchLabel: 'Racconti', title: 'Racconti', subtitle: 'Il Mazzo · Racconti brevi',
+      setupTitle: 'I racconti', setupSub: '',
       itemWord: 'word', itemWords: 'words',
-      items: STORY_ITEMS, themes: STORY_THEMES, frequency: STORY_ORDER,
-      statsKeys: { 'en-it': 'racconto-stats-v1', 'it-en': 'racconto-stats-iten-v1', listen: 'racconto-stats-listen-v1' }, statsFormat: 'noun',
-      assocKey: 'racconto-assoc-v1'
+      items: RACCONTI_ITEMS, themes: RACCONTI_THEMES, frequency: RACCONTI_ORDER,
+      statsKeys: { 'en-it': 'racconti-stats-v1', 'it-en': 'racconti-stats-iten-v1', listen: 'racconti-stats-listen-v1' }, statsFormat: 'noun',
+      assocKey: 'racconti-assoc-v1'
     }
   };
 
@@ -13291,7 +12581,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     phrases: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     sentences: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' },
     dialoghi: { selected: new Set(), capValue: '', capMode: 'random', direction: 'listen' },
-    story: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' }
+    racconti: { selected: new Set(), capValue: '', capMode: 'random', direction: 'en-it' }
   };
   let subject = null;
   let nounData = NOUN_ITEMS;            // the current subject's items (nouns or verbs)
@@ -13304,25 +12594,28 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     { key: 'parole', name: 'Parole', en: 'words', color: 'var(--olive)', sections: ['nouns', 'adjectives', 'verbs', 'irregular', 'avverbi', 'numeri'],
       groups: [{ name: 'Nomi e aggettivi', sections: ['nouns', 'adjectives'] }, { name: 'Verbi', sections: ['verbs', 'irregular'] }, { name: 'Altre parole', sections: ['avverbi', 'numeri'] }] },
     { key: 'grammatica', name: 'Grammatica', en: 'grammar', color: 'var(--terracotta)', sections: ['possessives', 'pronomi', 'prepositions', 'mipiace'] },
-    { key: 'frasi', name: 'Frasi e storie', en: 'sentences & stories', color: 'var(--gold)', sections: ['phrases', 'sentences', 'dialoghi', 'story'] },
+    { key: 'frasi', name: 'Frasi e dialoghi', short: 'Frasi', en: 'sentences & dialogues', color: 'var(--gold)', sections: ['phrases', 'sentences', 'dialoghi'] },
+    { key: 'racconti', name: 'Racconti', en: 'stories', color: 'var(--ink-soft)', sections: ['racconti'] },   // Nov 2026: a family of its own — one section, opened straight from its name
   ];
   const SECTION_DESC = {   // the header's menus (Nov 2026): a line under each section's name
     nouns: 'Nouns, with their articles', adjectives: 'Gender and number', numeri: 'Counting, from zero to a million', avverbi: 'The little words: adverbs, linking words',
     possessives: 'Mio, tuo, suo — with their articles', pronomi: 'Me, him, there, some — lo, gli, ci, ne', prepositions: 'Di, a, da, in — and with the article',
     verbs: 'Regular verbs: -are, -ere, -ire', irregular: 'Essere, avere, fare, andare…', mipiace: 'Mi piace, mi manca, mi serve…',
-    phrases: 'Everyday phrases', sentences: 'Put whole sentences together', dialoghi: 'Scenes from daily life', story: 'La casa di pietra, a story',
+    phrases: 'Everyday phrases', sentences: 'Put whole sentences together', dialoghi: 'Scenes from daily life', racconti: "Short stories — tap the words you don't know",
   };
   const NAV_LABEL = { verbs: 'Verbi regolari', irregular: 'Verbi irregolari', mipiace: 'Al contrario' };   // the menus' and the section pill's names
   const SECTION_SHORT = { nouns: 'Sostantivi', verbs: 'Verbi regolari', irregular: 'Verbi irregolari', mipiace: 'Al contrario', adjectives: 'Aggettivi', numeri: 'Numeri',
-                          avverbi: 'Avverbi', possessives: 'Possessivi', pronomi: 'Pronomi', prepositions: 'Preposizioni', phrases: 'Frasi', sentences: 'Scrittura' };
+                          avverbi: 'Avverbi', possessives: 'Possessivi', pronomi: 'Pronomi', prepositions: 'Preposizioni', phrases: 'Frasi', sentences: 'Scrittura', racconti: 'Racconti' };
   const familyOf = s => FAMILIES.find(f => f.sections.includes(s));
   const navLabel = s => NAV_LABEL[s] || SUBJECTS[s].switchLabel;
   // A family's menu (Nov 2026): its sections, under small headings where it has them — the one you're on with the green dot
   function familyMenuHTML(f, fam) {
     const item = key => `<button type="button" class="mode-option${key === subject ? ' active' : ''}" data-subject="${key}" aria-pressed="${key === subject}"${key === subject ? ' aria-current="true"' : ''}>`
       + `<span class="section-name">${key === subject ? '<span class="pill-dot" aria-hidden="true"></span>' : ''}${navLabel(key)}</span><span class="section-desc">${SECTION_DESC[key] || ''}</span></button>`;
+    const nameHTML = f.short ? `${f.short}<span class="family-more">${f.name.slice(f.short.length)}</span>` : f.name;
+    if (f.sections.length === 1) return `<div class="family-menu family-solo" data-family-menu="${f.key}"><button type="button" class="family family-go${f === fam ? ' active' : ''}" data-family="${f.key}" data-go="${f.sections[0]}"><span class="family-name">${nameHTML}</span></button></div>`;
     return `<div class="family-menu" data-family-menu="${f.key}">`
-      + `<button type="button" class="family${f === fam ? ' active' : ''}" data-family="${f.key}" aria-haspopup="true" aria-expanded="false" aria-controls="family-list-${f.key}"><span class="family-name">${f.name}</span><svg class="family-chev" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>`
+      + `<button type="button" class="family${f === fam ? ' active' : ''}" data-family="${f.key}" aria-haspopup="true" aria-expanded="false" aria-controls="family-list-${f.key}"><span class="family-name">${nameHTML}</span><svg class="family-chev" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>`
       + `<div class="family-list" id="family-list-${f.key}" role="group" aria-label="${f.name}" hidden>`
       + (f.groups ? f.groups.map(g => `<div class="family-group" role="group" aria-label="${g.name}"><span class="family-group-name" aria-hidden="true">${g.name}</span>${g.sections.map(item).join('')}</div>`).join('') : f.sections.map(item).join(''))
       + `</div></div>`;
@@ -13773,7 +13066,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       container.dataset.kind = keep.kind;
     }
   }
-  const handSkip = s => !!(SUBJECTS[s].story || SUBJECTS[s].dialogues);
+  const handSkip = s => !!(SUBJECTS[s].racconti || SUBJECTS[s].dialogues);
   function handSections() {   // the sections with something in the hand, in the banner's order
     return FAMILIES.flatMap(f => f.sections).filter(s => SUBJECTS[s] && !handSkip(s)
       && (s === subject ? selectedNouns.size > 0 : !!(subjectState[s] && subjectState[s].selected && subjectState[s].selected.size))
@@ -14666,6 +13959,15 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     if (barClose) barClose.addEventListener('click', () => closeSectionBar(true));
     document.querySelectorAll('.family-menu').forEach(menu => {
       const btn = menu.querySelector('.family');
+      if (btn.dataset.go) {   // a family of one section (Racconti): its name opens it
+        btn.addEventListener('click', () => {
+          closeSectionBar();
+          if (btn.dataset.go !== subject) { raccontoStopSpeaking(); applySubject(btn.dataset.go); showSetup(); }
+          const p = document.getElementById('section-pill');
+          if (p) p.focus();
+        });
+        return;
+      }
       btn.addEventListener('click', () => {
         if (!sectionBarOpen()) openSectionBar();
         closeTodo();
@@ -14685,7 +13987,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       btn.addEventListener('click', () => {
         closeSectionBar();
         if (btn.dataset.subject !== subject) {
-          storyStopSpeaking();
+          raccontoStopSpeaking();
           applySubject(btn.dataset.subject);
           showSetup();
         }
@@ -14712,8 +14014,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   const IT_EVERYDAY = 446735.1;
   const IT_NUMBER_WORDS = {"zero":0,"uno":1,"due":2,"tre":3,"quattro":4,"cinque":5,"sei":6,"sette":7,"otto":8,"nove":9,"dieci":10,"undici":11,"dodici":12,"tredici":13,"quattordici":14,"quindici":15,"sedici":16,"diciassette":17,"diciotto":18,"diciannove":19,"venti":20,"trenta":30,"quaranta":40,"cinquanta":50,"sessanta":60,"settanta":70,"ottanta":80,"novanta":90,"cento":100,"mille":1000,"milione":1000000};
   const IT_DIRS = ['en-it', 'it-en', 'listen'];
-  const IT_WORD_SECTIONS = { nouns: 'nouns', adjectives: 'adjectives', avverbi: 'adverbs', verbs: 'verbs', irregular: 'verbs', story: 'story words' };
-  const IT_KINDS = [['nouns', '#5a6b3a'], ['verbs', '#a23e2c'], ['adjectives', '#c9a35a'], ['adverbs', '#8a9a5b'], ['number words', '#3d3329'], ['story words', '#e0d2b4']];
+  const IT_WORD_SECTIONS = { nouns: 'nouns', adjectives: 'adjectives', avverbi: 'adverbs', verbs: 'verbs', irregular: 'verbs' };   // the stories' marked words are read in other decks' terms, not counted again
+  const IT_KINDS = [['nouns', '#5a6b3a'], ['verbs', '#a23e2c'], ['adjectives', '#c9a35a'], ['adverbs', '#8a9a5b'], ['number words', '#3d3329']];
   let itWordsCache = null;
   function italianoWords() {   // every word once: { id, kind, refs: [{ subj, keys, need }] }
     if (itWordsCache) return itWordsCache;
@@ -14761,7 +14063,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     const index = new Map(), add = (form, id) => { const f = String(form).toLowerCase(); if (!index.has(f)) index.set(f, new Set()); index.get(f).add(id); };
     for (const n of SUBJECTS.nouns.items) add(n.noun, n.noun);
     for (const n of SUBJECTS.adjectives.items) { const w = n.noun, ty = n.adj && n.adj.type, st = w.slice(0, -1); (ty === '4' ? [`${st}o`, `${st}a`, `${st}i`, `${st}e`] : ty === '2' ? [w, `${st}i`] : [w]).forEach(f => add(f, w)); }
-    for (const n of [...SUBJECTS.avverbi.items, ...SUBJECTS.story.items]) if (!/\s/.test(n.it)) add(n.it, n.noun);
+    for (const n of SUBJECTS.avverbi.items) if (!/\s/.test(n.it)) add(n.it, n.noun);
     for (const n of [...SUBJECTS.verbs.items, ...SUBJECTS.irregular.items]) [n.noun, ...Object.values(n.verb.conj)].forEach(f => add(f, n.noun));
     for (const w of Object.keys(IT_NUMBER_WORDS)) add(w, w);
     const used = new Set();
@@ -14910,6 +14212,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     hideConjPop();
     if (passive) { passiveStopTimers(); passive = null; passiveWake(false); }
     dialogueStopSpeaking();
+    raccontoStopSpeaking();
+    raccontoDetach();
     stopListening();
     closeChart({ keepPin: true });   // out of the way; a pinned one comes back in the next round
     if (reviewMode) {
@@ -14978,17 +14282,17 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       </div>
     `;
     renderItalianoStrip();   // Il mio italiano, at the foot of the heading
-    if (direction === 'listen' && !cfg.dialogues && !cfg.story && !cfg.numeri) {   // the old typed Listen has left the setup: back to EN → IT
+    if (direction === 'listen' && !cfg.dialogues && !cfg.racconti && !cfg.numeri) {   // the old typed Listen has left the setup: back to EN → IT
       direction = 'en-it';
       Object.values(subjectState).forEach(st => { if (st.direction === 'listen') st.direction = 'en-it'; });
       stats = loadStats();
     }
     syncOnSetup();
-    if (cfg.story) {
+    if (cfg.racconti) {
       wireSubjectToggle();
       wireTable();
       renderRipasso();
-      renderStoryHome();
+      renderRaccontiHome();
       return;
     }
     if (cfg.dialogues) {
@@ -15898,9 +15202,9 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // The example, shown with the answer: the sentence with the word in bold, its English beneath
   function exampleHTML(card) {
     if (!card.example) return '';
-    const [it, en] = card.example, word = String(card.italian).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const [it, en] = card.example, word = String(card.exampleWord || card.italian).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const marked = escapeHTML(it).replace(new RegExp(`(^|[^\\p{L}])(${word})(?![\\p{L}])`, 'giu'), '$1<strong>$2</strong>');
-    return `<div class="feedback-example"><span class="ex-it" lang="it">${marked}</span><span class="ex-en">${escapeHTML(en)}</span></div>`;
+    return `<div class="feedback-example"><span class="ex-it" lang="it">${marked}</span>${en ? `<span class="ex-en">${escapeHTML(en)}</span>` : ''}</div>`;
   }
   // What a card says aloud: the Italian answer, with the pronoun for a conjugation
   function sayText(card) {
@@ -16240,7 +15544,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   const BACKUP_APP = 'il-mazzo';
 
   function storageKeys() {
-    const keys = new Set([SUBJECT_KEY, AUDIO_KEY, RIPASSO_DIR_KEY, STORY_PROGRESS_KEY, DIALOGUE_PROGRESS_KEY, VERB_PERSONS_KEY]);
+    const keys = new Set([SUBJECT_KEY, AUDIO_KEY, RIPASSO_DIR_KEY, DIALOGUE_PROGRESS_KEY, RACCONTI_WORDS_KEY, RACCONTI_READ_KEY, VERB_PERSONS_KEY]);
     for (const s of Object.values(SUBJECTS)) {
       Object.values(s.statsKeys).forEach(k => { keys.add(k); keys.add(`${k}:srs`); if (s.map) keys.add(`${k}:hist`); });
       keys.add(s.assocKey);
@@ -16309,8 +15613,9 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       for (const k of Object.values(cfg.statsKeys)) { keys.set(k, 'counters'); keys.set(`${k}:srs`, 'schedule'); if (cfg.map) keys.set(`${k}:hist`, 'history'); }
       keys.set(cfg.assocKey, 'assoc');
     }
-    keys.set(STORY_PROGRESS_KEY, 'story');
-    keys.set(DIALOGUE_PROGRESS_KEY, 'story');   // the scenes' progress has the story's shape
+    keys.set(DIALOGUE_PROGRESS_KEY, 'story');   // the scenes' progress (the shape the first story's had)
+    keys.set(RACCONTI_WORDS_KEY, 'latest');   // the words you marked in the stories: each mark or unmark, the newer wins
+    keys.set(RACCONTI_READ_KEY, 'latest');    // where you were in each story
     keys.set(VERB_PERSONS_KEY, 'assoc');   // which persons each verb section drills
     keys.set(SAVED_DECK_KEY, 'latest');    // the saved deck: the newer snapshot wins
     return keys;
@@ -16424,6 +15729,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
       meta.epochs[key] = +e || 0;
     }
     syncSaveMeta(meta);
+    raccontiRebuild();   // marks from another device: the stories' deck, rebuilt
     redrawSetup();
   }
   // A reset or restore here should win over other devices' copies at the next sync
@@ -16629,8 +15935,8 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   function landingHTML() {
     const word = n => LANDING_WORDS[n] || String(n);
     const count = s => (SUBJECTS[s] && SUBJECTS[s].items ? SUBJECTS[s].items.length : 0).toLocaleString('en-GB');
-    const COUNT = { numeri: '0 – 1,000,000', dialoghi: 'scenes', story: 'a story' };
-    const DESC = { adjectives: 'Gender and number, in all their forms', story: 'La casa di pietra' };
+    const COUNT = { numeri: '0 – 1,000,000', dialoghi: 'scenes', racconti: RACCONTI.length === 1 ? '1 story' : `${RACCONTI.length} stories` };
+    const DESC = { adjectives: 'Gender and number, in all their forms', racconti: 'Short stories to read' };
     const label = s => NAV_LABEL[s] || SECTION_SHORT[s] || SUBJECTS[s].title;
     const sections = FAMILIES.reduce((n, f) => n + f.sections.length, 0);
     const families = FAMILIES.map(f => `
@@ -16961,7 +16267,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
   // caches; when they differ, a banner offers to reload. Checked a few seconds after opening, whenever the
   // page comes back into view, and every ten minutes while in view (where there's a service worker — a real
   // browser; the tests call checkForUpdate themselves).
-  const BUILD = '2026-11-24T09:59Z';
+  const BUILD = '2026-11-24T16:04Z';
   let updateDismissed = false;
   async function checkForUpdate() {
     if (updateDismissed || !/^https?:$/.test(location.protocol) || typeof fetch !== 'function') return;
@@ -18715,6 +18021,7 @@ const RIPASSO_DOSE = 30;   // a day's Ripasso (Nov 2026): the rest of a backlog 
     if (SUBJECTS[saved]) initialSubject = saved;
   } catch (e) { /* storage unavailable */ }
   applySubject(initialSubject);
+  raccontiRebuild();   // the stories' deck, from the marks saved on this device
   showSetup();
   syncStart();
 </script>

@@ -9,9 +9,9 @@ ok(errors.length === 0 && warns.length === 0, 'loads cleanly');
 
 // ---- What syncs ----
 const keys = ev('[...syncedKeys().keys()]');
-ok(keys.length === 126, `126 stores sync (${keys.length}) — I progressi added 15: a day-by-day history for each word section's three directions; Numeri 10, Pronomi 10 (its two ways to play and a third kept for listening — counters, schedules, histories — and its associations): its three directions' counters, schedules and histories, and its associations; Possessivi's map 3: its histories`);
-ok(['sostantivi-stats-v1', 'verbi-regolari-stats:srs', 'frasi-stats-listen-v1', 'aggettivi-assoc-v1', 'mazzo-story-v1', 'mazzo-verb-persons-v1'].every(k => keys.includes(k)),
-   'stats, review schedules, associations, story progress and the verb persons chosen, for every section and direction');
+ok(keys.length === 127, `127 stores sync (${keys.length}) — Racconti (Nov 2026) took the first story's place: its three directions, schedules and notes, plus the words you marked and where you were in each story; I progressi added 15: a day-by-day history for each word section's three directions; Numeri 10, Pronomi 10 (its two ways to play and a third kept for listening — counters, schedules, histories — and its associations): its three directions' counters, schedules and histories, and its associations; Possessivi's map 3: its histories`);
+ok(['sostantivi-stats-v1', 'verbi-regolari-stats:srs', 'frasi-stats-listen-v1', 'aggettivi-assoc-v1', 'mazzo-racconti-words-v1', 'mazzo-racconti-read-v1', 'mazzo-verb-persons-v1'].every(k => keys.includes(k)) && !keys.includes('mazzo-story-v1'),
+   'stats, review schedules, associations, the words marked in the stories and where you were, and the verb persons chosen, for every section and direction');
 ok(!['mazzo-audio-v1', 'mazzo-ripasso-dir', 'flipcards-subject', 'mazzo-sync-meta-v1', 'mazzo-sync-base-v1'].some(k => keys.includes(k)),
    'device settings (voice, review direction, last section) and sync bookkeeping stay on the device');
 
@@ -64,7 +64,7 @@ const backup = JSON.stringify(ev('buildBackup()'));
 ok(!/mazzo-sync-/.test(backup), 'backups leave the sync bookkeeping out');
 ev(`restoreFromText(${JSON.stringify(backup)})`);
 const ep2 = ev('syncMeta().epochs');
-ok(Object.keys(ep2).length === 126 && ep2['sostantivi-stats-v1'] === 2 && ep2['frasi-stats-v1'] === 1, 'restoring a backup raises every store\'s epoch, so the restored copy wins');
+ok(Object.keys(ep2).length === 127 && ep2['sostantivi-stats-v1'] === 2 && ep2['frasi-stats-v1'] === 1, 'restoring a backup raises every store\'s epoch, so the restored copy wins');
 
 // ---- Two devices, one stand-in server ----
 const server = { items: {} };

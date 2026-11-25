@@ -27,7 +27,7 @@ const { boot, ok, done } = require('./harness');
   ok(rows.length === total && rows[0][0] === 'Sostantivi' && rows[0][1] === B.ev("SUBJECTS.nouns.items.length.toLocaleString('en-GB')")
      && rows.some(r => r[0] === 'Verbi regolari' && r[1] === String(B.ev('SUBJECTS.verbs.items.length'))),
      `what's inside: every section, counted from the data (${rows.slice(0, 3).map(r => r.join(' ')).join(', ')}…)`);
-  ok(new RegExp(`${B.ev(`LANDING_WORDS[${total}]`)} sections in three families`).test(gate.textContent), `"${B.ev(`LANDING_WORDS[${total}]`)} sections in three families"`);
+  ok(new RegExp(`${B.ev(`LANDING_WORDS[${total}]`)} sections in four families`).test(gate.textContent), `"${B.ev(`LANDING_WORDS[${total}]`)} sections in four families"`);
   ok(!/\b(sync|synced|syncing|offline)\b/i.test(gate.textContent), 'nothing on it mentions syncing');
   B.ev("renderSigninGate('test.apps.googleusercontent.com', 'Please sign in again.')");
   ok(d.querySelectorAll('#signin-gate').length === 1 && d.getElementById('signin-msg').textContent === 'Please sign in again.', 'asked again: the same page, the message under the button');

@@ -7,7 +7,7 @@ const { boot, ok, done } = require('./harness');
 let B = boot({ 'flipcards-subject': 'possessives' });
 const { d, ev } = B;
 ok(B.errors.length === 0 && B.warns.length === 0, 'loads cleanly — every word of every accepted answer in the deck, no phrase or English prompt twice');
-const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => (b.querySelector('.section-name') || b).textContent.trim());
+const tabs = [...d.querySelectorAll('#subject-toggle .mode-option, #subject-toggle .family-go')].map(b => (b.querySelector('.section-name') || b.querySelector('.family-name') || b).textContent.trim());
 ok(tabs.length === 14 && tabs[6] === 'Possessivi' && tabs[5] === 'Numeri' && tabs[7] === 'Pronomi' && tabs[8] === 'Preposizioni' && d.getElementById('app-title').textContent === 'Possessivi'
    && ev("familyOf('possessives').key") === 'grammatica', 'a section of its own, opening Grammatica');
 ok(ev('POSS_ITEMS.length') === 71 && ev('POSS_ITEMS.filter(n => n.pl).length') === 46 && ev('POSS_ITEMS.flatMap(cardsForItem).length') === 117,

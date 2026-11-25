@@ -1,4 +1,4 @@
-// The top of the page (Nov 2026): Il Mazzo's masthead with the three families beside it — each opening its own
+// The top of the page (Nov 2026): Il Mazzo's masthead with the four families beside it — each opening its own
 // menu of sections — and the bell, whose Da fare list holds Ripasso del giorno and Il mazzo salvato; then the
 // section's heading; then the table: your hand, one for every section. Start and A spasso play one section as
 // before, several as one mixed round.
@@ -16,10 +16,11 @@ const pill = () => d.getElementById('section-pill'), bar = () => d.getElementByI
 // ---- The section pill (Nov 2026): at rest your section; tapped, the full bar of families ----
 ok(pill().textContent.trim() === 'Sostantivi' && pill().querySelector('.pill-dot') && bar().hidden && pill().getAttribute('aria-expanded') === 'false' && open().length === 0 && !d.querySelector('.family-name i'),
    'at rest, one pill: Sostantivi with its green dot — the families tucked away, and no coloured dots');
-ok(fams.join('|') === 'Parole|Grammatica|Frasi e storie' && names('parole').join('|') === 'Sostantivi|Aggettivi|Verbi regolari|Verbi irregolari|Avverbi e congiunzioni|Numeri'
+ok(fams.join('|') === 'Parole|Grammatica|Frasi e dialoghi|Racconti' && names('parole').join('|') === 'Sostantivi|Aggettivi|Verbi regolari|Verbi irregolari|Avverbi e congiunzioni|Numeri'
    && [...d.querySelectorAll('#family-list-parole .family-group-name')].map(x => x.textContent).join('|') === 'Nomi e aggettivi|Verbi|Altre parole'
-   && names('grammatica').join('|') === 'Possessivi|Pronomi|Preposizioni|Al contrario' && names('frasi').join('|') === 'Frasi|Scrittura|Dialoghi|Racconto',
-   'three families: Parole (in three groups, the verbs among them), Grammatica, Frasi e storie');
+   && names('grammatica').join('|') === 'Possessivi|Pronomi|Preposizioni|Al contrario' && names('frasi').join('|') === 'Frasi|Scrittura|Dialoghi'
+   && !!d.querySelector('.family-go[data-go="racconti"]') && !d.getElementById('family-list-racconti'),
+   'four families: Parole (in three groups, the verbs among them), Grammatica, Frasi e dialoghi — and Racconti, a family of one with no menu');
 pill().click();
 ok(!bar().hidden && pill().getAttribute('aria-expanded') === 'true' && open().join() === 'parole' && !d.getElementById('family-list-parole').hidden
    && d.querySelectorAll('.family-list .pill-dot').length === 1 && !!d.querySelector('#family-list-parole [data-subject="nouns"] .pill-dot') && d.querySelector('#family-list-parole [data-subject="nouns"]').getAttribute('aria-current') === 'true',
@@ -140,6 +141,13 @@ ok(row && /Il mazzo salvato/.test(row.textContent) && /cards, not started/.test(
 d.getElementById('saved-forget').click();
 ok(!d.getElementById('saved-resume') && d.getElementById('bell-count').textContent === '1', 'forget it: the saved deck leaves the list');
 ok(B.errors.length === 0, 'no errors here either');
+// ---- Racconti (Nov 2026): a family of one opens straight from its name ----
+pill().click();
+d.querySelector('.family-go[data-go="racconti"]').click();
+ok(ev('subject') === 'racconti' && bar().hidden && pill().textContent.trim() === 'Racconti' && d.activeElement === pill() && !!d.querySelector('.rc-home'),
+   'its name in the bar opens Racconti at once: the bar closes on the pill, now Racconti, and the stories show');
+d.querySelector('#subject-toggle [data-subject="nouns"]').click();
+
 // ---- Last: once the bar closes, the progress that waited is drawn — your pill keeping its focus ----
 (async () => {
   ev('showSetup()');

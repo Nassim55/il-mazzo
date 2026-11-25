@@ -6,7 +6,7 @@ const { boot, ok, done } = require('./harness');
 let B = boot({ 'flipcards-subject': 'avverbi' });
 const { d, ev } = B;
 ok(B.errors.length === 0 && B.warns.length === 0, 'loads cleanly — every word ranked and in a topic, no English prompt or Italian word twice');
-const tabs = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => (b.querySelector('.section-name') || b).textContent.trim());
+const tabs = [...d.querySelectorAll('#subject-toggle .mode-option, #subject-toggle .family-go')].map(b => (b.querySelector('.section-name') || b.querySelector('.family-name') || b).textContent.trim());   // Racconti (Nov 2026): a family of one, opened from its name
 ok(tabs.length === 14 && tabs[4] === 'Avverbi e congiunzioni' && tabs[5] === 'Numeri' && tabs[3] === 'Verbi irregolari' && d.getElementById('app-title').textContent === 'Avverbi e congiunzioni', 'a section of its own, in Parole after the verbs, before Numeri');
 ok(ev('AVV_ITEMS.length') === 112 && ev('AVV_ORDER.length') === 112 && ev('AVV_ORDER.slice(0, 4).join()') === 'e,non,che-cong,ma', `112 words, most common first (${ev('AVV_ORDER.slice(0, 6).map(k => AVV_ITEMS.find(n => n.noun === k).it).join(", ")')}…)`);
 const map = d.getElementById('noun-map');
@@ -40,7 +40,6 @@ B.ev("selectedNouns = new Set(['piano-avv', 'spesso']); updateReadout();");
 B.d.getElementById('start-btn').click();
 for (let i = 0; i < 2; i++) { B.d.getElementById('answer').value = B.ev('deck[index].italian'); B.d.getElementById('submit').click(); B.d.getElementById('submit').click(); }
 ok(JSON.stringify(B.ev("loadSrs('nouns', 'en-it').piano")) === pianoBefore, 'piano, slowly, keeps its own schedule — not the floor\'s');
-ok(B.ev("loadSrs('story', 'en-it').spesso.l") === B.ev('today()'), 'spesso counts for the story\'s spesso too — the same word');
 
 // ---- Known, on the map ----
 B = boot({ 'flipcards-subject': 'avverbi' });

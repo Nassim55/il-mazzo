@@ -1,8 +1,8 @@
 const { boot, ok, done } = require('./harness');
 let { w, d, ev, key, setVal, errors, warns } = boot();
 ok(warns.length === 0 && errors.length === 0, `loads with no validator warnings or errors ${warns.join(' ')}`);
-const labels = [...d.querySelectorAll('#subject-toggle .mode-option')].map(b => (b.querySelector('.section-name') || b).textContent.trim());
-ok(labels.length === 14 && labels[10] === 'Frasi' && labels[11] === 'Scrittura' && labels[12] === 'Dialoghi' && labels[13] === 'Racconto', `section switch: ${labels.join(' | ')}`);
+const labels = [...d.querySelectorAll('#subject-toggle .mode-option, #subject-toggle .family-go')].map(b => (b.querySelector('.section-name') || b.querySelector('.family-name') || b).textContent.trim());
+ok(labels.length === 14 && labels[10] === 'Frasi' && labels[11] === 'Scrittura' && labels[12] === 'Dialoghi' && labels[13] === 'Racconti', `section switch: ${labels.join(' | ')}`);
 d.querySelector('#subject-toggle [data-subject="phrases"]').click();
 ok(d.getElementById('app-title').textContent === 'Frasi' && d.title === 'Il Mazzo · Frasi' && ev('selectedNouns.size') === 0, 'title, tab, empty selection');
 ok(!d.querySelector('.container .phrases-panel') && d.querySelector('.setup-side').children[0].id === 'weak-panel', 'the side column: Da ripassare — In pratica opens from Le regole');

@@ -1,14 +1,15 @@
 // Ripasso del giorno counts practice done anywhere: a due word answered in any deck is
-// rescheduled just as Ripasso would — and a word held twice (a story word that's also a
-// noun or an adjective) counts for both.
+// rescheduled just as Ripasso would — and a word held twice (a word marked in a story that's
+// also a noun or an adjective: its card keeps the deck's key) counts for both.
 const { boot, ok, done } = require('./harness');
 
 const stats = {
   'flipcards-subject': 'nouns',
-  'sostantivi-stats-v1': JSON.stringify({ casa: { seen: 4, wrong: 2 }, buio: { seen: 4, wrong: 2 } }),
+  'sostantivi-stats-v1': JSON.stringify({ casa: { seen: 4, wrong: 2 }, cestino: { seen: 4, wrong: 2 } }),
   'verbi-regolari-stats': JSON.stringify({ parlare: { attempts: 6, wrongs: 3 } }),
   'aggettivi-stats-v1': JSON.stringify({ piccolo: { seen: 4, wrong: 2 }, perfetto: { seen: 4, wrong: 2 } }),
-  'racconto-stats-v1': JSON.stringify({ buio: { seen: 3, wrong: 2 } })
+  'racconti-stats-v1': JSON.stringify({ cestino: { seen: 3, wrong: 2 } }),
+  'mazzo-racconti-words-v1': JSON.stringify({ cestino: { ref: 'nouns:cestino', story: 'fontanella', p: 11, f: 'cestino', on: 1, at: 1 } })   // marked in Il treno per Fontanella
 };
 let B = boot(stats);
 const due = (dir = 'en-it') => B.ev(`dueList('${dir}').map(x => x.subj + ':' + x.n.noun)`);
@@ -19,7 +20,7 @@ const play = (subj, keys, setup = '') => {
   for (let i = 0; i < n; i++) { B.d.getElementById('answer').value = B.ev('deck[index].italian'); B.d.getElementById('submit').click(); B.d.getElementById('submit').click(); }
 };
 const before = due();
-ok(['nouns:casa', 'verbs:parlare', 'adjectives:piccolo', 'nouns:buio', 'story:buio'].every(x => before.includes(x)), `due today: ${before.join(', ')}`);
+ok(['nouns:casa', 'verbs:parlare', 'adjectives:piccolo', 'nouns:cestino', 'racconti:cestino'].every(x => before.includes(x)), `due today: ${before.join(', ')}`);
 play('nouns', ['casa']);
 ok(!due().includes('nouns:casa') && B.ev("loadSrs('nouns', 'en-it').casa.b") === 2, 'la casa, practised in an ordinary nouns deck: done for today — up a box, as Ripasso would');
 play('verbs', ['parlare'], "verbMode = 'conjugations';");
@@ -31,28 +32,28 @@ ok(new RegExp(`${due().length} due today`).test(B.d.getElementById('todo-items')
    `and the strip counts down, ${before.length} to ${due().length}: ${B.d.getElementById('todo-items').textContent.replace(/\s+/g, ' ').trim().slice(0, 60)}`);
 
 // ---- A word held twice ----
-play('nouns', ['buio']);
-ok(!due().includes('nouns:buio') && !due().includes('story:buio') && B.ev("loadSrs('story', 'en-it').buio.b") === 2,
-   'il buio, practised in Sostantivi: done as a noun — and as the story word too');
-ok(!B.ev("loadSrs('story', 'en-it').perfetto"), '(perfetto was never added from the story: its story schedule stays empty)');
+play('nouns', ['cestino']);
+ok(!due().includes('nouns:cestino') && !due().includes('racconti:cestino') && B.ev("loadSrs('racconti', 'en-it').cestino.b") === 2,
+   'il cestino, practised in Sostantivi: done as a noun — and as the word you marked in the story too');
+ok(!B.ev("loadSrs('racconti', 'en-it').perfetto"), '(perfetto was never marked in a story: it has no story card)');
 play('adjectives', ['perfetto'], "adjMode = 'dictionary';");
-ok(!B.ev("loadSrs('story', 'en-it').perfetto") && !due().includes('adjectives:perfetto'), 'practising the adjective doesn\'t put the story word on the schedule');
+ok(!B.ev("loadSrs('racconti', 'en-it').perfetto") && !due().includes('adjectives:perfetto'), 'practising the adjective doesn\'t put a story card on the schedule');
 
 // ---- A wrong answer counts too; "I was right" puts both back ----
 B = boot(stats);
-B.ev("direction = 'it-en'; stats = loadStats(); selectedNouns = new Set(['buio']); updateReadout();");
-B.w.localStorage.setItem('racconto-stats-iten-v1', JSON.stringify({ buio: { seen: 2, wrong: 1 } }));
-B.w.localStorage.setItem('sostantivi-stats-iten-v1', JSON.stringify({ buio: { seen: 2, wrong: 1 } }));
+B.ev("direction = 'it-en'; stats = loadStats(); selectedNouns = new Set(['cestino']); updateReadout();");
+B.w.localStorage.setItem('racconti-stats-iten-v1', JSON.stringify({ cestino: { seen: 2, wrong: 1 } }));
+B.w.localStorage.setItem('sostantivi-stats-iten-v1', JSON.stringify({ cestino: { seen: 2, wrong: 1 } }));
 B.ev('stats = loadStats();');
 B.d.getElementById('start-btn').click();
 B.d.getElementById('answer').value = 'the brightness';
 B.d.getElementById('submit').click();
 const t = B.ev('today()');
-ok(B.ev("loadSrs('nouns', 'it-en').buio.d") === t + 1 && B.ev("loadSrs('story', 'it-en').buio.d") === t + 1, 'a wrong answer: both come back tomorrow, as in Ripasso');
+ok(B.ev("loadSrs('nouns', 'it-en').cestino.d") === t + 1 && B.ev("loadSrs('racconti', 'it-en').cestino.d") === t + 1, 'a wrong answer: both come back tomorrow, as in Ripasso');
 const right = B.d.querySelector('.override-btn');
 ok(!!right, '(after a wrong Italian → English answer, "I was right" is offered)');
 right.click();
-ok(B.ev("loadSrs('nouns', 'it-en').buio.b") >= 2 && B.ev("loadSrs('story', 'it-en').buio.b") >= 2 && B.ev("loadSrs('story', 'it-en').buio.d") > t + 1, '"I was right": both put back as correct');
+ok(B.ev("loadSrs('nouns', 'it-en').cestino.b") >= 2 && B.ev("loadSrs('racconti', 'it-en').cestino.b") >= 2 && B.ev("loadSrs('racconti', 'it-en').cestino.d") > t + 1, '"I was right": both put back as correct');
 
 // ---- Each direction keeps its own ----
 B = boot(stats);
