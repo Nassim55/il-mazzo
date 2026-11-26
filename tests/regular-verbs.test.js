@@ -15,7 +15,7 @@ d.getElementById('rules-btn').click();
 ok(!!d.querySelector('#chart-overlay aside.endings .eg') && d.querySelector('#chart-overlay .endings-title').textContent === 'Le desinenze', 'Le desinenze, from Le regole by the title');
 d.getElementById('chart-close').click();
 ok(ev('selectedNouns.size') === 0 && ev('capValue') === '', 'verbs start with their own empty selection and subset box');
-ok(/[134]\/150 practised/.test(d.getElementById('setup-meta').textContent), `old verb history shows in the stats strip ("${d.getElementById('setup-meta').textContent.replace(/\s+/g, ' ').trim()}")`);
+ok(/[134]\/200 practised/.test(d.getElementById('setup-meta').textContent), `old verb history shows in the stats strip ("${d.getElementById('setup-meta').textContent.replace(/\s+/g, ' ').trim()}")`);
 // Weakest 10 uses the verb game's smoothed formula: capire 15/22, finire 8/12, pulire 1/8
 ev("selectedNouns = new Set(weakestNouns(Math.min(10, nounData.length))); deckTopics = null; updateReadout();");
 const sel = ev('[...selectedNouns]');
@@ -23,13 +23,13 @@ ok(sel.length === 10 && sel.slice(0, 3).join() === 'capire,finire,pulire', `Weak
 // Themes and card counts
 ev("selectedNouns.clear(); deckTopics = []; updateReadout();");
 ev("VERB_THEMES.find(t => t.key === 'isc').nouns.forEach(k => selectedNouns.add(k)); updateReadout();");   // the -isc- verbs, picked from the data
-ok(d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('8 verbs · 48 cards'), '-isc- theme: 8 verbs · 48 cards');
+ok(d.querySelector('.deck-readout').textContent.replace(/\s+/g, ' ').includes('12 verbs · 72 cards'), '-isc- theme: 12 verbs · 72 cards');
 d.querySelector('#mode-toggle [data-mode="infinitives"]').click();
-ok(d.getElementById('card-count').textContent === '8', 'Infinitives only → 8 cards');
+ok(d.getElementById('card-count').textContent === '12', 'Infinitives only → 12 cards');
 d.querySelector('#mode-toggle [data-mode="conjugations"]').click();
 // Play conjugations
 d.getElementById('start-btn').click();
-ok(ev('deck.length') === 48 && new Set(ev('deck.map(c => c.key)')).size === 48, 'game has 48 distinct cards');
+ok(ev('deck.length') === 72 && new Set(ev('deck.map(c => c.key)')).size === 72, 'game has 72 distinct cards');
 ev("index = deck.findIndex(c => c.noun === 'capire' && c.person === 'io'); render();");
 ok(d.getElementById('prompt').textContent === 'I understand' && d.getElementById('verb-meta').textContent === 'to understand' && d.getElementById('pronoun-hint').textContent === 'io', 'card shows prompt, verb meaning and person');
 ok(d.getElementById('answer').placeholder === 'type the italian conjugation…', 'placeholder asks for the conjugation');
@@ -50,7 +50,7 @@ d.getElementById('submit').click();
 ok(JSON.stringify(JSON.parse(w.localStorage.getItem('verbi-regolari-stats')).pulire) === JSON.stringify(before) && d.getElementById('feedback').classList.contains('hidden') && d.getElementById('answer').placeholder === 'type your answer first…', 'an empty answer leaves verb progress untouched — it is asked for again');
 // Focus and Deck size work per verb
 d.getElementById('game-focus-btn').click();
-ok(d.getElementById('focus-total').textContent === '8', 'Focus lists the 8 verbs');
+ok(d.getElementById('focus-total').textContent === '12', 'Focus lists the 12 verbs');
 d.getElementById('focus-top-input').value = '3'; key(d.getElementById('focus-top-input'), 'Enter'); d.getElementById('focus-apply').click();
 ok(ev('deck.length') === 18 && new Set(ev('deck.map(c => c.noun)')).size === 3, 'Focus top 3 → 18 cards from 3 verbs');
 setVal('game-trim-rest', String(48 - ev('sessionMaxDeck.length')), 'change');   // the Focus cards + the rest = 48
@@ -78,7 +78,7 @@ d.querySelector('#mode-toggle [data-mode="infinitives"]').click();
 ev("capValue = '10'; updateReadout();"); ev("capMode = 'frequent'; updateReadout();");
 ok(d.getElementById('start-btn').disabled, 'nothing in the hand + a deck size: Start waits');
 ev("nounData.forEach(n => selectedNouns.add(n.noun)); deckTopics = null; updateReadout();");   // a deck size picks from your hand
-ok(d.getElementById('start-btn').textContent.includes('10 most common cards') && /150 verbs/.test(d.querySelector('.deck-readout').textContent), 'All + 10 most common → 10 of all 150 verbs');
+ok(d.getElementById('start-btn').textContent.includes('10 most common cards') && /200 verbs/.test(d.querySelector('.deck-readout').textContent), 'All + 10 most common → 10 of all 200 verbs');
 d.getElementById('start-btn').click();
 const top10 = ev('FREQUENCY_ORDER.slice(0, 10)'), deck10 = ev('deck.map(c => c.noun)');
 ok(deck10.length === 10 && top10.every(v => deck10.includes(v)), `plays the 10 most common verbs (${top10.slice(0, 4).join(', ')}…)`);

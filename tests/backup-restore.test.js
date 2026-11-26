@@ -35,7 +35,7 @@ const tampered = JSON.parse(text); tampered.data['some-other-site'] = '{"x":1}';
 ok(B.ev(`restoreFromText(${JSON.stringify(JSON.stringify(tampered))})`) === true, 'restore accepted');
 ok(B.w.localStorage.getItem('some-other-site') === null, 'unknown keys in the file are ignored');
 ok(B.ev('subject') === 'verbs' && B.d.getElementById('app-title').textContent === 'Verbi Regolari', 'last-used subject restored (verbs)');
-ok(/1\/150 practised/.test(B.d.getElementById('setup-meta').textContent), 'verb progress restored in the strip');
+ok(/1\/200 practised/.test(B.d.getElementById('setup-meta').textContent), 'verb progress restored in the strip');
 ok(JSON.parse(B.w.localStorage.getItem('verbi-regolari-stats')).capire.attempts === 6, 'verb stats restored in their original format');
 B.d.querySelector('#subject-toggle [data-subject="nouns"]').click();
 ok(/2\/1495 practised · 1 with errors logged/.test(B.d.getElementById('setup-meta').textContent.replace(/\s+/g, ' ')), 'noun progress restored');

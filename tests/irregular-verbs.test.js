@@ -9,7 +9,7 @@ ok(JSON.stringify(labels) === JSON.stringify(['Sostantivi', 'Aggettivi', 'Verbi 
 // Regular section keeps its own panel
 d.querySelector('#subject-toggle [data-subject="verbs"]').click();
 d.getElementById('rules-btn').click();
-ok(d.querySelector('#chart-overlay .endings-title')?.textContent === 'Le desinenze' && !d.querySelector('.irregular-panel') && d.querySelectorAll('.verb-chip').length === 150, 'regular section: Le regole opens Le desinenze; 150 verbs');
+ok(d.querySelector('#chart-overlay .endings-title')?.textContent === 'Le desinenze' && !d.querySelector('.irregular-panel') && d.querySelectorAll('.verb-chip').length === 200, 'regular section: Le regole opens Le desinenze; 200 verbs');
 d.getElementById('chart-close').click();
 ev("selectedNouns = new Set(['parlare']); updateReadout();");
 // Irregular section
